@@ -19,6 +19,8 @@ The environment, immutable source pins, real MCP metadata, runner interface, and
 
 Read [Group A handoff](docs/group-a-handoff.md), [environment audit](docs/environment.md), and [project requirements](docs/project-brief.md).
 
+Validation: **22 tests passed in an independent clean checkout** after installing Python/Node and bootstrapping all three snapshots. [Evidence](results/evidence/clean-checkout.json) records the tested revision and cache reuse. GitHub Actions runs lint and tests that do not require the multi-gigabyte server download; two source-dependent checks skip there. Local post-bootstrap tests include real MCP persistence and an explicitly fake model protocol fixture.
+
 ## Reproduce the environment
 
 Prerequisites: Git, [uv](https://docs.astral.sh/uv/), and npm. Run from the repository root.

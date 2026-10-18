@@ -1,0 +1,63 @@
+{
+  "verified_at": "2026-10-18T12:04:28.133611+00:00",
+  "tested_commit": "3beaeca7c916674a89b9a9ca06b4474b0eefb6dd",
+  "checkout": "Independent clone of the locally committed branch; clean Git status after verification",
+  "platform": "macOS arm64",
+  "python": "3.12.12",
+  "node": "24.13.0",
+  "reused_cache": "Only the three original downloaded release ZIP files, hard-linked and SHA256-verified again; uv/npm may use their normal package caches",
+  "fresh_components": [
+    "Python virtual environment",
+    "Node installation directory",
+    "Pinned upstream Git checkout",
+    "All three extracted server trees",
+    "Per-test MCP state directories"
+  ],
+  "commands": [
+    {
+      "command": "uv sync --frozen",
+      "exit_code": 0
+    },
+    {
+      "command": "npm install --prefix .cache/node-runtime --no-save --package-lock=false node@24.13.0",
+      "exit_code": 0
+    },
+    {
+      "command": "uv run ruff check src tests",
+      "exit_code": 0
+    },
+    {
+      "command": "uv run ruff format --check src tests",
+      "exit_code": 0
+    },
+    {
+      "command": "uv run pytest -q -m 'not integration' (before bootstrap)",
+      "exit_code": 0,
+      "passed": 15,
+      "skipped": 2,
+      "deselected": 5
+    },
+    {
+      "command": "uv run pe6203 bootstrap",
+      "exit_code": 0,
+      "stages": [
+        "early",
+        "middle",
+        "late"
+      ]
+    },
+    {
+      "command": "MCPEVOL_NODE=<CHECKOUT>/.cache/node-runtime/node_modules/node/bin/node uv run pe6203 doctor",
+      "exit_code": 0
+    },
+    {
+      "command": "uv run pytest -q --tb=short (after bootstrap)",
+      "exit_code": 0,
+      "passed": 22,
+      "skipped": 0,
+      "seconds": 5.98
+    }
+  ],
+  "real_model_evaluation_completed": false,
+  "scope_note": "Real MCP transport and persistence; model HTTP protocol fixtures do not establish LLM benchmark performance."
+}
