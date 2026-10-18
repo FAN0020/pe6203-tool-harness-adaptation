@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MCPEvol adapter result 1.0", "type": "object",
+  "required": ["schema_version", "task_id", "version", "strategy", "seed", "status", "execution_status", "judge_status", "TF", "PE", "ECS", "ecs_inputs", "cost", "errors", "config_sha256"],
+  "properties": {
+    "schema_version": {"const": "1.0"}, "task_id": {"type": "integer"},
+    "version": {"enum": ["early", "middle", "late"]},
+    "strategy": {"enum": ["no_update", "full_rewrite", "selective_patch", "current_metadata_smoke"]},
+    "seed": {"type": "integer"},
+    "status": {"enum": ["evaluated", "judge_incomplete", "blocked", "timeout"]},
+    "execution_status": {"enum": ["not_started", "completed", "max_rounds", "empty_answer", "failed"]},
+    "judge_status": {"enum": ["not_started", "complete", "incomplete", "failed"]},
+    "TF": {"type": ["number", "null"], "minimum": 1, "maximum": 10},
+    "PE": {"type": ["number", "null"], "minimum": 1, "maximum": 10},
+    "ECS": {"type": ["number", "null"]}, "ecs_inputs": {"type": "object"},
+    "cost": {"type": "object"}, "errors": {"type": "array"},
+    "config_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

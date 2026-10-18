@@ -1,59 +1,82 @@
-# Safety Approval Policies for Agent Harnesses
+# PE6203 Tool Harness Adaptation under Environment Change
 
-PE6203 Group Project 2: design an approval policy that helps an AI agent complete tasks safely while using a limited amount of human attention.
+**Project 4 · MCPEvol-Bench · Group A environment and runner handoff**
 
-For each proposed tool call, the policy chooses **auto-approve**, **auto-deny**, or **escalate to a human reviewer**. Each task has an escalation budget `k`; once the budget is exhausted, further decisions that require escalation become auto-denials.
+Compare No Update, Full Rewrite, and Selective Patch when MCP tools evolve, with the same model, decoding settings, tasks, and judge. The repository keeps its existing GitHub name; Project 4 supersedes the initial Project 2 scaffold.
 
-**Status:** repository initialized with the project scope and deliverables. The approval gate, policies, benchmark integration, and experiments have not been implemented yet.
+## Current status
 
-## Research objective
+The environment, immutable source pins, real MCP metadata, runner interface, and transport persistence checks are available. **A real LLM agent → MCP → judge run is not yet verified: the model API endpoint and approved model configuration are still needed.** Committed transport probes use real released servers but no LLM, and have no TF/PE/ECS scores. They are not benchmark results.
 
-Maximize **TCR@k**, the fraction of tasks completed successfully without executing any unauthorized tool call, across different human-review budgets. Evaluate the trade-off between safe completion, human intervention, and API cost.
-
-The project will integrate an approval gate into **AgentDojo** before tool execution and compare a developed policy with two required baselines:
-
-| Strategy | Decision before tool execution |
+| Group A deliverable | Status |
 | --- | --- |
-| Full approve | Auto-approve every tool call without human intervention. |
-| Full escalate | Send every tool call to the reviewer while budget remains; auto-deny when it is exhausted. |
-| Developed policy | Selectively approve, deny, or escalate using information available at decision time. |
+| Upstream source, commit, server releases, dependencies | Pinned and checked |
+| Python and Node environment | Installed and exercised on macOS arm64 |
+| Stage switching and judge/metric entry points | Documented, including release discrepancies |
+| Real MCP calls and persistent state across restart | Verified on all three stages |
+| Runner, metadata, trace and result interfaces | Implemented with tests and examples |
+| Real model agent and model judge | Pending explicit model service configuration |
 
-Online evaluation will use an LLM to simulate the human reviewer. The reviewer must only receive information reasonably available to a real reviewer; benchmark labels and attack annotations must not be included in its inputs.
+Read [Group A handoff](docs/group-a-handoff.md), [environment audit](docs/environment.md), and [project requirements](docs/project-brief.md).
 
-## Repository contents
+## Reproduce the environment
 
-- [Project brief](docs/project-brief.md): requirements, evaluation criteria, and deliverables summarized from the selected course brief.
-- `.gitignore`: keeps local course documents, credentials, environments, and generated outputs out of version control.
-
-## Implementation roadmap
-
-- [ ] Select and record an AgentDojo revision, agent model, and evaluation configuration.
-- [ ] Define the policy interface and a per-task escalation-budget tracker.
-- [ ] Add an approval gate that intercepts tool calls before execution.
-- [ ] Implement the full-approve and full-escalate baselines.
-- [ ] Implement and document the developed approval policy.
-- [ ] Implement an LLM reviewer with documented inputs and prompts.
-- [ ] Record decisions, reviewer outcomes, task results, and component-level token usage or cost.
-- [ ] Run comparable experiments across a meaningful range of `k` values.
-- [ ] Produce the required analysis, report, and presentation.
-
-## Required results
-
-1. TCR@k curves comparing all three strategies.
-2. HITL Load: total escalations across successfully completed tasks, reported for each policy and budget.
-3. API usage or cost broken down into policy inference, reviewer simulation, and agent execution.
-4. Failure classification with representative trajectories for over-conservative and over-permissive behavior.
-5. Analysis of which tool calls benefit most from escalation.
-
-The final presentation is 10 minutes, followed by 5 minutes of Q&A.
-
-## Working with this repository
+Prerequisites: Git, [uv](https://docs.astral.sh/uv/), and npm. Run from the repository root.
 
 ```bash
 git clone https://github.com/FAN0020/pe6203-agent-harness-safety.git
 cd pe6203-agent-harness-safety
+uv sync --frozen
+npm install --prefix .cache/node-runtime --no-save --package-lock=false node@24.13.0
+export MCPEVOL_NODE="$PWD/.cache/node-runtime/node_modules/node/bin/node"
+uv run pe6203 bootstrap
+uv run pe6203 doctor
+uv run pytest -q
 ```
 
-Start with the [project brief](docs/project-brief.md). Installation and experiment commands will be added when the implementation is available.
+The first bootstrap downloads approximately **3.40 GB** of release ZIPs and verifies their SHA256 digests. It extracts the two smoke servers and their bundled dependency closures without resolving current npm versions. Runtime files stay under ignored `.cache/`. Docker and 1mcp are not required by this adapter; its MCP SDK connects directly to the released servers over stdio.
 
-The supplied Word briefs and other topic documents remain local reference material and are ignored by Git. Use synthetic or sanitized examples in committed traces, and keep API keys in local environment variables or ignored environment files.
+```bash
+uv run pe6203 probe --version early --output results/raw/probe-early
+uv run pe6203 probe --version middle --output results/raw/probe-middle
+uv run pe6203 probe --version late --output results/raw/probe-late
+uv run pe6203 metadata --version late --output results/raw/late-metadata.json
+```
+
+Each probe creates local project/task and knowledge-graph data, restarts both services, then reads it back. Use a new output directory for each run; existing runs are never overwritten.
+
+## Run the real model pipeline
+
+Set the four variables in [.env.example](.env.example). Credentials are never embedded in configs or inherited by MCP servers. `.env` is not automatically loaded. Configure models in a copy of [configs/smoke.json](configs/smoke.json); `gpt-4o` is an upstream example, not confirmed account access. The paper reports DeepSeek-Chat as judge while the released evaluator defaults to `gpt-4o`; select and freeze one protocol before comparing strategies.
+
+```bash
+cp configs/smoke.json configs/local.json
+# Edit configs/local.json and export the API variables in your shell.
+uv run pe6203 run --task-id 139 --version early \
+  --strategy current_metadata_smoke --seed 0 \
+  --config configs/local.json \
+  --knowledge examples/knowledge/early-task139.json \
+  --output results/raw/task139-early-seed0
+```
+
+For Middle/Late smoke runs, change `--version` and use the matching `examples/knowledge/<version>-task139.json`. These are current-metadata smoke runs, not implementations of the team's adaptation strategies.
+
+For No Update on an evolved server, supply Early knowledge and `--strategy no_update`. For Full Rewrite or Selective Patch, B/C supply the knowledge generated by their method. A strategy label records the source of knowledge; it does not implement that method.
+
+Interface: `run(task_id, version, strategy, seed, config) → (raw_trace, benchmark_result)`. The validated scope is official task **139** and two local servers. New task/server definitions must be reviewed before expansion; unsupported tasks are rejected rather than replaced with mocks.
+
+## Files for teammates
+
+- `src/pe6203/`: bootstrap, task loading, MCP transport, model runner, judge bridge, CLI.
+- `configs/benchmark.lock.json`, `uv.lock`: immutable upstream and dependency pins.
+- `examples/metadata/`: complete real catalogs for Early/Middle/Late.
+- `examples/knowledge/`: four task-139 tools selected from each catalog.
+- `schemas/`: ToolRecord and result JSON contracts.
+- `results/evidence/`: reviewed real transport evidence and environment report.
+- `tests/`: leakage, routing, score validation, round-limit, persistence, and output checks.
+
+Full benchmark evaluation, B/C's adaptation algorithms, and D's final analysis are subsequent work.
+
+## Primary sources
+
+Based on the [MCPEvol-Bench public source release](https://github.com/Octobrist/MCPEvol-Bench/tree/888c779a0fe735f612ca62bdd1fdd7c9e6bf8701), its [server dataset](https://huggingface.co/datasets/anonymous2233/evol-servers/tree/162e3ffbea1717ac8a20fe9b26465e29117229e4), and [Liu et al., arXiv:2607.14642v1](https://arxiv.org/abs/2607.14642v1). The paper is a preprint; no journal peer-review status is claimed. See the source audit for differences between paper and code.

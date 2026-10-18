@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ToolRecord", "type": "object",
+  "required": ["tool_id", "server_id", "version", "name", "parameters", "description", "usage_rules", "routing"],
+  "properties": {
+    "tool_id": {"type": "string", "minLength": 1},
+    "server_id": {"type": "string", "minLength": 1},
+    "version": {"enum": ["early", "middle", "late"]},
+    "name": {"type": "string", "minLength": 1},
+    "parameters": {"type": "object"},
+    "description": {"type": "string"},
+    "usage_rules": {"type": "array", "items": {"type": "string"}},
+    "output_schema": {"type": ["object", "null"]},
+    "routing": {"type": "object", "required": ["server_id", "tool_name"],
+      "properties": {"server_id": {"type": "string"}, "tool_name": {"type": "string"}},
+      "additionalProperties": false}
+  }, "additionalProperties": false
+}
