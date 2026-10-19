@@ -45,9 +45,7 @@ class FakeModelClient:
         self.chat = SimpleNamespace(completions=SimpleNamespace(create=self.create))
 
     async def create(self, *, messages, tools, **settings):
-        self.requests.append(
-            {"messages": copy.deepcopy(messages), "tools": copy.deepcopy(tools)}
-        )
+        self.requests.append({"messages": copy.deepcopy(messages), "tools": copy.deepcopy(tools)})
         return FakeCompletion(self.responses.pop(0))
 
 
@@ -91,12 +89,8 @@ async def test_vanilla_agent_uses_two_mcp_tools_and_records_observations(tmp_pat
         "current_metadata_smoke",
         name_policy="namespaced",
     )
-    fetch = next(
-        name for name, route in routes.items() if route["tool_name"] == "fetch_url"
-    )
-    deploy = next(
-        name for name, route in routes.items() if route["tool_name"] == "deploy_html"
-    )
+    fetch = next(name for name, route in routes.items() if route["tool_name"] == "fetch_url")
+    deploy = next(name for name, route in routes.items() if route["tool_name"] == "deploy_html")
     model = FakeModelClient(
         [
             {
@@ -151,9 +145,7 @@ async def test_vanilla_agent_uses_two_mcp_tools_and_records_observations(tmp_pat
 @pytest.mark.asyncio
 async def test_vanilla_agent_isolates_conversation_between_tasks(tmp_path):
     """Repeated independent tasks must not share dialogue memory."""
-    tools, routes = runner.prepare_tools(
-        [tool("server", "get_item")], "current_metadata_smoke"
-    )
+    tools, routes = runner.prepare_tools([tool("server", "get_item")], "current_metadata_smoke")
     model = FakeModelClient(
         [
             {"role": "assistant", "content": "answer one"},
@@ -245,14 +237,11 @@ async def test_vanilla_agent_can_recover_after_tool_error(tmp_path):
     assert "simulated tool failure" in error["error"]
     assert fallback.calls == [("safe_tool", {"query": "retry"})]
     assert any(
-        event["type"] == "tool_result" and event["result"].get("isError")
-        for event in events
+        event["type"] == "tool_result" and event["result"].get("isError") for event in events
     )
 
 
-def test_vanilla_reference_accepts_matching_stage_before_api_preflight(
-    tmp_path, monkeypatch
-):
+def test_vanilla_reference_accepts_matching_stage_before_api_preflight(tmp_path, monkeypatch):
     """A correct stage snapshot must reach credential checks, not fail the guard."""
     root = Path(__file__).resolve().parents[1]
     monkeypatch.setattr(
