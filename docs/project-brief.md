@@ -1,5 +1,7 @@
 # Project 4 requirements
 
+团队落实方式：[执行设定](plan/README.md) · [工作分配](plan/workplan.md) · [来源与决策](plan/sources.md)。下文是课程要求摘要；任务数、业务场景和方法细节见执行设定。
+
 The current assignment is **Tool Harness Adaptation under Environment Change**, based on the supplied PE6203 Project 4 brief and the team's [shared sprint plan](https://docs.google.com/document/d/1fbhITsq__0Xaxjp85qVaQxIO1kQS6oDF-RFe7G7G5kQ/edit). The course brief governs requirements; the schedule and interfaces are working agreements. Project 2 remains in Git history and no longer defines the scope.
 
 Investigate whether updating affected tool knowledge recovers performance after persistent environment changes while preserving unaffected capabilities. Compare **No Update**, **Full Rewrite**, and a developed **Selective Patch** method. Keep model, inference settings, task subset, and judge fixed. Do not fine-tune the model or modify benchmark labels.

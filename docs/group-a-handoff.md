@@ -1,5 +1,7 @@
 # Group A handoff
 
+后续协作：[团队执行设定](plan/README.md) · [A/B/C/D 接口](plan/interfaces.md) · [两周排期](plan/workplan.md)。本文件记录现有实现；新计划中的扩展需分别验收。
+
 ## 当前可交接内容
 
 已完成环境安装、官方源及快照锁定、三版本真实 MCP 启动与持久化检查、元数据导出、runner 和结果接口。**真实 LLM agent → MCP → LLM judge 验收尚未完成**：需要明确模型 API 地址、凭据变量和模型名称。Transport probe 不调用 LLM、不产生 benchmark 分数。

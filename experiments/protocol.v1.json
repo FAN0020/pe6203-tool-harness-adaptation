@@ -1,0 +1,257 @@
+{
+  "schema_version": "plan-1.0",
+  "runnable_config": false,
+  "artifact_type": "experiment_plan",
+  "protocol_id": "plan-v1",
+  "status": "adopted",
+  "human_protocol": "docs/plan/evaluation-protocol.md",
+  "benchmark": {
+    "lock_file": "configs/benchmark.lock.json",
+    "commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+    "dataset_revision": "162e3ffbea1717ac8a20fe9b26465e29117229e4",
+    "stages": {
+      "early": "original",
+      "middle": "iter3",
+      "late": "iter5"
+    },
+    "task_source": "official_selected_201"
+  },
+  "scope": {
+    "primary_domains": [
+      "knowledge_project_management",
+      "fixed_input_data_files"
+    ],
+    "supplementary_domain": "documents_diagrams",
+    "development_target": 4,
+    "evaluation_target": 8,
+    "coverage_targets": {
+      "TOOL": 2,
+      "PARAM": 2,
+      "DESC": 2,
+      "retention": 2
+    },
+    "coverage_labels_may_overlap": true,
+    "counts_are_team_budget_targets": true,
+    "development_reserved_ids": [
+      139
+    ],
+    "split_unit": "task_family",
+    "coverage_counting": {
+      "evaluation_ids": "distinct",
+      "mutation_quota": "distinct_changed_tasks_in_at_least_one_target_transition",
+      "retention_quota": "distinct_tasks_unaffected_in_both_target_transitions"
+    }
+  },
+  "strategies": [
+    "no_update",
+    "full_rewrite",
+    "selective_patch"
+  ],
+  "method": {
+    "name": "Diff-guided Selective Patch",
+    "stages": [
+      "deterministic_metadata_diff",
+      "explicit_dependency_expansion",
+      "selected_record_rewrite",
+      "schema_routing_and_unchanged_record_validation"
+    ],
+    "implicit_full_rewrite_fallback": false,
+    "updater_input_allowlist": [
+      "old_knowledge",
+      "target_public_metadata",
+      "versioned_execution_context"
+    ],
+    "updater_forbidden_inputs": [
+      "task_question",
+      "reference_answer",
+      "reference_trajectory",
+      "historical_scores",
+      "mutation_ground_truth",
+      "evaluation_subgroup_labels"
+    ],
+    "dependency_expansion": "one_hop_explicit_public_metadata_references",
+    "rename_without_explicit_evidence": "delete_plus_add",
+    "comparison": "parsed_JSON_ignore_object_key_order_preserve_array_order_and_text",
+    "optional_ablation": "disable_dependency_expansion_in_separate_experiment"
+  },
+  "knowledge": {
+    "scope": "complete_catalog_of_fixed_task_server_set",
+    "base": "early_K0",
+    "middle_from": "early_K0",
+    "late_from": "early_K0",
+    "early_updater_calls": 0,
+    "early_run_each_strategy_label": true,
+    "runtime_auto_refresh": false,
+    "artifact_identity": [
+      "server_group",
+      "target_stage",
+      "strategy",
+      "repeat_id"
+    ],
+    "reuse_across_tasks_with_same_server_group": true,
+    "regenerate_for_each_repeat": true,
+    "chunking_rule": {
+      "base_partition": "per_server",
+      "oversized_server_policy": null,
+      "status": "pilot_validation_required"
+    },
+    "agent_serialization_rule": null,
+    "K0_construction": "deterministic_mapping_from_complete_early_metadata"
+  },
+  "models": {
+    "agent": {
+      "provider": null,
+      "base_url": null,
+      "model": null,
+      "resolved_model_id": null,
+      "api_key_env": "AGENT_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 2048
+    },
+    "updater": {
+      "provider": null,
+      "base_url": null,
+      "model": null,
+      "resolved_model_id": null,
+      "api_key_env": "UPDATER_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096
+    },
+    "judge": {
+      "provider": null,
+      "base_url": null,
+      "model": null,
+      "resolved_model_id": null,
+      "api_key_env": "JUDGE_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096
+    }
+  },
+  "execution": {
+    "preferred_repeat_ids": [
+      0,
+      1,
+      2
+    ],
+    "fallback_repeat_ids": [
+      0
+    ],
+    "send_model_seed": false,
+    "schedule_seed": 0,
+    "strategy_order": "seeded_shuffle_with_recorded_schedule",
+    "max_rounds": 12,
+    "request_timeout_seconds": 90,
+    "tool_timeout_seconds": 30,
+    "run_timeout_seconds": 600,
+    "isolated_workspace_per_attempt": true,
+    "limits_status": "pilot_validation_required"
+  },
+  "judge": {
+    "attempts_per_trajectory": 5,
+    "complete_requires_valid_scores": 5,
+    "rubric": "pinned_upstream",
+    "rubric_order": "seeded_permutation",
+    "extra_attempts_for_invalid_json": 0,
+    "partial_scores_in_primary_table": false
+  },
+  "analysis": {
+    "score_range": [
+      1,
+      10
+    ],
+    "primary_metrics": [
+      "TF",
+      "PE",
+      "ECS"
+    ],
+    "ecs_primary": "mean_minus_population_std_over_three_stages",
+    "ecs_sensitivity": "mean_minus_sample_std_over_three_stages",
+    "aggregation": "mean_repeats_within_task_then_equal_weight_tasks",
+    "comparison_set": "all_strategies_complete_matched_cells",
+    "missing_score": null,
+    "report_strategy_failure_rates": true,
+    "transition_labels": [
+      "changed",
+      "unaffected",
+      "uncertain"
+    ],
+    "label_transitions": [
+      "early_to_middle",
+      "early_to_late"
+    ],
+    "uncertain_in_recovery_or_retention": false,
+    "recovery": "changed_mean_TF_strategy_minus_no_update_same_stage",
+    "retention_update": "unaffected_mean_TF_strategy_minus_no_update_same_stage",
+    "retention_vs_early": "unaffected_mean_TF_strategy_current_minus_no_update_early"
+  },
+  "retry": {
+    "implementation_status": "planned",
+    "max_extra_attempts": 1,
+    "eligible": [
+      "connection_failure",
+      "http_429",
+      "http_5xx"
+    ],
+    "backoff_seconds": 10,
+    "respect_longer_retry_after": true,
+    "new_workspace": true,
+    "select": "first_complete_attempt_under_fixed_policy",
+    "semantic_error_or_low_score_retry": false,
+    "keep_all_attempts_and_costs": true
+  },
+  "cost": {
+    "units": [
+      "tokens",
+      "seconds",
+      "USD"
+    ],
+    "separate": [
+      "common_metadata_acquisition",
+      "update",
+      "agent",
+      "judge",
+      "failed_attempts"
+    ],
+    "update_total": "sum_unique_adaptation_artifacts",
+    "no_update_tokens_seconds_usd": [
+      0,
+      0,
+      0
+    ],
+    "price_source": null,
+    "price_checked_at": null,
+    "currency_budget_usd": null
+  },
+  "budget": {
+    "task_count_assumption": 8,
+    "stage_count": 3,
+    "strategy_count": 3,
+    "preferred_agent_runs": 216,
+    "preferred_judge_attempts_max": 1080,
+    "fallback_agent_runs": 72,
+    "fallback_judge_attempts_max": 360,
+    "excludes": [
+      "development",
+      "updater",
+      "infrastructure_retry",
+      "ablation"
+    ]
+  },
+  "readiness": {
+    "frozen": false,
+    "status": "pending_validation",
+    "freeze_record": null,
+    "required_before_freeze": [
+      "real_model_end_to_end_evidence",
+      "reviewed_task_manifest",
+      "verified_three_stage_environments_and_fixtures",
+      "complete_K0_catalogs",
+      "agent_knowledge_serialization",
+      "validated_baselines_and_patch",
+      "pilot_limits_and_chunking",
+      "fixed_models_prompts_judge_and_code",
+      "recorded_usage_and_price_policy",
+      "reviewed_freeze_record"
+    ]
+  }
+}

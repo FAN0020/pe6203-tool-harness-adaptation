@@ -4,6 +4,19 @@
 
 Compare No Update, Full Rewrite, and Selective Patch when MCP tools evolve, with the same model, decoding settings, tasks, and judge. The repository keeps its existing GitHub name; Project 4 supersedes the initial Project 2 scaffold.
 
+## 团队入口 Team execution plan
+
+**先读 [一页执行设定](docs/plan/README.md)**：两类业务场景；目标 4 个开发任务 + 8 个正式任务；3 阶段 × 3 策略；2 周交付，第三周补重复与复现。任务数量是团队预算选择，正式集合尚未冻结。
+
+| 读者 | 从这里开始 | 交接产物 |
+| --- | --- | --- |
+| A 环境与 runner | [排期与验收](docs/plan/workplan.md)、[接口](docs/plan/interfaces.md) | 真实链路、任务环境、日志与批次记录 |
+| B 基线 / C 局部更新 | [方法设定](docs/plan/project-spec.md)、[接口](docs/plan/interfaces.md) | knowledge、patch、validation、更新成本 |
+| D 评测与报告 | [实验协议](docs/plan/evaluation-protocol.md)、[报告模板](reports/templates/README.md) | 冻结任务、配对指标、失败分析 |
+| Coding agent | [AGENTS.md](AGENTS.md)、[结构化计划](experiments/README.md) | 按依赖执行 backlog，以证据验收 |
+
+计划文件可供协作；它们不代表正式实验已经完成。来源及课程要求与团队选择的区别见 [来源表](docs/plan/sources.md)。
+
 ## Current status
 
 The environment, immutable source pins, real MCP metadata, runner interface, and transport persistence checks are available. **A real LLM agent → MCP → judge run is not yet verified: the model API endpoint and approved model configuration are still needed.** Committed transport probes use real released servers but no LLM, and have no TF/PE/ECS scores. They are not benchmark results.

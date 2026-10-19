@@ -1,0 +1,316 @@
+{
+  "schema_version": "plan-1.0",
+  "runnable_config": false,
+  "artifact_type": "team_backlog",
+  "as_of": "2026-10-19",
+  "status_values": [
+    "planned",
+    "in_progress",
+    "blocked",
+    "done"
+  ],
+  "done_requires_acceptance_and_evidence": true,
+  "day_zero": "team_plan_start",
+  "note": "Planned means not verified in this repository; it does not assert that teammates have done no work elsewhere. If batch automation is dropped, explicitly replace A4 with equivalent manual ledger and recovery acceptance before dependent execution.",
+  "items": [
+    {
+      "id": "A0",
+      "owner_group": "A",
+      "priority": "P0",
+      "target_day": 0,
+      "status": "done",
+      "depends_on": [],
+      "title_zh": "已锁定环境与 task 139 三阶段真实 MCP",
+      "objective_en": "Pin sources and verify transport persistence",
+      "acceptance": [
+        "Pinned benchmark and dependencies",
+        "Real MCP state survives restart in all three stages"
+      ],
+      "evidence": [
+        "results/evidence/clean-checkout.json",
+        "results/evidence/probe-early.json",
+        "results/evidence/probe-middle.json",
+        "results/evidence/probe-late.json"
+      ],
+      "blocker": null,
+      "verification_scope": "Environment and real MCP transport only; not a real LLM agent/judge evaluation"
+    },
+    {
+      "id": "A1",
+      "owner_group": "A",
+      "priority": "P0",
+      "target_day": 2,
+      "status": "blocked",
+      "depends_on": [
+        "A0"
+      ],
+      "title_zh": "完成真实模型闭环",
+      "objective_en": "Configure real model services and validate task 139",
+      "acceptance": [
+        "Explicit endpoint and accessible agent/judge models",
+        "Real agent tool calls and five valid judge scores",
+        "Trace, ANSWER, EVAL and result agree"
+      ],
+      "evidence": [],
+      "blocker": "Model endpoint and approved model configuration unresolved"
+    },
+    {
+      "id": "A2",
+      "owner_group": "A",
+      "priority": "P0",
+      "target_day": 4,
+      "status": "planned",
+      "depends_on": [
+        "A0"
+      ],
+      "title_zh": "扩展正式任务环境",
+      "objective_en": "Review task servers, fixtures and three-stage reset",
+      "acceptance": [
+        "Complete official server sets",
+        "Resettable sourced fixtures and hashes",
+        "Stage catalog exports and state-isolation evidence"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "A3",
+      "owner_group": "A",
+      "priority": "P0",
+      "target_day": 7,
+      "status": "planned",
+      "depends_on": [
+        "A0"
+      ],
+      "title_zh": "补齐完整知识与 agent 输入",
+      "objective_en": "Serialize complete knowledge consistently",
+      "acceptance": [
+        "Full K0 catalogs without silent truncation",
+        "Usage rules and output schema reach agent inputs",
+        "Unique stable tool aliases and recorded routing",
+        "No Update has no metadata auto-refresh"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "A4",
+      "owner_group": "A",
+      "priority": "P1",
+      "target_day": 7,
+      "status": "planned",
+      "depends_on": [
+        "A0"
+      ],
+      "title_zh": "增加批次 ledger 与恢复",
+      "objective_en": "Schedule runs and preserve attempts",
+      "acceptance": [
+        "Protocol-compliant run identity and artifact hashes",
+        "Restart skips only matching complete records",
+        "Failures and every billed attempt retained"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "B1",
+      "owner_group": "B",
+      "priority": "P0",
+      "target_day": 7,
+      "status": "planned",
+      "depends_on": [
+        "A0"
+      ],
+      "title_zh": "实现两个基线",
+      "objective_en": "Implement No Update and Full Rewrite",
+      "acceptance": [
+        "No Update preserves K0 with zero update cost",
+        "Full Rewrite processes complete catalogs",
+        "Shared updater configuration and chunking policy",
+        "Adaptation record and real usage evidence"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "C1",
+      "owner_group": "C",
+      "priority": "P0",
+      "target_day": 4,
+      "status": "planned",
+      "depends_on": [
+        "A0"
+      ],
+      "title_zh": "实现 metadata diff",
+      "objective_en": "Detect changes and explicit dependencies",
+      "acceptance": [
+        "Tool/schema/description changes recorded",
+        "Rename evidence and uncertainty recorded",
+        "No mutation labels or answers used as method input"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "C2",
+      "owner_group": "C",
+      "priority": "P0",
+      "target_day": 7,
+      "status": "planned",
+      "depends_on": [
+        "C1"
+      ],
+      "title_zh": "实现 Selective Patch",
+      "objective_en": "Rewrite selected records and validate",
+      "acceptance": [
+        "Untouched records canonical-equal",
+        "Schema and routing validation",
+        "No silent Full Rewrite fallback",
+        "Patch artifacts and real updater cost"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "D1",
+      "owner_group": "D",
+      "priority": "P0",
+      "target_day": 7,
+      "status": "planned",
+      "depends_on": [
+        "A2"
+      ],
+      "title_zh": "审查候选并确定 split",
+      "objective_en": "Review tasks jointly with A",
+      "acceptance": [
+        "Expand candidates toward 4 development and 8 evaluation",
+        "Task 139 development-only; family leakage checked",
+        "Per-transition changed/unaffected/uncertain evidence",
+        "Coverage and exclusion reasons recorded"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "D2",
+      "owner_group": "D",
+      "priority": "P0",
+      "target_day": 7,
+      "status": "planned",
+      "depends_on": [
+        "A1",
+        "A2",
+        "A3",
+        "B1",
+        "C2",
+        "D1"
+      ],
+      "title_zh": "冻结正式协议",
+      "objective_en": "Review complete experiment configuration",
+      "acceptance": [
+        "Models, prompts, code, fixtures and catalogs pinned",
+        "Pilot limits, chunking and provider pricing policy recorded",
+        "Freeze gates and reviewers have evidence",
+        "Manifest and protocol hashes match final artifacts"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "D3",
+      "owner_group": "D",
+      "priority": "P0",
+      "target_day": 10,
+      "status": "planned",
+      "depends_on": [
+        "D2",
+        "A4"
+      ],
+      "title_zh": "完成第一轮正式矩阵",
+      "objective_en": "Coordinate A execution and audit all cells",
+      "acceptance": [
+        "All planned cells attempted and ledgered",
+        "Matched results and missingness checked",
+        "No low-score cherry-picking or zero-filled missingness"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "A5",
+      "owner_group": "A",
+      "priority": "P0",
+      "target_day": 14,
+      "status": "planned",
+      "depends_on": [
+        "D3"
+      ],
+      "title_zh": "独立复现与交接",
+      "objective_en": "Reproduce from clean checkout",
+      "acceptance": [
+        "Documented install and run commands",
+        "Same frozen inputs and environment",
+        "Reviewed evidence and known limitations"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "D4",
+      "owner_group": "D",
+      "priority": "P0",
+      "target_day": 14,
+      "status": "planned",
+      "depends_on": [
+        "D3"
+      ],
+      "title_zh": "报告、真实案例与展示",
+      "objective_en": "Rebuild report from raw evidence",
+      "acceptance": [
+        "TF/PE/ECS/recovery/retention and costs traceable",
+        "At least one actual under-update and one actual over-update case with trace-based attribution; if absent, this acceptance remains unmet",
+        "10-minute presentation and personal contribution evidence"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "D5",
+      "owner_group": "D",
+      "priority": "P1",
+      "target_day": 18,
+      "status": "planned",
+      "depends_on": [
+        "D3"
+      ],
+      "title_zh": "补足三次重复",
+      "objective_en": "Complete repeat IDs 1 and 2",
+      "acceptance": [
+        "Same frozen configuration",
+        "Report variation and failure rates",
+        "No extra repeats counted as independent tasks"
+      ],
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "C3",
+      "owner_group": "C",
+      "priority": "P2",
+      "target_day": 18,
+      "status": "planned",
+      "depends_on": [
+        "D4"
+      ],
+      "title_zh": "可选单一消融",
+      "objective_en": "Evaluate dependency expansion ablation",
+      "acceptance": [
+        "Separate experiment ID and frozen comparison",
+        "All other settings identical",
+        "Negative results retained"
+      ],
+      "evidence": [],
+      "blocker": null
+    }
+  ]
+}
