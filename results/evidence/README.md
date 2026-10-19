@@ -1,5 +1,7 @@
 # Evidence and limits
 
+2026-10-19 全量任务审计、完整 Node 安装、多服务 probes 与新版 runner 验证见 [full-benchmark](full-benchmark/README.md)。下列 2026-10-18 文件是前一版 smoke 的历史证据。
+
 Captured on 2026-10-18 from the pinned released servers on macOS arm64.
 
 - `environment.json`: installed versions, source pins, and credential-presence booleans.
