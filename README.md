@@ -2,7 +2,7 @@
 
 **Project 4 · MCPEvol-Bench · Group A environment and runner**
 
-比较 No Update、Full Rewrite、Selective Patch 在工具变化后的表现，固定模型、任务、judge 与执行环境。仓库名称保留历史名称；当前课程要求以 [Project 4 brief](docs/project-brief.md) 为准。
+比较 No Update、Full Rewrite、Selective Patch 在工具变化后的表现，固定模型、任务、judge 与执行环境。课程要求以 [Project 4 brief](docs/project-brief.md) 为准。
 
 ## 当前交付 / Status
 
@@ -34,8 +34,8 @@
 需要 Git、[uv](https://docs.astral.sh/uv/) 和 npm；仓库根目录运行：
 
 ```bash
-git clone https://github.com/FAN0020/pe6203-agent-harness-safety.git
-cd pe6203-agent-harness-safety
+git clone https://github.com/FAN0020/pe6203-tool-harness-adaptation.git
+cd pe6203-tool-harness-adaptation
 uv sync --frozen
 npm install --prefix .cache/node-runtime --no-save --package-lock=false node@24.13.0
 export MCPEVOL_NODE="$PWD/.cache/node-runtime/node_modules/node/bin/node"

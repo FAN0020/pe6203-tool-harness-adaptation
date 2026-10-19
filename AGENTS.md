@@ -1,6 +1,6 @@
 # Agent working instructions
 
-This repository is PE6203 Project 4, Tool Harness Adaptation under Environment Change. Communicate in Chinese with English technical terms when useful. The GitHub repository name is historical.
+This repository is PE6203 Project 4, Tool Harness Adaptation under Environment Change. Communicate in Chinese with English technical terms when useful.
 
 ## Read order
 
