@@ -29,11 +29,13 @@ export JUDGE_API_KEY="$AGENT_API_KEY"
 默认 updater、agent 和 judge 都是 `deepseek-flash`，non-thinking 模式、temperature 0，judge 按现有官方 rubric 调用 5 次。updater 每个目标版本一次完整 catalog 调用，max_tokens=16384。`--allow-metadata-api` 明确允许将公开工具 metadata 发送到配置的模型 API；只有手动运行时才会产生费用。若更换 judge，统一使用 `--judge-model` 并先确认服务可用性。
 
 ```bash
-uv run python -m integration.test_real_baselines --version middle --allow-metadata-api
-uv run python -m integration.test_real_baselines --version late --allow-metadata-api
+uv run --env-file .env python -m integration.test_real_baselines --version middle --allow-metadata-api
+uv run --env-file .env python -m integration.test_real_baselines --version late --allow-metadata-api
 ```
 
 只验证一种策略可加 `--strategy no_update` 或 `--strategy full_rewrite`。每次自动创建新目录，保留失败；不要挑最佳重跑当正式结果。检查脚本退出码，非完整评分返回 2。
+
+默认显示 CLI 摘要，并保存总目录和每个 `execution/` 下的 `report.txt`。`uv run pe6203 report results/raw/<run>` 可离线重看整批结果；`--details` 展开评分/调用/回答，`--output NEW.txt` 保存，`--format json` 输出结构化数据。报告兼容上游桥接日志和更新成本 `tokens`，明确标出 `max_rounds`、缺失分数及更新失败。
 
 ## 代码复用与差异
 

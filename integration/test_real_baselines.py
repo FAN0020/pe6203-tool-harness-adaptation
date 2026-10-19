@@ -12,6 +12,7 @@ import hashlib
 import json
 import logging
 import os
+import sys
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -24,6 +25,7 @@ from integration.model_api import model_id, nonthinking_options
 from integration.project_paths import pilot_config_path, task139_metadata_path
 from pe6203 import runner
 from pe6203.benchmark import load_task, read_json, source, write_json
+from pe6203.report import render_saved_report
 from pe6203.transport import check_arguments
 
 
@@ -226,6 +228,7 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--judge-model", default="deepseek-flash")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -320,10 +323,9 @@ def main():
                 }
                 summary["runs"].append(item)
                 write_json(output / "summary.json", summary)
-                print(json.dumps(item, ensure_ascii=False), flush=True)
                 continue
             try:
-                print(f"Adapting {strategy} ...", flush=True)
+                print(f"Adapting {strategy} ...", file=sys.stderr, flush=True)
                 knowledge, record = adapt_for_runner(
                     old,
                     new,
@@ -345,7 +347,6 @@ def main():
                 }
                 summary["runs"].append(item)
                 write_json(output / "summary.json", summary)
-                print(json.dumps(item, ensure_ascii=False), flush=True)
                 continue
             runner.prepare_tools(knowledge["tools"], strategy)
             write_json(folder / "knowledge.json", knowledge)
@@ -366,16 +367,26 @@ def main():
                 },
             )
             write_json(folder / "config.json", current)
-            print(f"Running task 139 / {args.version} / {strategy} ...", flush=True)
+            print(
+                f"Running task 139 / {args.version} / {strategy} ...", file=sys.stderr, flush=True
+            )
             _, result = runner.run(139, args.version, strategy, args.seed, current)
             item = {k: result[k] for k in ("strategy", "status", "TF", "PE", "ECS", "errors")}
             item["execution_dir"] = str(folder / "execution")
             summary["runs"].append(item)
             write_json(output / "summary.json", summary)
-            print(json.dumps(item, ensure_ascii=False), flush=True)
+            if args.format == "text":
+                report_path = folder / "execution/report.txt"
+                if report_path.is_file():
+                    print(report_path.read_text(encoding="utf-8"), end="", flush=True)
     finally:
         runner.agent_loop, runner.AsyncOpenAI = original_loop, original_client
-    print(f"Results: {output}")
+    report = render_saved_report([output], output=output / "report.txt")
+    if args.format == "json":
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+    elif args.dry_run or any(r["status"] == "adaptation_failed" for r in summary["runs"]):
+        print(report, end="")
+    print(f"Results: {output}", file=sys.stderr)
     if not args.dry_run and any(r["status"] != "evaluated" for r in summary["runs"]):
         raise SystemExit(2)
 

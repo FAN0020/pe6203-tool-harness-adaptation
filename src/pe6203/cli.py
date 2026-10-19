@@ -168,6 +168,11 @@ def main():
     parser = argparse.ArgumentParser(description="PE6203 Group A MCPEvol environment and runner")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Project checkout root")
     sub = parser.add_subparsers(dest="command", required=True)
+    report = sub.add_parser("report", help="Read saved run or baseline pilot results; no API calls")
+    report.add_argument("inputs", type=Path, nargs="+")
+    report.add_argument("--details", action="store_true")
+    report.add_argument("--format", choices=["text", "json", "html"], default="text")
+    report.add_argument("--output", type=Path, help="Save to a new .txt/.json/.html file")
     setup = sub.add_parser("bootstrap", help="Verify and install immutable benchmark releases")
     setup.add_argument(
         "--stages",
@@ -189,6 +194,7 @@ def main():
         required=True,
     )
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--format", choices=["text", "json"], default="text")
     p.add_argument("--config", type=Path, default=Path("configs/smoke.json"))
     p.add_argument("--knowledge", type=Path)
     p.add_argument("--output", type=Path, required=True)
@@ -196,7 +202,15 @@ def main():
     p.add_argument("scores", type=Path)
     args = parser.parse_args()
     try:
-        if args.command == "bootstrap":
+        if args.command == "report":
+            from .report import render_saved_report
+
+            rendered = render_saved_report(
+                args.inputs, format_name=args.format, expanded=args.details, output=args.output
+            )
+            print(rendered, end="")
+            return 0
+        elif args.command == "bootstrap":
             result = bootstrap(args.root, args.stages)
             result = {
                 k: {"files": v["files"], "packages": len(v["packages"])} for k, v in result.items()
@@ -213,7 +227,11 @@ def main():
             if args.knowledge:
                 config["knowledge_path"] = str(args.knowledge)
             _, result = run(args.task_id, args.version, args.strategy, args.seed, config)
-            print(json.dumps(result, indent=2, ensure_ascii=False))
+            report_path = args.output / "report.txt"
+            if args.format == "text" and report_path.is_file():
+                print(report_path.read_text(encoding="utf-8"), end="")
+            else:
+                print(json.dumps(result, indent=2, ensure_ascii=False))
             return 0 if result["status"] == "evaluated" else 2
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0

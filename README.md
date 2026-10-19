@@ -4,6 +4,17 @@
 
 Compare No Update, Full Rewrite, and Selective Patch when MCP tools evolve, with the same model, decoding settings, tasks, and judge. The repository keeps its existing GitHub name; Project 4 supersedes the initial Project 2 scaffold.
 
+当前 `baselines/xiaohua-integration` 已接入可读 CLI：task 139、Middle、No Update + LLM Full Rewrite，三个角色使用同一 DeepSeek Flash。配置好的本机 `.env` 通过下面命令加载：
+
+```bash
+uv run --env-file .env python -m integration.test_real_baselines --version middle --allow-metadata-api
+uv run pe6203 report results/raw/<上面输出的运行目录> --details
+```
+
+运行后显示摘要并保存 `report.txt`；`--details` 展开逐次评分、工具调用和最终回答。`report` 只读日志，不调用模型；`--format json` 保留机器格式。每次真实运行使用新目录，所有失败保留。
+
+本轮已跑结果：`uv run pe6203 report results/raw/xiaohua-cli-middle-20261019`。可共享证据：[No Update](results/evidence/xiaohua-cli-middle-20261019/no_update.json)、[Full Rewrite](results/evidence/xiaohua-cli-middle-20261019/full_rewrite.json)、[核查记录](results/evidence/xiaohua-cli-middle-20261019/verification.json)。
+
 ## 团队入口 Team execution plan
 
 **先读 [一页执行设定](docs/plan/README.md)**：两类业务场景；目标 4 个开发任务 + 8 个正式任务；3 阶段 × 3 策略；2 周交付，第三周补重复与复现。任务数量是团队预算选择，正式集合尚未冻结。
@@ -19,7 +30,7 @@ Compare No Update, Full Rewrite, and Selective Patch when MCP tools evolve, with
 
 ## Current status
 
-The environment, immutable source pins, real MCP metadata, runner interface, and transport persistence checks are available. **A real LLM agent → MCP → judge run is not yet verified: the model API endpoint and approved model configuration are still needed.** Committed transport probes use real released servers but no LLM, and have no TF/PE/ECS scores. They are not benchmark results.
+本分支已经验证真实 DeepSeek → MCP → judge 的开发闭环：task 139 / Middle / seed 0，No Update TF 8.2、PE 7.0；LLM Full Rewrite TF 9.0、PE 7.2，各有 5 次有效评分。两组 agent 均触及 12 轮上限，Full Rewrite 有一次缺少 projectId 的工具错误。它们是可追溯的开发结果，不是完整 benchmark 或策略优越性的证明；ECS、USD 仍未获得。
 
 | Group A deliverable | Status |
 | --- | --- |
@@ -28,11 +39,11 @@ The environment, immutable source pins, real MCP metadata, runner interface, and
 | Stage switching and judge/metric entry points | Documented, including release discrepancies |
 | Real MCP calls and persistent state across restart | Verified on all three stages |
 | Runner, metadata, trace and result interfaces | Implemented with tests and examples |
-| Real model agent and model judge | Pending explicit model service configuration |
+| Real model agent and model judge | Verified on task 139 / Middle; judge complete, agent max_rounds |
 
 Read [Group A handoff](docs/group-a-handoff.md), [environment audit](docs/environment.md), and [project requirements](docs/project-brief.md).
 
-Validation: **22 tests passed in an independent clean checkout** after installing Python/Node and bootstrapping all three snapshots. [Evidence](results/evidence/clean-checkout.json) records the tested revision and cache reuse. GitHub Actions runs lint and tests that do not require the multi-gigabyte server download; two source-dependent checks skip there. Local post-bootstrap tests include real MCP persistence and an explicitly fake model protocol fixture.
+当前本地验证：**89 tests passed**，lint/format 通过，另有上述真实模型记录。历史环境验证为独立 clean checkout 的 22 项测试，[证据](results/evidence/clean-checkout.json)保留当时版本。GitHub Actions 不下载大型服务快照，相关测试可能 skip；fake model 测试只证明程序接线。
 
 ## Reproduce the environment
 
@@ -90,7 +101,7 @@ Interface: `run(task_id, version, strategy, seed, config) → (raw_trace, benchm
 - `results/evidence/`: reviewed real transport evidence and environment report.
 - `tests/`: leakage, routing, score validation, round-limit, persistence, and output checks.
 
-Full benchmark evaluation, B/C's adaptation algorithms, and D's final analysis are subsequent work.
+完整 benchmark、Selective Patch 和正式分析仍待完成。旧计划与 Group A handoff 记录初始交接状态；本分支当前运行入口和验证状态以上述 baseline 说明与证据为准。
 
 ## Primary sources
 

@@ -64,5 +64,6 @@ def test_missing_credentials_are_saved_as_blocked_not_scores(tmp_path, monkeypat
     assert result["TF"] is None and result["PE"] is None
     assert "AGENT_API_KEY" in result["errors"][0]["message"]
     assert (Path(config["output_dir"]) / "result.json").exists()
+    assert "blocked" in (Path(config["output_dir"]) / "report.txt").read_text()
     with pytest.raises(FileExistsError):
         module("runner").run(139, "early", "no_update", 0, config)
