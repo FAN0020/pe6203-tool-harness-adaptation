@@ -21,7 +21,9 @@ from .transport import check_arguments, server_profiles, sessions, snapshot
 def prepare_fixture(directory, workspace):
     directory, workspace = Path(directory).resolve(), Path(workspace).resolve()
     if not directory.is_dir() or workspace.is_relative_to(directory):
-        raise ValueError("Fixture directory must exist and be separate from the run workspace")
+        raise ValueError(
+            "Fixture directory must exist and be separate from the run workspace"
+        )
     paths = sorted(directory.rglob("*"))
     if any(p.is_symlink() for p in paths):
         raise ValueError("Fixture symlinks are not allowed")
@@ -33,7 +35,10 @@ def prepare_fixture(directory, workspace):
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, destination)
             files.append(
-                {"path": str(relative), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                {
+                    "path": str(relative),
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                }
             )
     return {"files": files, "manifest_sha256": digest(files)}
 
@@ -55,7 +60,9 @@ def credentials(config):
         or url.query
         or url.fragment
     ):
-        raise ValueError("Model base URL must be an explicit HTTP(S) endpoint without credentials")
+        raise ValueError(
+            "Model base URL must be an explicit HTTP(S) endpoint without credentials"
+        )
     return tuple(values)
 
 
@@ -67,7 +74,13 @@ def redact(text, secrets):
 
 
 def protocol_hash(config, endpoints):
-    operational = {"root", "output_dir", "knowledge_path", "update_cost", "adaptation_path"}
+    operational = {
+        "root",
+        "output_dir",
+        "knowledge_path",
+        "update_cost",
+        "adaptation_path",
+    }
     return digest(
         {
             "settings": {k: v for k, v in config.items() if k not in operational},
@@ -77,7 +90,12 @@ def protocol_hash(config, endpoints):
 
 
 def prepare_tools(records, strategy, name_policy="native_unique"):
-    if strategy not in ("no_update", "full_rewrite", "selective_patch", "current_metadata_smoke"):
+    if strategy not in (
+        "no_update",
+        "full_rewrite",
+        "selective_patch",
+        "current_metadata_smoke",
+    ):
         raise ValueError(f"Unknown strategy label: {strategy}")
     tools, routes = [], {}
     if name_policy not in ("native_unique", "namespaced"):
@@ -126,26 +144,41 @@ def usage_total(usages):
     }
 
 
-async def agent_loop(client, clients, tools, routes, question, workspace, config, seed, emit):
+async def agent_loop(
+    client, clients, tools, routes, question, workspace, config, seed, emit
+):
     system = (
         "You are an AI agent connected to MCP tools. Complete the user's task using "
         "the supplied tools. Do not ask the user follow-up questions. Use only the tools "
         "and schemas supplied to you. Do not invent successful tool results. "
         f"All workingDirectory arguments must be exactly: {workspace}"
     )
-    messages = [{"role": "system", "content": system}, {"role": "user", "content": question}]
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": question},
+    ]
     answer, status, usages = "", "max_rounds", []
     emit({"type": "initial_messages", "messages": copy.deepcopy(messages)})
-    settings = {k: config["agent"][k] for k in ("model", "temperature", "max_completion_tokens")}
+    settings = {
+        k: config["agent"][k] for k in ("model", "temperature", "max_completion_tokens")
+    }
     if "extra_body" in config["agent"]:
         settings["extra_body"] = copy.deepcopy(config["agent"]["extra_body"])
     if config.get("send_model_seed", False):
         settings["seed"] = seed
     for turn in range(config["max_rounds"]):
-        response = await client.chat.completions.create(messages=messages, tools=tools, **settings)
+        response = await client.chat.completions.create(
+            messages=messages, tools=tools, **settings
+        )
         message = response.choices[0].message.model_dump(exclude_none=True)
         usages.append(response.usage.model_dump() if response.usage else {})
-        emit({"type": "agent_response", "round": turn + 1, "response": response.model_dump()})
+        emit(
+            {
+                "type": "agent_response",
+                "round": turn + 1,
+                "response": response.model_dump(),
+            }
+        )
         messages.append(message)
         calls = message.get("tool_calls", [])
         if not calls:
@@ -175,7 +208,14 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
                 "content": json.dumps(payload, ensure_ascii=False),
             }
             messages.append(tool_message)
-            emit({"type": "tool_result", "round": turn + 1, "call": call, "result": payload})
+            emit(
+                {
+                    "type": "tool_result",
+                    "round": turn + 1,
+                    "call": call,
+                    "result": payload,
+                }
+            )
     return {
         "answer": answer,
         "messages": messages,
@@ -190,7 +230,9 @@ async def run_async(task_id, version, strategy, seed, config):
     config = copy.deepcopy(config)
     root = Path(config.get("root", ".")).resolve()
     output = Path(config["output_dir"]).resolve()
-    output.mkdir(parents=True, exist_ok=False)  # Preserve previous runs, including failures.
+    output.mkdir(
+        parents=True, exist_ok=False
+    )  # Preserve previous runs, including failures.
     workspace = output / "workspace"
     workspace.mkdir()
     started = time.monotonic()
@@ -224,17 +266,27 @@ async def run_async(task_id, version, strategy, seed, config):
         return json.loads(redact(json.dumps(value, ensure_ascii=False), secrets))
 
     def emit(event):
-        event = clean({"elapsed_seconds": round(time.monotonic() - started, 6), **event})
+        event = clean(
+            {"elapsed_seconds": round(time.monotonic() - started, 6), **event}
+        )
         events.append(event)
         with (output / "events.jsonl").open("a") as stream:
             stream.write(json.dumps(event, ensure_ascii=False) + "\n")
 
     trace = {"idx": task_id, "answer": "", "trajectory_messages": []}
     try:
-        for key in ("max_rounds", "judge_runs", "request_timeout_seconds", "run_timeout_seconds"):
+        for key in (
+            "max_rounds",
+            "judge_runs",
+            "request_timeout_seconds",
+            "run_timeout_seconds",
+        ):
             if type(config[key]) not in (float, int) or config[key] <= 0:
                 raise ValueError(f"{key} must be positive")
-        if type(config["max_rounds"]) is not int or type(config["judge_runs"]) is not int:
+        if (
+            type(config["max_rounds"]) is not int
+            or type(config["judge_runs"]) is not int
+        ):
             raise ValueError("Round and judge-run counts must be integers")
         lock, upstream = source(root)
         task = load_task(upstream, task_id)
@@ -244,7 +296,9 @@ async def run_async(task_id, version, strategy, seed, config):
         profiles = server_profiles(root, lock)
         unsupported = sorted(set(task["servers"]) - set(profiles))
         if unsupported:
-            raise ValueError(f"Missing reviewed runtime profiles: {', '.join(unsupported)}")
+            raise ValueError(
+                f"Missing reviewed runtime profiles: {', '.join(unsupported)}"
+            )
         if config.get("fixture_dir"):
             result["fixture"] = prepare_fixture(root / config["fixture_dir"], workspace)
             write_json(output / "fixture-manifest.json", result["fixture"])
@@ -280,7 +334,7 @@ async def run_async(task_id, version, strategy, seed, config):
         if knowledge["benchmark_commit"] != lock["commit"]:
             raise ValueError("Knowledge snapshot benchmark commit mismatch")
         records = knowledge["tools"]
-                # Vanilla should use the current stage's tool knowledge.
+        # Vanilla should use the current stage's tool knowledge.
         # Selective Patch is allowed to retain unchanged older records.
         if strategy == "current_metadata_smoke" and (
             knowledge.get("version") != version
@@ -394,8 +448,12 @@ async def run_async(task_id, version, strategy, seed, config):
                                 },
                             )
                             item["response"] = response.model_dump()
-                            usages.append(response.usage.model_dump() if response.usage else {})
-                            item["result"] = parse_scores(response.choices[0].message.content or "")
+                            usages.append(
+                                response.usage.model_dump() if response.usage else {}
+                            )
+                            item["result"] = parse_scores(
+                                response.choices[0].message.content or ""
+                            )
                             scores.append(item["result"])
                         except Exception as exc:
                             item["error"] = f"{type(exc).__name__}: {exc}"
@@ -404,14 +462,23 @@ async def run_async(task_id, version, strategy, seed, config):
                 aggregate = aggregate_scores(scores, config["judge_runs"])
                 write_json(
                     output / "EVAL" / f"{task_id}.json",
-                    clean({**trace, "eval_result": {"runs": judge_runs, "aggregate": aggregate}}),
+                    clean(
+                        {
+                            **trace,
+                            "eval_result": {"runs": judge_runs, "aggregate": aggregate},
+                        }
+                    ),
                 )
                 result.update(
                     {
                         "TF": aggregate["task_fulfillment_mean"],
                         "PE": aggregate["planning_and_efficiency_mean"],
-                        "judge_status": "complete" if aggregate["complete"] else "incomplete",
-                        "status": "evaluated" if aggregate["complete"] else "judge_incomplete",
+                        "judge_status": "complete"
+                        if aggregate["complete"]
+                        else "incomplete",
+                        "status": "evaluated"
+                        if aggregate["complete"]
+                        else "judge_incomplete",
                         "ecs_inputs": {version: aggregate["task_fulfillment_mean"]},
                     }
                 )

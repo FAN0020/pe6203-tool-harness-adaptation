@@ -26,7 +26,11 @@ class FakeCompletion:
     def __init__(self, payload):
         self.choices = [SimpleNamespace(message=FakeMessage(payload))]
         self.usage = SimpleNamespace(
-            model_dump=lambda: {"prompt_tokens": 7, "completion_tokens": 3, "total_tokens": 10}
+            model_dump=lambda: {
+                "prompt_tokens": 7,
+                "completion_tokens": 3,
+                "total_tokens": 10,
+            }
         )
         self.payload = payload
 
@@ -41,7 +45,9 @@ class FakeModelClient:
         self.chat = SimpleNamespace(completions=SimpleNamespace(create=self.create))
 
     async def create(self, *, messages, tools, **settings):
-        self.requests.append({"messages": copy.deepcopy(messages), "tools": copy.deepcopy(tools)})
+        self.requests.append(
+            {"messages": copy.deepcopy(messages), "tools": copy.deepcopy(tools)}
+        )
         return FakeCompletion(self.responses.pop(0))
 
 
@@ -85,11 +91,19 @@ async def test_vanilla_agent_uses_two_mcp_tools_and_records_observations(tmp_pat
         "current_metadata_smoke",
         name_policy="namespaced",
     )
-    fetch = next(name for name, route in routes.items() if route["tool_name"] == "fetch_url")
-    deploy = next(name for name, route in routes.items() if route["tool_name"] == "deploy_html")
+    fetch = next(
+        name for name, route in routes.items() if route["tool_name"] == "fetch_url"
+    )
+    deploy = next(
+        name for name, route in routes.items() if route["tool_name"] == "deploy_html"
+    )
     model = FakeModelClient(
         [
-            {"role": "assistant", "content": None, "tool_calls": [make_call("c1", fetch, query="AI")]},
+            {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [make_call("c1", fetch, query="AI")],
+            },
             {
                 "role": "assistant",
                 "content": None,
@@ -108,8 +122,15 @@ async def test_vanilla_agent_uses_two_mcp_tools_and_records_observations(tmp_pat
         routes,
         "Find five papers and publish a webpage",
         tmp_path,
-        {"agent": {"model": "fake-model", "temperature": 0, "max_completion_tokens": 50},
-         "max_rounds": 4, "tool_timeout_seconds": 1},
+        {
+            "agent": {
+                "model": "fake-model",
+                "temperature": 0,
+                "max_completion_tokens": 50,
+            },
+            "max_rounds": 4,
+            "tool_timeout_seconds": 1,
+        },
         0,
         events.append,
     )
@@ -130,18 +151,40 @@ async def test_vanilla_agent_uses_two_mcp_tools_and_records_observations(tmp_pat
 @pytest.mark.asyncio
 async def test_vanilla_agent_isolates_conversation_between_tasks(tmp_path):
     """Repeated independent tasks must not share dialogue memory."""
-    tools, routes = runner.prepare_tools([tool("server", "get_item")], "current_metadata_smoke")
-    model = FakeModelClient(
-        [{"role": "assistant", "content": "answer one"},
-         {"role": "assistant", "content": "answer two"}]
+    tools, routes = runner.prepare_tools(
+        [tool("server", "get_item")], "current_metadata_smoke"
     )
-    config = {"agent": {"model": "fake-model", "temperature": 0, "max_completion_tokens": 50},
-              "max_rounds": 2}
+    model = FakeModelClient(
+        [
+            {"role": "assistant", "content": "answer one"},
+            {"role": "assistant", "content": "answer two"},
+        ]
+    )
+    config = {
+        "agent": {"model": "fake-model", "temperature": 0, "max_completion_tokens": 50},
+        "max_rounds": 2,
+    }
     first = await runner.agent_loop(
-        model, {}, tools, routes, "private task one", tmp_path, config, 0, lambda _: None
+        model,
+        {},
+        tools,
+        routes,
+        "private task one",
+        tmp_path,
+        config,
+        0,
+        lambda _: None,
     )
     second = await runner.agent_loop(
-        model, {}, tools, routes, "different task two", tmp_path, config, 0, lambda _: None
+        model,
+        {},
+        tools,
+        routes,
+        "different task two",
+        tmp_path,
+        config,
+        0,
+        lambda _: None,
     )
     assert len(first["messages"]) == len(second["messages"]) == 3
     assert second["messages"][1]["content"] == "different task two"
@@ -162,10 +205,16 @@ async def test_vanilla_agent_can_recover_after_tool_error(tmp_path):
 
     model = FakeModelClient(
         [
-            {"role": "assistant", "content": None,
-             "tool_calls": [make_call("failure", "broken_tool", query="test")]},
-            {"role": "assistant", "content": None,
-             "tool_calls": [make_call("fallback", "safe_tool", query="retry")]},
+            {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [make_call("failure", "broken_tool", query="test")],
+            },
+            {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [make_call("fallback", "safe_tool", query="retry")],
+            },
             {"role": "assistant", "content": "Recovered with backup tool"},
         ]
     )
@@ -178,8 +227,15 @@ async def test_vanilla_agent_can_recover_after_tool_error(tmp_path):
         routes,
         "Use the tools to complete the task",
         tmp_path,
-        {"agent": {"model": "fake-model", "temperature": 0, "max_completion_tokens": 50},
-         "max_rounds": 4, "tool_timeout_seconds": 1},
+        {
+            "agent": {
+                "model": "fake-model",
+                "temperature": 0,
+                "max_completion_tokens": 50,
+            },
+            "max_rounds": 4,
+            "tool_timeout_seconds": 1,
+        },
         0,
         events.append,
     )
@@ -188,32 +244,55 @@ async def test_vanilla_agent_can_recover_after_tool_error(tmp_path):
     assert error["isError"] is True
     assert "simulated tool failure" in error["error"]
     assert fallback.calls == [("safe_tool", {"query": "retry"})]
-    assert any(event["type"] == "tool_result" and event["result"].get("isError")
-               for event in events)
+    assert any(
+        event["type"] == "tool_result" and event["result"].get("isError")
+        for event in events
+    )
 
 
-def test_vanilla_reference_accepts_matching_stage_before_api_preflight(tmp_path, monkeypatch):
+def test_vanilla_reference_accepts_matching_stage_before_api_preflight(
+    tmp_path, monkeypatch
+):
     """A correct stage snapshot must reach credential checks, not fail the guard."""
     root = Path(__file__).resolve().parents[1]
     monkeypatch.setattr(
         runner,
         "source",
-        lambda _root: ({"commit": "test-commit", "dataset_revision": "test-release", "stages": {"late": {}}}, tmp_path),
+        lambda _root: (
+            {
+                "commit": "test-commit",
+                "dataset_revision": "test-release",
+                "stages": {"late": {}},
+            },
+            tmp_path,
+        ),
     )
     monkeypatch.setattr(
         runner,
         "load_task",
-        lambda upstream, task_id: {"idx": 139, "question": "test task", "servers": {"server": []}},
+        lambda upstream, task_id: {
+            "idx": 139,
+            "question": "test task",
+            "servers": {"server": []},
+        },
     )
     monkeypatch.setattr(runner, "server_profiles", lambda *_: {"server": {}})
     knowledge_path = tmp_path / "correct.json"
-    knowledge_path.write_text(json.dumps({
-        "benchmark_commit": "test-commit", "version": "late",
-        "tools": [tool("server", "get_item", "late")],
-    }))
+    knowledge_path.write_text(
+        json.dumps(
+            {
+                "benchmark_commit": "test-commit",
+                "version": "late",
+                "tools": [tool("server", "get_item", "late")],
+            }
+        )
+    )
     config = json.loads((root / "configs/full-catalog-smoke.json").read_text())
-    config.update(root=str(tmp_path), output_dir=str(tmp_path / "correct-run"),
-                  knowledge_path=str(knowledge_path))
+    config.update(
+        root=str(tmp_path),
+        output_dir=str(tmp_path / "correct-run"),
+        knowledge_path=str(knowledge_path),
+    )
     monkeypatch.delenv("AGENT_API_KEY", raising=False)
     _, result = runner.run(139, "late", "current_metadata_smoke", 0, config)
     assert result["status"] == "blocked"
@@ -233,12 +312,23 @@ def test_vanilla_reference_rejects_stale_tool_knowledge(
     monkeypatch.setattr(
         runner,
         "source",
-        lambda _root: ({"commit": "test-commit", "dataset_revision": "test-release", "stages": {"late": {}}}, tmp_path),
+        lambda _root: (
+            {
+                "commit": "test-commit",
+                "dataset_revision": "test-release",
+                "stages": {"late": {}},
+            },
+            tmp_path,
+        ),
     )
     monkeypatch.setattr(
         runner,
         "load_task",
-        lambda upstream, task_id: {"idx": 139, "question": "test task", "servers": {"server": []}},
+        lambda upstream, task_id: {
+            "idx": 139,
+            "question": "test task",
+            "servers": {"server": []},
+        },
     )
     monkeypatch.setattr(runner, "server_profiles", lambda *_: {"server": {}})
     knowledge_path = tmp_path / "knowledge.json"
@@ -252,8 +342,11 @@ def test_vanilla_reference_rejects_stale_tool_knowledge(
         )
     )
     config = json.loads((root / "configs/full-catalog-smoke.json").read_text())
-    config.update(root=str(tmp_path), output_dir=str(tmp_path / "result"),
-                  knowledge_path=str(knowledge_path))
+    config.update(
+        root=str(tmp_path),
+        output_dir=str(tmp_path / "result"),
+        knowledge_path=str(knowledge_path),
+    )
     trace, result = runner.run(139, "late", "current_metadata_smoke", 0, config)
     assert result["status"] == "blocked"
     assert result["TF"] is None and result["PE"] is None
