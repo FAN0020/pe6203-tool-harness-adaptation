@@ -1,8 +1,11 @@
 import asyncio
 import copy
+import hashlib
 import json
 import os
 import random
+import re
+import shutil
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -12,7 +15,27 @@ from openai import AsyncOpenAI
 
 from .benchmark import digest, load_task, read_json, source, write_json
 from .judge import aggregate_scores, official_prompt, parse_scores
-from .transport import check_arguments, sessions, snapshot
+from .transport import check_arguments, server_profiles, sessions, snapshot
+
+
+def prepare_fixture(directory, workspace):
+    directory, workspace = Path(directory).resolve(), Path(workspace).resolve()
+    if not directory.is_dir() or workspace.is_relative_to(directory):
+        raise ValueError("Fixture directory must exist and be separate from the run workspace")
+    paths = sorted(directory.rglob("*"))
+    if any(p.is_symlink() for p in paths):
+        raise ValueError("Fixture symlinks are not allowed")
+    files = []
+    for path in paths:
+        if path.is_file():
+            relative = path.relative_to(directory)
+            destination = workspace / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, destination)
+            files.append(
+                {"path": str(relative), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+            )
+    return {"files": files, "manifest_sha256": digest(files)}
 
 
 def credentials(config):
@@ -53,22 +76,37 @@ def protocol_hash(config, endpoints):
     )
 
 
-def prepare_tools(records, strategy):
+def prepare_tools(records, strategy, name_policy="native_unique"):
     if strategy not in ("no_update", "full_rewrite", "selective_patch", "current_metadata_smoke"):
         raise ValueError(f"Unknown strategy label: {strategy}")
     tools, routes = [], {}
+    if name_policy not in ("native_unique", "namespaced"):
+        raise ValueError(f"Unknown tool name policy: {name_policy}")
     for record in records:
         if strategy == "no_update" and record["version"] != "early":
             raise ValueError("No Update must retain an early snapshot")
         name = record["name"]
+        if name_policy == "namespaced":
+            identity = record["server_id"] + "::" + name
+            suffix = hashlib.sha256(identity.encode()).hexdigest()[:12]
+            name = re.sub(r"[^a-zA-Z0-9_-]", "_", name)[:50] + "__" + suffix
         if name in routes:
             raise ValueError(f"Duplicate model-facing tool name: {name}")
+        description = record["description"]
+        if record.get("usage_rules"):
+            description += "\nUsage rules:\n" + json.dumps(
+                record["usage_rules"], ensure_ascii=False
+            )
+        if record.get("output_schema") is not None:
+            description += "\nOutput schema:\n" + json.dumps(
+                record["output_schema"], ensure_ascii=False
+            )
         tools.append(
             {
                 "type": "function",
                 "function": {
                     "name": name,
-                    "description": record["description"],
+                    "description": description,
                     "parameters": copy.deepcopy(record["parameters"]),
                 },
             }
@@ -198,13 +236,16 @@ async def run_async(task_id, version, strategy, seed, config):
             raise ValueError("Round and judge-run counts must be integers")
         lock, upstream = source(root)
         task = load_task(upstream, task_id)
-        if task_id != lock["smoke_task_id"]:
-            raise ValueError(
-                "This handoff validates task 139 only; review new servers before expanding"
-            )
         if version not in lock["stages"]:
             raise ValueError(f"Unknown version: {version}")
         trace.update(task)
+        profiles = server_profiles(root, lock)
+        unsupported = sorted(set(task["servers"]) - set(profiles))
+        if unsupported:
+            raise ValueError(f"Missing reviewed runtime profiles: {', '.join(unsupported)}")
+        if config.get("fixture_dir"):
+            result["fixture"] = prepare_fixture(root / config["fixture_dir"], workspace)
+            write_json(output / "fixture-manifest.json", result["fixture"])
         knowledge_path = Path(config["knowledge_path"])
         knowledge = read_json(
             knowledge_path if knowledge_path.is_absolute() else root / knowledge_path
@@ -212,7 +253,9 @@ async def run_async(task_id, version, strategy, seed, config):
         if knowledge["benchmark_commit"] != lock["commit"]:
             raise ValueError("Knowledge snapshot benchmark commit mismatch")
         records = knowledge["tools"]
-        tools, routes = prepare_tools(records, strategy)
+        tools, routes = prepare_tools(
+            records, strategy, config.get("tool_name_policy", "native_unique")
+        )
         if any(r["server_id"] not in task["servers"] for r in routes.values()):
             raise ValueError("Knowledge routes outside the fixed task server set")
         result.update(
@@ -223,6 +266,8 @@ async def run_async(task_id, version, strategy, seed, config):
                 "knowledge_version": knowledge["version"],
                 "agent_model": config["agent"]["model"],
                 "judge_model": config["judge"]["model"],
+                "tool_name_policy": config.get("tool_name_policy", "native_unique"),
+                "model_tool_routes": routes,
             }
         )
         write_json(output / "knowledge.json", knowledge)

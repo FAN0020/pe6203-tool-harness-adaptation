@@ -1,0 +1,212 @@
+{
+  "schema_version": "1.0",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "version": "late",
+  "source": "live_released_mcp_servers",
+  "tools": [
+    {
+      "tool_id": "math-mcp::evaluate",
+      "server_id": "math-mcp",
+      "version": "late",
+      "name": "evaluate",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "Mathematical expression to evaluate"
+          },
+          "validate_only": {
+            "type": "boolean",
+            "description": "If true, only validate syntax without evaluation",
+            "default": false
+          }
+        },
+        "required": [
+          "expression"
+        ]
+      },
+      "description": "Evaluate mathematical expressions with strict grammar validation",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "math-mcp",
+        "tool_name": "evaluate"
+      }
+    },
+    {
+      "tool_id": "math-mcp::validate_syntax",
+      "server_id": "math-mcp",
+      "version": "late",
+      "name": "validate_syntax",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "Mathematical expression to validate",
+            "minLength": 1
+          },
+          "detailed": {
+            "type": "boolean",
+            "description": "If true, return a more detailed validation result when supported",
+            "default": false
+          },
+          "allow_variables": {
+            "type": "boolean",
+            "description": "Explicitly specify whether variable references are allowed during validation"
+          },
+          "show_ast": {
+            "type": "boolean",
+            "description": "If true, include the abstract syntax tree (AST) structure in the validation result",
+            "default": false
+          },
+          "check_balanced": {
+            "type": "boolean",
+            "description": "If true, perform additional validation to ensure all brackets and parentheses are properly balanced",
+            "default": true
+          },
+          "max_depth": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Maximum allowed nesting depth for expressions (e.g., nested parentheses or function calls). If specified, validation fails if depth exceeds this limit"
+          }
+        },
+        "required": [
+          "expression",
+          "allow_variables"
+        ]
+      },
+      "description": "Validate mathematical expression syntax against grammar",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "math-mcp",
+        "tool_name": "validate_syntax"
+      }
+    },
+    {
+      "tool_id": "math-mcp::set_variable",
+      "server_id": "math-mcp",
+      "version": "late",
+      "name": "set_variable",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Variable name"
+          },
+          "expression": {
+            "type": "string",
+            "description": "Mathematical expression to evaluate and store"
+          }
+        },
+        "required": [
+          "name",
+          "expression"
+        ]
+      },
+      "description": "Set a variable value in the math context",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "math-mcp",
+        "tool_name": "set_variable"
+      }
+    },
+    {
+      "tool_id": "math-mcp::get_variable",
+      "server_id": "math-mcp",
+      "version": "late",
+      "name": "get_variable",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Variable name"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "description": "Get the value of a variable",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "math-mcp",
+        "tool_name": "get_variable"
+      }
+    },
+    {
+      "tool_id": "math-mcp::list_variables",
+      "server_id": "math-mcp",
+      "version": "late",
+      "name": "list_variables",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      },
+      "description": "List all defined variables",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "math-mcp",
+        "tool_name": "list_variables"
+      }
+    },
+    {
+      "tool_id": "math-mcp::clear_variables",
+      "server_id": "math-mcp",
+      "version": "late",
+      "name": "clear_variables",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      },
+      "description": "Clear all defined variables",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "math-mcp",
+        "tool_name": "clear_variables"
+      }
+    },
+    {
+      "tool_id": "math-mcp::batch_evaluate",
+      "server_id": "math-mcp",
+      "version": "late",
+      "name": "batch_evaluate",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "expressions": {
+            "type": "array",
+            "description": "Array of mathematical expressions to evaluate",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stop_on_error": {
+            "type": "boolean",
+            "description": "If true, stop processing on first error; if false, continue and report all results",
+            "default": false
+          }
+        },
+        "required": [
+          "expressions"
+        ]
+      },
+      "description": "Evaluate multiple mathematical expressions in a single batch operation",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "math-mcp",
+        "tool_name": "batch_evaluate"
+      }
+    }
+  ]
+}

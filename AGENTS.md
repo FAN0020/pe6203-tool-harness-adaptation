@@ -17,7 +17,7 @@ The course brief governs assignment requirements. The plan defines our design ch
 - `experiments/` currently contains planning records, not runnable `pe6203 run --config` files.
 - `null` means unresolved or unmeasured. Never replace it with a guessed model, score, task ID, or cost.
 - Candidate tasks are not the frozen evaluation set. Task 139 is reserved for development because it has already been used for debugging.
-- Current runtime supports task 139 and two servers. Batch scheduling, general task support, adaptation algorithms, and formal analysis are backlog items.
+- Current runtime accepts any selected task with a complete reviewed server set. Eight profiles cover five task server sets; fixtures and task success are separate gates. Full 201-task inventory, complete catalogs and a conservative resumable batch runner are available; real model evaluation, more service reviews, adaptation algorithms and formal analysis remain open. Read `docs/full-benchmark.md` for evidence and known upstream failures.
 - Real MCP transport evidence is not a real model evaluation. Mocks test software wiring only.
 - Only mark an item `done` after linking concrete evidence and verifying its acceptance criteria. Files in `reports/templates/` are not results.
 

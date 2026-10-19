@@ -83,13 +83,13 @@ Full Rewrite 的失败不自动等于 over-update；No Update 的低分也不自
 
 更新校验失败时不启动 agent、不换用其他策略；记录 `adaptation_validation`、已有成本和 `null` 分数。相关任务单元必须出现在计划执行数与失败率中，不能从总数中消失。
 
-未来 batch runner 对明确的连接失败、HTTP 429/5xx 等基础设施问题最多追加 1 次 attempt，固定退避规则为 10 秒并遵守更长的 Retry-After。重跑使用新 workspace，保留全部成本和日志，采用第一份按规则产生的完整结果。语义错误、低分、工具参数错误和 max rounds 不触发这种重试。当前单任务 runner 未实现该批次策略。
+未来 batch runner 对明确的连接失败、HTTP 429/5xx 等基础设施问题最多追加 1 次 attempt，固定退避规则为 10 秒并遵守更长的 Retry-After。重跑使用新 workspace，保留全部成本和日志，采用第一份按规则产生的完整结果。语义错误、低分、工具参数错误和 max rounds 不触发这种重试。当前已实现保守 batch/resume，但仍未实现上述 HTTP 分类退避；正式冻结前补齐或明确修订协议，不能宣称当前实现已满足此项。
 
-Judge 无效 JSON 不追加到“凑够高分/有效分”为止，固定五次尝试后报告完整性。恢复运行只跳过身份与 artifact hashes 一致的完整结果；部分、损坏或旧配置结果留在 ledger，不覆盖。手工诊断重跑使用新 ID，不能替换主实验中较差的有效结果。
+Judge 无效 JSON 不追加到“凑够高分/有效分”为止，固定五次尝试后报告完整性。当前 batch resume 保留身份与 result hashes 一致的完整或 incomplete/blocked 结果，不自动重试已落盘失败；身份或 hash 不符则拒绝恢复。中断且无 result 时最多另建一次 attempt；该机制不同于上述计划的分类重试。手工诊断重跑使用新 ID，不能替换主实验中较差的有效结果。
 
 ## 交接接口与产物
 
-现有接口：`run(task_id, version, strategy, seed, config) -> (raw_trace, benchmark_result)`。扩展时保持兼容，并新增批次 sidecar ledger。
+现有接口：`run(task_id, version, strategy, seed, config) -> (raw_trace, benchmark_result)`。已扩展通用 task/profile 与 batch sidecar ledger；当前能力见[全量交接](../full-benchmark.md)。
 
 待实现接口：`adapt(old_knowledge, new_metadata, strategy, context) -> (new_knowledge, diff_log, update_cost)`。`context` 只含 server group、stage、重复 ID、配置与版本信息，不包含任务答案或评分。示例形状见 [adaptation record](../../experiments/templates/adaptation-record.json)。
 

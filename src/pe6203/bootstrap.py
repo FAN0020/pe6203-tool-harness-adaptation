@@ -1,4 +1,4 @@
-"""Fetch immutable releases and extract the two smoke servers' dependency closures."""
+"""Fetch immutable releases; install smoke dependency closures or all archived Node files."""
 
 import hashlib
 import json
@@ -60,7 +60,39 @@ def extract_packages(archive, destination, packages):
     return {"packages": selected, "files": len(members)}
 
 
-def bootstrap(root, stages):
+def extract_all(archive, destination):
+    destination = Path(destination).resolve()
+    with ZipFile(archive) as z:
+        members = z.infolist()
+        for info in members:
+            path = PurePosixPath(info.filename)
+            if (
+                path.is_absolute()
+                or ".." in path.parts
+                or not path.parts
+                or (
+                    path.parts[0] != "node_modules"
+                    and str(path) not in ("package.json", "package-lock.json")
+                )
+                or stat.S_ISLNK(info.external_attr >> 16)
+                or not (destination / info.filename).resolve().is_relative_to(destination)
+            ):
+                raise ValueError(f"Unsafe archive path: {info.filename}")
+        packages = {}
+        for info in members:
+            z.extract(info, destination)
+            if info.filename.endswith("/package.json"):
+                # Only actual package roots, not example/fixture package.json files.
+                p = PurePosixPath(info.filename).parent
+                if p.parent.name == "node_modules" or (
+                    p.parent.name.startswith("@") and p.parent.parent.name == "node_modules"
+                ):
+                    metadata = json.loads(z.read(info))
+                    packages[str(p)] = metadata.get("version")
+    return {"packages": packages, "files": len(members), "scope": "all_archived_node_files"}
+
+
+def bootstrap(root, stages, scope="smoke"):
     root = Path(root).resolve()
     lock = read_json(root / "configs/benchmark.lock.json")
     cache = root / ".cache/mcpevol"
@@ -90,7 +122,11 @@ def bootstrap(root, stages):
             partial.rename(archive)
         verify_sha256(archive, spec["sha256"])
         destination = cache / spec["directory"]
-        extracted = extract_packages(archive, destination, list(lock["servers"]))
+        extracted = (
+            extract_all(archive, destination)
+            if scope == "all"
+            else extract_packages(archive, destination, list(lock["servers"]))
+        )
         results[stage] = {"archive_sha256": spec["sha256"], **extracted}
         write_json(destination / "extraction.json", results[stage])
     return results
