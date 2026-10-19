@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 
 from .audit import probe_servers
+from .baselines import write_adaptation
 from .batch import run_batch
 from .benchmark import load_task, read_json, source, write_json
 from .bootstrap import bootstrap
@@ -176,6 +177,11 @@ def main():
     parser = argparse.ArgumentParser(description="PE6203 Group A MCPEvol environment and runner")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Project checkout root")
     sub = parser.add_subparsers(dest="command", required=True)
+    p = sub.add_parser("adapt", help="Build Sprint 1 baseline knowledge (deterministic, no LLM)")
+    p.add_argument("--strategy", choices=["no_update", "full_rewrite"], required=True)
+    p.add_argument("--old-knowledge", type=Path, required=True)
+    p.add_argument("--new-metadata", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
     setup = sub.add_parser("bootstrap", help="Verify and install immutable benchmark releases")
     setup.add_argument(
         "--stages",
@@ -217,14 +223,20 @@ def main():
         required=True,
     )
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--config", type=Path, default=Path("configs/smoke.json"))
-    p.add_argument("--knowledge", type=Path)
+    p.add_argument("--config", type=Path, default=Path("configs/full-catalog-smoke.json"))
+    knowledge = p.add_mutually_exclusive_group()
+    knowledge.add_argument("--knowledge", type=Path)
+    knowledge.add_argument("--adaptation", type=Path, help="Validated adaptation.json with costs")
     p.add_argument("--output", type=Path, required=True)
     p = sub.add_parser("ecs", help="Compute ECS from a JSON mapping of early/middle/late TF")
     p.add_argument("scores", type=Path)
     args = parser.parse_args()
     try:
-        if args.command == "bootstrap":
+        if args.command == "adapt":
+            result = write_adaptation(
+                args.old_knowledge, args.new_metadata, args.strategy, args.output
+            )
+        elif args.command == "bootstrap":
             result = bootstrap(args.root, args.stages, args.scope)
             result = {
                 k: {"files": v["files"], "packages": len(v["packages"])} for k, v in result.items()
@@ -265,6 +277,9 @@ def main():
             config.update(root=str(args.root), output_dir=str(args.output))
             if args.knowledge:
                 config["knowledge_path"] = str(args.knowledge)
+                config.pop("adaptation_path", None)
+            if args.adaptation:
+                config["adaptation_path"] = str(args.adaptation)
             _, result = run(args.task_id, args.version, args.strategy, args.seed, config)
             print(json.dumps(result, indent=2, ensure_ascii=False))
             return 0 if result["status"] == "evaluated" else 2

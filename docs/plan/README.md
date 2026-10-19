@@ -41,13 +41,13 @@
 
 ## 当前起点
 
-截至 2026-10-19，已有 201-task 环境审计、三个阶段的完整 Node 发布包、8 个 reviewed profiles、完整 catalogs、通用 runner 和 batch/resume。真实 LLM agent → MCP → judge 验收、其余服务/fixture 审查、B/C 更新算法和正式评测仍未完成；详见[全量交接](../full-benchmark.md)与 [backlog](../../experiments/backlog.json)。
+截至 2026-10-19，已有 201-task 环境审计、三个阶段的完整 Node 发布包、8 个 reviewed profiles、完整 catalogs、通用 runner 和 batch/resume。task 139 Early / No Update 的真实 LLM → MCP → 5 次 judge 已验收，Sprint 1 确定性 baseline 已接入（[证据](../../results/evidence/baseline-integration/verification.json)）；其余服务/fixture 审查、正式 LLM updater、Selective Patch 和正式评测仍未完成；详见[全量交接](../full-benchmark.md)与 [backlog](../../experiments/backlog.json)。
 
-计划可以分享；正式实验尚未冻结。[protocol.v1.json](../../experiments/protocol.v1.json) 的 `readiness.frozen=false` 与尚未填写的模型字段表达这个区别。现有 `configs/smoke.json` 是 smoke runner 配置，不能把计划 JSON 直接传给 CLI。
+计划可以分享；正式实验尚未冻结。[protocol.v1.json](../../experiments/protocol.v1.json) 的 `readiness.frozen=false` 与尚未填写的模型字段表达这个区别。现有 `configs/full-catalog-smoke.json` 是 smoke runner 配置，不能把计划 JSON 直接传给 CLI。
 
 ## 开始工作
 
-1. A 配置实际模型服务，完成一个真实任务的 agent、MCP、judge 和日志验收。
+1. A 保留已通过的真实模型 smoke 配置与全部失败记录，按 [baseline smoke](../baseline-smoke.md) 复现；正式冻结前继续检查目标集合的 provider limits。
 2. A/D 按任务审查模板筛选候选并记录全部纳入或排除理由；B/C 使用 metadata 开发方法。
 3. A/B/C/D 合并接口，D 填写冻结记录，再运行同一份正式集合。
 4. 先完成所有组合的一轮；时间允许再补到三轮。报告、成本和失败案例随运行积累。

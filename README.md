@@ -6,7 +6,11 @@
 
 ## 当前交付 / Status
 
-**201 个官方任务已完成全量环境审计；真实 LLM agent → MCP → judge 尚未验收。** 需要明确的 API base URL 与 agent/judge model IDs。现有真实工具日志和 fake-model 协议测试都不算模型 benchmark 分数。
+**201 个官方任务已完成环境审计；task 139 的最小真实 LLM → MCP → judge 闭环已通过。** 2026-10-19，Early / No Update 的 5 次 judge 均有效，TF 9.8、PE 8.6；这是 development smoke，不是完整 201-task 评测或三策略比较。见[本轮证据](results/evidence/baseline-integration/verification.json)。
+
+Sprint 1 baseline 已接入：`pe6203 adapt` 生成 No Update / deterministic Full Rewrite，
+`pe6203 run --adaptation` 校验产物并带入成本。最小 smoke、judge 配置修复及清理范围见
+[baseline 集成说明](docs/baseline-smoke.md)。当前 Full Rewrite 是确定性原型，正式 LLM 重写仍待实现。
 
 | 已验证内容 | 范围 | 入口 |
 | --- | --- | --- |
@@ -59,7 +63,7 @@ uv run python scripts/probe_reviewed_services.py --output results/raw/functional
 
 ## 真实模型运行
 
-将 [full-catalog config](configs/full-catalog-smoke.json) 复制到 ignored 的 `configs/local.json`，填写两个实际 model IDs，并 export [.env.example](.env.example) 中四个变量；`.env` 不会自动载入。不能凭现有 key 的变量名猜测 provider。MCP 子进程不继承模型 key。
+将 [full-catalog config](configs/full-catalog-smoke.json) 复制到 ignored 的 `configs/local.json`，填写两个实际 model IDs，并 export [.env.example](.env.example) 中四个变量，或使用 `uv run --env-file .env` 显式载入。不能凭现有 key 的变量名猜测 provider。MCP 子进程不继承模型 key。
 
 ```bash
 cp configs/full-catalog-smoke.json configs/local.json
@@ -77,12 +81,12 @@ uv run pe6203 batch --plan configs/batch-task139.example.json \
   --output results/raw/task139-three-stages --resume
 ```
 
-完整 task139 catalogs 分别有 40/40/44 tools；旧四工具样例只用于历史 smoke。No Update 在 Middle/Late 仍提供 Early knowledge。Full Rewrite / Selective Patch 要由 B/C 交更新后的 knowledge；strategy 标签本身不实现算法。
+完整 task139 catalogs 分别有 40/40/44 tools；旧四工具样例和重复 metadata 已移除。No Update 在 Middle/Late 仍提供 Early knowledge。Sprint 1 的确定性 baseline 可经 `adapt` 生成；正式 LLM Full Rewrite / Selective Patch 仍待 B/C 完成，单传 strategy 标签不会自动执行算法。
 
 接口保持 `run(task_id, version, strategy, seed, config) → (raw_trace, benchmark_result)`。真模型验收需实际 tool call、最终回答和五次有效官方 judge 结果；blocked / incomplete 分数保持 `null`，不填 0。ECS 需三阶段配对后计算。
 
 ## 验证与来源
 
-本次本地检查与独立 checkout 结果见[验证回执](results/evidence/full-benchmark/README.md)。CI 运行 lint 与不依赖发布包的测试；bootstrap 后的本地测试包含真实 MCP。Fake model HTTP fixture 只验证协议接线。
+本轮 baseline 集成通过 68 tests（0 skipped），见[本轮验证](results/evidence/baseline-integration/verification.json)。此前环境与独立 checkout 结果见[历史验证回执](results/evidence/full-benchmark/README.md)。CI 运行 lint 与不依赖发布包的测试；bootstrap 后的本地测试包含真实 MCP。Fake model HTTP fixture 只验证协议接线。
 
 以 [官方代码固定 commit](https://github.com/Octobrist/MCPEvol-Bench/tree/888c779a0fe735f612ca62bdd1fdd7c9e6bf8701)、[服务器数据固定 revision](https://huggingface.co/datasets/anonymous2233/evol-servers/tree/162e3ffbea1717ac8a20fe9b26465e29117229e4) 和 [Liu et al., arXiv:2607.14642v1](https://arxiv.org/abs/2607.14642v1) 为依据。论文是 preprint，不声称已通过期刊同行评审；发布代码与论文的差异见[来源审计](docs/environment.md)。

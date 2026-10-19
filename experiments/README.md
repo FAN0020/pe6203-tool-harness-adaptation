@@ -1,6 +1,6 @@
 # 结构化实验计划
 
-**本目录是协作规范，不是 runner 配置。** 可执行配置仍为 [configs/smoke.json](../configs/smoke.json) 的本地副本。不要把 `protocol.v1.json` 传给 `pe6203 run --config`。
+**本目录是协作规范，不是 runner 配置。** 可执行配置仍为 [configs/full-catalog-smoke.json](../configs/full-catalog-smoke.json) 的本地副本。不要把 `protocol.v1.json` 传给 `pe6203 run --config`。
 
 | 文件 | 用途 | 谁维护 |
 | --- | --- | --- |
@@ -29,7 +29,7 @@
 
 | 官方 ID | 方向 | 已知缺口 | split |
 | --- | --- | --- | --- |
-| 139 | 项目 + 知识图谱 | 三阶段真实 MCP 已验证；模型链路未验证 | development |
+| 139 | 项目 + 知识图谱 | 三阶段真实 MCP 已验证；Early / No Update 真实模型闭环通过，见 [smoke](../docs/baseline-smoke.md) | development |
 | 393 | 项目 + memory graph | 初始 Horizon 状态、服务器和三阶段待验证 | 未定 |
 | 24 / 28 | 日志文件 → 任务文档 | 原始文件 fixtures、服务待验证；近似任务族须同 split | 未定 |
 | 226 | 架构 → Mermaid / draw.io | 多服务和输入约束待验证；仅作补充 | 未定 |

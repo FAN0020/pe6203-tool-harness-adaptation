@@ -1,6 +1,6 @@
 # Full-benchmark environment evidence / 验证范围
 
-2026-10-19，macOS arm64，官方 commit 与 release SHA256 见 [installation](installation.json)。**所有本目录记录均不是模型 benchmark 分数。**
+2026-10-19，macOS arm64，官方 commit 与 release SHA256 见 [installation](installation.json)。**本目录保留此前的环境审计记录，均不是模型 benchmark 分数。** 后续 task 139 真实模型 smoke 和 baseline 集成结果见 [baseline-integration](../baseline-integration/verification.json)。
 
 | Evidence | 验证内容 | 限制 |
 | --- | --- | --- |

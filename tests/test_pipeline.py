@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pytest
 
+from pe6203.baselines import write_adaptation
 from pe6203.benchmark import read_json
 from pe6203.runner import run
 
@@ -17,9 +18,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("provider_fails", [False, True])
+@pytest.mark.parametrize(
+    "version,strategy,provider_fails",
+    [(v, s, False) for v in ("early", "middle", "late") for s in ("no_update", "full_rewrite")]
+    + [("early", "no_update", True)],
+)
 def test_full_adapter_wiring_real_mcp_with_model_protocol_fixture(
-    tmp_path, monkeypatch, provider_fails
+    tmp_path, monkeypatch, version, strategy, provider_fails
 ):
     if not (ROOT / ".cache/mcpevol/original/extraction.json").exists():
         pytest.skip("Requires released MCP services")
@@ -51,7 +56,11 @@ def test_full_adapter_wiring_real_mcp_with_model_protocol_fixture(
                             "id": "fixture-call",
                             "type": "function",
                             "function": {
-                                "name": "create_project",
+                                "name": next(
+                                    t["function"]["name"]
+                                    for t in body["tools"]
+                                    if t["function"]["name"].startswith("create_project__")
+                                ),
                                 "arguments": json.dumps(
                                     {
                                         "workingDirectory": str(output / "workspace"),
@@ -101,10 +110,24 @@ def test_full_adapter_wiring_real_mcp_with_model_protocol_fixture(
     endpoint = f"http://127.0.0.1:{server.server_port}/v1"
     monkeypatch.setenv("AGENT_BASE_URL", endpoint)
     monkeypatch.setenv("JUDGE_BASE_URL", endpoint)
-    config = read_json(ROOT / "configs/smoke.json")
-    config.update(root=str(ROOT), output_dir=str(output), judge_runs=2)
+    adaptation = tmp_path / "adaptation"
+    artifact = write_adaptation(
+        ROOT / "examples/catalogs/task139/early.json",
+        ROOT / f"examples/catalogs/task139/{version}.json",
+        strategy,
+        adaptation,
+    )
+    config = read_json(ROOT / "configs/full-catalog-smoke.json")
+    config["judge"]["extra_body"] = {"reasoning": {"enabled": False}}
+    config["agent"]["extra_body"] = {"reasoning": {"effort": "low"}}
+    config.update(
+        root=str(ROOT),
+        output_dir=str(output),
+        judge_runs=2,
+        adaptation_path=str(adaptation / "adaptation.json"),
+    )
     try:
-        trace, result = run(139, "early", "no_update", 42, config)
+        trace, result = run(139, version, strategy, 42, config)
     finally:
         server.shutdown()
         server.server_close()
@@ -119,6 +142,15 @@ def test_full_adapter_wiring_real_mcp_with_model_protocol_fixture(
         assert read_json(output / "result.json")["errors"]
         return
     assert result["status"] == "evaluated", result["errors"]
+    expected_version = "early" if strategy == "no_update" else version
+    assert read_json(output / "knowledge.json") == read_json(
+        ROOT / f"examples/catalogs/task139/{expected_version}.json"
+    )
+    assert result["cost"]["update"] == artifact["cost"]
+    assert len(requests[0]["tools"]) == (44 if expected_version == "late" else 40)
+    assert len(read_json(output / "environment-metadata.json")["tools"]) == (
+        44 if version == "late" else 40
+    )
     assert result["execution_status"] == "completed"
     assert result["TF"] == 2 and result["PE"] == 4 and result["ECS"] is None
     assert result["cost"]["agent"]["total_tokens"] == 24
@@ -126,6 +158,8 @@ def test_full_adapter_wiring_real_mcp_with_model_protocol_fixture(
     assert (output / "workspace/.agentic-tools-mcp/tasks/tasks.json").exists()
     assert len(trace["trajectory_messages"]) == 5
     assert len(requests) == 4
+    assert all(r.get("reasoning") == {"effort": "low"} for r in requests if "tools" in r)
+    assert all(r.get("reasoning") == {"enabled": False} for r in requests if "tools" not in r)
     assert read_json(output / "EVAL/139.json")["eval_result"]["aggregate"]["complete"]
     assert "TEST-ONLY-SECRET" not in (output / "raw_trace.json").read_text()
     assert (output / "judge-prompt-1.txt").exists()

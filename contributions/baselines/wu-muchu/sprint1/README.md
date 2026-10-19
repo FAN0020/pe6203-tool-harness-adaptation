@@ -1,39 +1,12 @@
-# PE6203 Project 4 — Sprint 1: Baselines
+# Muchu Wu Sprint 1 baseline contribution
 
-Contributor: Muchu Wu
+原始提交：`24adbf5`，分支：`baselines/wu-muchu-sprint1`。
 
-## Contents
-- baselines.py: No Update and deterministic Full Rewrite.
-- baseline_synthetic_validation.json: synthetic validation records.
+已在原型基础上修复并迁入 [pe6203.baselines](../../../../src/pe6203/baselines.py)。
+旧独立脚本和静态 synthetic validation dump 已由 [可执行测试](../../../../tests/test_baselines.py)
+与 [真实 MCP 接入测试](../../../../tests/test_pipeline.py) 替代，避免维护两份实现。
 
-## Usage
-from baselines import build_knowledge, adapt
+提供 No Update 与 deterministic Full Rewrite；后者不是正式计划中的 LLM semantic rewrite。
+原始贡献与 validation 记录仍保留在 Git 历史。
 
-old_knowledge = build_knowledge(old_metadata)
-new_knowledge, diff_log, update_cost = adapt(
-    old_knowledge, new_metadata, strategy="full_rewrite"
-)
-
-Use strategy="no_update" for the unchanged-knowledge baseline.
-
-## Prototype Format
-Metadata is a dictionary containing a complete "tools" list.
-Each tool requires a unique, nonempty name within the snapshot.
-All supplied tool fields are preserved in the rebuilt knowledge.
-The final format must be aligned with the team before integration.
-
-## Costs
-Costs cover adaptation only, excluding agent execution and judging.
-Neither prototype calls a model; model usage and API cost are zero.
-Elapsed time is measured locally.
-Update operations count rebuilt tool knowledge blocks.
-
-## Validation
-Six synthetic scenarios were tested with both strategies.
-Two output-isolation checks and one strategy-rejection check were run.
-See the notebook for executable tests and the JSON file for results.
-
-## Limitations
-No real benchmark integration or official TF, PE, or ECS evaluation.
-Runtime prevention of updated-metadata leakage remains to be checked.
-The final rebuild mechanism must be aligned with the shared team design.
+完整命令、修复说明和验证边界见 [baseline smoke](../../../../docs/baseline-smoke.md)。

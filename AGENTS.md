@@ -17,8 +17,9 @@ The course brief governs assignment requirements. The plan defines our design ch
 - `experiments/` currently contains planning records, not runnable `pe6203 run --config` files.
 - `null` means unresolved or unmeasured. Never replace it with a guessed model, score, task ID, or cost.
 - Candidate tasks are not the frozen evaluation set. Task 139 is reserved for development because it has already been used for debugging.
-- Current runtime accepts any selected task with a complete reviewed server set. Eight profiles cover five task server sets; fixtures and task success are separate gates. Full 201-task inventory, complete catalogs and a conservative resumable batch runner are available; real model evaluation, more service reviews, adaptation algorithms and formal analysis remain open. Read `docs/full-benchmark.md` for evidence and known upstream failures.
+- Current runtime accepts any selected task with a complete reviewed server set. Eight profiles cover five task server sets; fixtures and task success are separate gates. Full 201-task inventory, complete catalogs and a conservative resumable batch runner are available; one real task-139 Early / No Update development smoke now has five valid judge results (see `docs/baseline-smoke.md`). Broader real model evaluation, more service reviews, LLM adaptation algorithms and formal analysis remain open. Read `docs/full-benchmark.md` for evidence and known upstream failures.
 - Real MCP transport evidence is not a real model evaluation. Mocks test software wiring only.
+- Sprint 1 No Update / deterministic Full Rewrite are integrated in `src/pe6203/baselines.py`; see `docs/baseline-smoke.md`. This prototype is not the planned LLM semantic rewrite. Current smoke uses full catalogs; obsolete four-tool knowledge and duplicate metadata were removed.
 - Only mark an item `done` after linking concrete evidence and verifying its acceptance criteria. Files in `reports/templates/` are not results.
 
 ## Experiment integrity
@@ -26,7 +27,7 @@ The course brief governs assignment requirements. The plan defines our design ch
 - Keep the model, decoding settings, judge, task set, fixtures, and execution harness fixed across strategies.
 - Preserve official task IDs and text. Do not expose reference answers, reference trajectories, historical scores, or mutation ground truth to the agent or adaptation method.
 - No Update must keep Early knowledge. Runtime tool discovery must not silently refresh its schemas, descriptions, or routing.
-- Use the fixed official server set for each task. Formal knowledge covers those servers' complete catalogs; the four-tool task-139 smoke example is not the formal tool universe.
+- Use the fixed official server set for each task. Knowledge covers those servers’ complete catalogs; the obsolete four-tool task-139 smoke example was removed.
 - Main comparisons independently adapt Early knowledge to Middle and Late. Sequential adaptation is a separately labeled optional experiment.
 - Use isolated resettable state and retain failed attempts. Never select the best rerun or fill missing scores with zero.
 - Keep development and evaluation tasks separate. Do not tune against final evaluation outcomes.

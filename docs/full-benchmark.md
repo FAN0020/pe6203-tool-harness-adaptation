@@ -1,6 +1,6 @@
 # Group A：全量 benchmark 环境交接
 
-**2026-10-19｜201 个官方选中任务全部审计；真实 LLM 评测尚未运行。** 这里的“全量”指任务与发布环境的覆盖审计，不能写成“完成 201 个任务测评”。正式实验仍按[团队协议](plan/evaluation-protocol.md)选取与冻结子集。
+**2026-10-19｜201 个官方选中任务全部审计；task 139 Early / No Update 已完成最小真实模型闭环。** 这里的“全量”指任务与发布环境的覆盖审计，不能写成“完成 201 个任务测评”。正式实验仍按[团队协议](plan/evaluation-protocol.md)选取与冻结子集。
 
 ## 五项交付与证据
 
@@ -27,11 +27,11 @@
 | 真实 initialize + tools/list | 24 / 24 | 8 servers × 3 stages |
 | 新增 6 服务的真实 functional probes | 17 / 18 | Late thinking 有发布包错误；完整日志保留 |
 | 固定 server set 均有 profile 的任务 | 103、105、139、283、393 | 仅表示启动配置覆盖，fixture 与业务正确性另行验收 |
-| 完整模型任务评测 | **0** | 不提供虚构 TF / PE / ECS |
+| 完整模型 development smoke | **1 个 task/stage/strategy** | 139 Early / No Update，5/5 judge，TF 9.8 / PE 8.6；[本轮证据](../results/evidence/baseline-integration/verification.json)，ECS 仍为 null |
 
 7 个缺少同名配置的任务 server：`fixparser-plugin-mcp`、`google-cloud/storage-mcp`、`mcp-sequential-thinking`、`mcp-server-time`、`pollinations/model-context-protocol`、`server-memory`、`server-sequential-thinking`。不能静默映射为相似名称；需要上游依据与显式实验变更。
 
-[逐任务 readiness](../results/evidence/full-benchmark/task-readiness.json) 对全部 201 个任务记录 archive blocker、missing profile、fixture 状态与已知运行错误。Inventory 是可重复生成的静态事实，readiness 是本次检查后的交接快照。
+[逐任务 readiness](../results/evidence/full-benchmark/task-readiness.json) 对全部 201 个任务记录 archive blocker、missing profile、fixture 状态与已知运行错误。Inventory 是可重复生成的静态事实，readiness 是环境审计时的历史交接快照；后续 task 139 真实模型结果见 [baseline smoke](baseline-smoke.md)。
 
 ## 当前服务与任务边界
 
@@ -50,7 +50,7 @@ Late thinking 的 `dist/index.js:113` 调用 `thinkingServer.getThoughtHistory()
 
 | Task | Fixture / state 审查 | 下一步 |
 | --- | --- | --- |
-| 139 | 要求新建项目与知识关系；空 workspace 适合 development smoke | 优先真实模型验收，固定为 development |
+| 139 | 空 workspace；真实 smoke 创建项目、9 个任务、12 个实体、37 个关系 | Early / No Update 闭环已验收；固定为 development，不能放入正式 evaluation |
 | 103 | 引用 requirements document，未定位其精确来源；Late thinking 有错误 | 确认 fixture，保留错误条件 |
 | 105 | 官方有 `anotation_path/code/`；题目所指 `logs/` 尚未核定 | 不把其它日志擅自改名代替 |
 | 283 | 有官方 CSV 输入，但题目相关初始数据尚未完整核对；Late thinking 有错误 | 逐项 review，不能直接标记 ready |
@@ -99,4 +99,4 @@ uv run pe6203 batch --plan configs/batch-task139.example.json --output results/r
 
 需要明确的 `AGENT_BASE_URL`、`JUDGE_BASE_URL` 和两个可用 model IDs；keys 留在本机环境变量，不上传 Git/Drive。当前检测到的 key 变量名不能用于推断其供应商或 endpoint。
 
-验收读取实际日志：有真实 model response → 至少一个真实 MCP call/result → 最终 answer → 五次有效官方 rubric 分数；`ANSWER/<id>.json`、`EVAL/<id>.json`、`result.json` 相符。之后才能报告完成 A 的最小真实任务；其他任务仍按 readiness 逐项推进。
+验收读取实际日志：有真实 model response → 至少一个真实 MCP call/result → 最终 answer → 五次有效官方 rubric 分数；`ANSWER/<id>.json`、`EVAL/<id>.json`、`result.json` 相符。本轮 task 139 已通过这项验收；其他任务仍按 readiness 逐项推进。judge 配置修复与保留的失败尝试见 [baseline smoke](baseline-smoke.md)。

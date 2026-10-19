@@ -67,7 +67,7 @@ def redact(text, secrets):
 
 
 def protocol_hash(config, endpoints):
-    operational = {"root", "output_dir", "knowledge_path", "update_cost"}
+    operational = {"root", "output_dir", "knowledge_path", "update_cost", "adaptation_path"}
     return digest(
         {
             "settings": {k: v for k, v in config.items() if k not in operational},
@@ -137,6 +137,8 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
     answer, status, usages = "", "max_rounds", []
     emit({"type": "initial_messages", "messages": copy.deepcopy(messages)})
     settings = {k: config["agent"][k] for k in ("model", "temperature", "max_completion_tokens")}
+    if "extra_body" in config["agent"]:
+        settings["extra_body"] = copy.deepcopy(config["agent"]["extra_body"])
     if config.get("send_model_seed", False):
         settings["seed"] = seed
     for turn in range(config["max_rounds"]):
@@ -246,6 +248,31 @@ async def run_async(task_id, version, strategy, seed, config):
         if config.get("fixture_dir"):
             result["fixture"] = prepare_fixture(root / config["fixture_dir"], workspace)
             write_json(output / "fixture-manifest.json", result["fixture"])
+        if config.get("adaptation_path"):
+            artifact_path = root / config["adaptation_path"]
+            artifact = read_json(artifact_path)
+            if (
+                artifact.get("status") != "validated"
+                or artifact.get("strategy") != strategy
+                or artifact.get("target_stage") != version
+                or artifact.get("benchmark_commit") != lock["commit"]
+            ):
+                raise ValueError("Adaptation artifact does not match this run")
+            adapted_path = artifact_path.parent / artifact["output"]["knowledge_path"]
+            if (
+                hashlib.sha256(adapted_path.read_bytes()).hexdigest()
+                != artifact["output"]["knowledge_file_sha256"]
+            ):
+                raise ValueError("Adaptation knowledge file hash mismatch")
+            config["knowledge_path"] = str(adapted_path.resolve())
+            config["update_cost"] = copy.deepcopy(artifact["cost"])
+            result["cost"]["update"] = copy.deepcopy(artifact["cost"])
+            result["adaptation_file_sha256"] = hashlib.sha256(
+                artifact_path.read_bytes()
+            ).hexdigest()
+            result["adaptation_method"] = artifact["cost"]["method"]
+            write_json(output / "adaptation.json", artifact)
+        result["config_sha256"] = digest(config)
         knowledge_path = Path(config["knowledge_path"])
         knowledge = read_json(
             knowledge_path if knowledge_path.is_absolute() else root / knowledge_path
@@ -347,7 +374,13 @@ async def run_async(task_id, version, strategy, seed, config):
                                 messages=[{"role": "user", "content": prompt}],
                                 **{
                                     k: config["judge"][k]
-                                    for k in ("model", "temperature", "max_completion_tokens")
+                                    for k in (
+                                        "model",
+                                        "temperature",
+                                        "max_completion_tokens",
+                                        "extra_body",
+                                    )
+                                    if k in config["judge"]
                                 },
                             )
                             item["response"] = response.model_dump()

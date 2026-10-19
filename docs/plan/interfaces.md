@@ -32,12 +32,12 @@
 | 能力 | 当前状态 | 冻结前要求 / owner |
 | --- | --- | --- |
 | Task / server 范围 | 201-task inventory；8 profiles 覆盖五个 task server sets，fixture 未全验收 | A：按 manifest 扩展与验证，不能仅换 ID |
-| 工具覆盖 | 已有 24 份完整 server catalogs、15 份完整 task catalogs；旧 smoke 仍是四工具 | A：生成正式完整 K0；B/C 基于同一 K0 |
+| 工具覆盖 | 已有 24 份完整 server catalogs、15 份完整 task catalogs；smoke 已统一完整 catalog | A：生成正式完整 K0；B/C 基于同一 K0 |
 | Agent 实际输入 | usage rules / output schema 已序列化；routing 与 alias 保存到 result | A：将 usage rules 和可用 output schema 显式序列化给 agent，记录输入；所有策略同一序列化器 |
-| tool alias / context limits | 稳定 namespaced alias 已测试；provider 上限仍待真模型 pilot | A：开发集验证唯一映射、provider tool/context 上限；不静默截断 |
-| 更新方法 | strategy 是标签，未实现 B/C 算法 | B/C：交真实更新产物、成本、校验和失败状态 |
+| tool alias / context limits | 稳定 namespaced alias 已测试；真实模型已接收 139 Early 的 40 tools，正式集合上限仍待验证 | A：开发集验证唯一映射、provider tool/context 上限；不静默截断 |
+| 更新方法 | Sprint 1 No Update / deterministic Full Rewrite 已接入，见 [baseline smoke](../baseline-smoke.md)；正式 LLM updater 未实现 | B/C：交正式 LLM 重写与 Selective Patch 产物、成本、校验和失败状态 |
 | 批次恢复 | 已实现 fingerprint / result hash / batch resume；分类退避未实现 | A：增加 sidecar ledger，按身份及 hashes 判断恢复 |
-| 接口演示 | transport probe 与 fake model 测试可用 | A：补真实 agent → MCP → judge 证据 |
+| 接口演示 | 139 Early / No Update 已完成真实 agent → MCP → 5 judge；[证据](../../results/evidence/baseline-integration/verification.json) | A：正式集合与三阶段覆盖仍待验证 |
 
 ## 运行状态与成本
 
