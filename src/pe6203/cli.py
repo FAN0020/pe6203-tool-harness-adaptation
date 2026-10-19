@@ -177,6 +177,15 @@ def main():
     parser = argparse.ArgumentParser(description="PE6203 Group A MCPEvol environment and runner")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Project checkout root")
     sub = parser.add_subparsers(dest="command", required=True)
+    p = sub.add_parser("report", help="Read saved runs/evidence in the terminal; no model calls")
+    p.add_argument("inputs", type=Path, nargs="+")
+    p.add_argument("--output", type=Path, help="Save to a new .txt/.json/.html file")
+    p.add_argument(
+        "--format", choices=["text", "json", "html"], help="Default: text (HTML for .html output)"
+    )
+    p.add_argument(
+        "--details", action="store_true", help="Show judge scores, tool calls and full answer"
+    )
     p = sub.add_parser("adapt", help="Build Sprint 1 baseline knowledge (deterministic, no LLM)")
     p.add_argument("--strategy", choices=["no_update", "full_rewrite"], required=True)
     p.add_argument("--old-knowledge", type=Path, required=True)
@@ -223,6 +232,9 @@ def main():
         required=True,
     )
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument(
+        "--format", choices=["text", "json"], default="text", help="Result display (default: text)"
+    )
     p.add_argument("--config", type=Path, default=Path("configs/full-catalog-smoke.json"))
     knowledge = p.add_mutually_exclusive_group()
     knowledge.add_argument("--knowledge", type=Path)
@@ -232,7 +244,21 @@ def main():
     p.add_argument("scores", type=Path)
     args = parser.parse_args()
     try:
-        if args.command == "adapt":
+        if args.command == "report":
+            from .report import render_saved_report
+
+            format_name = args.format or (
+                "html" if args.output and args.output.suffix.lower() == ".html" else "text"
+            )
+            rendered = render_saved_report(
+                args.inputs, format_name=format_name, expanded=args.details, output=args.output
+            )
+            if format_name == "html" and args.output:
+                print(f"报告已保存：{args.output.resolve()}")
+            else:
+                print(rendered, end="")
+            return 0
+        elif args.command == "adapt":
             result = write_adaptation(
                 args.old_knowledge, args.new_metadata, args.strategy, args.output
             )
@@ -281,7 +307,16 @@ def main():
             if args.adaptation:
                 config["adaptation_path"] = str(args.adaptation)
             _, result = run(args.task_id, args.version, args.strategy, args.seed, config)
-            print(json.dumps(result, indent=2, ensure_ascii=False))
+            if args.format == "json":
+                print(json.dumps(result, indent=2, ensure_ascii=False))
+            else:
+                # A presentation failure must not hide the saved execution result.
+                report = args.output / "report.txt"
+                if report.is_file():
+                    print(report.read_text(encoding="utf-8"), end="")
+                else:
+                    print(json.dumps(result, indent=2, ensure_ascii=False))
+                    print("Readable report unavailable; see report-error.txt", file=sys.stderr)
             return 0 if result["status"] == "evaluated" else 2
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0

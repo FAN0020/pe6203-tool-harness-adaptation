@@ -15,6 +15,7 @@ from openai import AsyncOpenAI
 
 from .benchmark import digest, load_task, read_json, source, write_json
 from .judge import aggregate_scores, official_prompt, parse_scores
+from .report import write_report
 from .transport import check_arguments, server_profiles, sessions, snapshot
 
 
@@ -419,6 +420,14 @@ async def run_async(task_id, version, strategy, seed, config):
         trace["events"] = events
         write_json(output / "raw_trace.json", clean(trace))
         write_json(output / "result.json", clean(result))
+        try:
+            write_report([output], output / "report.txt")
+            write_report([output], output / "report.html")
+        except Exception as exc:
+            # Presentation must never change or lose the authoritative run outcome.
+            (output / "report-error.txt").write_text(
+                redact(f"{type(exc).__name__}: {exc}", secrets)
+            )
     return clean(trace), clean(result)
 
 
