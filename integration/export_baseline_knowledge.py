@@ -13,6 +13,7 @@ from pathlib import Path
 
 from integration import baselines
 from integration.baseline_wrapper import run_baseline_once
+from integration.project_paths import task139_metadata_path
 
 STAGES = {"early", "middle", "late"}
 REQUIRED = {
@@ -142,7 +143,7 @@ def main():
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target-version", choices=["middle", "late"], required=True)
-    parser.add_argument("--old-metadata", type=Path, default=root / "examples/metadata/early.json")
+    parser.add_argument("--old-metadata", type=Path, default=task139_metadata_path(root, "early"))
     parser.add_argument("--new-metadata", type=Path)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument(
@@ -151,7 +152,7 @@ def main():
         help="Allow paid LLM rewrite of the public target tool catalog",
     )
     args = parser.parse_args()
-    new_path = args.new_metadata or root / f"examples/metadata/{args.target_version}.json"
+    new_path = args.new_metadata or task139_metadata_path(root, args.target_version)
     old, new = read_json(args.old_metadata), read_json(new_path)
     lock = read_json(root / "configs/benchmark.lock.json")
     if old["benchmark_commit"] != lock["commit"]:

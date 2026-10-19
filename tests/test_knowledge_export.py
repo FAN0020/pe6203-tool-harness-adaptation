@@ -7,13 +7,14 @@ from pathlib import Path
 import pytest
 
 from integration.export_baseline_knowledge import adapt_for_runner, validate_envelope
+from integration.project_paths import task139_metadata_path
 
 ROOT = Path(__file__).resolve().parents[1]
 pytestmark = pytest.mark.usefixtures("mock_baseline_llm")
 
 
 def metadata(stage):
-    return json.loads((ROOT / f"examples/metadata/{stage}.json").read_text())
+    return json.loads(task139_metadata_path(ROOT, stage).read_text())
 
 
 @pytest.mark.parametrize("stage", ["middle", "late"])

@@ -21,6 +21,7 @@ from openai import AsyncOpenAI
 from integration.baselines import AdaptationError
 from integration.export_baseline_knowledge import adapt_for_runner
 from integration.model_api import model_id, nonthinking_options
+from integration.project_paths import pilot_config_path, task139_metadata_path
 from pe6203 import runner
 from pe6203.benchmark import load_task, read_json, source, write_json
 from pe6203.transport import check_arguments
@@ -202,7 +203,7 @@ async def upstream_agent_loop(
 
 
 def make_config(root, version, seed, judge_model):
-    config = read_json(root / "configs/smoke.json")
+    config = read_json(pilot_config_path(root))
     config.update(
         root=str(root),
         version=version,
@@ -210,6 +211,7 @@ def make_config(root, version, seed, judge_model):
         execution_backend="pinned_upstream_ChatModel_stdio_bridge",
         thinking_mode="disabled",
         pilot_only=True,
+        tool_name_policy="native_unique",
     )
     config["agent"]["model"] = "deepseek-flash"
     config["judge"]["model"] = judge_model
@@ -241,8 +243,8 @@ def main():
         )
     lock, upstream = source(root)
     task = load_task(upstream, 139)
-    old = read_json(root / "examples/metadata/early.json")
-    new = read_json(root / f"examples/metadata/{args.version}.json")
+    old = read_json(task139_metadata_path(root, "early"))
+    new = read_json(task139_metadata_path(root, args.version))
     if old["benchmark_commit"] != lock["commit"] or new["version"] != args.version:
         raise ValueError("Metadata provenance mismatch")
     if {t["server_id"] for t in old["tools"]} != set(task["servers"]):

@@ -9,6 +9,7 @@ import httpx
 import pytest
 from openai import AsyncOpenAI
 
+from integration.project_paths import pilot_config_path, task139_metadata_path
 from integration.test_real_baselines import DeepSeekClient, upstream_agent_loop
 from pe6203 import runner
 from pe6203.benchmark import read_json, write_json
@@ -64,7 +65,7 @@ async def test_upstream_loop_uses_frozen_route_and_records_usage(tmp_path):
     if not (ROOT / ".cache/mcpevol/upstream").is_dir():
         pytest.skip("Requires pinned upstream bootstrap")
     calls, requests, events = [], [], []
-    record = read_json(ROOT / "examples/metadata/early.json")["tools"][0]
+    record = read_json(task139_metadata_path(ROOT, "early"))["tools"][0]
     record["name"] = "old_name"
     record["routing"]["tool_name"] = "old_name"
     record["parameters"] = {"type": "object", "properties": {}}
@@ -101,7 +102,7 @@ async def test_upstream_loop_uses_frozen_route_and_records_usage(tmp_path):
         assert body["messages"][-1]["role"] == "tool"
         return response({"role": "assistant", "content": "Done [FINISH]"})
 
-    config = read_json(ROOT / "configs/smoke.json")
+    config = read_json(pilot_config_path(ROOT))
     config.update(root=str(ROOT), knowledge_path=str(knowledge_path))
     config["agent"]["model"] = "deepseek-flash"
     tools, routes = runner.prepare_tools([record], "no_update")
@@ -134,11 +135,11 @@ async def test_upstream_loop_uses_frozen_route_and_records_usage(tmp_path):
 async def test_upstream_model_error_is_not_success(tmp_path):
     if not (ROOT / ".cache/mcpevol/upstream").is_dir():
         pytest.skip("Requires pinned upstream bootstrap")
-    record = read_json(ROOT / "examples/metadata/early.json")["tools"][0]
+    record = read_json(task139_metadata_path(ROOT, "early"))["tools"][0]
     knowledge_path = tmp_path / "knowledge.json"
     write_json(knowledge_path, {"tools": [record]})
     tools, routes = runner.prepare_tools([record], "no_update")
-    config = read_json(ROOT / "configs/smoke.json")
+    config = read_json(pilot_config_path(ROOT))
     config.update(root=str(ROOT), knowledge_path=str(knowledge_path))
 
     def handler(request):
