@@ -280,6 +280,16 @@ async def run_async(task_id, version, strategy, seed, config):
         if knowledge["benchmark_commit"] != lock["commit"]:
             raise ValueError("Knowledge snapshot benchmark commit mismatch")
         records = knowledge["tools"]
+                # Vanilla should use the current stage's tool knowledge.
+        # Selective Patch is allowed to retain unchanged older records.
+        if strategy == "current_metadata_smoke" and (
+            knowledge.get("version") != version
+            or any(record.get("version") != version for record in records)
+        ):
+            raise ValueError(
+                "Vanilla/current_metadata_smoke requires the knowledge envelope "
+                "and every tool record to match the selected stage"
+            )
         tools, routes = prepare_tools(
             records, strategy, config.get("tool_name_policy", "native_unique")
         )
