@@ -4,7 +4,6 @@
   "artifact_type": "experiment_plan",
   "protocol_id": "plan-v1",
   "status": "adopted",
-  "human_protocol": "docs/plan/evaluation-protocol.md",
   "benchmark": {
     "lock_file": "configs/benchmark.lock.json",
     "commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
@@ -18,10 +17,8 @@
   },
   "scope": {
     "primary_domains": [
-      "knowledge_project_management",
-      "fixed_input_data_files"
+      "paper_retrieval_webpage"
     ],
-    "supplementary_domain": "documents_diagrams",
     "development_target": 4,
     "evaluation_target": 8,
     "coverage_targets": {
@@ -33,14 +30,22 @@
     "coverage_labels_may_overlap": true,
     "counts_are_team_budget_targets": true,
     "development_reserved_ids": [
-      139
+      139,
+      223
     ],
     "split_unit": "task_family",
     "coverage_counting": {
       "evaluation_ids": "distinct",
       "mutation_quota": "distinct_changed_tasks_in_at_least_one_target_transition",
       "retention_quota": "distinct_tasks_unaffected_in_both_target_transitions"
-    }
+    },
+    "regression_domains": [
+      "knowledge_project_management",
+      "fixed_input_data_files",
+      "documents_diagrams"
+    ],
+    "main_optimization_task_id": 223,
+    "selection_note": "223 主优化；其余候选用于回归/保留能力。4+8 仍是未冻结预算目标。"
   },
   "strategies": [
     "no_update",
@@ -72,7 +77,32 @@
     "dependency_expansion": "one_hop_explicit_public_metadata_references",
     "rename_without_explicit_evidence": "delete_plus_add",
     "comparison": "parsed_JSON_ignore_object_key_order_preserve_array_order_and_text",
-    "optional_ablation": "disable_dependency_expansion_in_separate_experiment"
+    "optional_ablation": "disable_dependency_expansion_in_separate_experiment",
+    "research_questions": [
+      "changed-task recovery vs No Update",
+      "unaffected-task retention",
+      "update cost vs Full Rewrite"
+    ],
+    "hypothesis_not_result": "Selective Patch improves recovery/cost without harming unrelated capabilities; negative results retained",
+    "diff_fields": [
+      "tool add/delete",
+      "parameters",
+      "description",
+      "usage_rules",
+      "output_schema",
+      "routing"
+    ],
+    "timestamps_alone_trigger": false,
+    "structured_fields": "Use target public metadata; model must not invent names/schema/routing",
+    "semantic_fields": "Use shared fixed updater to rewrite descriptions/rules from metadata evidence only",
+    "shared_chunking_and_limits_for_rewriters": true,
+    "unchanged_records": "Canonical equality including source version",
+    "validation_failure": "Record adaptation_validation/cost/null scores; no agent execution or silent fallback",
+    "implementation_status": {
+      "no_update": "integrated",
+      "full_rewrite": "deterministic prototype integrated; formal LLM rewrite pending",
+      "selective_patch": "pending"
+    }
   },
   "knowledge": {
     "scope": "complete_catalog_of_fixed_task_server_set",
@@ -95,36 +125,44 @@
       "oversized_server_policy": null,
       "status": "pilot_validation_required"
     },
-    "agent_serialization_rule": null,
+    "agent_serialization_rule": "namespaced; usage_rules/output_schema appended to description; see src/pe6203/.context/contracts.json",
     "K0_construction": "deterministic_mapping_from_complete_early_metadata"
   },
   "models": {
     "agent": {
-      "provider": null,
-      "base_url": null,
-      "model": null,
-      "resolved_model_id": null,
+      "provider": "OpenRouter",
+      "base_url": "https://openrouter.ai/api/v1",
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "resolved_model_id": "deepseek/deepseek-v4.1-flash-1017",
       "api_key_env": "AGENT_API_KEY",
       "temperature": 0.0,
-      "max_completion_tokens": 2048
+      "max_completion_tokens": 2048,
+      "selection_status": "task139_smoke_verified_not_formally_frozen"
     },
     "updater": {
-      "provider": null,
-      "base_url": null,
-      "model": null,
+      "provider": "OpenRouter",
+      "base_url": "https://openrouter.ai/api/v1",
+      "model": "deepseek/deepseek-v4.1-flash-1017",
       "resolved_model_id": null,
       "api_key_env": "UPDATER_API_KEY",
       "temperature": 0.0,
-      "max_completion_tokens": 4096
+      "max_completion_tokens": 4096,
+      "selection_status": "planned_not_implemented_credentials_unset"
     },
     "judge": {
-      "provider": null,
-      "base_url": null,
-      "model": null,
-      "resolved_model_id": null,
+      "provider": "OpenRouter",
+      "base_url": "https://openrouter.ai/api/v1",
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "resolved_model_id": "deepseek/deepseek-v4.1-flash-1017",
       "api_key_env": "JUDGE_API_KEY",
       "temperature": 0.0,
-      "max_completion_tokens": 4096
+      "max_completion_tokens": 4096,
+      "selection_status": "task139_smoke_verified_not_formally_frozen",
+      "extra_body": {
+        "reasoning": {
+          "enabled": false
+        }
+      }
     }
   },
   "execution": {
@@ -144,7 +182,7 @@
     "tool_timeout_seconds": 30,
     "run_timeout_seconds": 600,
     "isolated_workspace_per_attempt": true,
-    "limits_status": "pilot_validation_required"
+    "limits_status": "verified_task139_early_only; formal_set_and_updater_chunking_pending"
   },
   "judge": {
     "attempts_per_trajectory": 5,
@@ -182,7 +220,10 @@
     "uncertain_in_recovery_or_retention": false,
     "recovery": "changed_mean_TF_strategy_minus_no_update_same_stage",
     "retention_update": "unaffected_mean_TF_strategy_minus_no_update_same_stage",
-    "retention_vs_early": "unaffected_mean_TF_strategy_current_minus_no_update_early"
+    "retention_vs_early": "unaffected_mean_TF_strategy_current_minus_no_update_early",
+    "judge_aggregation": "unrounded mean of valid TF/PE/Grounding; primary table requires all five",
+    "sample_limit": "Small selected subset; repeat runs are not independent tasks or proof of significance",
+    "missingness": "Report planned/valid/matched counts and exclusions; strategy-related missingness limits conclusions"
   },
   "retry": {
     "implementation_status": "planned",
@@ -253,5 +294,34 @@
       "recorded_usage_and_price_policy",
       "reviewed_freeze_record"
     ]
+  },
+  "overview": "README.md",
+  "project_choices": "configs/.context/project.json",
+  "requirements": "docs/.context/requirements.json",
+  "contracts": "src/pe6203/.context/contracts.json",
+  "failure_analysis": {
+    "categories": [
+      "infrastructure",
+      "agent_execution",
+      "adaptation_validation",
+      "judge_format",
+      "under_update",
+      "over_update"
+    ],
+    "under_update": "Missing required knowledge/field/dependency causes observed failed call",
+    "over_update": "Unnecessary or incorrect change harms previously working capability; compare baseline or separate diagnostic",
+    "not_automatic": [
+      "No Update low score does not establish under-update",
+      "Full Rewrite failure does not establish over-update"
+    ],
+    "required_each": 1,
+    "unobserved": "Mark requirement unmet; controlled diagnostic separate"
+  },
+  "freeze_policy": {
+    "reviewers": "A/D tasks/environment; B/C method/prompts; D models/judge/pricing/metrics",
+    "record": "experiments/templates/freeze-record.json",
+    "after_change": "New experiment revision; rerun affected matched comparisons for all strategies; preserve old results",
+    "case223": "Freeze source URLs/fetch time/snapshots and publishing setup; disclose substitutes; exclude tuned case from independent evaluation",
+    "no_new_permission_gate": "Routine review within user-authorized scope"
   }
 }

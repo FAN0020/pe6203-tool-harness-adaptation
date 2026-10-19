@@ -1,0 +1,135 @@
+{
+  "path_base": "repository_root",
+  "entrypoints": {
+    "run": "run(task_id,version,strategy,seed,config) -> (raw_trace,result)",
+    "adapt": "adapt(old_knowledge,new_metadata,strategy,context=None) -> (knowledge,diff_log,update_cost)",
+    "cli": "pe6203 adapt; pe6203 run --adaptation artifact.json (exclusive with --knowledge)"
+  },
+  "knowledge": {
+    "schema": "schemas/tool-record.schema.json",
+    "envelope": [
+      "schema_version",
+      "benchmark_commit",
+      "version",
+      "tools"
+    ],
+    "identity": "server_id::name",
+    "coverage": "complete catalog of fixed official task server set",
+    "defaults": {
+      "usage_rules": [],
+      "output_schema": null
+    },
+    "no_update": "Keep entire Early K0, schema and routing; never refresh from live metadata",
+    "selective_patch_planned": "Preserve unselected records canonical-equal including source version; envelope target version may differ from unchanged records",
+    "serialization": "Append usage_rules/output_schema to description; actual schema becomes model parameters",
+    "namespaced_alias": "sanitize name to [a-zA-Z0-9_-], first 50 chars + __ + first 12 SHA256(server_id::name); max 64; collisions rejected",
+    "native_unique": "Legacy policy; duplicates rejected, never drop tools"
+  },
+  "adaptation": {
+    "file": "adaptation.json",
+    "checks": [
+      "validated status",
+      "strategy",
+      "target stage",
+      "benchmark commit",
+      "knowledge file SHA256"
+    ],
+    "runner_effect": "Loads knowledge and update cost; saves copied artifact/hash/method",
+    "no_update": "Deep-copy Early; zero update cost; algorithm ignores target metadata; writer reads target for provenance",
+    "full_rewrite": "Deterministic complete target rebuild, Early reuses K0; formal_llm_rewrite=false",
+    "failure": "Persist validation errors; no silent fallback; costs retained"
+  },
+  "execution": {
+    "tasks": "Only official selected IDs with complete reviewed profiles",
+    "inputs": "Only question and method knowledge; no reference answers, historical scores or mutation labels",
+    "current_metadata": "Audit/judge only",
+    "fixture": "Reject symlinks; copy sourced files into new workspace and hash",
+    "containment": "Private HOME/storage; workingDirectory fixed to run workspace; application-level, not OS sandbox",
+    "provider_options": "agent.extra_body and judge.extra_body forwarded; config records them",
+    "result_schema": "schemas/result.schema.json",
+    "status": [
+      "evaluated",
+      "judge_incomplete",
+      "blocked",
+      "timeout"
+    ],
+    "execution_status": [
+      "not_started",
+      "completed",
+      "max_rounds",
+      "empty_answer",
+      "failed"
+    ],
+    "judge_status": [
+      "not_started",
+      "complete",
+      "incomplete",
+      "failed"
+    ],
+    "exit_codes": {
+      "0": "five valid judge results; not necessarily task success",
+      "2": "blocked/timeout/incomplete"
+    }
+  },
+  "artifacts": {
+    "knowledge.json": "Frozen model knowledge",
+    "environment-metadata.json": "Live audit/judge catalog",
+    "fixture-manifest.json": "Source file hashes when fixture configured",
+    "events.jsonl": "Incremental responses, tool calls/results, judge results",
+    "ANSWER/<id>.json": "Answer and trajectory",
+    "EVAL/<id>.json": "Judge attempts and aggregate",
+    "judge-prompt-N.txt": "Actual rubric inputs",
+    "raw_trace.json": "Full trace including errors",
+    "result.json": "Statuses, nullable scores, usage, model/config/knowledge hashes",
+    "mcp.stderr.log": "Server diagnostics",
+    "workspace/": "Persisted task state",
+    "batch.json": "Attempt ledger"
+  },
+  "batch": {
+    "plan": "configs/batch-task139.example.json",
+    "cell": [
+      "task_id",
+      "version",
+      "strategy",
+      "seed",
+      "knowledge_path"
+    ],
+    "optional_cell": [
+      "fixture_dir",
+      "update_cost"
+    ],
+    "identity": "plan/config + Python source + benchmark/profile/uv lock + knowledge/fixture bytes + endpoints; no keys",
+    "resume": "Reject identity/result-hash changes; reuse existing result incl blocked/incomplete/low scores; interrupted without result gets at most one extra attempt",
+    "limits": [
+      "single writer",
+      "HTTP 429/5xx retry/backoff not implemented",
+      "full environment/Node binary fingerprint pending",
+      "cell uses explicit knowledge/cost, not automatic adaptation"
+    ]
+  },
+  "hashes": {
+    "file_sha256": "raw file bytes",
+    "object_digest": "benchmark.digest JSON serialization; distinct from bytes",
+    "question_sha256": "unchanged question UTF-8",
+    "canonical_equal": "object keys ignored; list order and text preserved",
+    "artifact_cost": "Count once per server_group/target_stage/strategy/repeat_id; shared tasks do not double-count"
+  },
+  "formal_ledger_fields": [
+    "run_id",
+    "experiment_id",
+    "task_id",
+    "stage",
+    "strategy",
+    "repeat_id",
+    "seed",
+    "attempt_id",
+    "runner_commit",
+    "protocol_file_sha256",
+    "task_manifest_file_sha256",
+    "fixture_file_sha256",
+    "knowledge_file_sha256",
+    "adaptation_artifact_id",
+    "status",
+    "output_dir"
+  ]
+}

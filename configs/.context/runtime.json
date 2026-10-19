@@ -1,0 +1,52 @@
+{
+  "path_base": "repository_root",
+  "runnable_config": false,
+  "settings_ref": "configs/.context/project.json",
+  "runtime": "native stdio; macOS arm64; Python 3.12.12 / Node 24.13.0; dependencies in uv.lock",
+  "limits": [
+    "未验证 Docker；独立 workspace/private HOME 是应用级约束，不是 OS sandbox",
+    "仅执行 server-profiles.json 已审查服务；安装 archive 不表示所有服务可运行",
+    "task 223 缺两个 reviewed profiles，需审查外网抓取、发布凭据与输入时间条件",
+    "每次 run/adapt 使用新 output；失败保留"
+  ],
+  "commands": {
+    "install": [
+      "uv sync --frozen",
+      "npm install --prefix .cache/node-runtime --no-save --package-lock=false node@24.13.0",
+      "export MCPEVOL_NODE=\"$PWD/.cache/node-runtime/node_modules/node/bin/node\"",
+      "uv run pe6203 bootstrap --scope smoke",
+      "uv run pe6203 doctor"
+    ],
+    "full_archive": "uv run pe6203 bootstrap --scope all",
+    "checks": [
+      "uv run ruff check src tests scripts",
+      "uv run ruff format --check src tests scripts",
+      "uv run pytest -q"
+    ],
+    "offline_baseline_smoke": "uv run pytest -q tests/test_baselines.py tests/test_pipeline.py",
+    "adapt": "uv run pe6203 adapt --strategy no_update --old-knowledge examples/catalogs/task139/early.json --new-metadata examples/catalogs/task139/early.json --output results/raw/NEW_ID/adaptation",
+    "real_smoke": "uv run --env-file .env pe6203 run --task-id 139 --version early --strategy no_update --seed 0 --config configs/local.smoke-no-reasoning.json --adaptation results/raw/NEW_ID/adaptation/adaptation.json --output results/raw/NEW_ID/run",
+    "late_full_rebuild": "adapt target=examples/catalogs/task139/late.json, strategy=full_rewrite; run version=late, strategy=full_rewrite; use new output dirs",
+    "inventory": "uv run pe6203 inventory --output results/raw/NEW_ID/inventory.json",
+    "catalog_probe": "uv run pe6203 probe-servers --output results/raw/NEW_ID/catalog-check",
+    "functional_probe": "uv run python scripts/probe_reviewed_services.py --output results/raw/NEW_ID/functional-check",
+    "metadata": "uv run pe6203 metadata --task-id 393 --version early --output results/raw/NEW_ID/task393-early.json",
+    "persistence_probe": "uv run pe6203 probe --version early --output results/raw/NEW_ID/probe-early",
+    "batch": "uv run --env-file .env pe6203 batch --plan configs/batch-task139.example.json --output results/raw/NEW_ID/batch",
+    "resume": "Repeat identical batch command with --resume; changed config/knowledge/code requires new directory"
+  },
+  "new_checkout_config": [
+    "Copy configs/full-catalog-smoke.json to ignored configs/local.smoke-no-reasoning.json; set agent.model and judge.model from project.json",
+    "Set judge.extra_body={\"reasoning\":{\"enabled\":false}} for the selected OpenRouter model",
+    "Set AGENT_BASE_URL/AGENT_API_KEY/JUDGE_BASE_URL/JUDGE_API_KEY in local .env; uv --env-file loads explicitly; never commit keys",
+    "Batch example references configs/local.json; configure that file equivalently before batch, or use a new local plan"
+  ],
+  "storage_estimate": "Full archives ~3.40 GB download / ~12 GB extracted; verify SHA256 before extraction; scope=smoke installs only original two-server dependency closures",
+  "baseline": "Muchu Wu prototype retained as deterministic baselines; old wrapped records incompatible with runner were replaced with complete envelopes, schema/routing validation, cross-server identities and artifact hashes.",
+  "known_failures": {
+    "judge": "Original 4096-token default reasoning exhausted all 5 responses; extra_body forwarding + judge reasoning=false fixed development smoke. Both protocol versions retained.",
+    "upstream_late_thinking": "dist/index.js:113 calls getThoughtHistory missing from dist/lib.js; 17/18 functional probes pass, command exits 2. Preserve upstream error; do not silently fix release.",
+    "first_real_tool_error": "Earlier attempt create_entities failed once with undefined.filter; retained trace, agent recovered."
+  },
+  "evidence_ref": "results/evidence/.context/index.json"
+}

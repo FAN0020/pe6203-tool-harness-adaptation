@@ -1,0 +1,71 @@
+{
+  "checked_at": "2026-10-19",
+  "benchmark_lock": "configs/benchmark.lock.json",
+  "sources": {
+    "S1": {
+      "file": "PE6203 Group Project 4 - Tool Harness Adaptation under Environment Change.docx",
+      "sha256": "6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d",
+      "supports": "课程要求；不规定业务领域或 4+8 任务数"
+    },
+    "S2": {
+      "url": "https://docs.google.com/document/d/1fbhITsq__0Xaxjp85qVaQxIO1kQS6oDF-RFe7G7G5kQ/edit",
+      "supports": "小组 A/B/C/D 分工，不是实验效果证据"
+    },
+    "S3": {
+      "url": "https://arxiv.org/html/2607.14642v1",
+      "label": "Liu et al., MCPEvol-Bench，preprint",
+      "sections": [
+        "4",
+        "5.2",
+        "6.1",
+        "Appendix D.1"
+      ],
+      "supports": "工具演化、阶段、指标与 judge；不宣称已获期刊同行评审"
+    },
+    "S4": {
+      "repository": "https://github.com/Octobrist/MCPEvol-Bench.git",
+      "commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+      "dataset": "anonymous2233/evol-servers",
+      "dataset_revision": "162e3ffbea1717ac8a20fe9b26465e29117229e4",
+      "supports": "selected IDs、任务、服务快照、rubric 与可执行口径；不推断账号与作者身份关系"
+    },
+    "S5": {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools",
+      "supports": "tools/list、tools/call、schema、错误语义"
+    },
+    "S6": {
+      "url": "https://aclanthology.org/2024.findings-acl.664/",
+      "label": "Guo et al., StableToolBench (2024)",
+      "supports": "控制 API/工具环境不稳定性"
+    },
+    "S7": {
+      "url": "https://jmlr.org/papers/v11/cawley10a.html",
+      "label": "Cawley & Talbot (2010)",
+      "supports": "开发与评测隔离；不证明小样本统计充分"
+    },
+    "S8": {
+      "url": "https://openrouter.ai/docs/guides/best-practices/reasoning-tokens",
+      "supports": "reasoning 与可见输出共享 completion 预算；按模型能力配置"
+    }
+  },
+  "upstream_paths": {
+    "launcher": "src/custom/real_mcp/tool_level_test.py",
+    "selection": "src/custom/utils/test_utils.py:clean_all_test_cases",
+    "selected_ids": "src/custom/data/test_cases/chosen_idx.json",
+    "judge_prompt": "src/custom/prompt/eval_error_prompt.py:build_mcp_bench_judge_prompt",
+    "judge": "src/custom/analysis/answer/evaluation.py:evaluate_one_five_times,aggregate_eval_runs",
+    "ecs": "src/custom/analysis/answer/evolutionary_volatility.py:_compute_row",
+    "snapshots": "servers/1mcp_config/{original,iter3,iter5}/mcp.json"
+  },
+  "source_differences": {
+    "task_population": "原始文件 393 候选记录；chosen_idx 过滤为 201，保留官方 ID，不是 0–200。",
+    "harness": "上游 1mcp HTTP、time/database prompt、重复 final nudges、截断 observations；本项目 stdio、workspace prompt、完整 observations、final 无 tools 即停。所有策略固定本项目 harness，不称论文 leaderboard 复现。",
+    "judge_import": "上游 evaluator 缺 mutation.utils，import 连接 localhost:3050；本项目 AST 加载未改写 pure formatter 与官方 rubric。保留其工具文本 1000 字符截断和 assistant-text 移除；完整轨迹另存。",
+    "judge_model": "论文 DeepSeek-Chat，代码默认 gpt-4o；本项目实际模型见 project.json。固定 5 次，非法响应不循环补足。",
+    "ecs": "上游 population std(N)，论文附录 sample std(N-1)；TF [6,8,10] 分别为 6.3670068381 和 6.0。",
+    "snapshot_identity": "演化包可能保留旧 package version；必须用 stage + archive SHA256。直接执行归档代码，不用 unversioned npx 替换。",
+    "credentials": "上游硬编码 endpoint/API placeholders 不采用；本项目显式从环境读取 endpoint/key。",
+    "installation": "上游 CUDA/NVIDIA requirements 不作为 Apple Silicon 安装路径；本项目依赖以 uv.lock 为准。"
+  },
+  "upstream_paths_relative_to": ".cache/mcpevol/upstream"
+}
