@@ -177,11 +177,25 @@ def main():
     parser = argparse.ArgumentParser(description="PE6203 Group A MCPEvol environment and runner")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Project checkout root")
     sub = parser.add_subparsers(dest="command", required=True)
-    p = sub.add_parser("adapt", help="Build Sprint 1 baseline knowledge (deterministic, no LLM)")
-    p.add_argument("--strategy", choices=["no_update", "full_rewrite"], required=True)
+    p = sub.add_parser(
+        "adapt", help="Build adaptation knowledge (no_update/full_rewrite/selective_patch)"
+    )
+    p.add_argument(
+        "--strategy", choices=["no_update", "full_rewrite", "selective_patch"], required=True
+    )
     p.add_argument("--old-knowledge", type=Path, required=True)
     p.add_argument("--new-metadata", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument(
+        "--allow-llm-update",
+        action="store_true",
+        help="Enable the gated LLM usage-rule rewrite (selective_patch only)",
+    )
+    p.add_argument(
+        "--updater-config",
+        type=Path,
+        help="JSON with updater model/env overrides (selective_patch only)",
+    )
     setup = sub.add_parser("bootstrap", help="Verify and install immutable benchmark releases")
     setup.add_argument(
         "--stages",
@@ -233,8 +247,15 @@ def main():
     args = parser.parse_args()
     try:
         if args.command == "adapt":
+            context = None
+            if args.strategy == "selective_patch" and (
+                args.allow_llm_update or args.updater_config
+            ):
+                context = {"allow_llm_update": args.allow_llm_update}
+                if args.updater_config:
+                    context["updater_config"] = read_json(args.updater_config)
             result = write_adaptation(
-                args.old_knowledge, args.new_metadata, args.strategy, args.output
+                args.old_knowledge, args.new_metadata, args.strategy, args.output, context
             )
         elif args.command == "bootstrap":
             result = bootstrap(args.root, args.stages, args.scope)

@@ -163,9 +163,24 @@ def test_early_full_rewrite_reuses_k0_without_update_cost():
     assert cost["seconds"] == cost["update_operations"] == 0
 
 
-def test_selective_patch_is_not_silently_implemented_as_full_rewrite():
-    with pytest.raises(ValueError, match="Unsupported"):
-        adapt(snapshot(), snapshot("late"), "selective_patch")
+def test_selective_patch_is_distinct_and_keeps_untouched_records():
+    old, target = snapshot(), snapshot("late")
+    extra_old = record()
+    extra_old.update(server_id="server", tool_id="server::second", name="second")
+    extra_old["routing"] = {"server_id": "server", "tool_name": "second"}
+    old["tools"].append(extra_old)
+    extra_new = copy.deepcopy(extra_old)
+    extra_new["version"] = "late"
+    target["tools"].append(extra_new)
+    target["tools"][0]["description"] = "Changed description"
+    knowledge, changes, cost = adapt(old, target, "selective_patch")
+    assert knowledge["version"] == "late"
+    assert knowledge["tools"][0]["description"] == "Changed description"
+    assert knowledge["tools"][0]["version"] == "late"
+    assert knowledge["tools"][1] == extra_old  # untouched keeps its early source version
+    assert cost["method"] == "deterministic_diff_selective_patch"
+    assert cost["calls"] == 0
+    assert cost["untouched_records"] == 1
 
 
 @pytest.mark.parametrize("defect", ["knowledge_changed", "wrong_strategy", "wrong_stage"])
