@@ -41,7 +41,7 @@
 
 ## 当前起点
 
-截至 2026-10-19，已经有任务 139 的三阶段真实 MCP transport probe、元数据、单任务 runner 和环境复现证据。真实 LLM agent → MCP → judge 的验收仍未完成。通用多任务运行、批处理与断点续跑、B/C 的更新算法、正式评测结果尚未交付；详见 [backlog](../../experiments/backlog.json)。
+截至 2026-10-19，已有 201-task 环境审计、三个阶段的完整 Node 发布包、8 个 reviewed profiles、完整 catalogs、通用 runner 和 batch/resume。真实 LLM agent → MCP → judge 验收、其余服务/fixture 审查、B/C 更新算法和正式评测仍未完成；详见[全量交接](../full-benchmark.md)与 [backlog](../../experiments/backlog.json)。
 
 计划可以分享；正式实验尚未冻结。[protocol.v1.json](../../experiments/protocol.v1.json) 的 `readiness.frozen=false` 与尚未填写的模型字段表达这个区别。现有 `configs/smoke.json` 是 smoke runner 配置，不能把计划 JSON 直接传给 CLI。
 

@@ -1,24 +1,23 @@
-# Group A handoff
+# Group A handoff / 组员直接接入
 
-后续协作：[团队执行设定](plan/README.md) · [A/B/C/D 接口](plan/interfaces.md) · [两周排期](plan/workplan.md)。本文件记录现有实现；新计划中的扩展需分别验收。
+**可用：全量任务审计、通用 runner、8 个 reviewed profiles、完整 catalogs、batch/resume。待完成：真实模型 agent → MCP → judge。** 范围、fixture 缺口、上游 Late thinking 错误见[全量交接](full-benchmark.md)。
 
-## 当前可交接内容
+## 给 B/C：固定完整知识
 
-已完成环境安装、官方源及快照锁定、三版本真实 MCP 启动与持久化检查、元数据导出、runner 和结果接口。**真实 LLM agent → MCP → LLM judge 验收尚未完成**：需要明确模型 API 地址、凭据变量和模型名称。Transport probe 不调用 LLM、不产生 benchmark 分数。
+| 输入 | 位置 / 规则 |
+| --- | --- |
+| 完整 server catalogs | [examples/catalogs/index.json](../examples/catalogs/index.json)，24 份真实 `tools/list`，附 hashes |
+| 完整固定 server group | `examples/catalogs/task{103,105,139,283,393}/{early,middle,late}.json` |
+| Development K0 | [task139/early.json](../examples/catalogs/task139/early.json)，40 tools；不是旧四工具 smoke |
+| ToolRecord | [schema](../schemas/tool-record.schema.json)：`tool_id/server_id/version/name/parameters/description/usage_rules/output_schema/routing` |
+| Updater 输入 | K0 + 目标 metadata + 固定配置；不读题目、参考答案、历史评分、mutation labels |
+| Updater 输出 | knowledge、diff/patch、validation、update cost；见[接口](plan/interfaces.md) |
 
-## B/C 接入
+`tool_id=server_id::name`；重命名由 C 做有证据的匹配。No Update 保持 Early records 与路由，runtime 不自动刷新。官方没有 usage rules 则为 `[]`，没有 output schema 则为 `null`。
 
-`examples/metadata/{early,middle,late}.json` 来自真实服务器 `tools/list`。`examples/knowledge/*-task139.json` 是按官方 task 139 所需工具选出的四条记录，不是 Full Rewrite 或 Selective Patch 算法结果。
+Runner 把 usage rules 与 output schema（若有）附加到模型可见 description。配置 `tool_name_policy=namespaced` 时，alias = 安全字符化 name 前 50 字符 + `__` + SHA256(`server_id::name`) 前 12 位；最长 64 字符，跨服务器/长名称保持稳定，碰撞时拒绝执行。真实 MCP 路由仍来自 frozen knowledge，保存在 result；所有策略必须统一 policy。原 `native_unique` 保持兼容并拒绝重名。
 
-ToolRecord 字段为 `tool_id/server_id/version/name/parameters/description/usage_rules/routing`，另保留 `output_schema`。`tool_id=server_id::name`；重命名不会自动维持旧 ID，匹配由 C 的 diff 层处理。官方没有独立 usage-rules 字段时使用空数组，不凭空推断。见 [JSON schema](../schemas/tool-record.schema.json)。
-
-继续使用团队的 `adapt(old_knowledge, new_metadata, strategy, context) → new_knowledge, diff_log, update_cost`。把 `new_knowledge` 写成样例 envelope（`schema_version/benchmark_commit/version/tools`），将路径传给 runner。更新成本写入配置 `update_cost`，单位 tokens/seconds/USD，未测量为 `null`。
-
-No Update 在 Middle/Late 仍传 Early knowledge。执行循环只把 supplied frozen tools 发给模型。当前元数据仅供审计和 judge，不替换模型 schema，不自动修复名称和参数。工具返回的正常错误信息仍会进入 agent 轨迹；保持该反馈规则一致。
-
-`routing` 必须指向固定 task 的服务器，模型侧名字不能重复。当前支持 task 139；新 task/server 要先扩充受审查的 manifest。C 可在方法生成的 knowledge 中加入选择的新工具，不能直接把所有新工具暴露给 No Update。
-
-## Runner
+## 给 A：Runner / batch
 
 ```python
 import json
@@ -26,37 +25,40 @@ from pe6203.runner import run
 
 config = json.load(open("configs/local.json"))
 config.update(root="/absolute/path/to/checkout",
-              knowledge_path="examples/knowledge/early-task139.json",
-              output_dir="/absolute/path/to/a/new/run/directory")
-raw_trace, benchmark_result = run(139, "late", "no_update", 0, config)
+              knowledge_path="examples/catalogs/task139/early.json",
+              output_dir="/absolute/path/to/a/new/run")
+raw_trace, result = run(139, "late", "no_update", 0, config)
 ```
 
-策略名称只记录 knowledge 来自哪种方法，runner 不代写 B/C 算法。`current_metadata_smoke` 专供环境检查，不是正式 baseline。
+任意官方 selected ID 都经过原题加载；只有其完整 server set 在 [profiles](../configs/server-profiles.json) 中才允许运行。当前五个 task IDs 具有配置覆盖，不能据此跳过 fixture review。可选 `fixture_dir` 复制固定输入并保存 hash，拒绝 symlink。所有调用使用独立 workspace/private HOME；这是 application-level containment，不是 OS sandbox。
 
-| 产物 | 内容 |
+策略只记录知识来源；不替 B/C 实现更新算法。模板 [batch-task139.example.json](../configs/batch-task139.example.json) 可由 `pe6203 batch --plan ... --output ...` 执行，字段为 `experiment_id/config_path/runs`，cell 为 `task_id/version/strategy/seed/knowledge_path`，可附 `fixture_dir/update_cost`。详情和恢复限制见[batch 规则](full-benchmark.md#batch--resume-规则)。
+
+| Artifact | 内容 |
 | --- | --- |
 | `knowledge.json` | 模型实际使用的 frozen metadata |
-| `environment-metadata.json` | 当前环境元数据，供审计/judge |
-| `events.jsonl` | 即时保存的 agent response、工具调用/返回、judge response；故障前事件也保留 |
-| `ANSWER/139.json` | 官方兼容 question/answer/trajectory envelope |
-| `EVAL/139.json` | 官方兼容 `eval_result.runs/aggregate` |
+| `environment-metadata.json` | 当前环境 metadata，仅审计/judge |
+| `fixture-manifest.json` | 指定 fixture 时的文件 hashes 与 manifest digest |
+| `events.jsonl` | 即时保存 model response、tool call/result、judge response |
+| `ANSWER/<task_id>.json` | 官方兼容 task / answer / trajectory |
+| `EVAL/<task_id>.json` | 官方兼容 `eval_result.runs/aggregate` |
 | `judge-prompt-N.txt` | 实际评分输入 |
-| `raw_trace.json` | 完整轨迹及事件，阻塞时也保存 |
-| `result.json` | 状态、nullable 分数、tokens、时间、配置与哈希 |
-| `mcp.stderr.log`、`workspace/` | 服务日志和任务生成状态 |
+| `raw_trace.json`、`result.json` | 原始轨迹、状态、nullable 分数、usage、配置/hash；blocked 也保存 |
+| `mcp.stderr.log`、`workspace/` | 服务日志与独立任务状态 |
+| `batch.json` | cell identity、attempt paths、结果 hashes、状态；低分和失败保留 |
 
-输出目录必须不存在，避免混入旧状态。CLI 评分完成返回 0，blocked/timeout/incomplete 返回 2。批量调度和断点续跑属于后续集成工作，当前未实现。
+退出码：完整评分 0，blocked/timeout/incomplete 2。`execution_status` 与 `judge_status` 区分未启动和已尝试失败；不要仅看总 status。一次进程只写一个 batch；不同配置/知识/代码用新目录。
 
-`execution_status` / `judge_status` 区分 `not_started` 与 `failed`：例如模型服务不可用会留下执行失败和已有事件，不会被误记为没有尝试。
+## 给 D：分数与可信边界
 
-## D 的评分接口
+| 内容 | 读取 / 判定 |
+| --- | --- |
+| TF / PE | `task_fulfillment_mean` / `planning_and_efficiency_mean` 的未取整 mean |
+| 完整 judge | `successful_runs=5` 且 `complete=true`；partial mean 不冒充完整评分 |
+| ECS | 三阶段同 task/strategy/model/config/repetition 配对；[公式差异](environment.md)；缺一阶段则缺该 triplet |
+| Cost | `cost.agent/judge` 为 provider usage；B/C 提供 `cost.update`；未知为 null，USD 不猜价格 |
+| Seed | 默认不发送 model seed；用于 judge 顺序，不能声称模型严格确定 |
+| 模型验收 | 目前未完成；真实 MCP probe / fake-model 测试均无 benchmark 分数 |
+| 正式实验 | [协议](plan/evaluation-protocol.md)尚未冻结；任务族/split、changed/unaffected、provider limits 和 B/C 产物仍需验证 |
 
-使用真实 ID 139，不是候选数组下标。读取 `EVAL` 的未取整 mean，核对 `successful_runs/complete`。缺失不记为 0，`judge_incomplete` 不当作完整评估。单版本没有 ECS；三版本配对后再算，注明总体/样本标准差口径。
-
-`cost.agent` 和 `cost.judge` 分别记录 provider 返回的 token usage；未返回则为 `null`。`cost.update` 由 B/C 提供。没有核定供应商价格时不估造 USD。种子控制 judge 顺序；默认 `send_model_seed=false`，不声称模型严格确定。若服务支持 seed，统一启用并保持策略间一致。
-
-Smoke case 不替代正式 manifest。D/C 仍需核对任务 changed/unaffected 分类与三类变化覆盖；mutation 标注必须结合真实 metadata 和轨迹分析。
-
-## 下一步验收
-
-配置真实服务后执行 README 单任务命令。检查非 mock 的 agent response、真实 MCP 调用/输出、五次有效 judge 结果，以及 ANSWER/EVAL/result 一致性，保存实际配置和日志。完成后才能标记真实任务 pipeline 验收通过，再由 B/C 接入方法比较。
+完整 logs 默认留 ignored 的 `results/raw/`。可分享副本先检查秘密与用户数据，再放 `results/evidence/`；保留原始 hash 和路径替换规则。不要上传 keys 或 raw .env。

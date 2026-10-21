@@ -27,7 +27,7 @@ The raw task file contains 393 candidate records with reference answers and traj
 
 This follows the README and paper Table 3. `--version` changes the executable package tree and starts fresh processes. Nested `HYBRID` annotation-directory depth is not treated as a substitute for physical snapshots.
 
-Official task 139 uses `@pimzino/agentic-tools-mcp` 1.8.1 and `@itseasy21/mcp-knowledge-graph` 1.0.7. Evolved bundles retain these version strings: **identify snapshots by stage and archive digest, not package version alone**. Bootstrap resolves 97 bundled dependency paths and roughly 4,700 files per stage, including nested dependencies.
+Official task 139 uses `@pimzino/agentic-tools-mcp` 1.8.1 and `@itseasy21/mcp-knowledge-graph` 1.0.7. Evolved bundles retain these version strings: **identify snapshots by stage and archive digest, not package version alone**. The original smoke scope resolves 97 bundled dependency paths and roughly 4,700 files per stage. `bootstrap --scope all` now extracts the complete published Node archives: 335,955 / 328,463 / 328,602 entries, including bundled dependency copies. See the [installation receipt](../results/evidence/full-benchmark/installation.json).
 
 Task 139 is an infrastructure smoke case, not a representative final subset. Server annotations include PARAM, TOOL, and DESC changes across the sequence, but that does not prove the task's actually used tools cover all categories. D/C must validate task-level coverage before freezing experiments.
 
@@ -35,7 +35,7 @@ Task 139 is an infrastructure smoke case, not a representative final subset. Ser
 
 Tested: Python **3.12.12**, Node **24.13.0**, uv **0.11.21**, npm **11.17.0**, macOS arm64. `uv.lock` pins Python dependencies; core upstream versions retained are MCP **1.25.0** and OpenAI SDK **2.16.0**. Upstream lists npm 11.6.2; our npm only installs the pinned Node binary, not the released server dependency graph.
 
-Docker client **29.2.0** was installed but the daemon unavailable. This delivery validates native stdio, not a container image. Each run has a fresh directory; `workingDirectory` is restricted to it and graph storage is redirected there. This is application-level containment, not an OS sandbox. Only the two reviewed local servers are enabled. New shell/filesystem/browser/network/database servers need a separate review.
+Docker client **29.2.0** was installed but the daemon unavailable. This delivery validates native stdio, not a container image. Each run has a fresh directory; `workingDirectory` is restricted to it and graph storage is redirected there. This is application-level containment, not an OS sandbox. Eight reviewed local profiles are now enabled, with private HOME, per-run storage and filesystem allowlists. New shell/browser/network/database services still require review. See the [full inventory and service coverage](full-benchmark.md); installing archived files does not enable their execution.
 
 The full upstream requirements include CUDA/NVIDIA dependencies and a wider research environment. That unchanged list is not our Apple Silicon installation path. The adapter installs only its runtime dependencies and retains released Node dependency closures without upgrades.
 
@@ -56,3 +56,7 @@ The [paper's §6.1 and Appendix D.1](https://arxiv.org/html/2607.14642v1) define
 Single-version results have `ECS=null` and `ecs_inputs`. Pair task, strategy, model/config, and repetition across three stages before computing ECS. Upstream aligns filenames and prefers unrounded TF means. Keep filenames stable (`139.json`) and disclose missing triplets rather than silently shrinking the set.
 
 The primary academic source is [Liu et al., arXiv:2607.14642v1 (2026)](https://arxiv.org/abs/2607.14642v1), a preprint rather than a verified journal publication. Executable behavior is grounded in the pinned released source when it differs from the paper.
+
+## Full-release audit update
+
+The complete selected task inventory, all three Node archives, reviewed profiles and per-task readiness are now published in the [full benchmark handoff](full-benchmark.md). Static entry availability covers 163/201 tasks; 24/24 reviewed server-stage catalogs initialize successfully. Functional checks expose a Late `sequentialthinking` release bug (`getThoughtHistory` is absent in its implementation). Preserve that released behavior and record its impact; do not silently patch the benchmark or blame an adaptation method. Python/uvx server configurations, external credentials, task fixtures and missing exact-name launch configurations remain explicit blockers.

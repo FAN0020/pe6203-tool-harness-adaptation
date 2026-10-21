@@ -1,0 +1,429 @@
+{
+  "schema_version": "1.0",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "version": "early",
+  "source": "live_released_mcp_servers",
+  "tools": [
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::create_entities",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "create_entities",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "entities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the entity"
+                },
+                "entityType": {
+                  "type": "string",
+                  "description": "The type of the entity"
+                },
+                "observations": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "An array of observation contents associated with the entity"
+                }
+              },
+              "required": [
+                "name",
+                "entityType",
+                "observations"
+              ]
+            }
+          }
+        },
+        "required": [
+          "entities"
+        ]
+      },
+      "description": "Create multiple new entities in the knowledge graph",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "create_entities"
+      }
+    },
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::create_relations",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "create_relations",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "description": "The name of the entity where the relation starts"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "The name of the entity where the relation ends"
+                },
+                "relationType": {
+                  "type": "string",
+                  "description": "The type of the relation"
+                }
+              },
+              "required": [
+                "from",
+                "to",
+                "relationType"
+              ]
+            }
+          }
+        },
+        "required": [
+          "relations"
+        ]
+      },
+      "description": "Create multiple new relations between entities in the knowledge graph. Relations should be in active voice",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "create_relations"
+      }
+    },
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::add_observations",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "add_observations",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "observations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entityName": {
+                  "type": "string",
+                  "description": "The name of the entity to add the observations to"
+                },
+                "contents": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "An array of observation contents to add"
+                }
+              },
+              "required": [
+                "entityName",
+                "contents"
+              ]
+            }
+          }
+        },
+        "required": [
+          "observations"
+        ]
+      },
+      "description": "Add new observations to existing entities in the knowledge graph",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "add_observations"
+      }
+    },
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::delete_entities",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "delete_entities",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "entityNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "An array of entity names to delete"
+          }
+        },
+        "required": [
+          "entityNames"
+        ]
+      },
+      "description": "Delete multiple entities and their associated relations from the knowledge graph",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "delete_entities"
+      }
+    },
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::delete_observations",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "delete_observations",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "deletions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entityName": {
+                  "type": "string",
+                  "description": "The name of the entity containing the observations"
+                },
+                "observations": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "An array of observations to delete"
+                }
+              },
+              "required": [
+                "entityName",
+                "observations"
+              ]
+            }
+          }
+        },
+        "required": [
+          "deletions"
+        ]
+      },
+      "description": "Delete specific observations from entities in the knowledge graph",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "delete_observations"
+      }
+    },
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::delete_relations",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "delete_relations",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "description": "The name of the entity where the relation starts"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "The name of the entity where the relation ends"
+                },
+                "relationType": {
+                  "type": "string",
+                  "description": "The type of the relation"
+                }
+              },
+              "required": [
+                "from",
+                "to",
+                "relationType"
+              ]
+            },
+            "description": "An array of relations to delete"
+          }
+        },
+        "required": [
+          "relations"
+        ]
+      },
+      "description": "Delete multiple relations from the knowledge graph",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "delete_relations"
+      }
+    },
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::read_graph",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "read_graph",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      },
+      "description": "Read the entire knowledge graph",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "read_graph"
+      }
+    },
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::search_nodes",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "search_nodes",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search query to match against entity names, types, and observation content"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "description": "Search for nodes in the knowledge graph based on a query",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "search_nodes"
+      }
+    },
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::open_nodes",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "open_nodes",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "An array of entity names to retrieve"
+          }
+        },
+        "required": [
+          "names"
+        ]
+      },
+      "description": "Open specific nodes in the knowledge graph by their names",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "open_nodes"
+      }
+    },
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::update_entities",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "update_entities",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "entities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the entity to update"
+                },
+                "entityType": {
+                  "type": "string",
+                  "description": "The updated type of the entity"
+                },
+                "observations": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The updated array of observation contents"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "entities"
+        ]
+      },
+      "description": "Update multiple existing entities in the knowledge graph",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "update_entities"
+      }
+    },
+    {
+      "tool_id": "@itseasy21/mcp-knowledge-graph::update_relations",
+      "server_id": "@itseasy21/mcp-knowledge-graph",
+      "version": "early",
+      "name": "update_relations",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "description": "The name of the entity where the relation starts"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "The name of the entity where the relation ends"
+                },
+                "relationType": {
+                  "type": "string",
+                  "description": "The type of the relation"
+                }
+              },
+              "required": [
+                "from",
+                "to",
+                "relationType"
+              ]
+            }
+          }
+        },
+        "required": [
+          "relations"
+        ]
+      },
+      "description": "Update multiple existing relations in the knowledge graph",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@itseasy21/mcp-knowledge-graph",
+        "tool_name": "update_relations"
+      }
+    }
+  ]
+}

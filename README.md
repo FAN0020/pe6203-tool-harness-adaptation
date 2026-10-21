@@ -1,108 +1,88 @@
 # PE6203 Tool Harness Adaptation under Environment Change
 
-**Project 4 · MCPEvol-Bench · Group A environment and runner handoff**
+**Project 4 · MCPEvol-Bench · Group A environment and runner**
 
-Compare No Update, Full Rewrite, and Selective Patch when MCP tools evolve, with the same model, decoding settings, tasks, and judge. The repository keeps its existing GitHub name; Project 4 supersedes the initial Project 2 scaffold.
+比较 No Update、Full Rewrite、Selective Patch 在工具变化后的表现，固定模型、任务、judge 与执行环境。课程要求以 [Project 4 brief](docs/project-brief.md) 为准。
 
-当前 `baselines/xiaohua-integration` 已接入可读 CLI：task 139、Middle、No Update + LLM Full Rewrite，三个角色使用同一 DeepSeek Flash。配置好的本机 `.env` 通过下面命令加载：
+## 当前交付 / Status
 
-```bash
-uv run --env-file .env python -m integration.test_real_baselines --version middle --allow-metadata-api
-uv run pe6203 report results/raw/<上面输出的运行目录> --details
-```
+**201 个官方任务已完成全量环境审计；真实 LLM agent → MCP → judge 尚未验收。** 需要明确的 API base URL 与 agent/judge model IDs。现有真实工具日志和 fake-model 协议测试都不算模型 benchmark 分数。
 
-运行后显示摘要并保存 `report.txt`；`--details` 展开逐次评分、工具调用和最终回答。`report` 只读日志，不调用模型；`--format json` 保留机器格式。每次真实运行使用新目录，所有失败保留。
-
-本轮已跑结果：`uv run pe6203 report results/raw/xiaohua-cli-middle-20261019`。可共享证据：[No Update](results/evidence/xiaohua-cli-middle-20261019/no_update.json)、[Full Rewrite](results/evidence/xiaohua-cli-middle-20261019/full_rewrite.json)、[核查记录](results/evidence/xiaohua-cli-middle-20261019/verification.json)。
-
-## 团队入口 Team execution plan
-
-**先读 [一页执行设定](docs/plan/README.md)**：两类业务场景；目标 4 个开发任务 + 8 个正式任务；3 阶段 × 3 策略；2 周交付，第三周补重复与复现。任务数量是团队预算选择，正式集合尚未冻结。
-
-| 读者 | 从这里开始 | 交接产物 |
+| 已验证内容 | 范围 | 入口 |
 | --- | --- | --- |
-| A 环境与 runner | [排期与验收](docs/plan/workplan.md)、[接口](docs/plan/interfaces.md) | 真实链路、任务环境、日志与批次记录 |
-| B 基线 / C 局部更新 | [方法设定](docs/plan/project-spec.md)、[接口](docs/plan/interfaces.md) | knowledge、patch、validation、更新成本 |
-| D 评测与报告 | [实验协议](docs/plan/evaluation-protocol.md)、[报告模板](reports/templates/README.md) | 冻结任务、配对指标、失败分析 |
-| Coding agent | [AGENTS.md](AGENTS.md)、[结构化计划](experiments/README.md) | 按依赖执行 backlog，以证据验收 |
+| 来源与安装 | 锁定 commit/revision、三阶段完整 Node 发布包、Python/Node dependencies | [环境与官方评分入口](docs/environment.md) |
+| 全量 inventory | 201 tasks，128 个任务 server names；163 个任务所需 Node 入口齐备 | [全量交接与缺口](docs/full-benchmark.md) |
+| MCP catalogs | 8 reviewed services × 3 stages，24/24 启动与目录检查 | [完整 catalogs](examples/catalogs/README.md) |
+| 实际工具执行 | 原两服务三阶段持久化通过；新增六服务 17/18 检查通过 | [证据](results/evidence/full-benchmark/README.md)；Late thinking 有上游错误 |
+| Runner | 任意 selected task ID + reviewed profiles、隔离工作目录、fixture hashes、完整知识输入 | [A/B/C/D 交接](docs/group-a-handoff.md) |
+| Batch | 显式运行计划、ledger、恢复、哈希检查；保留低分与失败 | [三阶段开发样例](configs/batch-task139.example.json) |
 
-计划文件可供协作；它们不代表正式实验已经完成。来源及课程要求与团队选择的区别见 [来源表](docs/plan/sources.md)。
+当前 profile 覆盖任务 **103、105、139、283、393** 的固定服务器集合；只有 139 已完成空状态 development smoke 审查，其它 fixture 尚未全部核定。其余任务的缺口逐项记录；不能将完整发布包安装等同于全部服务运行成功。
 
-## Current status
+## 团队入口
 
-本分支已经验证真实 DeepSeek → MCP → judge 的开发闭环：task 139 / Middle / seed 0，No Update TF 8.2、PE 7.0；LLM Full Rewrite TF 9.0、PE 7.2，各有 5 次有效评分。两组 agent 均触及 12 轮上限，Full Rewrite 有一次缺少 projectId 的工具错误。它们是可追溯的开发结果，不是完整 benchmark 或策略优越性的证明；ECS、USD 仍未获得。
-
-| Group A deliverable | Status |
+| 读者 | 内容 |
 | --- | --- |
-| Upstream source, commit, server releases, dependencies | Pinned and checked |
-| Python and Node environment | Installed and exercised on macOS arm64 |
-| Stage switching and judge/metric entry points | Documented, including release discrepancies |
-| Real MCP calls and persistent state across restart | Verified on all three stages |
-| Runner, metadata, trace and result interfaces | Implemented with tests and examples |
-| Real model agent and model judge | Verified on task 139 / Middle; judge complete, agent max_rounds |
+| 全组 | [一页执行设定](docs/plan/README.md)：2–3 周；目标 4 development + 8 evaluation，正式集合尚未冻结 |
+| A | [全量 benchmark 交接](docs/full-benchmark.md)、[环境安装](docs/environment.md) |
+| B/C | [完整 metadata](examples/catalogs/README.md)、[方法设定](docs/plan/project-spec.md)、[接口](docs/plan/interfaces.md) |
+| D | [实验协议](docs/plan/evaluation-protocol.md)、[readiness](results/evidence/full-benchmark/task-readiness.json)、[报告模板](reports/templates/README.md) |
+| Coding agent | [AGENTS.md](AGENTS.md)、[结构化计划](experiments/README.md)、[backlog](experiments/backlog.json) |
 
-Read [Group A handoff](docs/group-a-handoff.md), [environment audit](docs/environment.md), and [project requirements](docs/project-brief.md).
+## 安装与真实 MCP 验证
 
-当前本地验证：**89 tests passed**，lint/format 通过，另有上述真实模型记录。历史环境验证为独立 clean checkout 的 22 项测试，[证据](results/evidence/clean-checkout.json)保留当时版本。GitHub Actions 不下载大型服务快照，相关测试可能 skip；fake model 测试只证明程序接线。
-
-## Reproduce the environment
-
-Prerequisites: Git, [uv](https://docs.astral.sh/uv/), and npm. Run from the repository root.
+需要 Git、[uv](https://docs.astral.sh/uv/) 和 npm；仓库根目录运行：
 
 ```bash
-git clone https://github.com/FAN0020/pe6203-agent-harness-safety.git
-cd pe6203-agent-harness-safety
+git clone https://github.com/FAN0020/pe6203-tool-harness-adaptation.git
+cd pe6203-tool-harness-adaptation
 uv sync --frozen
 npm install --prefix .cache/node-runtime --no-save --package-lock=false node@24.13.0
 export MCPEVOL_NODE="$PWD/.cache/node-runtime/node_modules/node/bin/node"
-uv run pe6203 bootstrap
+uv run pe6203 bootstrap --scope all
 uv run pe6203 doctor
+uv run pe6203 inventory --output results/raw/inventory.json
+uv run pe6203 probe-servers --output results/raw/catalog-check
 uv run pytest -q
 ```
 
-The first bootstrap downloads approximately **3.40 GB** of release ZIPs and verifies their SHA256 digests. It extracts the two smoke servers and their bundled dependency closures without resolving current npm versions. Runtime files stay under ignored `.cache/`. Docker and 1mcp are not required by this adapter; its MCP SDK connects directly to the released servers over stdio.
+ZIP 下载约 3.40 GB，完整展开约 12 GB；先校验 SHA256，直接运行发布包，不重新解析最新 npm 依赖。仅复现原两服务 smoke 可用 `bootstrap --scope smoke`。Docker/1mcp 不是此 native-stdio adapter 的依赖；未声称完成容器验证。
 
 ```bash
 uv run pe6203 probe --version early --output results/raw/probe-early
 uv run pe6203 probe --version middle --output results/raw/probe-middle
 uv run pe6203 probe --version late --output results/raw/probe-late
-uv run pe6203 metadata --version late --output results/raw/late-metadata.json
+uv run python scripts/probe_reviewed_services.py --output results/raw/functional-check
 ```
 
-Each probe creates local project/task and knowledge-graph data, restarts both services, then reads it back. Use a new output directory for each run; existing runs are never overwritten.
+每次输出目录必须是新的。最后一条当前保留 Late `sequentialthinking` 的官方运行错误，退出 2；其它 17 项检查通过。详见 [证据与复现边界](results/evidence/full-benchmark/README.md)。
 
-## Run the real model pipeline
+## 真实模型运行
 
-Set the four variables in [.env.example](.env.example). Credentials are never embedded in configs or inherited by MCP servers. `.env` is not automatically loaded. Configure models in a copy of [configs/smoke.json](configs/smoke.json); `gpt-4o` is an upstream example, not confirmed account access. The paper reports DeepSeek-Chat as judge while the released evaluator defaults to `gpt-4o`; select and freeze one protocol before comparing strategies.
+将 [full-catalog config](configs/full-catalog-smoke.json) 复制到 ignored 的 `configs/local.json`，填写两个实际 model IDs，并 export [.env.example](.env.example) 中四个变量；`.env` 不会自动载入。不能凭现有 key 的变量名猜测 provider。MCP 子进程不继承模型 key。
 
 ```bash
-cp configs/smoke.json configs/local.json
-# Edit configs/local.json and export the API variables in your shell.
+cp configs/full-catalog-smoke.json configs/local.json
+# Edit agent.model / judge.model; export explicit endpoint/key variables.
 uv run pe6203 run --task-id 139 --version early \
   --strategy current_metadata_smoke --seed 0 \
   --config configs/local.json \
-  --knowledge examples/knowledge/early-task139.json \
+  --knowledge examples/catalogs/task139/early.json \
   --output results/raw/task139-early-seed0
+
+uv run pe6203 batch --plan configs/batch-task139.example.json \
+  --output results/raw/task139-three-stages
+# Resume only the identical plan/config/artifacts:
+uv run pe6203 batch --plan configs/batch-task139.example.json \
+  --output results/raw/task139-three-stages --resume
 ```
 
-For Middle/Late smoke runs, change `--version` and use the matching `examples/knowledge/<version>-task139.json`. These are current-metadata smoke runs, not implementations of the team's adaptation strategies.
+完整 task139 catalogs 分别有 40/40/44 tools；旧四工具样例只用于历史 smoke。No Update 在 Middle/Late 仍提供 Early knowledge。Full Rewrite / Selective Patch 要由 B/C 交更新后的 knowledge；strategy 标签本身不实现算法。
 
-For No Update on an evolved server, supply Early knowledge and `--strategy no_update`. For Full Rewrite or Selective Patch, B/C supply the knowledge generated by their method. A strategy label records the source of knowledge; it does not implement that method.
+接口保持 `run(task_id, version, strategy, seed, config) → (raw_trace, benchmark_result)`。真模型验收需实际 tool call、最终回答和五次有效官方 judge 结果；blocked / incomplete 分数保持 `null`，不填 0。ECS 需三阶段配对后计算。
 
-Interface: `run(task_id, version, strategy, seed, config) → (raw_trace, benchmark_result)`. The validated scope is official task **139** and two local servers. New task/server definitions must be reviewed before expansion; unsupported tasks are rejected rather than replaced with mocks.
+## 验证与来源
 
-## Files for teammates
+本次本地检查与独立 checkout 结果见[验证回执](results/evidence/full-benchmark/README.md)。CI 运行 lint 与不依赖发布包的测试；bootstrap 后的本地测试包含真实 MCP。Fake model HTTP fixture 只验证协议接线。
 
-- `src/pe6203/`: bootstrap, task loading, MCP transport, model runner, judge bridge, CLI.
-- `configs/benchmark.lock.json`, `uv.lock`: immutable upstream and dependency pins.
-- `examples/metadata/`: complete real catalogs for Early/Middle/Late.
-- `examples/knowledge/`: four task-139 tools selected from each catalog.
-- `schemas/`: ToolRecord and result JSON contracts.
-- `results/evidence/`: reviewed real transport evidence and environment report.
-- `tests/`: leakage, routing, score validation, round-limit, persistence, and output checks.
-
-完整 benchmark、Selective Patch 和正式分析仍待完成。旧计划与 Group A handoff 记录初始交接状态；本分支当前运行入口和验证状态以上述 baseline 说明与证据为准。
-
-## Primary sources
-
-Based on the [MCPEvol-Bench public source release](https://github.com/Octobrist/MCPEvol-Bench/tree/888c779a0fe735f612ca62bdd1fdd7c9e6bf8701), its [server dataset](https://huggingface.co/datasets/anonymous2233/evol-servers/tree/162e3ffbea1717ac8a20fe9b26465e29117229e4), and [Liu et al., arXiv:2607.14642v1](https://arxiv.org/abs/2607.14642v1). The paper is a preprint; no journal peer-review status is claimed. See the source audit for differences between paper and code.
+以 [官方代码固定 commit](https://github.com/Octobrist/MCPEvol-Bench/tree/888c779a0fe735f612ca62bdd1fdd7c9e6bf8701)、[服务器数据固定 revision](https://huggingface.co/datasets/anonymous2233/evol-servers/tree/162e3ffbea1717ac8a20fe9b26465e29117229e4) 和 [Liu et al., arXiv:2607.14642v1](https://arxiv.org/abs/2607.14642v1) 为依据。论文是 preprint，不声称已通过期刊同行评审；发布代码与论文的差异见[来源审计](docs/environment.md)。

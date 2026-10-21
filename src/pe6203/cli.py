@@ -8,23 +8,31 @@ import sys
 import tempfile
 from pathlib import Path
 
+from .audit import probe_servers
+from .batch import run_batch
 from .benchmark import load_task, read_json, source, write_json
 from .bootstrap import bootstrap
+from .inventory import build_inventory
 from .judge import ecs
 from .runner import run
 from .transport import sessions, snapshot
 
 
-async def metadata(root, version, output):
+async def metadata(root, version, output, task_id=None):
     lock, upstream = source(root)
-    task = load_task(upstream, lock["smoke_task_id"])
+    task = load_task(upstream, task_id if task_id is not None else lock["smoke_task_id"])
     with tempfile.TemporaryDirectory(prefix="mcpevol-metadata-") as tmp:
         async with sessions(
             root, version, task["servers"], Path(tmp), Path(tmp) / "stderr.log"
         ) as clients:
             result = await snapshot(clients, version, lock["commit"])
     write_json(output, result)
-    return {"output": str(output), "version": version, "tools": len(result["tools"])}
+    return {
+        "output": str(output),
+        "task_id": task["idx"],
+        "version": version,
+        "tools": len(result["tools"]),
+    }
 
 
 async def probe(root, version, output):
@@ -168,11 +176,6 @@ def main():
     parser = argparse.ArgumentParser(description="PE6203 Group A MCPEvol environment and runner")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Project checkout root")
     sub = parser.add_subparsers(dest="command", required=True)
-    report = sub.add_parser("report", help="Read saved run or baseline pilot results; no API calls")
-    report.add_argument("inputs", type=Path, nargs="+")
-    report.add_argument("--details", action="store_true")
-    report.add_argument("--format", choices=["text", "json", "html"], default="text")
-    report.add_argument("--output", type=Path, help="Save to a new .txt/.json/.html file")
     setup = sub.add_parser("bootstrap", help="Verify and install immutable benchmark releases")
     setup.add_argument(
         "--stages",
@@ -180,10 +183,30 @@ def main():
         choices=["early", "middle", "late"],
         default=["early", "middle", "late"],
     )
+    setup.add_argument("--scope", choices=["smoke", "all"], default="smoke")
+    p = sub.add_parser("inventory", help="Audit all selected tasks and released server entries")
+    p.add_argument("--output", type=Path, required=True)
+    p = sub.add_parser(
+        "probe-servers", help="Initialize reviewed services and export complete catalogs"
+    )
+    p.add_argument(
+        "--stages",
+        nargs="+",
+        choices=["early", "middle", "late"],
+        default=["early", "middle", "late"],
+    )
+    p.add_argument("--timeout", type=float, default=30)
+    p.add_argument("--output", type=Path, required=True)
+    p = sub.add_parser("batch", help="Execute an explicit run plan with a resumable ledger")
+    p.add_argument("--plan", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--resume", action="store_true")
     for name in ("metadata", "probe"):
         p = sub.add_parser(name)
         p.add_argument("--version", choices=["early", "middle", "late"], required=True)
         p.add_argument("--output", type=Path, required=True)
+        if name == "metadata":
+            p.add_argument("--task-id", type=int, default=139)
     sub.add_parser("doctor", help="Report environment and credential presence, never secret values")
     p = sub.add_parser("run", help="Run agent -> real MCP -> official rubric judge -> saved logs")
     p.add_argument("--task-id", type=int, default=139)
@@ -194,7 +217,6 @@ def main():
         required=True,
     )
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--format", choices=["text", "json"], default="text")
     p.add_argument("--config", type=Path, default=Path("configs/smoke.json"))
     p.add_argument("--knowledge", type=Path)
     p.add_argument("--output", type=Path, required=True)
@@ -202,21 +224,38 @@ def main():
     p.add_argument("scores", type=Path)
     args = parser.parse_args()
     try:
-        if args.command == "report":
-            from .report import render_saved_report
-
-            rendered = render_saved_report(
-                args.inputs, format_name=args.format, expanded=args.details, output=args.output
-            )
-            print(rendered, end="")
-            return 0
-        elif args.command == "bootstrap":
-            result = bootstrap(args.root, args.stages)
+        if args.command == "bootstrap":
+            result = bootstrap(args.root, args.stages, args.scope)
             result = {
                 k: {"files": v["files"], "packages": len(v["packages"])} for k, v in result.items()
             }
-        elif args.command in ("metadata", "probe"):
-            result = asyncio.run(globals()[args.command](args.root, args.version, args.output))
+        elif args.command == "inventory":
+            lock, upstream = source(args.root)
+            result = build_inventory(upstream, lock, args.root / ".cache/mcpevol")
+            write_json(args.output, result)
+            result = {"output": str(args.output), **result["summary"]}
+        elif args.command == "probe-servers":
+            result = asyncio.run(probe_servers(args.root, args.stages, args.output, args.timeout))
+            result = {
+                "output": str(args.output),
+                "checks": len(result["servers"]),
+                "verified": sum(r["status"] == "catalog_verified" for r in result["servers"]),
+            }
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+            return 0 if result["verified"] == result["checks"] else 2
+        elif args.command == "batch":
+            ledger = run_batch(args.root, args.plan, args.output, args.resume)
+            result = {
+                "output": str(args.output),
+                "runs": len(ledger["runs"]),
+                "complete": sum(r["status"] == "complete" for r in ledger["runs"]),
+            }
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+            return 0 if result["complete"] == result["runs"] else 2
+        elif args.command == "metadata":
+            result = asyncio.run(metadata(args.root, args.version, args.output, args.task_id))
+        elif args.command == "probe":
+            result = asyncio.run(probe(args.root, args.version, args.output))
         elif args.command == "doctor":
             result = doctor(args.root)
         elif args.command == "ecs":
@@ -227,11 +266,7 @@ def main():
             if args.knowledge:
                 config["knowledge_path"] = str(args.knowledge)
             _, result = run(args.task_id, args.version, args.strategy, args.seed, config)
-            report_path = args.output / "report.txt"
-            if args.format == "text" and report_path.is_file():
-                print(report_path.read_text(encoding="utf-8"), end="")
-            else:
-                print(json.dumps(result, indent=2, ensure_ascii=False))
+            print(json.dumps(result, indent=2, ensure_ascii=False))
             return 0 if result["status"] == "evaluated" else 2
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
