@@ -15,6 +15,7 @@ from .benchmark import load_task, read_json, source, write_json
 from .bootstrap import bootstrap
 from .inventory import build_inventory
 from .judge import ecs
+from .report import render_saved_report
 from .runner import run
 from .transport import sessions, snapshot
 
@@ -177,11 +178,22 @@ def main():
     parser = argparse.ArgumentParser(description="PE6203 Group A MCPEvol environment and runner")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Project checkout root")
     sub = parser.add_subparsers(dest="command", required=True)
-    p = sub.add_parser("adapt", help="Build Sprint 1 baseline knowledge (deterministic, no LLM)")
+    p = sub.add_parser("report", help="Read saved run reports offline; no model calls")
+    p.add_argument("inputs", nargs="+", type=Path, help="Run directories or saved evidence files")
+    p.add_argument("--format", choices=["text", "json", "html"], default="text")
+    p.add_argument("--details", action="store_true", help="Include tool calls and saved state")
+    p.add_argument("--output", type=Path, help="Write to a new file without overwriting")
+    p = sub.add_parser("adapt", help="Build baseline knowledge; Full Rewrite uses an LLM")
     p.add_argument("--strategy", choices=["no_update", "full_rewrite"], required=True)
     p.add_argument("--old-knowledge", type=Path, required=True)
     p.add_argument("--new-metadata", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument(
+        "--updater-config", type=Path, help="Updater JSON settings; use env names for secrets"
+    )
+    p.add_argument(
+        "--allow-metadata-api", action="store_true", help="Allow sending tool metadata to updater"
+    )
     setup = sub.add_parser("bootstrap", help="Verify and install immutable benchmark releases")
     setup.add_argument(
         "--stages",
@@ -232,9 +244,29 @@ def main():
     p.add_argument("scores", type=Path)
     args = parser.parse_args()
     try:
-        if args.command == "adapt":
+        if args.command == "report":
+            print(
+                render_saved_report(
+                    args.inputs,
+                    format_name=args.format,
+                    expanded=args.details,
+                    output=args.output,
+                ),
+                end="",
+            )
+            return 0
+        elif args.command == "adapt":
             result = write_adaptation(
-                args.old_knowledge, args.new_metadata, args.strategy, args.output
+                args.old_knowledge,
+                args.new_metadata,
+                args.strategy,
+                args.output,
+                context={
+                    "updater": {
+                        **(read_json(args.updater_config) if args.updater_config else {}),
+                        "allow_metadata_api": args.allow_metadata_api,
+                    }
+                },
             )
         elif args.command == "bootstrap":
             result = bootstrap(args.root, args.stages, args.scope)

@@ -159,14 +159,23 @@ def test_pilot_entrypoint_with_mocked_api_and_runner(
         if strategy == "full_rewrite":
             assert config["update_cost"]["tokens"] == 151
             assert config["update_cost"]["usd"] is None
-        return {}, {
+        result = {
+            "task_id": task_id,
+            "version": version,
+            "seed": seed,
+            "config": config,
             "strategy": strategy,
             "status": "evaluated",
+            "execution_status": "completed",
+            "judge_status": "complete",
             "TF": 7,
             "PE": 8,
             "ECS": None,
             "errors": [],
         }
+        # The runner contract persists observations before the pilot renders them.
+        pilot.write_json(Path(config["output_dir"]) / "result.json", result)
+        return {}, result
 
     monkeypatch.setattr(pilot.runner, "run", run)
     if fail:
@@ -187,3 +196,6 @@ def test_pilot_entrypoint_with_mocked_api_and_runner(
     summary = json.loads((output / "summary.json").read_text())
     assert summary["full_rewrite_method"] == "llm_full_rewrite"
     assert summary["runs"][-1]["status"] == ("adaptation_failed" if fail else "evaluated")
+    visible = (output / "report.txt").read_text()
+    assert "7.00" in visible and "8.00" in visible
+    assert ("adaptation_failed" in visible) == fail

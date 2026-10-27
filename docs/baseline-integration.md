@@ -1,5 +1,8 @@
 # 项目 4 Baseline 本地接入记录
 
+2026-10-27：通用入口也已接入 LLM Full Rewrite，当前使用方式见
+[通用入口说明](common-llm-baselines.md)。以下为原接入过程的历史记录。
+
 更新于 2026-10-19：Full Rewrite 已改为 deepseek-flash LLM 全目录重写，原文下面的确定性原型记录仅为历史。当前命令与行为以 [DeepSeek 接入说明](deepseek-baseline-pilot.md) 为准。pytest 使用显式 mock updater，不调用外部模型。旧 synthetic 日志入口和 knowledge 导出入口均需要 --allow-metadata-api，运行会产生更新费用。No Update 保持不变。LLM 描述不再要求与 metadata 逐字相等，工具覆盖与结构字段必须一致，未知成本保留 null。
 
 队友的实现位于 `integration/baselines.py`。本次将其接入现有 wrapper，使用六组合成数据验证两种策略。A 组的 MCPEvol-Bench runner 尚未接入。
