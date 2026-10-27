@@ -28,7 +28,7 @@ def test_selected_non_smoke_task_reaches_credential_preflight(tmp_path, monkeypa
     knowledge.write_text(
         json.dumps({"benchmark_commit": "pin", "version": "early", "tools": [record()]})
     )
-    config = json.loads((root / "configs/smoke.json").read_text())
+    config = json.loads((root / "configs/full-catalog-smoke.json").read_text())
     config.update(
         root=str(tmp_path), output_dir=str(tmp_path / "run"), knowledge_path=str(knowledge)
     )

@@ -56,7 +56,7 @@ def test_released_mcp_services_write_and_reload_real_state(tmp_path, version):
 def test_missing_credentials_are_saved_as_blocked_not_scores(tmp_path, monkeypatch):
     if not (ROOT / ".cache/mcpevol/upstream/.git").exists():
         pytest.skip("Requires the pinned upstream checkout")
-    config = json.loads((ROOT / "configs/smoke.json").read_text())
+    config = json.loads((ROOT / "configs/full-catalog-smoke.json").read_text())
     config.update(root=str(ROOT), output_dir=str(tmp_path / "missing-credentials"))
     monkeypatch.delenv("AGENT_API_KEY", raising=False)
     _, result = module("runner").run(139, "early", "no_update", 0, config)

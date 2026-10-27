@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "runnable_config": false,
+  "path_base": "repository_root",
+  "as_of": "2026-10-19",
+  "course": "PE6203 Project 4: Tool Harness Adaptation under Environment Change",
+  "objective": "在固定模型下，比较工具变化后局部更新对任务恢复、能力保持和更新成本的影响。",
+  "main_case": {
+    "task_id": 223,
+    "name": "最新论文检索 → HTML 网页发布",
+    "role": "development_optimization",
+    "selection_basis": "用户提出的主优化方向；已核对官方 selected task",
+    "status": "selected_not_runnable",
+    "details_ref": "experiments/task-manifest.v1.json"
+  },
+  "other_cases": {
+    "smoke_task_id": 139,
+    "regression_candidates": [
+      24,
+      28,
+      393,
+      226,
+      450
+    ],
+    "formal_evaluation_ids": [],
+    "rule": "其余任务用于回归/保留能力验证；候选不等于冻结测试集。139 已用于调试，只能作为 development。223 主优化案例也不进入独立 evaluation。"
+  },
+  "models": {
+    "general_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "OpenRouter",
+    "base_url": "https://openrouter.ai/api/v1",
+    "agent": "configured_and_smoke_verified",
+    "judge": "configured_and_smoke_verified",
+    "updater": "planned_same_model_not_implemented",
+    "local_config": "configs/local.smoke-no-reasoning.json",
+    "env": "ignored .env; explicit uv run --env-file .env",
+    "env_check": "agent/judge endpoint 与 key 存在；本轮仅检查配置，未重新调用 API"
+  },
+  "settings": {
+    "temperature": 0,
+    "agent_max_completion_tokens": 2048,
+    "judge_max_completion_tokens": 4096,
+    "judge_reasoning": false,
+    "judge_runs": 5,
+    "max_rounds": 12,
+    "request_timeout_seconds": 90,
+    "tool_timeout_seconds": 30,
+    "run_timeout_seconds": 600,
+    "send_model_seed": false,
+    "tool_name_policy": "namespaced"
+  },
+  "experiment": {
+    "stages": [
+      "early",
+      "middle",
+      "late"
+    ],
+    "strategies": [
+      "no_update",
+      "full_rewrite",
+      "selective_patch"
+    ],
+    "full_rewrite_now": "deterministic complete metadata rebuild",
+    "llm_full_rewrite": "pending",
+    "selective_patch": "pending",
+    "freeze_ref": "experiments/protocol.v1.json"
+  },
+  "verified": {
+    "task_id": 139,
+    "stage": "early",
+    "strategy": "no_update",
+    "TF": 9.8,
+    "PE": 8.6,
+    "ECS": null,
+    "judge_valid": 5,
+    "tests_passed": 68,
+    "evidence": "results/evidence/baseline-integration/verification.json"
+  },
+  "not_claimed": [
+    "完整 201-task 评测",
+    "三策略效果比较",
+    "223 网页案例已可运行",
+    "正式 LLM updater 已实现"
+  ],
+  "context_files": [
+    "docs/.context/requirements.json",
+    "docs/.context/sources.json",
+    "configs/.context/runtime.json",
+    "experiments/protocol.v1.json",
+    "experiments/task-manifest.v1.json",
+    "experiments/backlog.json",
+    "experiments/.context/workflow.json",
+    "src/pe6203/.context/contracts.json",
+    "examples/catalogs/.context/catalogs.json",
+    "fixtures/.context/fixtures.json",
+    "results/evidence/.context/index.json",
+    "reports/.context/report-template.json",
+    "contributions/baselines/wu-muchu/sprint1/.context/provenance.json"
+  ]
+}

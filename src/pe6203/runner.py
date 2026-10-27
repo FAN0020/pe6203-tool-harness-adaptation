@@ -33,7 +33,10 @@ def prepare_fixture(directory, workspace):
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, destination)
             files.append(
-                {"path": str(relative), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                {
+                    "path": str(relative),
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                }
             )
     return {"files": files, "manifest_sha256": digest(files)}
 
@@ -67,7 +70,13 @@ def redact(text, secrets):
 
 
 def protocol_hash(config, endpoints):
-    operational = {"root", "output_dir", "knowledge_path", "update_cost"}
+    operational = {
+        "root",
+        "output_dir",
+        "knowledge_path",
+        "update_cost",
+        "adaptation_path",
+    }
     return digest(
         {
             "settings": {k: v for k, v in config.items() if k not in operational},
@@ -77,7 +86,12 @@ def protocol_hash(config, endpoints):
 
 
 def prepare_tools(records, strategy, name_policy="native_unique"):
-    if strategy not in ("no_update", "full_rewrite", "selective_patch", "current_metadata_smoke"):
+    if strategy not in (
+        "no_update",
+        "full_rewrite",
+        "selective_patch",
+        "current_metadata_smoke",
+    ):
         raise ValueError(f"Unknown strategy label: {strategy}")
     tools, routes = [], {}
     if name_policy not in ("native_unique", "namespaced"):
@@ -133,17 +147,28 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
         "and schemas supplied to you. Do not invent successful tool results. "
         f"All workingDirectory arguments must be exactly: {workspace}"
     )
-    messages = [{"role": "system", "content": system}, {"role": "user", "content": question}]
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": question},
+    ]
     answer, status, usages = "", "max_rounds", []
     emit({"type": "initial_messages", "messages": copy.deepcopy(messages)})
     settings = {k: config["agent"][k] for k in ("model", "temperature", "max_completion_tokens")}
+    if "extra_body" in config["agent"]:
+        settings["extra_body"] = copy.deepcopy(config["agent"]["extra_body"])
     if config.get("send_model_seed", False):
         settings["seed"] = seed
     for turn in range(config["max_rounds"]):
         response = await client.chat.completions.create(messages=messages, tools=tools, **settings)
         message = response.choices[0].message.model_dump(exclude_none=True)
         usages.append(response.usage.model_dump() if response.usage else {})
-        emit({"type": "agent_response", "round": turn + 1, "response": response.model_dump()})
+        emit(
+            {
+                "type": "agent_response",
+                "round": turn + 1,
+                "response": response.model_dump(),
+            }
+        )
         messages.append(message)
         calls = message.get("tool_calls", [])
         if not calls:
@@ -173,7 +198,14 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
                 "content": json.dumps(payload, ensure_ascii=False),
             }
             messages.append(tool_message)
-            emit({"type": "tool_result", "round": turn + 1, "call": call, "result": payload})
+            emit(
+                {
+                    "type": "tool_result",
+                    "round": turn + 1,
+                    "call": call,
+                    "result": payload,
+                }
+            )
     return {
         "answer": answer,
         "messages": messages,
@@ -229,7 +261,12 @@ async def run_async(task_id, version, strategy, seed, config):
 
     trace = {"idx": task_id, "answer": "", "trajectory_messages": []}
     try:
-        for key in ("max_rounds", "judge_runs", "request_timeout_seconds", "run_timeout_seconds"):
+        for key in (
+            "max_rounds",
+            "judge_runs",
+            "request_timeout_seconds",
+            "run_timeout_seconds",
+        ):
             if type(config[key]) not in (float, int) or config[key] <= 0:
                 raise ValueError(f"{key} must be positive")
         if type(config["max_rounds"]) is not int or type(config["judge_runs"]) is not int:
@@ -246,6 +283,31 @@ async def run_async(task_id, version, strategy, seed, config):
         if config.get("fixture_dir"):
             result["fixture"] = prepare_fixture(root / config["fixture_dir"], workspace)
             write_json(output / "fixture-manifest.json", result["fixture"])
+        if config.get("adaptation_path"):
+            artifact_path = root / config["adaptation_path"]
+            artifact = read_json(artifact_path)
+            if (
+                artifact.get("status") != "validated"
+                or artifact.get("strategy") != strategy
+                or artifact.get("target_stage") != version
+                or artifact.get("benchmark_commit") != lock["commit"]
+            ):
+                raise ValueError("Adaptation artifact does not match this run")
+            adapted_path = artifact_path.parent / artifact["output"]["knowledge_path"]
+            if (
+                hashlib.sha256(adapted_path.read_bytes()).hexdigest()
+                != artifact["output"]["knowledge_file_sha256"]
+            ):
+                raise ValueError("Adaptation knowledge file hash mismatch")
+            config["knowledge_path"] = str(adapted_path.resolve())
+            config["update_cost"] = copy.deepcopy(artifact["cost"])
+            result["cost"]["update"] = copy.deepcopy(artifact["cost"])
+            result["adaptation_file_sha256"] = hashlib.sha256(
+                artifact_path.read_bytes()
+            ).hexdigest()
+            result["adaptation_method"] = artifact["cost"]["method"]
+            write_json(output / "adaptation.json", artifact)
+        result["config_sha256"] = digest(config)
         knowledge_path = Path(config["knowledge_path"])
         knowledge = read_json(
             knowledge_path if knowledge_path.is_absolute() else root / knowledge_path
@@ -253,6 +315,16 @@ async def run_async(task_id, version, strategy, seed, config):
         if knowledge["benchmark_commit"] != lock["commit"]:
             raise ValueError("Knowledge snapshot benchmark commit mismatch")
         records = knowledge["tools"]
+        # Vanilla should use the current stage's tool knowledge.
+        # Selective Patch is allowed to retain unchanged older records.
+        if strategy == "current_metadata_smoke" and (
+            knowledge.get("version") != version
+            or any(record.get("version") != version for record in records)
+        ):
+            raise ValueError(
+                "Vanilla/current_metadata_smoke requires the knowledge envelope "
+                "and every tool record to match the selected stage"
+            )
         tools, routes = prepare_tools(
             records, strategy, config.get("tool_name_policy", "native_unique")
         )
@@ -347,7 +419,13 @@ async def run_async(task_id, version, strategy, seed, config):
                                 messages=[{"role": "user", "content": prompt}],
                                 **{
                                     k: config["judge"][k]
-                                    for k in ("model", "temperature", "max_completion_tokens")
+                                    for k in (
+                                        "model",
+                                        "temperature",
+                                        "max_completion_tokens",
+                                        "extra_body",
+                                    )
+                                    if k in config["judge"]
                                 },
                             )
                             item["response"] = response.model_dump()
@@ -361,7 +439,12 @@ async def run_async(task_id, version, strategy, seed, config):
                 aggregate = aggregate_scores(scores, config["judge_runs"])
                 write_json(
                     output / "EVAL" / f"{task_id}.json",
-                    clean({**trace, "eval_result": {"runs": judge_runs, "aggregate": aggregate}}),
+                    clean(
+                        {
+                            **trace,
+                            "eval_result": {"runs": judge_runs, "aggregate": aggregate},
+                        }
+                    ),
                 )
                 result.update(
                     {
