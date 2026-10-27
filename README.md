@@ -37,3 +37,5 @@ uv run pytest -q tests/test_baselines.py tests/test_pipeline.py
 真实 MCP 测试需要先按运行说明 bootstrap；缺少发布包时会 skip，不能当作验证通过。
 
 Full Rewrite 通用入口及其后续 `run --adaptation` 用法见 [LLM 基线接入说明](docs/common-llm-baselines.md)。真实更新需要显式 `--allow-metadata-api`，会产生模型费用；未授权或重写失败时不会退回确定性重建。
+
+范子钰的评估交付、离线复现命令与下一步对接见 [Evaluation handoff](docs/fanziyu-evaluation.md)；已发布开发日志的核对结果见 [27 October pilot analysis](reports/fanziyu-pilot-analysis-20261027.md)。开发结果不等于正式三策略比较。
