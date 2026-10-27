@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 from openai import AsyncOpenAI
 
 from .benchmark import digest, load_task, read_json, source, write_json
+from .costs import provider_usd, sum_usd
 from .judge import aggregate_scores, official_prompt, parse_scores
 from .transport import check_arguments, server_profiles, sessions, snapshot
 
@@ -132,12 +133,17 @@ def prepare_tools(records, strategy, name_policy="native_unique"):
 
 
 def usage_total(usages):
-    return {
+    total = {
         key: sum(u[key] for u in usages)
-        if usages and all(isinstance(u.get(key), int) for u in usages)
+        if usages and all(type(u.get(key)) is int and u[key] >= 0 for u in usages)
         else None
         for key in ("prompt_tokens", "completion_tokens", "total_tokens")
     }
+    charges = [provider_usd(usage) for usage in usages]
+    total["usd"] = sum_usd(charges)
+    total["known_usd"] = sum_usd(value for value in charges if value is not None)
+    total["usd_source"] = "provider_usage.cost" if total["usd"] is not None else None
+    return total
 
 
 async def agent_loop(client, clients, tools, routes, question, workspace, config, seed, emit):
@@ -159,8 +165,13 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
     if config.get("send_model_seed", False):
         settings["seed"] = seed
     for turn in range(config["max_rounds"]):
-        response = await client.chat.completions.create(messages=messages, tools=tools, **settings)
-        message = response.choices[0].message.model_dump(exclude_none=True)
+        try:
+            response = await client.chat.completions.create(
+                messages=messages, tools=tools, **settings
+            )
+        except BaseException as exc:
+            emit({"type": "agent_error", "round": turn + 1, "error_type": type(exc).__name__})
+            raise
         usages.append(response.usage.model_dump() if response.usage else {})
         emit(
             {
@@ -169,6 +180,7 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
                 "response": response.model_dump(),
             }
         )
+        message = response.choices[0].message.model_dump(exclude_none=True)
         messages.append(message)
         calls = message.get("tool_calls", [])
         if not calls:
@@ -225,6 +237,7 @@ async def run_async(task_id, version, strategy, seed, config):
     workspace.mkdir()
     started = time.monotonic()
     secrets, events = [], []
+    recorded_usages = {"agent": [], "judge": []}
     result = {
         "schema_version": "1.0",
         "task_id": task_id,
@@ -254,6 +267,15 @@ async def run_async(task_id, version, strategy, seed, config):
         return json.loads(redact(json.dumps(value, ensure_ascii=False), secrets))
 
     def emit(event):
+        role = {
+            "agent_response": "agent",
+            "agent_error": "agent",
+            "judge_result": "judge",
+        }.get(event.get("type"))
+        if role:
+            # Retain billed responses even if a later parse, tool call or request fails.
+            recorded_usages[role].append((event.get("response") or {}).get("usage") or {})
+            result["cost"][role] = usage_total(recorded_usages[role])
         event = clean({"elapsed_seconds": round(time.monotonic() - started, 6), **event})
         events.append(event)
         with (output / "events.jsonl").open("a") as stream:
@@ -392,7 +414,7 @@ async def run_async(task_id, version, strategy, seed, config):
                 result["execution_status"] = outcome["status"]
                 result["cost"]["agent"] = outcome["usage"]
                 write_json(output / "ANSWER" / f"{task_id}.json", clean(trace))
-                rng, scores, judge_runs, usages = random.Random(seed), [], [], []
+                rng, scores, judge_runs = random.Random(seed), [], []
                 result["judge_status"] = "running"
                 async with AsyncOpenAI(
                     api_key=judge_key,
@@ -429,9 +451,13 @@ async def run_async(task_id, version, strategy, seed, config):
                                 },
                             )
                             item["response"] = response.model_dump()
-                            usages.append(response.usage.model_dump() if response.usage else {})
                             item["result"] = parse_scores(response.choices[0].message.content or "")
                             scores.append(item["result"])
+                        except asyncio.CancelledError:
+                            item["error"] = "CancelledError: Judge request cancelled"
+                            judge_runs.append(item)
+                            emit({"type": "judge_result", "run": index + 1, **item})
+                            raise
                         except Exception as exc:
                             item["error"] = f"{type(exc).__name__}: {exc}"
                         judge_runs.append(item)
@@ -455,7 +481,7 @@ async def run_async(task_id, version, strategy, seed, config):
                         "ecs_inputs": {version: aggregate["task_fulfillment_mean"]},
                     }
                 )
-                result["cost"]["judge"] = usage_total(usages)
+                result["cost"]["judge"] = usage_total(recorded_usages["judge"])
     except Exception as exc:
         for stage in ("execution_status", "judge_status"):
             if result[stage] == "running":
@@ -464,6 +490,13 @@ async def run_async(task_id, version, strategy, seed, config):
         result["status"] = "timeout" if isinstance(exc, TimeoutError) else "blocked"
         emit({"type": "run_error", "error": result["errors"][-1]})
     finally:
+        # Only publish a run total when all three stages report known amounts.
+        result["cost"]["usd"] = sum_usd(
+            (result["cost"].get(stage) or {}).get("usd") for stage in ("update", "agent", "judge")
+        )
+        result["cost"]["usd_source"] = (
+            "sum_of_recorded_stage_usd" if result["cost"]["usd"] is not None else None
+        )
         result["seconds"] = round(time.monotonic() - started, 6)
         # Events survive interruptions during the agent loop, before a final ANSWER exists.
         trace["events"] = events

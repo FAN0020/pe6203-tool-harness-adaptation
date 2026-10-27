@@ -160,7 +160,13 @@ async def upstream_agent_loop(
                     "tools": payload["tools"],
                 }
             )
-            response = await client.chat.completions.create(**payload, **settings)
+            try:
+                response = await client.chat.completions.create(**payload, **settings)
+            except BaseException as exc:
+                emit(
+                    {"type": "agent_error", "round": round_count, "error_type": type(exc).__name__}
+                )
+                raise
             usages.append(response.usage.model_dump() if response.usage else {})
             emit(
                 {"type": "agent_response", "round": round_count, "response": response.model_dump()}
