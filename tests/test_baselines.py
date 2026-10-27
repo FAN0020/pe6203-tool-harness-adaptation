@@ -49,7 +49,9 @@ def test_cross_server_same_names_are_not_dropped_or_rejected():
 
 
 @pytest.mark.parametrize("change", ["rename", "add", "remove", "parameter", "description", "rules"])
-def test_full_rebuild_uses_entire_target_catalog_and_no_update_stays_early(change):
+def test_full_rebuild_uses_entire_target_catalog_and_no_update_stays_early(
+    change, mock_baseline_llm
+):
     old, target = snapshot(), snapshot("late")
     extra = copy.deepcopy(target["tools"][0])
     extra.update(name="second", tool_id="server::second")
@@ -72,10 +74,14 @@ def test_full_rebuild_uses_entire_target_catalog_and_no_update_stays_early(chang
         target["tools"][0]["usage_rules"] = ["New constraint"]
     old_before, target_before = copy.deepcopy(old), copy.deepcopy(target)
     fresh, log, cost = adapt(old, target, "full_rewrite")
-    assert fresh == target
+    expected = copy.deepcopy(target)
+    for tool in expected["tools"]:
+        tool["description"] = "Rewritten: " + tool["description"]
+    assert fresh == expected
     assert log[0]["rebuilt_tool_ids"] == [t["tool_id"] for t in target["tools"]]
-    assert cost["method"] == "deterministic_full_rebuild"
-    assert cost["calls"] == cost["total_tokens"] == 0
+    assert cost["method"] == "llm_full_rewrite"
+    assert cost["calls"] == 1 and cost["total_tokens"] == 151
+    assert len(mock_baseline_llm) == 1
     unchanged, log, cost = adapt(old, target, "no_update")
     assert unchanged == old and log == []
     assert cost["seconds"] == cost["usd"] == cost["total_tokens"] == 0
@@ -127,7 +133,9 @@ def test_adaptation_rejects_mixed_sources_and_non_early_base(defect):
 def test_cli_adapt_writes_consumable_artifact_and_refuses_overwrite(tmp_path, strategy):
     old, target = tmp_path / "early.json", tmp_path / "late.json"
     old.write_text(json.dumps(snapshot()))
-    target.write_text(json.dumps(snapshot("late")))
+    # Subprocess tests make no model calls: Full Rewrite at Early reuses K0.
+    stage = "late" if strategy == "no_update" else "early"
+    target.write_text(json.dumps(snapshot(stage)))
     output = tmp_path / "adaptation"
     command = [
         sys.executable,
@@ -147,9 +155,9 @@ def test_cli_adapt_writes_consumable_artifact_and_refuses_overwrite(tmp_path, st
     assert run.returncode == 0, run.stderr
     knowledge = json.loads((output / "knowledge.json").read_text())
     artifact = json.loads((output / "adaptation.json").read_text())
-    assert knowledge["version"] == ("early" if strategy == "no_update" else "late")
+    assert knowledge["version"] == "early"
     assert artifact["strategy"] == strategy and artifact["status"] == "validated"
-    assert artifact["target_stage"] == "late"
+    assert artifact["target_stage"] == stage
     assert len(artifact["output"]["knowledge_file_sha256"]) == 64
     assert artifact["formal_llm_rewrite"] is False
     prepare_tools(knowledge["tools"], strategy)
@@ -169,7 +177,9 @@ def test_selective_patch_is_not_silently_implemented_as_full_rewrite():
 
 
 @pytest.mark.parametrize("defect", ["knowledge_changed", "wrong_strategy", "wrong_stage"])
-def test_runner_rejects_mismatched_adaptation_before_model_calls(tmp_path, monkeypatch, defect):
+def test_runner_rejects_mismatched_adaptation_before_model_calls(
+    tmp_path, monkeypatch, defect, mock_baseline_llm
+):
     from pe6203.benchmark import read_json
 
     if not (ROOT / ".cache/mcpevol/upstream/.git").exists():

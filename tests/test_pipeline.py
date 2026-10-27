@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
     + [("early", "no_update", True)],
 )
 def test_full_adapter_wiring_real_mcp_with_model_protocol_fixture(
-    tmp_path, monkeypatch, version, strategy, provider_fails
+    tmp_path, monkeypatch, version, strategy, provider_fails, mock_baseline_llm
 ):
     if not (ROOT / ".cache/mcpevol/original/extraction.json").exists():
         pytest.skip("Requires released MCP services")
@@ -143,9 +143,11 @@ def test_full_adapter_wiring_real_mcp_with_model_protocol_fixture(
         return
     assert result["status"] == "evaluated", result["errors"]
     expected_version = "early" if strategy == "no_update" else version
-    assert read_json(output / "knowledge.json") == read_json(
-        ROOT / f"examples/catalogs/task139/{expected_version}.json"
-    )
+    expected = read_json(ROOT / f"examples/catalogs/task139/{expected_version}.json")
+    if strategy == "full_rewrite" and version != "early":
+        for tool in expected["tools"]:
+            tool["description"] = "Rewritten: " + tool["description"]
+    assert read_json(output / "knowledge.json") == expected
     assert result["cost"]["update"] == artifact["cost"]
     assert len(requests[0]["tools"]) == (44 if expected_version == "late" else 40)
     assert len(read_json(output / "environment-metadata.json")["tools"]) == (

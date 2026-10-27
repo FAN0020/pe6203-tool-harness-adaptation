@@ -1,5 +1,9 @@
 # DeepSeek baseline 接入验证
 
+2026-10-27：通用 `pe6203 adapt` 已接入同一 LLM 重写实现，见
+[通用入口说明](common-llm-baselines.md)。本文保留 task139 上游 agent 桥接 pilot 的运行方式；
+它与通用 runner 的执行循环不同，不能将两种入口的分数混作同一 harness 的对比。
+
 兼容团队目录重组：优先读取 examples/catalogs/task139/{stage}.json 与 configs/full-catalog-smoke.json，旧 checkout 回退到 examples/metadata/{stage}.json 与 configs/smoke.json。此 task-139 pilot 固定 native_unique 工具名称，保留已验证的上游循环路由规则；通用多任务仍使用 A 组 runner 的命名政策。
 
 入口为 `integration/test_real_baselines.py`。仅开发任务 139，比较 Early 知识分别面对 Middle 或 Late 环境时的 No Update 和 Full Rewrite。`integration/baselines.py` 已从确定性复制更新为 LLM Full Rewrite：使用 deepseek-flash 对目标完整 catalog 中每个工具重新生成描述，包括未变化工具；名称、IDs、参数 schema、routing、output schema、来源版本及已有 usage rules 保留权威 metadata 原值。所有知识块完整重建。

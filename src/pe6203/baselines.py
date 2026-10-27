@@ -1,19 +1,48 @@
-"""Runner-compatible Sprint 1 baselines, adapted from Muchu Wu's submission.
-
-Full Rewrite here is a deterministic complete metadata rebuild, NOT the planned
-LLM semantic rewrite. Keep that distinction in every adaptation artifact.
-"""
+"""Runner-compatible baselines; Full Rewrite uses the shared LLM implementation."""
 
 import hashlib
 import json
 from copy import deepcopy
 from pathlib import Path
-from time import perf_counter
 
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import SchemaError
 
 from .benchmark import read_json, write_json
+
+
+def updater_settings(context):
+    """Accept configuration, never inline credentials or arbitrary task context."""
+    settings = (context or {}).get("updater", {})
+    allowed = {
+        "model",
+        "temperature",
+        "max_tokens",
+        "timeout",
+        "api_key_env",
+        "base_url_env",
+        "allow_metadata_api",
+    }
+    if not isinstance(settings, dict) or set(settings) - allowed:
+        raise ValueError("Updater requires supported settings and environment variable names only")
+    return deepcopy(settings)
+
+
+def runner_cost(cost):
+    """Map updater accounting to the common artifact; unknown usage stays null."""
+    prompt, completion = cost["input_tokens"], cost["output_tokens"]
+    return {
+        "method": "llm_full_rewrite",
+        "calls": cost["model_calls"],
+        "prompt_tokens": prompt,
+        "completion_tokens": completion,
+        "total_tokens": prompt + completion
+        if prompt is not None and completion is not None
+        else None,
+        "usd": cost["api_cost_usd"],
+        "seconds": cost["elapsed_seconds"],
+        "update_operations": cost["update_operations"],
+    }
 
 
 def build_knowledge(metadata):
@@ -67,7 +96,6 @@ def adapt(old_knowledge, new_metadata, strategy, context=None):
     """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
     if strategy not in {"no_update", "full_rewrite"}:
         raise ValueError(f"Unsupported strategy: {strategy}")
-    start = perf_counter()
     old = build_knowledge(old_knowledge)
     if old["version"] != "early":
         raise ValueError("Both baselines must start from Early knowledge")
@@ -92,25 +120,29 @@ def adapt(old_knowledge, new_metadata, strategy, context=None):
         if target != old:
             raise ValueError("Early baselines must reuse the same K0")
         return old, [], {**cost, "method": "early_k0_reuse"}
-    log = [
-        {
-            "operation": "full_rebuild",
-            "rebuilt_tool_ids": [t["tool_id"] for t in target["tools"]],
-            "removed_tool_ids": sorted(
-                {t["tool_id"] for t in old["tools"]} - {t["tool_id"] for t in target["tools"]}
-            ),
-            "rebuilt_blocks": len(target["tools"]),
-        }
-    ]
-    cost.update(
-        method="deterministic_full_rebuild",
-        seconds=perf_counter() - start,
-        update_operations=len(target["tools"]),
+    from integration.baselines import adapt as llm_adapt
+
+    # The shared engine keys by name. Use stable cross-server IDs as temporary
+    # names, while retaining the native name as immutable metadata evidence.
+    tools = deepcopy(target["tools"])
+    for tool in tools:
+        tool["native_name"] = tool["name"]
+        tool["name"] = tool["tool_id"]
+    safe_context = {"updater": updater_settings(context)}
+    if (context or {}).get("audit_path"):
+        safe_context["audit_path"] = context["audit_path"]
+    rewritten, log, update_cost = llm_adapt({}, {"tools": tools}, strategy, safe_context)
+    descriptions = {block["name"]: block["metadata"]["description"] for block in rewritten["tools"]}
+    for tool in target["tools"]:
+        tool["description"] = descriptions[tool["tool_id"]]
+    log[0]["rebuilt_tool_ids"] = [t["tool_id"] for t in target["tools"]]
+    log[0]["removed_tool_ids"] = sorted(
+        {t["tool_id"] for t in old["tools"]} - {t["tool_id"] for t in target["tools"]}
     )
-    return target, log, cost
+    return build_knowledge(target), log, runner_cost(update_cost)
 
 
-def write_adaptation(old_path, metadata_path, strategy, output):
+def write_adaptation(old_path, metadata_path, strategy, output, context=None):
     """Persist the baseline output, provenance and costs without overwriting attempts."""
     old_path, metadata_path, output = Path(old_path), Path(metadata_path), Path(output)
     output.mkdir(parents=True, exist_ok=False)
@@ -123,7 +155,11 @@ def write_adaptation(old_path, metadata_path, strategy, output):
     }
     try:
         old, target = read_json(old_path), read_json(metadata_path)
-        knowledge, log, cost = adapt(old, target, strategy)
+        safe_context = {
+            "updater": updater_settings(context),
+            "audit_path": str(output / "updater-audit.json"),
+        }
+        knowledge, log, cost = adapt(old, target, strategy, safe_context)
         write_json(output / "knowledge.json", knowledge)
         artifact.update(
             status="validated",
@@ -143,8 +179,18 @@ def write_adaptation(old_path, metadata_path, strategy, output):
             },
             patch=log,
             cost=cost,
+            formal_llm_rewrite=cost["method"] == "llm_full_rewrite",
         )
+        if artifact["formal_llm_rewrite"]:
+            artifact["updater_audit_path"] = "updater-audit.json"
     except (ValueError, KeyError, OSError, TypeError) as exc:
+        audit = getattr(exc, "audit", None)
+        if audit is not None:
+            artifact.update(
+                formal_llm_rewrite=True,
+                cost=runner_cost(audit["update_cost"]),
+                updater_audit_path="updater-audit.json",
+            )
         artifact["validation"]["errors"].append(f"{type(exc).__name__}: {exc}")
         raise
     finally:

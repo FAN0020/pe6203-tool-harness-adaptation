@@ -6,10 +6,10 @@
 | --- | --- |
 | 主优化案例 | **task 223：抓取最新 5 篇具身智能论文 → 生成并发布网页**。对应 fetcher-mcp + edgeone-pages-mcp，运行配置尚待接入。 |
 | 其它测试 | **139** 作开发 smoke；24/28 日志处理、393 项目管理、226 图表、450 数据可视化作回归候选。正式测试集尚未冻结；用于调优的 223/139 不算独立测试。 |
-| 通用模型 | **DeepSeek v4.1 Flash**，OpenRouter ID：`deepseek/deepseek-v4.1-flash-1017`。Agent/judge 已使用；updater 计划同模型，尚未实现。 |
+| 通用模型 | **DeepSeek v4.1 Flash**，OpenRouter ID：`deepseek/deepseek-v4.1-flash-1017`。Agent/judge 已使用；Full Rewrite updater 已接入，设置见 `configs/full-rewrite-updater.template.json`。 |
 | 基础设置 | temperature 0；agent 上限 2048 tokens、12 轮；judge 上限 4096 tokens、关闭 reasoning，每条轨迹评分 5 次。 |
 | 对比方案 | Early / Middle / Late × No Update / Full Rewrite / Selective Patch；比较 TF、PE、ECS、能力保持与更新成本。 |
-| 当前进度 | 两个基线已接入，**Full Rewrite 目前是确定性全量重建**；LLM 重写和 Selective Patch 待做。139 已通过真实闭环（TF 9.8、PE 8.6）；68 项测试通过。完整 benchmark 尚未完成。 |
+| 当前进度 | 通用 `adapt` 入口已接入 **LLM Full Rewrite**，No Update 保持 Early 知识；新入口用模拟 updater 测试，不代表已完成真实实验。Selective Patch 尚待从 C 组分支整合；正式协议和测试集尚未冻结。 |
 
 | Folder | 放什么、做什么 |
 | --- | --- |
@@ -35,3 +35,5 @@ uv run pytest -q tests/test_baselines.py tests/test_pipeline.py
 ```
 
 真实 MCP 测试需要先按运行说明 bootstrap；缺少发布包时会 skip，不能当作验证通过。
+
+Full Rewrite 通用入口及其后续 `run --adaptation` 用法见 [LLM 基线接入说明](docs/common-llm-baselines.md)。真实更新需要显式 `--allow-metadata-api`，会产生模型费用；未授权或重写失败时不会退回确定性重建。

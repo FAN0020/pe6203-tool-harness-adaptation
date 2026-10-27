@@ -183,11 +183,17 @@ def main():
     p.add_argument("--format", choices=["text", "json", "html"], default="text")
     p.add_argument("--details", action="store_true", help="Include tool calls and saved state")
     p.add_argument("--output", type=Path, help="Write to a new file without overwriting")
-    p = sub.add_parser("adapt", help="Build Sprint 1 baseline knowledge (deterministic, no LLM)")
+    p = sub.add_parser("adapt", help="Build baseline knowledge; Full Rewrite uses an LLM")
     p.add_argument("--strategy", choices=["no_update", "full_rewrite"], required=True)
     p.add_argument("--old-knowledge", type=Path, required=True)
     p.add_argument("--new-metadata", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument(
+        "--updater-config", type=Path, help="Updater JSON settings; use env names for secrets"
+    )
+    p.add_argument(
+        "--allow-metadata-api", action="store_true", help="Allow sending tool metadata to updater"
+    )
     setup = sub.add_parser("bootstrap", help="Verify and install immutable benchmark releases")
     setup.add_argument(
         "--stages",
@@ -251,7 +257,16 @@ def main():
             return 0
         elif args.command == "adapt":
             result = write_adaptation(
-                args.old_knowledge, args.new_metadata, args.strategy, args.output
+                args.old_knowledge,
+                args.new_metadata,
+                args.strategy,
+                args.output,
+                context={
+                    "updater": {
+                        **(read_json(args.updater_config) if args.updater_config else {}),
+                        "allow_metadata_api": args.allow_metadata_api,
+                    }
+                },
             )
         elif args.command == "bootstrap":
             result = bootstrap(args.root, args.stages, args.scope)
