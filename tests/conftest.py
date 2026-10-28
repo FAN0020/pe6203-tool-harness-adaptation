@@ -13,7 +13,16 @@ def mock_baseline_llm(monkeypatch):
 
     def complete(messages, settings):
         requests.append((messages, settings))
-        tools = json.loads(messages[-1]["content"])["tools"]
+        payload = json.loads(messages[-1]["content"])
+        tools = payload["tools"]
+        checks = {item["name"]: item for item in payload.get("rewrite_checks", [])}
+
+        def description(tool):
+            text = "Rewritten: " + tool.get("description", "")
+            for limit in checks.get(tool["name"], {}).get("character_limits", []):
+                text += f" {limit['field']} has a maximum of {limit['max_characters']} characters."
+            return text
+
         return {
             "choices": [
                 {
@@ -24,7 +33,7 @@ def mock_baseline_llm(monkeypatch):
                                 "tools": [
                                     {
                                         "name": t["name"],
-                                        "description": "Rewritten: " + t.get("description", ""),
+                                        "description": description(t),
                                         "usage_rules": t.get("usage_rules", []),
                                     }
                                     for t in tools

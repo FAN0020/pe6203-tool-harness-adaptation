@@ -28,10 +28,10 @@ def test_real_catalog_export(stage, strategy):
         assert knowledge == expected
     else:
         for actual, target_tool in zip(knowledge["tools"], target["tools"], strict=True):
-            assert actual == {
-                **target_tool,
-                "description": "Rewritten: " + target_tool["description"],
+            assert {k: v for k, v in actual.items() if k != "description"} == {
+                k: v for k, v in target_tool.items() if k != "description"
             }
+            assert actual["description"].startswith("Rewritten: " + target_tool["description"])
     assert (old, target) == before
     assert all("metadata" not in tool and "text" not in tool for tool in knowledge["tools"])
     assert record["update_cost"]["update_operations"] == (
