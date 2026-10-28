@@ -21,6 +21,25 @@ C 组的 Selective 独立分支未在此次修改中合并；尚不能据此宣�
 
 ## 运行方式
 
+### 2026-10-28：描述约束保真修复
+
+共享 Full Rewrite 提示词要求保留完整metadata中的强制限制、默认值、条件和副作用。
+新增 `integration/rewrite_constraints.py` 仅从允许的参数metadata提取字符上限和可识别的
+null/schema冲突，通过 `rewrite_checks` 发送给同一次LLM请求。没有读取judge、答案或工具
+运行结果，也没有新增模型调用、修改No Update或benchmark工具实现。
+
+- 对可识别的 `max N characters`/`maxLength`，重写描述须注明对应参数和强制上限；
+  省略上限或改成recommended等软性建议会拒绝产物。
+- 参数说明提到null而schema排除null时，记录metadata冲突。为避免模糊否定句误判，
+  此类工具的新描述采用保守规则：不出现单词null，仅描述schema允许的输入；
+  原schema和参数说明仍保持原样，冲突仍需人工确认。
+- 检查失败保留原模型响应、费用及 `validation_issues`；不修补原输出、不重试、不回退。
+  audit/validation记录 `metadata-constraints-v2`，便于与旧实验区分。
+
+这些规则只防护部分可机器识别的问题，不是完整语义正确性证明。40工具仍需语义复核。
+旧 `knowledge.json`、audit和分数保持不变。要评估修复版，使用新输出目录生成知识，
+复核后运行受影响的匹配任务并重新评分；三策略正式比较前同步共同规则。
+
 以下示例以 task139 开发目录为例，不是正式冻结测试集。每次输出目录需要尚不存在。
 先在本机配置环境变量 AGENT_API_KEY 和 AGENT_BASE_URL；OpenRouter 地址为
 `https://openrouter.ai/api/v1`。凭据只保留在本机环境或 .env，不写入 JSON 配置。
