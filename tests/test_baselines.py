@@ -172,8 +172,12 @@ def test_early_full_rewrite_reuses_k0_without_update_cost():
 
 
 def test_selective_patch_is_not_silently_implemented_as_full_rewrite():
-    with pytest.raises(ValueError, match="Unsupported"):
-        adapt(snapshot(), snapshot("late"), "selective_patch")
+    old = snapshot()
+    knowledge, changes, cost = adapt(old, snapshot("late"), "selective_patch")
+    assert knowledge == old
+    assert changes == []
+    assert cost["method"] == "no_change_detected"
+    assert cost["calls"] == 0
 
 
 @pytest.mark.parametrize("defect", ["knowledge_changed", "wrong_strategy", "wrong_stage"])

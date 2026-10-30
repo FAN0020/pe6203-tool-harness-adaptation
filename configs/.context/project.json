@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "runnable_config": false,
   "path_base": "repository_root",
-  "as_of": "2026-10-19",
+  "as_of": "2026-10-30",
   "course": "PE6203 Project 4: Tool Harness Adaptation under Environment Change",
   "objective": "在固定模型下，比较工具变化后局部更新对任务恢复、能力保持和更新成本的影响。",
   "main_case": {
@@ -10,8 +10,10 @@
     "name": "最新论文检索 → HTML 网页发布",
     "role": "development_optimization",
     "selection_basis": "用户提出的主优化方向；已核对官方 selected task",
-    "status": "selected_not_runnable",
-    "details_ref": "experiments/task-manifest.v1.json"
+    "status": "netlify_variant_requires_user_login_and_reviewed_source",
+    "details_ref": "experiments/task-manifest.v1.json",
+    "publishing": "Netlify CLI 23.15.1; user login + dedicated site; draft deployments",
+    "source": "Frozen research listing with timestamp/hash; all strategies share it; variant, not original EdgeOne environment"
   },
   "other_cases": {
     "smoke_task_id": 139,
@@ -31,10 +33,10 @@
     "base_url": "https://openrouter.ai/api/v1",
     "agent": "configured_and_smoke_verified",
     "judge": "configured_and_smoke_verified",
-    "updater": "planned_same_model_not_implemented",
+    "updater": "LLM Full Rewrite integrated; same general model via OpenRouter",
     "local_config": "configs/local.smoke-no-reasoning.json",
-    "env": "ignored .env; explicit uv run --env-file .env",
-    "env_check": "agent/judge endpoint 与 key 存在；本轮仅检查配置，未重新调用 API"
+    "env": "ignored .env; ./experiment loads it through uv",
+    "env_check": "2026-10-30 agent/judge real API requests succeeded"
   },
   "settings": {
     "temperature": 0,
@@ -60,10 +62,11 @@
       "full_rewrite",
       "selective_patch"
     ],
-    "full_rewrite_now": "deterministic complete metadata rebuild",
-    "llm_full_rewrite": "pending",
-    "selective_patch": "pending",
-    "freeze_ref": "experiments/protocol.v1.json"
+    "full_rewrite_now": "LLM rewrites every target tool description; immutable schemas/routes/rules retained",
+    "llm_full_rewrite": "integrated with constraint validation and costs",
+    "selective_patch": "HaoQI_V1 deterministic diff integrated; preserved unchanged records; experimental LLM rule mode disabled",
+    "freeze_ref": "experiments/protocol.v1.json",
+    "cli": "./experiment: prepare / run / report / netlify; all results development unless separately reviewed"
   },
   "verified": {
     "task_id": 139,
@@ -78,9 +81,9 @@
   },
   "not_claimed": [
     "完整 201-task 评测",
-    "三策略效果比较",
-    "223 网页案例已可运行",
-    "正式 LLM updater 已实现"
+    "三策略优劣结论",
+    "Netlify 用户登录前的真实发布验证",
+    "独立正式测试集与 under/over-update 归因已完成"
   ],
   "context_files": [
     "docs/.context/requirements.json",

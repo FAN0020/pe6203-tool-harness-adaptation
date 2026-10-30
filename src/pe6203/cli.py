@@ -175,16 +175,27 @@ def doctor(root):
 
 
 def main():
+    # Pass through so the experiment interface owns its help and nested commands.
+    if len(sys.argv) > 1 and sys.argv[1] == "experiment":
+        from .experiment import main as experiment_main
+
+        return experiment_main(Path.cwd(), sys.argv[2:])
     parser = argparse.ArgumentParser(description="PE6203 Group A MCPEvol environment and runner")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Project checkout root")
     sub = parser.add_subparsers(dest="command", required=True)
+    p = sub.add_parser(
+        "experiment", add_help=False, help="Interactive experiment CLI: prepare/run/report/netlify"
+    )
+    p.add_argument("arguments", nargs=argparse.REMAINDER)
     p = sub.add_parser("report", help="Read saved run reports offline; no model calls")
     p.add_argument("inputs", nargs="+", type=Path, help="Run directories or saved evidence files")
     p.add_argument("--format", choices=["text", "json", "html"], default="text")
     p.add_argument("--details", action="store_true", help="Include tool calls and saved state")
     p.add_argument("--output", type=Path, help="Write to a new file without overwriting")
     p = sub.add_parser("adapt", help="Build baseline knowledge; Full Rewrite uses an LLM")
-    p.add_argument("--strategy", choices=["no_update", "full_rewrite"], required=True)
+    p.add_argument(
+        "--strategy", choices=["no_update", "full_rewrite", "selective_patch"], required=True
+    )
     p.add_argument("--old-knowledge", type=Path, required=True)
     p.add_argument("--new-metadata", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
@@ -244,7 +255,11 @@ def main():
     p.add_argument("scores", type=Path)
     args = parser.parse_args()
     try:
-        if args.command == "report":
+        if args.command == "experiment":
+            from .experiment import main as experiment_main
+
+            return experiment_main(args.root, args.arguments)
+        elif args.command == "report":
             print(
                 render_saved_report(
                     args.inputs,

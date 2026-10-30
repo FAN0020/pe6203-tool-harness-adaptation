@@ -88,21 +88,22 @@
       "tool add/delete",
       "parameters",
       "description",
-      "usage_rules",
       "output_schema",
       "routing"
     ],
     "timestamps_alone_trigger": false,
     "structured_fields": "Use target public metadata; model must not invent names/schema/routing",
-    "semantic_fields": "Use shared fixed updater to rewrite descriptions/rules from metadata evidence only",
-    "shared_chunking_and_limits_for_rewriters": true,
+    "semantic_fields": "Full Rewrite: LLM descriptions only. Selective Patch: target descriptions copied for affected records; existing usage rules preserved unless dangling, unresolved dependencies recorded. Optional LLM rule updater disabled because cost/output handling is not validated.",
+    "shared_chunking_and_limits_for_rewriters": false,
     "unchanged_records": "Canonical equality including source version",
     "validation_failure": "Record adaptation_validation/cost/null scores; no agent execution or silent fallback",
     "implementation_status": {
       "no_update": "integrated",
-      "full_rewrite": "deterministic prototype integrated; formal LLM rewrite pending",
-      "selective_patch": "pending"
-    }
+      "full_rewrite": "LLM descriptions, metadata-constraints-v2, integrated",
+      "selective_patch": "deterministic Diff-guided Selective Patch integrated from HaoQI_V1"
+    },
+    "usage_rules_policy": "Harness-owned rules, absent in released metadata; empty target rules do not erase existing rules.",
+    "comparison_limitation": "Methods differ in both update scope and semantic generation; do not attribute every difference solely to scope without a matched-rewriter ablation."
   },
   "knowledge": {
     "scope": "complete_catalog_of_fixed_task_server_set",
@@ -113,17 +114,18 @@
     "early_run_each_strategy_label": true,
     "runtime_auto_refresh": false,
     "artifact_identity": [
+      "task_id",
       "server_group",
       "target_stage",
       "strategy",
       "repeat_id"
     ],
-    "reuse_across_tasks_with_same_server_group": true,
+    "reuse_across_tasks_with_same_server_group": false,
     "regenerate_for_each_repeat": true,
     "chunking_rule": {
-      "base_partition": "per_server",
-      "oversized_server_policy": null,
-      "status": "pilot_validation_required"
+      "base_partition": "complete fixed server catalog in one request",
+      "oversized_server_policy": "fail and retain billed attempt; no retry or truncation",
+      "status": "current implementation, subset size must fit model context"
     },
     "agent_serialization_rule": "namespaced; usage_rules/output_schema appended to description; see src/pe6203/.context/contracts.json",
     "K0_construction": "deterministic_mapping_from_complete_early_metadata"
@@ -143,11 +145,11 @@
       "provider": "OpenRouter",
       "base_url": "https://openrouter.ai/api/v1",
       "model": "deepseek/deepseek-v4.1-flash-1017",
-      "resolved_model_id": null,
-      "api_key_env": "UPDATER_API_KEY",
+      "resolved_model_id": "deepseek/deepseek-v4.1-flash-1017",
+      "api_key_env": "AGENT_API_KEY",
       "temperature": 0.0,
-      "max_completion_tokens": 4096,
-      "selection_status": "planned_not_implemented_credentials_unset"
+      "max_completion_tokens": 16384,
+      "selection_status": "integrated; CLI freezes updater settings per experiment"
     },
     "judge": {
       "provider": "OpenRouter",
@@ -182,7 +184,7 @@
     "tool_timeout_seconds": 30,
     "run_timeout_seconds": 600,
     "isolated_workspace_per_attempt": true,
-    "limits_status": "verified_task139_early_only; formal_set_and_updater_chunking_pending"
+    "limits_status": "CLI task139 development matrix; all selected strategies share the same frozen config"
   },
   "judge": {
     "attempts_per_trajectory": 5,
@@ -226,8 +228,8 @@
     "missingness": "Report planned/valid/matched counts and exclusions; strategy-related missingness limits conclusions"
   },
   "retry": {
-    "implementation_status": "planned",
-    "max_extra_attempts": 1,
+    "implementation_status": "CLI keeps failures and interrupts without automatic retry",
+    "max_extra_attempts": 0,
     "eligible": [
       "connection_failure",
       "http_429",
@@ -280,7 +282,7 @@
   },
   "readiness": {
     "frozen": false,
-    "status": "pending_validation",
+    "status": "development_cli_available; formal independent subset and human review pending",
     "freeze_record": null,
     "required_before_freeze": [
       "real_model_end_to_end_evidence",
@@ -321,7 +323,7 @@
     "reviewers": "A/D tasks/environment; B/C method/prompts; D models/judge/pricing/metrics",
     "record": "experiments/templates/freeze-record.json",
     "after_change": "New experiment revision; rerun affected matched comparisons for all strategies; preserve old results",
-    "case223": "Freeze source URLs/fetch time/snapshots and publishing setup; disclose substitutes; exclude tuned case from independent evaluation",
+    "case223": "Netlify + frozen-source variant. Preserve question and stage metadata, record shared source hint and capture timestamp. Browser scripts/subresources disabled in replay; source relevance/latest-five need review; deployment metadata preserved.",
     "no_new_permission_gate": "Routine review within user-authorized scope"
   }
 }

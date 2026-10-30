@@ -20,7 +20,11 @@ ROOT = Path(__file__).resolve().parents[1]
 @pytest.mark.integration
 @pytest.mark.parametrize(
     "version,strategy,provider_fails",
-    [(v, s, False) for v in ("early", "middle", "late") for s in ("no_update", "full_rewrite")]
+    [
+        (v, s, False)
+        for v in ("early", "middle", "late")
+        for s in ("no_update", "full_rewrite", "selective_patch")
+    ]
     + [("early", "no_update", True)],
 )
 def test_full_adapter_wiring_real_mcp_with_model_protocol_fixture(
@@ -143,11 +147,9 @@ def test_full_adapter_wiring_real_mcp_with_model_protocol_fixture(
         return
     assert result["status"] == "evaluated", result["errors"]
     expected_version = "early" if strategy == "no_update" else version
-    expected = read_json(ROOT / f"examples/catalogs/task139/{expected_version}.json")
-    if strategy == "full_rewrite" and version != "early":
-        for tool in expected["tools"]:
-            tool["description"] = "Rewritten: " + tool["description"]
-    assert read_json(output / "knowledge.json") == expected
+    # The runner must consume the exact validated updater artifact, including
+    # rewritten constraints and the mixed source versions of a selective patch.
+    assert read_json(output / "knowledge.json") == read_json(adaptation / "knowledge.json")
     assert result["cost"]["update"] == artifact["cost"]
     assert len(requests[0]["tools"]) == (44 if expected_version == "late" else 40)
     assert len(read_json(output / "environment-metadata.json")["tools"]) == (

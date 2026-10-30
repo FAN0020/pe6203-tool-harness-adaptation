@@ -6,8 +6,9 @@
   "limits": [
     "未验证 Docker；独立 workspace/private HOME 是应用级约束，不是 OS sandbox",
     "仅执行 server-profiles.json 已审查服务；安装 archive 不表示所有服务可运行",
-    "task 223 缺两个 reviewed profiles，需审查外网抓取、发布凭据与输入时间条件",
-    "每次 run/adapt 使用新 output；失败保留"
+    "每次 run/adapt 使用新 output；失败保留",
+    "task223 uses explicit Netlify/frozen-source variant, not original EdgeOne; user login and linked dedicated site required",
+    "Third-party source may rate-limit; no silent old-paper fallback"
   ],
   "commands": {
     "install": [
@@ -33,7 +34,13 @@
     "metadata": "uv run pe6203 metadata --task-id 393 --version early --output results/raw/NEW_ID/task393-early.json",
     "persistence_probe": "uv run pe6203 probe --version early --output results/raw/NEW_ID/probe-early",
     "batch": "uv run --env-file .env pe6203 batch --plan configs/batch-task139.example.json --output results/raw/NEW_ID/batch",
-    "resume": "Repeat identical batch command with --resume; changed config/knowledge/code requires new directory"
+    "resume": "./experiment run --resume",
+    "experiment_menu": "./experiment",
+    "prepare": "./experiment prepare --tasks 139 --repeats 1",
+    "run": "./experiment run",
+    "report": "./experiment report",
+    "api_check": "./experiment check --api",
+    "netlify_setup": "./experiment netlify install; ./experiment netlify login; ./experiment netlify link"
   },
   "new_checkout_config": [
     "Copy configs/full-catalog-smoke.json to ignored configs/local.smoke-no-reasoning.json; set agent.model and judge.model from project.json",
@@ -42,7 +49,7 @@
     "Batch example references configs/local.json; configure that file equivalently before batch, or use a new local plan"
   ],
   "storage_estimate": "Full archives ~3.40 GB download / ~12 GB extracted; verify SHA256 before extraction; scope=smoke installs only original two-server dependency closures",
-  "baseline": "Muchu Wu prototype retained as deterministic baselines; old wrapped records incompatible with runner were replaced with complete envelopes, schema/routing validation, cross-server identities and artifact hashes.",
+  "baseline": "No Update + current LLM Full Rewrite + integrated deterministic Selective Patch; see CLI frozen plan for actual configuration.",
   "known_failures": {
     "judge": "Original 4096-token default reasoning exhausted all 5 responses; extra_body forwarding + judge reasoning=false fixed development smoke. Both protocol versions retained.",
     "upstream_late_thinking": "dist/index.js:113 calls getThoughtHistory missing from dist/lib.js; 17/18 functional probes pass, command exits 2. Preserve upstream error; do not silently fix release.",

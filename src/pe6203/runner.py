@@ -154,6 +154,8 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
         "and schemas supplied to you. Do not invent successful tool results. "
         f"All workingDirectory arguments must be exactly: {workspace}"
     )
+    if config.get("task_context"):
+        system += "\n" + config["task_context"]
     messages = [
         {"role": "system", "content": system},
         {"role": "user", "content": question},
@@ -392,17 +394,22 @@ async def run_async(task_id, version, strategy, seed, config):
                     timeout=config["request_timeout_seconds"],
                     max_retries=0,
                 ) as agent:
-                    outcome = await agent_loop(
-                        agent,
-                        clients,
-                        tools,
-                        routes,
-                        task["question"],
-                        workspace,
-                        config,
-                        seed,
-                        emit,
-                    )
+                    from .netlify import runtime_clients
+
+                    with runtime_clients(
+                        clients, root, workspace, config.get("runtime"), current["tools"]
+                    ) as active_clients:
+                        outcome = await agent_loop(
+                            agent,
+                            active_clients,
+                            tools,
+                            routes,
+                            task["question"],
+                            workspace,
+                            config,
+                            seed,
+                            emit,
+                        )
                 trace.update(
                     {
                         "answer": outcome["answer"],
