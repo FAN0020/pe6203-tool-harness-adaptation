@@ -1,16 +1,16 @@
 {
-  "as_of": "2026-10-30",
+  "as_of": "2026-10-31",
   "branch": "codex/experiment-cli",
   "entrypoint": "./experiment (loads ignored .env)",
   "contract": {
     "prepare": "No model requests; fetches current pinned MCP metadata; freezes tasks, catalogs, config, source code and relevant locks. Save plan.json + plan.sha256.",
-    "run": "Sequential seeded schedule; adapt then shared runner then exactly five official-rubric judge attempts. Explicit run is API execution. Single writer; no score-driven retries.",
-    "resume": "Reuse completed/failed records and verify hashes; retain interrupted directories without silently rerunning; regenerate new experiment after code/config/input changes.",
+    "run": "v1.3: shared agent; original rubric plus deterministic call counts; five first-valid judge slots, max two logical attempts/slot with one HTTP transport retry each. Immutable request/response/outcome files; no score-driven retries.",
+    "resume": "Verify frozen files. v1.3 completed execution checkpoint can resume missing judge slots without MCP/agent calls; preserve previous aggregate revisions. Persist attempt counts, never reset budgets. Terminal/ambiguous agent and tool execution is not blindly replayed.",
     "report": "Development diagnostic tables; reviewed suites additionally export evaluation manifests/ledgers and matched TF/PE/ECS/recovery/retention/cost CSVs through existing evaluation.py. Truncation and provider filtering are execution failures, not completion.",
     "request_retry": "Agent/judge/updater: one identical-request retry for connection failure/429/5xx, backoff 2s and Retry-After up to 60s. Record each retry with unknown usage. No trajectory/tool/semantic retries.",
-    "papers": "Interactive install/login/link/source/prepare/run flow. Browser login and site selection belong to user; valid state reused. User can --prepare-only.",
+    "papers": "Show CLI identity, user confirms/switches account and selects dedicated site before freeze. New plans use v1.3 config. Draft deployment keyed by site+HTML within run workspace; existing deployment is only verified, unknown submission not repeated.",
     "preflight": "Real low-token endpoint requests before new cells, separate costs in preflight/*.json; same plan controls across strategies. Stop after two consecutive model transport failures; untouched cells remain pending.",
-    "judge": "Pinned original rubric; five attempts; JSON object output mode, reasoning disabled. Unscored v1 measurement trial and failed v1.1 connection trial retained; course-v1.2 is fresh complete rerun."
+    "judge": "Original rubric retained verbatim; append concise-counts-v1 input statistics/output instruction. First development probe exposed miscounting; revised four-prompt denominator checks and one live task139 cell passed. Subjective judge/rubric ambiguity remains. Do not mix prior scores."
   },
   "lineage": {
     "selective_patch": "Imported source and tests from origin/HaoQI_V1 at 4a16b56; retain contribution/provenance and prior live summary. Fixed duplicate native names across servers and incomplete candidate catalog validation.",
@@ -107,5 +107,6 @@
     "source_order": "Hugging Face query results are not date-sorted; latest-five requires date sorting and relevance review, never first-five assumption"
   },
   "benchmark_suite": "experiments/benchmark-v1.json",
-  "latest_readiness": "27 attempts, 24 complete scores; no matched ECS triplet. Agent/judge connectivity recovered on recheck. No failed record replaced. See current verification for submission gaps."
+  "latest_readiness": "27 attempts, 24 complete scores; no matched ECS triplet. Agent/judge connectivity recovered on recheck. No failed record replaced. See current verification for submission gaps.",
+  "active_suite": "experiments/benchmark-v1.3.json"
 }

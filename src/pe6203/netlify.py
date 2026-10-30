@@ -11,7 +11,6 @@ import json
 import os
 import subprocess
 import threading
-import uuid
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -90,6 +89,7 @@ def check_setup(root, site):
     info = command_json(root, ["api", "getSite", "--data", json.dumps({"site_id": site})])
     if info.get("id") != site:
         raise ValueError("Netlify could not verify access to the selected experiment site")
+    return info
 
 
 def ensure_runtime(root):
@@ -143,21 +143,55 @@ def ensure_runtime(root):
 def setup_wizard(root):
     ensure_runtime(root)
     try:
-        command_json(root, ["api", "getCurrentUser"])
+        user = command_json(root, ["api", "getCurrentUser"])
     except ValueError:
         print("请在浏览器完成 Netlify 登录；完成后 CLI 自动继续。", flush=True)
         if setup(root, "login"):
             raise ValueError("Netlify 登录未完成；重新运行 ./experiment papers 可继续")
-        command_json(root, ["api", "getCurrentUser"])
-    try:
-        site = site_id(root)
-    except ValueError:
-        print("请选择你已创建的专用实验站点；只发布 draft。", flush=True)
-        if setup(root, "link"):
-            raise ValueError("站点关联未完成；重新运行 ./experiment papers 可继续")
-        site = site_id(root)
-    check_setup(root, site)
-    return site
+        user = command_json(root, ["api", "getCurrentUser"])
+    switched = False
+    while True:
+        print(
+            f"Netlify 当前账号：{user.get('email') or user.get('full_name') or user.get('id')} ({user.get('id')})",
+            flush=True,
+        )
+        choice = input("账号选择：1 使用此账号  2 切换账号  0 退出 [1]：").strip() or "1"
+        if choice == "0":
+            raise ValueError("用户取消 Netlify 设置")
+        if choice == "1":
+            break
+        if choice != "2":
+            continue
+        if os.environ.get("NETLIFY_AUTH_TOKEN"):
+            raise ValueError(
+                "当前使用 .env 的 NETLIFY_AUTH_TOKEN；切换账号前请移除或更换此值，不要在聊天中发送 token"
+            )
+        if setup(root, "switch"):
+            raise ValueError("账号切换未完成；重新运行 ./experiment papers 可继续")
+        switched = True
+        user = command_json(root, ["api", "getCurrentUser"])
+    while True:
+        try:
+            site = site_id(root)
+            if switched:
+                raise ValueError("Account switched; select its dedicated site")
+        except ValueError:
+            print("请选择你已创建的专用实验站点；只发布 draft。", flush=True)
+            if setup(root, "link"):
+                raise ValueError("站点关联未完成；重新运行 ./experiment papers 可继续")
+            site = site_id(root)
+            switched = False
+        info = check_setup(root, site)
+        print(f"目标专用站点：{info.get('name') or site} ({site})；仅 draft。", flush=True)
+        choice = input("站点选择：1 使用此站点  2 重新选择  0 退出 [1]：").strip() or "1"
+        if choice == "1":
+            return site
+        if choice == "0":
+            raise ValueError("用户取消站点选择")
+        if choice == "2":
+            if os.environ.get("NETLIFY_SITE_ID"):
+                raise ValueError(".env 的 NETLIFY_SITE_ID 固定了站点；请先更新或移除此值再重新选择")
+            switched = True
 
 
 def setup(root, action):
@@ -185,19 +219,81 @@ def setup(root, action):
             if result.returncode:
                 return result.returncode
         return 0
-    if action not in ("login", "link", "status"):
-        raise ValueError("Expected install, login, link or status")
+    if action not in ("login", "link", "status", "switch"):
+        raise ValueError("Expected install, login, link, switch or status")
     # Browser login and site selection are deliberately performed by the user.
     return subprocess.run(cli_command(root) + [action], cwd=root, env=cli_environment()).returncode
+
+
+def verify_deployment(audit_path):
+    """Read-only recovery; never submit another deploy while checking an existing URL."""
+    import time
+
+    audit_path = Path(audit_path)
+    audit = read_json(audit_path)
+    url = audit.get("url")
+    parsed = urlsplit(url or "")
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or not parsed.hostname.endswith(".netlify.app")
+    ):
+        raise ValueError("Netlify did not return a valid HTTPS draft URL")
+    for attempt in range(3):
+        observation = {"checked_at": datetime.now(UTC).isoformat(), "public_url_verified": False}
+        transient = False
+        try:
+            response = httpx.get(url, timeout=30, follow_redirects=False)
+            observation["http_status"] = response.status_code
+            observation["response_sha256"] = hashlib.sha256(response.content).hexdigest()
+            observation["content_matches"] = observation["response_sha256"] == audit["html_sha256"]
+            observation["public_url_verified"] = (
+                response.status_code == 200 and observation["content_matches"]
+            )
+            transient = response.status_code >= 500
+        except httpx.HTTPError as exc:
+            observation["verification_error"] = type(exc).__name__
+            transient = True
+        number = len(list(audit_path.parent.glob("verification-*.json"))) + 1
+        write_json(audit_path.parent / f"verification-{number}.json", observation)
+        audit.update(observation)
+        write_json(audit_path, audit)
+        if observation["public_url_verified"]:
+            return url
+        if not transient or attempt == 2:
+            break
+        time.sleep(2**attempt)
+    raise ValueError(
+        "Deployment URL is not public with matching content; retained deployment.json; verification can resume without deploying"
+    )
 
 
 def publish_html(root, workspace, html, site):
     if not isinstance(html, str) or not html.strip() or len(html.encode()) > 4_000_000:
         raise ValueError("HTML must contain 1–4,000,000 bytes")
-    directory = Path(workspace).resolve() / "published" / uuid.uuid4().hex
-    directory.mkdir(parents=True)
+    identity = hashlib.sha256((site + "\n" + html).encode()).hexdigest()
+    workspace = Path(workspace).resolve()
+    directory = workspace / "published" / identity
+    audit_path = workspace / "deployments" / identity / "deployment.json"
+    if audit_path.exists():
+        return verify_deployment(audit_path)
+    request_path = audit_path.parent / "request.json"
+    if request_path.exists():
+        raise ValueError(
+            "Deployment outcome unknown; reconcile the recorded request before retrying"
+        )
+    directory.mkdir(parents=True, exist_ok=True)
     (directory / "index.html").write_text(html, encoding="utf-8")
-    # Only this freshly created HTML directory is uploaded, never the repository.
+    request = {
+        "site_id": site,
+        "html_sha256": hashlib.sha256(html.encode()).hexdigest(),
+        "requested_at": datetime.now(UTC).isoformat(),
+        "production": False,
+    }
+    from .judge import save_once
+
+    save_once(request_path, request)
+    # Only this generated HTML directory is uploaded. A lost response is never blindly replayed.
     deployed = command_json(
         root,
         [
@@ -213,35 +309,17 @@ def publish_html(root, workspace, html, site):
         ],
         cwd=directory,
     )
-    url = deployed.get("deploy_url")
-    parsed = urlsplit(url or "")
-    if (
-        parsed.scheme != "https"
-        or not parsed.hostname
-        or not parsed.hostname.endswith(".netlify.app")
-    ):
-        raise ValueError("Netlify did not return a valid HTTPS draft URL")
-    audit = {
-        "provider": "netlify",
-        "production": False,
-        "url": url,
-        "deploy_id": deployed.get("deploy_id"),
-        "site_id": site,
-        "html_sha256": hashlib.sha256(html.encode()).hexdigest(),
-        "public_url_verified": False,
-    }
-    audit_path = Path(workspace) / "deployments" / directory.name / "deployment.json"
-    try:
-        response = httpx.get(url, timeout=30, follow_redirects=False)
-        audit["http_status"] = response.status_code
-        audit["public_url_verified"] = response.status_code == 200
-    except httpx.HTTPError as exc:
-        audit["verification_error"] = type(exc).__name__
-    finally:
-        write_json(audit_path, audit)
-    if not audit["public_url_verified"]:
-        raise ValueError("Deployment URL is not publicly accessible; retained deployment.json")
-    return url
+    save_once(
+        audit_path,
+        {
+            **request,
+            "provider": "netlify",
+            "url": deployed.get("deploy_url"),
+            "deploy_id": deployed.get("deploy_id"),
+            "public_url_verified": False,
+        },
+    )
+    return verify_deployment(audit_path)
 
 
 def capture_source(url, directory):

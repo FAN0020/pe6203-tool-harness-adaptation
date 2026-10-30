@@ -18,7 +18,7 @@ from .baselines import write_adaptation
 from .benchmark import load_task, read_json, source, write_json
 from .evaluation import judge_scores
 from .judge import ecs
-from .runner import credentials, run
+from .runner import credentials, resume_judging, run
 from .transport import sessions, snapshot
 
 STAGES = ("early", "middle", "late")
@@ -247,7 +247,14 @@ def prepare(
             ]
         )
         + [f"{repeats} trajectory repeat(s); five judge ratings are not independent task repeats"],
-        "retry_policy": "Retry identical model requests once on connection errors, 429 or 5xx; respect Retry-After up to 60s. Log failed requests with unknown usage. No tool-call, trajectory, invalid-output or low-score retries.",
+        "retry_policy": (
+            "Identical model request: one retry on connection/429/5xx, respecting Retry-After up to 60s. "
+            "Judge: five slots, at most two logical attempts per slot, first valid rating only; "
+            "durable request/response/outcome records and judge-only resume; all failed costs retained. "
+            "No agent-trajectory, tool-call or low-score retries."
+            if config.get("judge_recovery")
+            else "Retry identical model requests once on connection errors, 429 or 5xx; respect Retry-After up to 60s. Log failed requests with unknown usage. No tool-call, trajectory, invalid-output or low-score retries."
+        ),
         "availability_preflight": True,
         "stop_after_infrastructure_failures": 2,
     }
@@ -319,6 +326,15 @@ def run_experiment(root, output, resume=False, limit=None):
         return _run_experiment(root, output, resume, limit)
 
 
+def pending_judging(directory, config):
+    if "judge_recovery" not in config or not (directory / "execution-checkpoint.json").exists():
+        return False
+    result = read_json(directory / "result.json") if (directory / "result.json").exists() else {}
+    return result.get("status") != "evaluated" and result.get("judge_recovery", {}).get(
+        "resumable", True
+    )
+
+
 def _run_experiment(root, output, resume=False, limit=None):
     root, output = Path(root).resolve(), Path(output).resolve()
     configure_runtime(root)
@@ -329,16 +345,21 @@ def _run_experiment(root, output, resume=False, limit=None):
         raise ValueError("Experiment already started; use run --resume")
     ledger = read_json(ledger_path) if ledger_path.exists() else {"cells": {}}
     if plan.get("availability_preflight") and any(
-        ledger["cells"].get(c["id"], {}).get("status") in (None, "running") for c in plan["cells"]
+        ledger["cells"].get(c["id"], {}).get("status") in (None, "running")
+        or pending_judging(output / "cells" / c["id"] / "run", plan["config"])
+        for c in plan["cells"]
     ):
         availability_preflight(plan, output)
     executed = 0
     consecutive_transport_failures = 0
+    ledger.pop("stop_reason", None)
     for cell in plan["cells"]:
         directory = output / "cells" / cell["id"]
         item = ledger["cells"].get(cell["id"], {})
-        if item.get("status") not in (None, "running"):
+        recovering = resume and pending_judging(directory / "run", plan["config"])
+        if item.get("status") not in (None, "running") or recovering:
             verify_files(output, item.get("files", {}))
+        if item.get("status") not in (None, "running") and not recovering:
             continue
         if limit is not None and executed >= limit:
             break
@@ -346,7 +367,12 @@ def _run_experiment(root, output, resume=False, limit=None):
             directory / "adaptation/adaptation.json",
             directory / "run/result.json",
         )
-        if result_path.exists():
+        if recovering:
+            print(f"[{executed + 1}] {cell['id']}：仅恢复缺失评分，保留原执行", flush=True)
+            _, result = resume_judging(directory / "run")
+            item["status"] = result["status"]
+            executed += 1
+        elif result_path.exists():
             result = read_json(result_path)
             item["status"] = result["status"]
         elif (directory / "run").exists():
@@ -402,6 +428,11 @@ def _run_experiment(root, output, resume=False, limit=None):
         temporary.replace(ledger_path)
         summarize(output)
         print(f"  {item['status']}", flush=True)
+        if result_path.exists() and read_json(result_path).get("judge_recovery", {}).get("paused"):
+            ledger["stop_reason"] = "judge_transport_outage"
+            write_json(ledger_path, ledger)
+            print("评分阶段连续连接故障，已保存评分槽；网络恢复后 --resume。", flush=True)
+            break
         transport_failure = (
             result_path.exists()
             and read_json(result_path).get("failure_category") == "model_transport"
@@ -676,7 +707,16 @@ def papers_workflow(root, source_url=None, repeats=1, prepare_only=False):
             or "https://huggingface.co/papers?q=Embodied+AI"
         )
     output = Path(root) / "results/raw" / f"papers-{datetime.now(UTC):%Y%m%dT%H%M%S%f}"
-    prepare(root, output, [223], repeats=repeats, netlify=True, source_url=source_url)
+    prepare(
+        root,
+        output,
+        [223],
+        repeats=repeats,
+        netlify=True,
+        source_url=source_url,
+        config_path="configs/course-benchmark-v1.3.json",
+        updater_path="configs/course-updater.json",
+    )
     if not prepare_only:
         print("开始调用模型；将创建 Netlify draft 网页并保存全部轨迹。", flush=True)
         run_experiment(root, output)
@@ -732,7 +772,11 @@ def menu(root):
                     Path(root) / "results/raw" / f"benchmark-{datetime.now(UTC):%Y%m%dT%H%M%S%f}"
                 )
                 prepare(
-                    root, output, None, repeats=repeats, suite_path="experiments/benchmark-v1.json"
+                    root,
+                    output,
+                    None,
+                    repeats=repeats,
+                    suite_path="experiments/benchmark-v1.3.json",
                 )
         except (ValueError, OSError, KeyError) as exc:
             print(f"未完成：{exc}")
@@ -766,7 +810,8 @@ def main(root, arguments):
     p = sub.add_parser("report", help="重新核对五次评分并生成 CSV/JSON")
     p.add_argument("--output", type=Path)
     p = sub.add_parser("netlify", help="用户自行登录并选择专用实验站点")
-    p.add_argument("operation", choices=["install", "login", "link", "status"])
+    p.add_argument("operation", choices=["install", "login", "link", "switch", "status", "verify"])
+    p.add_argument("--workspace", type=Path, help="verify：只核验此运行 workspace 下已有部署")
     p = sub.add_parser("papers", help="网页实验向导：依赖→用户登录→站点→来源→运行")
     p.add_argument("--source-url")
     p.add_argument("--repeats", type=int, default=1)
@@ -811,8 +856,17 @@ def main(root, arguments):
                 raise ValueError("--repeats must be positive")
             papers_workflow(root, args.source_url, args.repeats, args.prepare_only)
         else:
-            from .netlify import setup
+            from .netlify import setup, verify_deployment
 
+            if args.operation == "verify":
+                if not args.workspace:
+                    raise ValueError("netlify verify requires --workspace <run/workspace>")
+                audits = sorted((args.workspace / "deployments").glob("*/deployment.json"))
+                if not audits:
+                    raise ValueError("No recorded deployments in this workspace")
+                for audit in audits:
+                    print(verify_deployment(audit))
+                return 0
             return setup(root, args.operation)
         return 0
     except KeyboardInterrupt:

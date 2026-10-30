@@ -174,3 +174,65 @@ def test_matrix_stops_after_two_transport_failures_preserving_pending_cells(tmp_
     assert len(ledger["cells"]) == 2
     assert ledger["stop_reason"] == "consecutive_model_transport_failures"
     assert not (tmp_path / "cells/2").exists()
+
+
+def test_resume_continues_pending_judge_without_repeating_agent(tmp_path, monkeypatch):
+    from pe6203 import experiment
+    from pe6203.benchmark import write_json
+
+    cell = {"id": "one", "task_id": 139, "version": "late", "strategy": "no_update", "seed": 0}
+    write_json(
+        tmp_path / "plan.json", {"cells": [cell], "config": {"judge_recovery": {}}, "updater": {}}
+    )
+    directory = tmp_path / "cells/one/run"
+    write_json(directory / "execution-checkpoint.json", {"saved": "execution"})
+    write_json(
+        directory / "result.json",
+        {"status": "judge_pending", "judge_recovery": {"resumable": True}},
+    )
+    write_json(
+        tmp_path / "experiment.json", {"cells": {"one": {"status": "judge_pending", "files": {}}}}
+    )
+    monkeypatch.setattr(experiment, "check_plan", lambda *a: None)
+    monkeypatch.setattr(experiment, "run", lambda *a: pytest.fail("Agent must not rerun"))
+
+    def resume(output):
+        result = {"status": "evaluated", "execution_status": "completed"}
+        write_json(output / "result.json", result)
+        return {}, result
+
+    monkeypatch.setattr(experiment, "resume_judging", resume, raising=False)
+    ledger = experiment.run_experiment(ROOT, tmp_path, resume=True)
+    assert ledger["cells"]["one"]["status"] == "evaluated"
+
+
+def test_judge_outage_stops_next_cell_instead_of_hiding_inside_score_failure(tmp_path, monkeypatch):
+    from pe6203 import experiment
+    from pe6203.benchmark import write_json
+
+    cells = [
+        {"id": str(i), "task_id": 139, "version": "early", "strategy": "no_update", "seed": i}
+        for i in range(3)
+    ]
+    write_json(tmp_path / "plan.json", {"cells": cells, "config": {}, "updater": {}})
+    monkeypatch.setattr(experiment, "check_plan", lambda *a: None)
+    monkeypatch.setattr(
+        experiment,
+        "write_adaptation",
+        lambda a, b, c, d, e: write_json(d / "adaptation.json", {"status": "validated"}),
+    )
+
+    def run(task, version, strategy, seed, config):
+        result = {
+            "status": "judge_pending",
+            "failure_category": "model_transport",
+            "judge_recovery": {"paused": True, "resumable": True},
+        }
+        write_json(Path(config["output_dir"]) / "result.json", result)
+        return {}, result
+
+    monkeypatch.setattr(experiment, "run", run)
+    ledger = experiment.run_experiment(ROOT, tmp_path)
+    assert len(ledger["cells"]) == 1
+    assert ledger["stop_reason"] == "judge_transport_outage"
+    assert not (tmp_path / "cells/1").exists()

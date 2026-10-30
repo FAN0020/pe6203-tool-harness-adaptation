@@ -129,6 +129,7 @@ def test_setup_wizard_logs_in_links_and_verifies_selected_site(tmp_path, monkeyp
     actions = []
     monkeypatch.setattr(netlify, "ensure_runtime", lambda root: None, raising=False)
     monkeypatch.delenv("NETLIFY_SITE_ID", raising=False)
+    monkeypatch.setattr("builtins.input", lambda prompt: "1")
 
     def command(root, args, **kwargs):
         if args[1] == "getCurrentUser":
@@ -166,3 +167,135 @@ def test_setup_wizard_stops_when_user_does_not_finish_login(tmp_path, monkeypatc
     monkeypatch.setattr(netlify, "setup", lambda root, action: 1)
     with pytest.raises(ValueError, match="登录"):
         netlify.setup_wizard(tmp_path)
+
+
+def test_account_switch_is_user_selected_and_identity_is_visible(tmp_path, monkeypatch, capsys):
+    from pe6203 import netlify
+    from pe6203.benchmark import write_json
+
+    monkeypatch.setattr(netlify, "ensure_runtime", lambda root: None)
+    monkeypatch.delenv("NETLIFY_SITE_ID", raising=False)
+    monkeypatch.delenv("NETLIFY_AUTH_TOKEN", raising=False)
+    actions = []
+    choices = iter(["2", "1", "1"])
+    monkeypatch.setattr("builtins.input", lambda prompt: next(choices))
+
+    def command(root, args, **kwargs):
+        if args[1] == "getCurrentUser":
+            return {"id": "new" if "switch" in actions else "old", "email": "user@example.test"}
+        return {"id": "dedicated", "name": "experiment-only"}
+
+    def setup(root, action):
+        actions.append(action)
+        if action == "link":
+            write_json(root / ".netlify/state.json", {"siteId": "dedicated"})
+        return 0
+
+    monkeypatch.setattr(netlify, "command_json", command)
+    monkeypatch.setattr(netlify, "setup", setup)
+    assert netlify.setup_wizard(tmp_path) == "dedicated"
+    assert actions == ["switch", "link"]
+    output = capsys.readouterr().out
+    assert "user@example.test" in output and "experiment-only" in output
+
+
+def test_retrying_url_verification_reuses_deployment_and_preserves_attempts(tmp_path, monkeypatch):
+    from pe6203 import netlify
+
+    deployments = []
+    online = False
+
+    def deploy(*a, **k):
+        deployments.append(1)
+        return {"deploy_id": "d1", "deploy_url": "https://draft--test.netlify.app"}
+
+    monkeypatch.setattr(netlify, "command_json", deploy)
+    monkeypatch.setattr(
+        netlify.httpx,
+        "get",
+        lambda *a, **k: httpx.Response(200 if online else 401, text="<h1>one</h1>"),
+    )
+    workspace = tmp_path / "workspace"
+    with pytest.raises(ValueError, match="public"):
+        netlify.publish_html(tmp_path, workspace, "<h1>one</h1>", "site")
+    online = True
+    assert netlify.publish_html(tmp_path, workspace, "<h1>one</h1>", "site").startswith("https://")
+    assert len(deployments) == 1
+    assert len(list(workspace.rglob("verification-*.json"))) == 2
+
+
+def test_deployment_identity_is_saved_before_url_check_interrupts(tmp_path, monkeypatch):
+    from pe6203 import netlify
+    from pe6203.benchmark import read_json
+
+    monkeypatch.setattr(
+        netlify,
+        "command_json",
+        lambda *a, **k: {"deploy_id": "d1", "deploy_url": "https://draft--test.netlify.app"},
+    )
+
+    def interrupted(*a, **k):
+        assert len(list((tmp_path / "workspace").rglob("deployment.json"))) == 1
+        raise KeyboardInterrupt("crash after deploy")
+
+    monkeypatch.setattr(netlify.httpx, "get", interrupted)
+    with pytest.raises(KeyboardInterrupt):
+        netlify.publish_html(tmp_path, tmp_path / "workspace", "<h1>one</h1>", "site")
+    audit = list((tmp_path / "workspace").rglob("deployment.json"))
+    assert len(audit) == 1
+    assert read_json(audit[0])["deploy_id"] == "d1"
+
+
+def test_unknown_deployment_outcome_cannot_be_blindly_repeated(tmp_path, monkeypatch):
+    from pe6203 import netlify
+
+    calls = []
+
+    def ambiguous(*args, **kwargs):
+        calls.append(1)
+        raise ValueError("CLI connection lost after request")
+
+    monkeypatch.setattr(netlify, "command_json", ambiguous)
+    with pytest.raises(ValueError):
+        netlify.publish_html(tmp_path, tmp_path / "workspace", "<h1>one</h1>", "site")
+    with pytest.raises(ValueError, match="unknown"):
+        netlify.publish_html(tmp_path, tmp_path / "workspace", "<h1>one</h1>", "site")
+    assert len(calls) == 1
+
+
+def test_http_200_with_wrong_content_is_not_a_verified_deployment(tmp_path, monkeypatch):
+    from pe6203 import netlify
+
+    monkeypatch.setattr(
+        netlify, "command_json", lambda *a, **k: {"deploy_url": "https://draft--test.netlify.app"}
+    )
+    monkeypatch.setattr(
+        netlify.httpx, "get", lambda *a, **k: httpx.Response(200, text="Wrong page")
+    )
+    with pytest.raises(ValueError, match="content"):
+        netlify.publish_html(tmp_path, tmp_path / "workspace", "<h1>one</h1>", "site")
+
+
+def test_cli_can_resume_only_public_url_verification(tmp_path, monkeypatch):
+    import hashlib
+
+    from pe6203 import experiment, netlify
+    from pe6203.benchmark import read_json, write_json
+
+    audit = tmp_path / "workspace/deployments/one/deployment.json"
+    write_json(
+        audit,
+        {
+            "url": "https://draft--test.netlify.app",
+            "html_sha256": hashlib.sha256(b"page").hexdigest(),
+        },
+    )
+    monkeypatch.setattr(netlify.httpx, "get", lambda *a, **k: httpx.Response(200, content=b"page"))
+    monkeypatch.setattr(
+        netlify, "command_json", lambda *a, **k: pytest.fail("Verification must not deploy")
+    )
+    assert (
+        experiment.main(tmp_path, ["netlify", "verify", "--workspace", str(tmp_path / "workspace")])
+        == 0
+    )
+    assert read_json(audit)["public_url_verified"] is True

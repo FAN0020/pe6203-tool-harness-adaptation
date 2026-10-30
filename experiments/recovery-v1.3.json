@@ -1,0 +1,80 @@
+{
+  "id": "recovery-v1.3",
+  "status": "frozen_for_formal_trial",
+  "registered_before_formal_run": true,
+  "controls": "Same tasks, model, decoding, agent token/round limits, updater and original rubric as course-v1.2. Three strategies always share judge and recovery settings.",
+  "judge": "Original rubric saved verbatim; append concise-counts-v1 format contract plus deterministic counts of tool-call proposals, observed results, errors and unanswered proposals (no scores or redundancy labels). Five rating slots; at most two logical attempts per slot, with one identical HTTP retry each for connection/429/5xx. Accept first valid rating, never the highest. Max 20 judge HTTP requests per trajectory. Counts survive resume.",
+  "persistence": "Request/response/retry/outcome records immutable. Completed execution checkpoint permits judge-only resume. Prior aggregates retained in revisions. No blind replay of agent or tool side effects; interruption before a completed execution checkpoint stays interrupted.",
+  "transport": "Judge pauses after two consecutive exhausted logical transport requests. Matrix sees the pause and starts no further cells. Agent/updater transport failures retain existing per-request limits and outer circuit breaker. Resume does not reset judge attempt budgets.",
+  "netlify": "User confirms CLI account/site. Same HTML and site within a workspace reuse the deployment; URL checks can resume. Unknown deploy outcome blocks automatic resubmission. Strict HTTP200 + content hash; verification attempts preserved.",
+  "development_probe": {
+    "prompts": [
+      "results/raw/task139-three-strategy-20261030/cells/task139-early-no_update-r0/run/judge-prompt-1.txt",
+      "results/raw/cli-selective-live-20261030/cells/task139-late-selective_patch-r0/run/judge-prompt-1.txt",
+      "results/raw/finalized-trial-20261031/cells/task133-middle-full_rewrite-r0/run/judge-prompt-3.txt",
+      "results/raw/course-v1.2-20261030/cells/task133-late-no_update-r0/run/judge-prompt-5.txt"
+    ],
+    "gate": "Four predefined exposed-development prompts; original rubric prefix unchanged, valid first or bounded recovered output, inspect counts/reasons against source trajectory. No tuning or selection by score. Then one live task139 cell with real MCP, agent and judge.",
+    "first_candidate": {
+      "path": "results/raw/recovery-v1.3-development/judge-probe",
+      "valid_format": "4/4",
+      "semantic_gate": "failed: tool totals 24/24/30/44 versus recorded 29/27/32/31; retained without score replacement"
+    },
+    "accepted_candidate": {
+      "path": "results/raw/recovery-v1.3-development/judge-counts-probe",
+      "review": "review.json",
+      "gate": "4/4 first-attempt valid; recorded denominators correct; subjective attribution and rubric ambiguity disclosed"
+    },
+    "live_runner": {
+      "path": "results/raw/course-v1.3-live-smoke-20261031",
+      "task": 139,
+      "stage": "late",
+      "strategy": "selective_patch",
+      "execution_status": "completed",
+      "valid_judges": 5,
+      "TF": 10,
+      "PE": 9
+    }
+  },
+  "formal_gate": {
+    "tasks": [
+      133,
+      235,
+      283
+    ],
+    "stages": [
+      "early",
+      "middle",
+      "late"
+    ],
+    "methods": [
+      "no_update",
+      "full_rewrite",
+      "selective_patch"
+    ],
+    "repeats": 1,
+    "trajectories": 27,
+    "valid_rating_slots": 135,
+    "matched_stage_groups": 9,
+    "complete_matched_tasks": 3,
+    "no_minimum_score": true
+  },
+  "diagnostic": {
+    "task": 235,
+    "stage": "late",
+    "repeats_per_arm": 3,
+    "arms": [
+      "frozen trial-B Full Rewrite knowledge",
+      "same structural records; roll back only unrelated descriptions to Early"
+    ],
+    "source": "results/raw/finalized-trial-20261031/cells/task235-late-full_rewrite-r0/adaptation/knowledge.json",
+    "separate_from_main_results": true,
+    "no_guarantee_of_causal_over_update": true
+  },
+  "history": "All previous success/failure evidence immutable. Do not backfill old missing cells.",
+  "verification": {
+    "tests": "299 passed",
+    "format_lint": "ruff check and format passed",
+    "counts_probe": "4/4 valid first attempts; denominator checks passed; subjective judge uncertainty retained"
+  }
+}

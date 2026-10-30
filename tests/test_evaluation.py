@@ -60,6 +60,26 @@ def data():
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_recovered_scores_must_select_first_valid_attempt(self):
+        payload = judge()
+        packed = payload["eval_result"]
+        packed["protocol"] = "durable-slots-v1"
+        for i, row in enumerate(packed["runs"], 1):
+            row.update(slot=i, attempt=1)
+        packed["attempts"] = copy.deepcopy(packed["runs"])
+        self.assertIsNone(ev.judge_scores(payload)[1])
+        earlier = copy.deepcopy(packed["attempts"][0])
+        earlier["result"]["task_fulfillment"] = 1
+        packed["attempts"][0]["attempt"] = 2
+        packed["runs"][0]["attempt"] = 2
+        packed["attempts"].insert(0, earlier)
+        self.assertIsNone(ev.judge_scores(payload)[0])
+
+    def test_durable_judge_requires_attempt_audit(self):
+        payload = judge()
+        payload["eval_result"]["protocol"] = "durable-slots-v1"
+        self.assertIsNone(ev.judge_scores(payload)[0])
+
     def test_ecs_reference(self):
         self.assertAlmostEqual(ev.ecs([6, 8, 10]), 6.367006838144548)
         self.assertAlmostEqual(ev.ecs([6, 8, 10], True), 6)

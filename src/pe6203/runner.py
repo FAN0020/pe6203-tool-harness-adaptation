@@ -15,7 +15,14 @@ from openai import AsyncOpenAI
 
 from .benchmark import digest, load_task, read_json, source, write_json
 from .costs import provider_usd, sum_usd
-from .judge import aggregate_scores, official_prompt, parse_scores
+from .judge import (
+    aggregate_scores,
+    evaluate_slots,
+    measurement_prompt,
+    official_prompt,
+    parse_scores,
+    save_once,
+)
 from .report import write_report
 from .transport import check_arguments, server_profiles, sessions, snapshot
 
@@ -438,87 +445,112 @@ async def run_async(task_id, version, strategy, seed, config):
                 result["execution_status"] = outcome["status"]
                 result["cost"]["agent"] = outcome["usage"]
                 write_json(output / "ANSWER" / f"{task_id}.json", clean(trace))
-                rng, scores, judge_runs = random.Random(seed), [], []
-                result["judge_status"] = "running"
-                async with AsyncOpenAI(
-                    api_key=judge_key,
-                    base_url=judge_url,
-                    timeout=config["request_timeout_seconds"],
-                    max_retries=0,
-                ) as judge:
+                if config.get("judge_recovery"):
+                    prompts, rng = [], random.Random(seed)
                     for index in range(config["judge_runs"]):
-                        order = rng.sample([0, 1, 2], 3)
-                        prompt = official_prompt(
+                        original = official_prompt(
                             upstream,
                             task,
                             current["tools"],
                             outcome["messages"],
                             outcome["answer"],
-                            order,
+                            rng.sample([0, 1, 2], 3),
+                        )
+                        prompt = measurement_prompt(original, outcome["messages"])
+                        (output / f"judge-original-prompt-{index + 1}.txt").write_text(
+                            redact(original, secrets)
                         )
                         (output / f"judge-prompt-{index + 1}.txt").write_text(
                             redact(prompt, secrets)
                         )
-                        item = {"dimension_order": order}
-                        try:
-                            from .request_retry import request_async
-
-                            response = await request_async(
-                                lambda: judge.chat.completions.create(
-                                    messages=[{"role": "user", "content": prompt}],
-                                    **{
-                                        k: config["judge"][k]
-                                        for k in (
-                                            "model",
-                                            "temperature",
-                                            "max_completion_tokens",
-                                            "extra_body",
-                                        )
-                                        if k in config["judge"]
-                                    },
-                                ),
-                                config.get("request_retry"),
-                                lambda event: emit(
-                                    {
-                                        "type": "request_retry",
-                                        "role": "judge",
-                                        "run": index + 1,
-                                        **event,
-                                    }
-                                ),
+                        prompts.append(prompt)
+                    checkpoint = {"trace": trace, "result": result, "prompts": prompts}
+                    save_once(output / "execution-checkpoint.json", clean(checkpoint))
+                    await finish_judging(output, checkpoint, emit)
+                else:
+                    rng, scores, judge_runs = random.Random(seed), [], []
+                    result["judge_status"] = "running"
+                    async with AsyncOpenAI(
+                        api_key=judge_key,
+                        base_url=judge_url,
+                        timeout=config["request_timeout_seconds"],
+                        max_retries=0,
+                    ) as judge:
+                        for index in range(config["judge_runs"]):
+                            order = rng.sample([0, 1, 2], 3)
+                            prompt = official_prompt(
+                                upstream,
+                                task,
+                                current["tools"],
+                                outcome["messages"],
+                                outcome["answer"],
+                                order,
                             )
-                            item["response"] = response.model_dump()
-                            item["result"] = parse_scores(response.choices[0].message.content or "")
-                            scores.append(item["result"])
-                        except asyncio.CancelledError:
-                            item["error"] = "CancelledError: Judge request cancelled"
+                            (output / f"judge-prompt-{index + 1}.txt").write_text(
+                                redact(prompt, secrets)
+                            )
+                            item = {"dimension_order": order}
+                            try:
+                                from .request_retry import request_async
+
+                                response = await request_async(
+                                    lambda: judge.chat.completions.create(
+                                        messages=[{"role": "user", "content": prompt}],
+                                        **{
+                                            k: config["judge"][k]
+                                            for k in (
+                                                "model",
+                                                "temperature",
+                                                "max_completion_tokens",
+                                                "extra_body",
+                                            )
+                                            if k in config["judge"]
+                                        },
+                                    ),
+                                    config.get("request_retry"),
+                                    lambda event: emit(
+                                        {
+                                            "type": "request_retry",
+                                            "role": "judge",
+                                            "run": index + 1,
+                                            **event,
+                                        }
+                                    ),
+                                )
+                                item["response"] = response.model_dump()
+                                item["result"] = parse_scores(
+                                    response.choices[0].message.content or ""
+                                )
+                                scores.append(item["result"])
+                            except asyncio.CancelledError:
+                                item["error"] = "CancelledError: Judge request cancelled"
+                                judge_runs.append(item)
+                                emit({"type": "judge_result", "run": index + 1, **item})
+                                raise
+                            except Exception as exc:
+                                item["error"] = f"{type(exc).__name__}: {exc}"
                             judge_runs.append(item)
                             emit({"type": "judge_result", "run": index + 1, **item})
-                            raise
-                        except Exception as exc:
-                            item["error"] = f"{type(exc).__name__}: {exc}"
-                        judge_runs.append(item)
-                        emit({"type": "judge_result", "run": index + 1, **item})
-                aggregate = aggregate_scores(scores, config["judge_runs"])
-                write_json(
-                    output / "EVAL" / f"{task_id}.json",
-                    clean(
+                    aggregate = aggregate_scores(scores, config["judge_runs"])
+                    write_json(
+                        output / "EVAL" / f"{task_id}.json",
+                        clean(
+                            {
+                                **trace,
+                                "eval_result": {"runs": judge_runs, "aggregate": aggregate},
+                            }
+                        ),
+                    )
+                    result.update(
                         {
-                            **trace,
-                            "eval_result": {"runs": judge_runs, "aggregate": aggregate},
+                            "TF": aggregate["task_fulfillment_mean"],
+                            "PE": aggregate["planning_and_efficiency_mean"],
+                            "judge_status": "complete" if aggregate["complete"] else "incomplete",
+                            "status": "evaluated" if aggregate["complete"] else "judge_incomplete",
+                            "ecs_inputs": {version: aggregate["task_fulfillment_mean"]},
                         }
-                    ),
-                )
-                result.update(
-                    {
-                        "TF": aggregate["task_fulfillment_mean"],
-                        "PE": aggregate["planning_and_efficiency_mean"],
-                        "judge_status": "complete" if aggregate["complete"] else "incomplete",
-                        "status": "evaluated" if aggregate["complete"] else "judge_incomplete",
-                        "ecs_inputs": {version: aggregate["task_fulfillment_mean"]},
-                    }
-                )
-                result["cost"]["judge"] = usage_total(recorded_usages["judge"])
+                    )
+                    result["cost"]["judge"] = usage_total(recorded_usages["judge"])
     except Exception as exc:
         from .request_retry import failure_details
 
@@ -553,3 +585,114 @@ async def run_async(task_id, version, strategy, seed, config):
 
 def run(task_id, version, strategy, seed, config):
     return asyncio.run(run_async(task_id, version, strategy, seed, config))
+
+
+async def finish_judging(output, checkpoint, emit):
+    """Consume saved execution only; no MCP session or agent request can run here."""
+    result, trace = checkpoint["result"], checkpoint["trace"]
+    config = result["config"]
+    key, url = credentials(config["judge"])
+    if url != result["model_endpoints"]["judge"]:
+        raise ValueError("Frozen judge endpoint changed")
+    async with AsyncOpenAI(
+        api_key=key, base_url=url, timeout=config["request_timeout_seconds"], max_retries=0
+    ) as judge:
+        packed = await evaluate_slots(judge, output, checkpoint["prompts"], config, emit)
+    aggregate = packed["aggregate"]
+    write_json(
+        Path(output) / "EVAL" / f"{result['task_id']}.json",
+        {
+            **trace,
+            "eval_result": {
+                "runs": packed["runs"],
+                "aggregate": aggregate,
+                "attempts": packed["attempts"],
+                "protocol": "durable-slots-v1",
+            },
+        },
+    )
+    complete = aggregate["complete"]
+    result.update(
+        {
+            "TF": aggregate["task_fulfillment_mean"] if complete else None,
+            "PE": aggregate["planning_and_efficiency_mean"] if complete else None,
+            "ecs_inputs": {
+                result["version"]: aggregate["task_fulfillment_mean"] if complete else None
+            },
+            "judge_status": "complete" if complete else "incomplete",
+            "status": "evaluated"
+            if complete
+            else "judge_pending"
+            if packed["resumable"]
+            else "judge_incomplete",
+            "judge_recovery": {k: packed[k] for k in ("paused", "resumable")},
+        }
+    )
+    result["judge_recovery"]["attempts"] = len(packed["attempts"])
+    result["cost"]["judge"] = usage_total(packed["usages"])
+    if packed["paused"]:
+        result["failure_category"] = "model_transport"
+    elif complete:
+        result.pop("failure_category", None)
+    return result
+
+
+async def resume_judging_async(output):
+    """Resume only a completed execution checkpoint; retain prior aggregate revisions."""
+    output = Path(output)
+    checkpoint = read_json(output / "execution-checkpoint.json")
+    result, trace = checkpoint["result"], checkpoint["trace"]
+    if not result["config"].get("judge_recovery"):
+        raise ValueError("Historical protocol does not allow judge recovery")
+    previous = read_json(output / "result.json") if (output / "result.json").exists() else None
+    if previous and previous["status"] == "evaluated":
+        return read_json(output / "raw_trace.json"), previous
+    if previous:
+        revisions = output / "revisions"
+        dest = revisions / f"resume-{len(list(revisions.glob('resume-*'))) + 1}"
+        for name in (
+            "result.json",
+            "raw_trace.json",
+            "report.txt",
+            f"EVAL/{result['task_id']}.json",
+        ):
+            p = output / name
+            if p.exists():
+                copy_to = dest / name
+                copy_to.parent.mkdir(parents=True, exist_ok=True)
+                if name == "report.txt":
+                    p.replace(copy_to)
+                else:
+                    shutil.copyfile(p, copy_to)
+    key, _ = credentials(result["config"]["judge"])
+    events = [json.loads(line) for line in (output / "events.jsonl").read_text().splitlines()]
+    started = time.monotonic()
+
+    def emit(event):
+        event = json.loads(
+            redact(json.dumps({"resumed_at": datetime.now(UTC).isoformat(), **event}), [key])
+        )
+        events.append(event)
+        with (output / "events.jsonl").open("a") as stream:
+            stream.write(json.dumps(event, ensure_ascii=False) + "\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+
+    result["status"] = "judge_pending"
+    try:
+        async with asyncio.timeout(result["config"]["run_timeout_seconds"]):
+            await finish_judging(output, checkpoint, emit)
+    finally:
+        result["seconds"] = (previous or result).get("seconds", 0) + time.monotonic() - started
+        result["cost"]["usd"] = sum_usd(
+            (result["cost"].get(s) or {}).get("usd") for s in ("agent", "judge", "update")
+        )
+        trace["events"] = events
+        write_json(output / "result.json", result)
+        write_json(output / "raw_trace.json", trace)
+    write_report([output], output / "report.txt")
+    return trace, result
+
+
+def resume_judging(output):
+    return asyncio.run(resume_judging_async(output))
