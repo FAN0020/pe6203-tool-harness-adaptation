@@ -1,0 +1,100 @@
+{
+  "as_of": "2026-10-31",
+  "kind": "historical_evidence_catalog_not_new_evaluation",
+  "policy": "全部旧结果原样保留；案例用于解释，不用于筛选或拼接主结果。score_complete、execution_status 与因果确定性分别展示。",
+  "trials": [
+    {"id": "A", "title": "课程试跑 A · 2026-10-30", "summary": "results/evidence/benchmark-finalization/summary.json", "archive": "results/evidence/benchmark-finalization/raw-experiments.tar.gz", "archive_sha256": "dc6e3d7f674d73058f7c2d53975309ba1a928161692a9c336798334dd289824c", "archive_root": "course-v1.2-20261030", "note": "26/27 完整评分；仅 235/283 两个完整匹配任务可进入三策略 ECS。包内同时保留 v1 评分格式失败、v1.1 全连接失败和对应实现快照。"},
+    {"id": "B", "title": "课程试跑 B · 2026-10-31", "summary": "results/evidence/finalized-trial-20261031/summary.json", "archive": "results/evidence/finalized-trial-20261031/raw-trial.tar.gz", "archive_sha256": "701b93f79d9da7981e0789eb9158d59b27f80b6f62832e3b20e0a856a141b8bd", "archive_root": "finalized-trial-20261031", "note": "24/27 完整评分；0 个完整匹配任务，三策略匹配 ECS 均为空。135 个计划 judge 槽，实际尝试 130 个，126 个有效。临时总控控制台日志缺失，逐单元证据仍在。"},
+    {"id": "D1", "title": "开发任务 139 · 三策略试跑", "summary": "results/evidence/experiment-cli-20261030/summary.json", "note": "8/9 评分完整，一条连接失败。开发结果不并入正式子集。"},
+    {"id": "D2", "title": "开发任务 139 · Selective Patch 单条", "summary": "results/evidence/experiment-cli-20261030/selective-live/summary.json", "note": "TF 10 / PE 9.2，仍有两次工具错误；单条开发 smoke，不是三策略比较。"}
+  ],
+  "cases": [
+    {
+      "id": "C01", "title": "成功恢复：更新新参数后调用被接受", "category": "success", "certainty": "参数调用层面已确认", "trial": "B",
+      "cells": ["task133-late-full_rewrite-r0", "task133-late-selective_patch-r0"],
+      "expected": "Late validate_syntax 调用显式提供布尔 allow_variables，完成数学与安全建议任务。",
+      "observed": "Full Rewrite TF 10 / PE 10；Selective Patch TF 9.8 / PE 6。两者执行完成，新参数调用均被接受。Selective Patch 仍有一次其他工具错误。",
+      "cause": "适应后的知识提供了 Late 所需参数。",
+      "limit": "单次样本；不能把整段 TF 差异都归因于这一参数，也不能证明 Selective Patch 总体优于 Full Rewrite。",
+      "evidence": ["results/evidence/finalized-trial-20261031/failure-analysis.json"]
+    },
+    {
+      "id": "C02", "title": "成功保持：无需修改的图表任务", "category": "success", "certainty": "工具轨迹与评分已确认", "trial": "B",
+      "cells": ["task235-middle-selective_patch-r0"],
+      "expected": "保留未变化知识，生成原任务需要的图表规格。",
+      "observed": "TF 10 / PE 10；3 次工具调用，0 个工具错误，执行完成。",
+      "cause": "未变化记录保持原样，无 LLM 更新 token。",
+      "limit": "验证对象是 vis-chart 规格；未验证浏览器渲染或托管网页。一次通过不证明跨任务普遍保持。",
+      "evidence": ["results/evidence/finalized-trial-20261031/artifact-audit.json"]
+    },
+    {
+      "id": "C03", "title": "Under-update 证据：旧知识漏传必需参数", "category": "failure", "certainty": "No Update 的调用级原因已确认", "trial": "B",
+      "cells": ["task133-late-no_update-r0"],
+      "expected": "在 Late 环境中满足新参数契约。",
+      "observed": "5 次 validate_syntax 缺少 allow_variables 被拒绝；TF 6 / PE 6.6；最终 output_truncated。",
+      "cause": "Early 知识不含 Late 新必需参数；独立工具探测复现拒绝。",
+      "limit": "此案例属于 No Update，不是已证明的 Selective Patch 漏改。最终任务同时受生成额度耗尽影响；作业要求的 patch 失败分析仍需谨慎补证。",
+      "evidence": ["results/evidence/finalized-trial-20261031/failure-analysis.json", "results/evidence/finalized-trial-20261031/contracts-probes.json"]
+    },
+    {
+      "id": "C04", "title": "Over-update 候选：无变化任务中重复生成地图", "category": "candidate", "certainty": "退化已观察，因果未确认", "trial": "B",
+      "cells": ["task235-late-full_rewrite-r0", "task235-late-no_update-r0", "task235-late-selective_patch-r0"],
+      "expected": "无关知识的重写不应损坏原本可完成的图表任务。",
+      "observed": "Full Rewrite TF 8.8 / PE 4.2，调用地图 5 次，遗漏部分地图单位配置；另两方法均 TF 10 / PE 10。",
+      "cause": "可能与描述重写有关，但重写文本及 schema 仍包含相关字段；还存在 agent 和 judge 的波动。",
+      "limit": "TF 五个评分为 10/10/10/9/5，存在分歧。Early 相同知识也出现分数差异。不能凭低分认定 over-update；需预注册回退对照诊断。",
+      "evidence": ["results/evidence/finalized-trial-20261031/candidate-over-update.json"]
+    },
+    {
+      "id": "C05", "title": "模型生成预算失败：参数修正成功但未完成任务", "category": "failure", "certainty": "截断原因已确认，非 harness 归因", "trial": "B",
+      "cells": ["task133-middle-selective_patch-r0"],
+      "expected": "在共同的生成预算内完成任务。",
+      "observed": "TF 3.2 / PE 4.2；新 validate_syntax 调用成功，但第 6 轮 finish_reason=length、4096 completion tokens，没有最终内容或工具调用。",
+      "cause": "直接终止原因是生成额度耗尽。",
+      "limit": "不据此认定 under-update 或 over-update；若调整额度，必须对三方法统一并冻结新版本。",
+      "evidence": ["results/evidence/finalized-trial-20261031/measurement-failures.json"]
+    },
+    {
+      "id": "C06", "title": "评分失败：agent 完成但 judge JSON 被截断", "category": "measurement", "certainty": "测量缺失已确认", "trial": "B",
+      "cells": ["task133-middle-full_rewrite-r0"],
+      "expected": "五个有效原始 rubric 评分。",
+      "observed": "agent completed；judge 第 3 次 length/无效 JSON；仅 4/5 有效，正式 TF/PE 为空。",
+      "cause": "judge 输出截断，不能解析为完整评分。",
+      "limit": "不把其余四个评分的均值当成完整结果；旧协议不允许补判。A 中 133 Late No Update 也曾有此类缺失，原记录保留。",
+      "evidence": ["results/evidence/finalized-trial-20261031/measurement-failures.json", "results/evidence/benchmark-finalization/verification.json"]
+    },
+    {
+      "id": "C07", "title": "连接失败：执行与评分两个阶段都受影响", "category": "infrastructure", "certainty": "边界异常已确认，网络根因未知", "trial": "B",
+      "cells": ["task235-middle-no_update-r0", "task283-late-no_update-r0"],
+      "expected": "请求可达；失败时保留状态、费用与剩余工作。",
+      "observed": "235 的首次 agent 请求在重试后失败，未评分；283 的 judge 3/4/5 连接失败，仅 2/5 有效。随后独立 API 检查恢复成功。",
+      "cause": "APIConnectionError；不能仅凭此确定是服务商、客户端或网络问题。",
+      "limit": "后来连接恢复不替换历史失败；没有把两条重新跑成成功记录。",
+      "evidence": ["results/evidence/finalized-trial-20261031/measurement-failures.json", "results/evidence/finalized-trial-20261031/connectivity-recheck.log"]
+    },
+    {
+      "id": "C08", "title": "上游工具缺陷：健康检查调用不存在的方法", "category": "environment", "certainty": "独立工具探测已确认", "trial": "B",
+      "cells": ["task283-late-full_rewrite-r0"],
+      "expected": "review_workspace_health 的默认参数可执行。",
+      "observed": "includeMemories=true 报 memoryStorage.listMemories is not a function；false 成功。该轨迹最终 TF 6.8 / PE 7.8。",
+      "cause": "发布包 server 调用不存在的存储方法。",
+      "limit": "保留所有方法共同使用的原发布实现；不能归因为 harness 重写，也不能将绕过缺陷的独立诊断当成主实验修复。",
+      "evidence": ["results/evidence/finalized-trial-20261031/workspace-health-diagnostic.json"]
+    },
+    {
+      "id": "C09", "title": "非致命协议警告与轮数耗尽分别记录", "category": "environment", "certainty": "源码与轨迹可查，原总控日志缺失", "trial": "B",
+      "cells": ["task283-early-selective_patch-r0"],
+      "expected": "MCP stdout 仅输出协议消息；独立记录执行是否完成。",
+      "observed": "上游迁移提示输出到 stdout，引发 JSON-RPC 解析警告后继续；轨迹 max_rounds，TF 9.2 / PE 7.4，记录的工具结果无 isError。",
+      "cause": "上游 console.log 污染协议输出；它是否导致轮数耗尽未证明。",
+      "limit": "高 TF 不等于执行完成。警告曾被现场观察，原临时控制台日志缺失，不能声称完整保存了该警告输出。",
+      "evidence": ["results/evidence/finalized-trial-20261031/runtime-warnings.json", "results/evidence/finalized-trial-20261031/reproduction.json"]
+    }
+  ],
+  "older_evidence": [
+    {"path": "results/evaluation/fanziyu-pilot-audit-20261027/summary.json", "note": "更早开发审计：含成功、无效 judge 和未归因工具错误；部分原始 judge 响应未保存，不具备完整三策略比较。"},
+    {"path": "reports/fanziyu-pilot-analysis-20261027.md", "note": "早期人工可读分析；属于当时版本，不覆盖当前协议。"},
+    {"path": "reports/vanilla-agent-task139-early-handoff.md", "note": "原始 agent 接入与开发案例交接。"},
+    {"path": "results/evidence/full-rewrite-20261019/README.md", "note": "Full Rewrite 早期实现与验证来源。"}
+  ]
+}
