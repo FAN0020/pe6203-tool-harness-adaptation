@@ -22,6 +22,7 @@ def updater_settings(context):
         "api_key_env",
         "base_url_env",
         "allow_metadata_api",
+        "request_retry",
     }
     if not isinstance(settings, dict) or set(settings) - allowed:
         raise ValueError("Updater requires supported settings and environment variable names only")

@@ -144,7 +144,16 @@ def _llm_rewrite(new_metadata, context, started):
     _save_audit(context, audit)
     try:
         cost["model_calls"] = 1
-        response = _request_completion(messages, settings)
+        from pe6203.request_retry import request_sync
+
+        def on_retry(event):
+            audit.setdefault("request_retries", []).append(event)
+            cost["model_calls"] += 1
+            _save_audit(context, audit)
+
+        response = request_sync(
+            lambda: _request_completion(messages, settings), settings.get("request_retry"), on_retry
+        )
         audit["response"] = response
         usage = response.get("usage") or {}
         cost["api_cost_usd"] = provider_usd(usage)
@@ -157,6 +166,10 @@ def _llm_rewrite(new_metadata, context, started):
         ):
             value = usage.get(provider)
             cost[field] = value if type(value) is int and value >= 0 else None
+        if audit.get("request_retries"):
+            # Keep the successful response usage in the audit, but the failed calls' usage is unknown.
+            cost.update(input_tokens=None, output_tokens=None, api_cost_usd=None)
+            audit["api_cost_source"] = None
         choice = response["choices"][0]
         if choice.get("finish_reason") != "stop":
             raise ValueError("Rewrite truncated or incomplete")

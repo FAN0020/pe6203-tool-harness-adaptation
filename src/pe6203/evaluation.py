@@ -374,7 +374,14 @@ def summarize(m, selected, attempts):
                 "missing_selected_cells": sum(x["reason"] == "no_selected_result" for x in rows),
                 "noneligible_cell_fraction": sum(not x["eligible"] for x in rows) / len(rows),
                 "attempt_execution_failures": sum(
-                    x["execution_status"] in ("failed", "max_rounds", "empty_answer")
+                    x["execution_status"]
+                    in (
+                        "failed",
+                        "max_rounds",
+                        "empty_answer",
+                        "output_truncated",
+                        "content_filtered",
+                    )
                     for x in observed
                 ),
                 "attempt_not_started": sum(

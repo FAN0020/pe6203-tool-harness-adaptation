@@ -85,10 +85,79 @@ def site_id(root):
 
 
 def check_setup(root, site):
-    cli_command(root)
     if not site:
         raise ValueError("A dedicated Netlify experiment site is required")
-    command_json(root, ["status", "--json"])
+    info = command_json(root, ["api", "getSite", "--data", json.dumps({"site_id": site})])
+    if info.get("id") != site:
+        raise ValueError("Netlify could not verify access to the selected experiment site")
+
+
+def ensure_runtime(root):
+    """Install missing pinned dependencies before entering the interactive login flow."""
+    from .bootstrap import bootstrap
+    from .experiment import STAGES, configure_runtime
+
+    root = Path(root).resolve()
+    node = root / ".cache/node-runtime/node_modules/node/bin/node"
+    if not node.exists():
+        subprocess.run(
+            [
+                "npm",
+                "install",
+                "--prefix",
+                str(root / ".cache/node-runtime"),
+                "--no-audit",
+                "--no-fund",
+                "node@24.13.0",
+            ],
+            check=True,
+            cwd=root,
+        )
+    configure_runtime(root)
+    lock = read_json(root / "configs/benchmark.lock.json")
+    missing = [
+        v
+        for v in STAGES
+        if any(
+            not (
+                root / ".cache/mcpevol" / lock["stages"][v]["directory"] / "node_modules" / entry
+            ).is_file()
+            for entry in (
+                "fetcher-mcp/build/index.js",
+                "edgeone-pages-mcp/dist/index.js",
+                "playwright/cli.js",
+            )
+        )
+    ]
+    if missing:
+        print("安装缺少的锁定 MCP 发布包（首次可能下载数 GB）", flush=True)
+        bootstrap(root, missing, scope="all")
+    cli = root / "tools/netlify/node_modules/netlify-cli/bin/run.js"
+    if not cli.is_file() or not list((root / ".cache/playwright").glob("chromium-*")):
+        if setup(root, "install"):
+            raise ValueError(
+                "依赖安装失败；修复网络后重新运行 ./experiment papers，已下载内容会保留"
+            )
+
+
+def setup_wizard(root):
+    ensure_runtime(root)
+    try:
+        command_json(root, ["api", "getCurrentUser"])
+    except ValueError:
+        print("请在浏览器完成 Netlify 登录；完成后 CLI 自动继续。", flush=True)
+        if setup(root, "login"):
+            raise ValueError("Netlify 登录未完成；重新运行 ./experiment papers 可继续")
+        command_json(root, ["api", "getCurrentUser"])
+    try:
+        site = site_id(root)
+    except ValueError:
+        print("请选择你已创建的专用实验站点；只发布 draft。", flush=True)
+        if setup(root, "link"):
+            raise ValueError("站点关联未完成；重新运行 ./experiment papers 可继续")
+        site = site_id(root)
+    check_setup(root, site)
+    return site
 
 
 def setup(root, action):

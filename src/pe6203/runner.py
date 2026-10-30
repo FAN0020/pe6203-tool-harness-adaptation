@@ -148,6 +148,8 @@ def usage_total(usages):
 
 
 async def agent_loop(client, clients, tools, routes, question, workspace, config, seed, emit):
+    from .request_retry import request_async
+
     system = (
         "You are an AI agent connected to MCP tools. Complete the user's task using "
         "the supplied tools. Do not ask the user follow-up questions. Use only the tools "
@@ -168,9 +170,16 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
     if config.get("send_model_seed", False):
         settings["seed"] = seed
     for turn in range(config["max_rounds"]):
+
+        def on_retry(event):
+            usages.append({})  # Failed HTTP request may have incurred unreported usage.
+            emit({"type": "request_retry", "role": "agent", "round": turn + 1, **event})
+
         try:
-            response = await client.chat.completions.create(
-                messages=messages, tools=tools, **settings
+            response = await request_async(
+                lambda: client.chat.completions.create(messages=messages, tools=tools, **settings),
+                config.get("request_retry"),
+                on_retry,
             )
         except BaseException as exc:
             emit({"type": "agent_error", "round": turn + 1, "error_type": type(exc).__name__})
@@ -185,6 +194,11 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
         )
         message = response.choices[0].message.model_dump(exclude_none=True)
         messages.append(message)
+        finish = response.choices[0].finish_reason
+        if finish in ("length", "content_filter"):
+            answer = message.get("content") or ""
+            status = "output_truncated" if finish == "length" else "content_filtered"
+            break
         calls = message.get("tool_calls", [])
         if not calls:
             answer = message.get("content") or ""
@@ -275,6 +289,8 @@ async def run_async(task_id, version, strategy, seed, config):
             "agent_error": "agent",
             "judge_result": "judge",
         }.get(event.get("type"))
+        if event.get("type") == "request_retry":
+            role = event["role"]
         if role:
             # Retain billed responses even if a later parse, tool call or request fails.
             recorded_usages[role].append((event.get("response") or {}).get("usage") or {})
@@ -445,18 +461,31 @@ async def run_async(task_id, version, strategy, seed, config):
                         )
                         item = {"dimension_order": order}
                         try:
-                            response = await judge.chat.completions.create(
-                                messages=[{"role": "user", "content": prompt}],
-                                **{
-                                    k: config["judge"][k]
-                                    for k in (
-                                        "model",
-                                        "temperature",
-                                        "max_completion_tokens",
-                                        "extra_body",
-                                    )
-                                    if k in config["judge"]
-                                },
+                            from .request_retry import request_async
+
+                            response = await request_async(
+                                lambda: judge.chat.completions.create(
+                                    messages=[{"role": "user", "content": prompt}],
+                                    **{
+                                        k: config["judge"][k]
+                                        for k in (
+                                            "model",
+                                            "temperature",
+                                            "max_completion_tokens",
+                                            "extra_body",
+                                        )
+                                        if k in config["judge"]
+                                    },
+                                ),
+                                config.get("request_retry"),
+                                lambda event: emit(
+                                    {
+                                        "type": "request_retry",
+                                        "role": "judge",
+                                        "run": index + 1,
+                                        **event,
+                                    }
+                                ),
                             )
                             item["response"] = response.model_dump()
                             item["result"] = parse_scores(response.choices[0].message.content or "")
@@ -491,6 +520,9 @@ async def run_async(task_id, version, strategy, seed, config):
                 )
                 result["cost"]["judge"] = usage_total(recorded_usages["judge"])
     except Exception as exc:
+        from .request_retry import failure_details
+
+        result.update(failure_details(exc))
         for stage in ("execution_status", "judge_status"):
             if result[stage] == "running":
                 result[stage] = "failed"

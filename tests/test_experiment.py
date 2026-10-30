@@ -140,3 +140,37 @@ def test_same_experiment_cannot_have_two_writers(tmp_path):
                 pass
     with writer_lock(tmp_path):
         pass
+
+
+def test_matrix_stops_after_two_transport_failures_preserving_pending_cells(tmp_path, monkeypatch):
+    from pe6203 import experiment
+    from pe6203.benchmark import write_json
+
+    cells = [
+        {"id": str(i), "task_id": 105 + i, "version": "early", "strategy": "no_update", "seed": 0}
+        for i in range(4)
+    ]
+    write_json(
+        tmp_path / "plan.json",
+        {"cells": cells, "config": {}, "updater": {}, "stop_after_infrastructure_failures": 2},
+    )
+    monkeypatch.setattr(experiment, "check_plan", lambda *args: None)
+
+    def adaptation(old, target, strategy, directory, context):
+        write_json(directory / "adaptation.json", {"status": "validated", "cost": {}})
+
+    def failed(task, version, strategy, seed, config):
+        result = {
+            "status": "blocked",
+            "failure_category": "model_transport",
+            "execution_status": "failed",
+        }
+        write_json(Path(config["output_dir"]) / "result.json", result)
+        return {}, result
+
+    monkeypatch.setattr(experiment, "write_adaptation", adaptation)
+    monkeypatch.setattr(experiment, "run", failed)
+    ledger = experiment.run_experiment(ROOT, tmp_path)
+    assert len(ledger["cells"]) == 2
+    assert ledger["stop_reason"] == "consecutive_model_transport_failures"
+    assert not (tmp_path / "cells/2").exists()

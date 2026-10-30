@@ -1,4 +1,4 @@
-"""Small, reproducible development matrices over the shared benchmark runner."""
+"""Reproducible development matrices and reviewed course benchmark suites."""
 
 import argparse
 import asyncio
@@ -91,6 +91,10 @@ def model_config(root, path=None):
         if "api_key" in config[role] or "base_url" in config[role]:
             raise ValueError("Use credential environment variable names, never inline secrets")
     config["tool_name_policy"] = "namespaced"
+    config.setdefault("request_retry", {"max_retries": 1, "backoff_seconds": 2})
+    config["judge"].setdefault("extra_body", {}).setdefault(
+        "response_format", {"type": "json_object"}
+    )
     return config
 
 
@@ -119,12 +123,26 @@ def prepare(
     updater_path=None,
     netlify=False,
     source_url=None,
+    suite_path=None,
 ):
     root, output = Path(root).resolve(), Path(output).resolve()
+    suite = read_json(root / suite_path) if suite_path else None
+    if suite:
+        if set(stages) != set(STAGES) or set(strategies) != set(STRATEGIES):
+            raise ValueError("Benchmark requires all three stages and all three strategies")
+        suite_tasks = [t["task_id"] for t in suite["tasks"]]
+        if tasks is not None and tasks != suite_tasks:
+            raise ValueError("Use the fixed suite task set without overrides")
+        if config_path or updater_path or netlify or source_url:
+            raise ValueError("Use the reviewed suite configuration; changes require a new suite")
+        tasks = suite_tasks
+        config_path, updater_path = suite["config_path"], suite["updater_config_path"]
+    tasks = tasks if tasks is not None else [139]
     configure_runtime(root)
     cells = make_cells(tasks, stages, strategies, repeats)
     config = model_config(root, config_path)
     updater = read_json(root / (updater_path or "configs/full-rewrite-updater.template.json"))
+    updater.setdefault("request_retry", config["request_retry"])
     from .baselines import updater_settings
 
     updater_settings({"updater": updater})
@@ -156,6 +174,10 @@ def prepare(
         )
     asyncio.run(collect_catalogs(root, tasks, output))
     lock, upstream = source(root)
+    if suite:
+        from .benchmark_suite import validate_suite
+
+        validate_suite(suite, output, lock)
     from .selective import diff_catalogs
 
     coverage = {}
@@ -185,6 +207,9 @@ def prepare(
     ]
     if netlify:
         paths += [root / "tools/netlify/package.json", root / "tools/netlify/package-lock.json"]
+    if suite:
+        paths += [root / suite_path, root / config_path, root / updater_path]
+        paths += [root / p for p in suite.get("evidence_files", [])]
     paths += list(output.rglob("*.json")) + list((output / "source").glob("*.html"))
     node = Path(os.environ.get("MCPEVOL_NODE", ""))
     if node.is_file():
@@ -198,7 +223,7 @@ def prepare(
     endpoints = {role: os.environ.get(value["base_url_env"]) for role, value in roles.items()}
     plan = {
         "schema_version": "experiment-1",
-        "kind": "development",
+        "kind": "benchmark" if suite else "development",
         "variant": "netlify_frozen_source" if netlify else "released_servers",
         "created_at": datetime.now(UTC).isoformat(),
         "benchmark_commit": lock["commit"],
@@ -211,15 +236,23 @@ def prepare(
         "files": freeze_files(root, paths),
         "endpoints": endpoints,
         "coverage": coverage,
-        "formal_evaluation": False,
-        "limitations": [
-            "Development subset; task-level change/retention labels need review",
-            "Under/over-update causal examples and independent holdout remain required",
-            "One run per cell by default; use --repeats 3 for repeated trajectories",
-            "Selective Patch is deterministic; Full Rewrite is an LLM description rewrite",
-        ],
-        "retry_policy": "No automatic retry of failed, interrupted, or low-score attempts",
+        "formal_evaluation": bool(suite),
+        "limitations": (
+            suite["limitations"]
+            if suite
+            else [
+                "Development subset; task-level change/retention labels need review",
+                "Under/over-update causal examples and independent holdout remain required",
+                "Selective Patch is deterministic; Full Rewrite is an LLM description rewrite",
+            ]
+        )
+        + [f"{repeats} trajectory repeat(s); five judge ratings are not independent task repeats"],
+        "retry_policy": "Retry identical model requests once on connection errors, 429 or 5xx; respect Retry-After up to 60s. Log failed requests with unknown usage. No tool-call, trajectory, invalid-output or low-score retries.",
+        "availability_preflight": True,
+        "stop_after_infrastructure_failures": 2,
     }
+    if suite:
+        plan["suite"] = suite
     write_json(output / "plan.json", plan)
     (output / "plan.sha256").write_text(sha(output / "plan.json") + "\n")
     write_json(root / "configs/local.experiment.json", {"output": str(output)})
@@ -295,7 +328,12 @@ def _run_experiment(root, output, resume=False, limit=None):
     if ledger_path.exists() and not resume:
         raise ValueError("Experiment already started; use run --resume")
     ledger = read_json(ledger_path) if ledger_path.exists() else {"cells": {}}
+    if plan.get("availability_preflight") and any(
+        ledger["cells"].get(c["id"], {}).get("status") in (None, "running") for c in plan["cells"]
+    ):
+        availability_preflight(plan, output)
     executed = 0
+    consecutive_transport_failures = 0
     for cell in plan["cells"]:
         directory = output / "cells" / cell["id"]
         item = ledger["cells"].get(cell["id"], {})
@@ -364,7 +402,86 @@ def _run_experiment(root, output, resume=False, limit=None):
         temporary.replace(ledger_path)
         summarize(output)
         print(f"  {item['status']}", flush=True)
+        transport_failure = (
+            result_path.exists()
+            and read_json(result_path).get("failure_category") == "model_transport"
+        )
+        audit_path = adaptation.parent / "updater-audit.json"
+        if not result_path.exists() and audit_path.exists():
+            audit = read_json(audit_path)
+            transport_failure = audit.get("error_type") in (
+                "APIConnectionError",
+                "APITimeoutError",
+                "RateLimitError",
+                "InternalServerError",
+            )
+        consecutive_transport_failures = (
+            consecutive_transport_failures + 1 if transport_failure else 0
+        )
+        if consecutive_transport_failures >= plan.get("stop_after_infrastructure_failures", 2):
+            ledger["stop_reason"] = "consecutive_model_transport_failures"
+            write_json(ledger_path, ledger)
+            print(
+                "连续模型连接故障，已停止；其余单元保持未运行。检查网络后可 --resume；失败轨迹保留。",
+                flush=True,
+            )
+            break
     return ledger
+
+
+def availability_preflight(plan, output):
+    """Check real credentials/model endpoints before allocating any benchmark cells."""
+    import time
+
+    from openai import OpenAI
+
+    from integration.model_api import model_id
+
+    from .request_retry import request_sync
+
+    path = Path(output) / "preflight" / f"{datetime.now(UTC):%Y%m%dT%H%M%S%f}.json"
+    records = []
+    for role in ("agent", "judge", "updater"):
+        settings = plan[role] if role == "updater" else plan["config"][role]
+        key, url = credentials(settings)
+        resolved = model_id(settings["model"], url)
+        # A common updater endpoint/key/model was already checked as the agent.
+        if (
+            role == "updater"
+            and settings["api_key_env"] == plan["config"]["agent"]["api_key_env"]
+            and url == plan["endpoints"]["agent"]
+            and resolved == plan["config"]["agent"]["model"]
+        ):
+            continue
+        item = {"role": role, "model": resolved, "retries": []}
+        records.append(item)
+        started = time.monotonic()
+        try:
+            with OpenAI(api_key=key, base_url=url, timeout=30, max_retries=0) as client:
+                response = request_sync(
+                    lambda: client.chat.completions.create(
+                        model=resolved,
+                        messages=[{"role": "user", "content": 'Return JSON: {"ok":true}'}],
+                        temperature=0,
+                        max_completion_tokens=32,
+                        extra_body={
+                            "reasoning": {"enabled": False},
+                            "response_format": {"type": "json_object"},
+                        },
+                    ),
+                    plan["config"].get("request_retry"),
+                    item["retries"].append,
+                )
+            item["usage"] = response.usage.model_dump() if response.usage else None
+            item["status"] = "reachable"
+        except Exception as exc:
+            item.update(status="failed", error_type=type(exc).__name__)
+            raise ValueError(
+                f"{role} API 预检失败，未启动新单元；修复连接/凭据后重新 run。见 {path}"
+            ) from None
+        finally:
+            item["seconds"] = time.monotonic() - started
+            write_json(path, records)
 
 
 def summarize(output):
@@ -373,6 +490,10 @@ def summarize(output):
         for item in read_json(output / "experiment.json")["cells"].values():
             verify_files(output, item.get("files", {}))
     plan = read_json(output / "plan.json")
+    if (output / "plan.sha256").exists() and sha(output / "plan.json") != (
+        output / "plan.sha256"
+    ).read_text().strip():
+        raise ValueError("Frozen plan changed")
     rows, costs = [], {role: [] for role in ("update", "agent", "judge")}
     for cell in plan["cells"]:
         directory = output / "cells" / cell["id"]
@@ -443,9 +564,9 @@ def summarize(output):
         if {r["strategy"] for r in group if r["TF"] is not None} == set(STRATEGIES):
             matched += 1
     summary = {
-        "kind": "development",
+        "kind": plan.get("kind", "development"),
         "variant": plan.get("variant"),
-        "formal_evaluation": False,
+        "formal_evaluation": plan.get("formal_evaluation", False),
         "planned": len(rows),
         "scored": sum(r["TF"] is not None for r in rows),
         "completed_execution": sum(r["execution_status"] == "completed" for r in rows),
@@ -456,6 +577,15 @@ def summarize(output):
         "recovery_retention": None,
         "limitations": plan.get("limitations", []),
     }
+    if plan.get("suite"):
+        from .benchmark_suite import analyze
+
+        analysis = analyze(output, plan)
+        summary["recovery_retention"] = analysis["recovery_retention"]
+        summary["main_results"] = analysis["main_results"]
+        summary["matched_ecs"] = analysis["ecs"]
+        summary["update_cost_by_strategy"] = analysis["update_cost"]
+        summary["analysis_path"] = "analysis/summary.json"
     write_json(output / "summary.json", summary)
     with (output / "runs.csv").open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]) if rows else ["id"])
@@ -467,7 +597,7 @@ def summarize(output):
 def report(output):
     summary = summarize(output)
     print(
-        f"开发实验 | 已评分 {summary['scored']}/{summary['planned']} | 执行完成 {summary['completed_execution']} | 三策略匹配组 {summary['matched_three_strategy_groups']}"
+        f"{summary['kind']} | 已评分 {summary['scored']}/{summary['planned']} | 执行完成 {summary['completed_execution']} | 三策略匹配组 {summary['matched_three_strategy_groups']}"
     )
     print(f"{'任务/阶段/策略':60} {'TF':>6} {'PE':>6}  执行状态")
     for row in summary["rows"]:
@@ -476,6 +606,14 @@ def report(output):
         print(
             f"ECS task{row['task_id']} {row['strategy']} r{row['repeat']}: {row['upstream_population']}"
         )
+    if summary.get("recovery_retention"):
+        for row in summary["recovery_retention"]:
+            if row["strategy"] == "no_update":
+                continue
+            print(
+                f"{row['stage']} {row['strategy']} {row['subgroup']}: ΔTF={row['delta_vs_no_update_same_stage']} (matched tasks={row['matched_tasks']})"
+            )
+        print("公平匹配统计、缺失记录与分策略费用：analysis/；单条 ECS 仅为诊断值。")
     print(f"结果：{Path(output).resolve() / 'summary.json'}；逐条轨迹：runs.csv / cells/")
     return summary
 
@@ -524,10 +662,32 @@ def check(root, api=False):
     return status
 
 
+def papers_workflow(root, source_url=None, repeats=1, prepare_only=False):
+    from .netlify import setup_wizard
+
+    setup_wizard(root)
+    config = model_config(root)
+    for role in ("agent", "judge"):
+        credentials(config[role])
+    print("Agent 自动选择抓取/发布工具与参数；三策略共用同一个来源快照。")
+    if not source_url:
+        source_url = (
+            input("论文列表 HTTPS URL [https://huggingface.co/papers?q=Embodied+AI]: ").strip()
+            or "https://huggingface.co/papers?q=Embodied+AI"
+        )
+    output = Path(root) / "results/raw" / f"papers-{datetime.now(UTC):%Y%m%dT%H%M%S%f}"
+    prepare(root, output, [223], repeats=repeats, netlify=True, source_url=source_url)
+    if not prepare_only:
+        print("开始调用模型；将创建 Netlify draft 网页并保存全部轨迹。", flush=True)
+        run_experiment(root, output)
+        report(output)
+    return output
+
+
 def menu(root):
     while True:
         print(
-            "\nPE6203 实验台\n1 环境检查  2 准备 task139 三策略实验  3 准备论文网页实验\n4 运行/继续最近实验（调用 API）  5 查看结果  6 Netlify 设置  0 退出"
+            "\nPE6203 实验台\n1 环境检查  2 准备 task139 开发实验  3 准备论文网页实验\n4 运行/继续最近实验（调用 API）  5 查看结果  6 Netlify 设置\n7 准备固定课程 benchmark（133/235/283）  0 退出"
         )
         choice = input("选择 [0]: ").strip() or "0"
         if choice == "0":
@@ -535,7 +695,10 @@ def menu(root):
         try:
             if choice == "1":
                 check(root)
-            elif choice in ("2", "3"):
+            elif choice == "3":
+                repeats = int(input("每组重复次数 [1]: ").strip() or "1")
+                papers_workflow(root, repeats=repeats)
+            elif choice == "2":
                 repeats = int(input("每组重复次数 [1，正式建议 3]: ").strip() or "1")
                 paper = choice == "3"
                 url = input("要冻结的研究论文列表 URL: ").strip() if paper else None
@@ -563,6 +726,14 @@ def menu(root):
 
                 action = input("install / login / link / status [status]: ").strip() or "status"
                 setup(root, action)
+            elif choice == "7":
+                repeats = int(input("每组重复次数 [3；预算有限可填 1]: ").strip() or "3")
+                output = (
+                    Path(root) / "results/raw" / f"benchmark-{datetime.now(UTC):%Y%m%dT%H%M%S%f}"
+                )
+                prepare(
+                    root, output, None, repeats=repeats, suite_path="experiments/benchmark-v1.json"
+                )
         except (ValueError, OSError, KeyError) as exc:
             print(f"未完成：{exc}")
 
@@ -576,10 +747,13 @@ def main(root, arguments):
     p = sub.add_parser("check", help="检查依赖；--api 额外调用真实模型")
     p.add_argument("--api", action="store_true")
     p = sub.add_parser("prepare", help="固定任务、配置、工具目录与源码 hashes")
-    p.add_argument("--tasks", type=int, nargs="+", default=[139])
+    p.add_argument("--tasks", type=int, nargs="+")
+    p.add_argument(
+        "--suite", type=Path, help="Reviewed benchmark suite, e.g. experiments/benchmark-v1.json"
+    )
     p.add_argument("--stages", choices=STAGES, nargs="+", default=list(STAGES))
     p.add_argument("--strategies", choices=STRATEGIES, nargs="+", default=list(STRATEGIES))
-    p.add_argument("--repeats", type=int, default=1)
+    p.add_argument("--repeats", type=int, help="Default: 3 for a suite, 1 for development")
     p.add_argument("--config", type=Path)
     p.add_argument("--updater-config", type=Path)
     p.add_argument("--output", type=Path)
@@ -593,6 +767,10 @@ def main(root, arguments):
     p.add_argument("--output", type=Path)
     p = sub.add_parser("netlify", help="用户自行登录并选择专用实验站点")
     p.add_argument("operation", choices=["install", "login", "link", "status"])
+    p = sub.add_parser("papers", help="网页实验向导：依赖→用户登录→站点→来源→运行")
+    p.add_argument("--source-url")
+    p.add_argument("--repeats", type=int, default=1)
+    p.add_argument("--prepare-only", action="store_true")
     args = parser.parse_args(arguments)
     root = Path(root).resolve()
     configure_runtime(root)
@@ -612,11 +790,12 @@ def main(root, arguments):
                 args.tasks,
                 args.stages,
                 args.strategies,
-                args.repeats,
+                args.repeats if args.repeats is not None else (3 if args.suite else 1),
                 args.config,
                 args.updater_config,
                 args.netlify,
                 args.source_url,
+                args.suite,
             )
         elif args.action == "run":
             if args.limit is not None and args.limit < 1:
@@ -627,6 +806,10 @@ def main(root, arguments):
             return 2 if any(c["status"] != "evaluated" for c in ledger["cells"].values()) else 0
         elif args.action == "report":
             report(args.output or latest(root))
+        elif args.action == "papers":
+            if args.repeats < 1:
+                raise ValueError("--repeats must be positive")
+            papers_workflow(root, args.source_url, args.repeats, args.prepare_only)
         else:
             from .netlify import setup
 

@@ -173,3 +173,59 @@ async def test_usage_missing_from_provider_remains_unknown(tmp_path):
             lambda e: None,
         )
     assert outcome["usage"]["total_tokens"] is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "finish_reason,want", [("length", "output_truncated"), ("content_filter", "content_filtered")]
+)
+async def test_incomplete_provider_output_is_never_completed_or_dispatched(
+    tmp_path, finish_reason, want
+):
+    def handler(request):
+        payload = json.loads(
+            completion(
+                {
+                    "role": "assistant",
+                    "content": "partial response",
+                    "tool_calls": [
+                        {
+                            "id": "partial",
+                            "type": "function",
+                            "function": {"name": "old_tool", "arguments": "{}"},
+                        }
+                    ],
+                }
+            ).content
+        )
+        payload["choices"][0]["finish_reason"] = finish_reason
+        return httpx.Response(200, json=payload)
+
+    client = AsyncOpenAI(
+        api_key="fixture-key",
+        base_url="https://model.test/v1",
+        http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
+    )
+    events = []
+    m = module("runner")
+    tools, routes = m.prepare_tools([record()], "no_update")
+    async with client:
+        outcome = await m.agent_loop(
+            client,
+            {},
+            tools,
+            routes,
+            "Task",
+            tmp_path,
+            {
+                "agent": {"model": "fixture-model", "temperature": 0, "max_completion_tokens": 64},
+                "max_rounds": 2,
+            },
+            0,
+            events.append,
+        )
+    assert outcome["status"] == want
+    assert outcome["rounds"] == 1
+    assert outcome["answer"] == "partial response"
+    assert outcome["usage"]["total_tokens"] == 15
+    assert not any(e["type"] == "tool_result" for e in events)

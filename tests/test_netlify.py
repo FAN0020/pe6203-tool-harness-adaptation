@@ -119,3 +119,50 @@ async def test_netlify_proxy_enforces_target_schema_before_upload(tmp_path, monk
     client = netlify.NetlifyClient(tmp_path, tmp_path, "site-123", records)
     result = await client.call_tool("deploy_html", {"html": "wrong parameter"})
     assert result.isError
+
+
+def test_setup_wizard_logs_in_links_and_verifies_selected_site(tmp_path, monkeypatch):
+    import json
+
+    from pe6203 import netlify
+
+    actions = []
+    monkeypatch.setattr(netlify, "ensure_runtime", lambda root: None, raising=False)
+    monkeypatch.delenv("NETLIFY_SITE_ID", raising=False)
+
+    def command(root, args, **kwargs):
+        if args[1] == "getCurrentUser":
+            if "login" not in actions:
+                raise ValueError("not authenticated")
+            return {"id": "user"}
+        assert args[1] == "getSite"
+        assert json.loads(args[args.index("--data") + 1]) == {"site_id": "site-test"}
+        return {"id": "site-test"}
+
+    def setup(root, action):
+        actions.append(action)
+        if action == "link":
+            (tmp_path / ".netlify").mkdir()
+            (tmp_path / ".netlify/state.json").write_text('{"siteId":"site-test"}')
+        return 0
+
+    monkeypatch.setattr(netlify, "command_json", command)
+    monkeypatch.setattr(netlify, "setup", setup)
+    assert netlify.setup_wizard(tmp_path) == "site-test"
+    assert actions == ["login", "link"]
+    actions.clear()
+    monkeypatch.setattr(netlify, "command_json", lambda root, args, **kwargs: {"id": "site-test"})
+    assert netlify.setup_wizard(tmp_path) == "site-test"
+    assert actions == []
+
+
+def test_setup_wizard_stops_when_user_does_not_finish_login(tmp_path, monkeypatch):
+    from pe6203 import netlify
+
+    monkeypatch.setattr(netlify, "ensure_runtime", lambda root: None, raising=False)
+    monkeypatch.setattr(
+        netlify, "command_json", lambda *a, **k: (_ for _ in ()).throw(ValueError("no auth"))
+    )
+    monkeypatch.setattr(netlify, "setup", lambda root, action: 1)
+    with pytest.raises(ValueError, match="登录"):
+        netlify.setup_wizard(tmp_path)

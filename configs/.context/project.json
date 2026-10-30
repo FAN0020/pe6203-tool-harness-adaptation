@@ -24,8 +24,12 @@
       226,
       450
     ],
-    "formal_evaluation_ids": [],
-    "rule": "其余任务用于回归/保留能力验证；候选不等于冻结测试集。139 已用于调试，只能作为 development。223 主优化案例也不进入独立 evaluation。"
+    "formal_evaluation_ids": [
+      133,
+      235,
+      283
+    ],
+    "rule": "course-v1 fixed subset; 139/223 remain development. 283 shares a server family with 139; no independent-family holdout claim."
   },
   "models": {
     "general_model": "deepseek/deepseek-v4.1-flash-1017",
@@ -36,20 +40,25 @@
     "updater": "LLM Full Rewrite integrated; same general model via OpenRouter",
     "local_config": "configs/local.smoke-no-reasoning.json",
     "env": "ignored .env; ./experiment loads it through uv",
-    "env_check": "2026-10-30 agent/judge real API requests succeeded"
+    "env_check": "2026-10-30 agent/judge real API requests succeeded",
+    "benchmark_config": "configs/course-benchmark.json"
   },
   "settings": {
     "temperature": 0,
-    "agent_max_completion_tokens": 2048,
+    "agent_max_completion_tokens": 4096,
     "judge_max_completion_tokens": 4096,
     "judge_reasoning": false,
     "judge_runs": 5,
     "max_rounds": 12,
-    "request_timeout_seconds": 90,
+    "request_timeout_seconds": 120,
     "tool_timeout_seconds": 30,
-    "run_timeout_seconds": 600,
+    "run_timeout_seconds": 900,
     "send_model_seed": false,
-    "tool_name_policy": "namespaced"
+    "tool_name_policy": "namespaced",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    }
   },
   "experiment": {
     "stages": [
@@ -66,7 +75,8 @@
     "llm_full_rewrite": "integrated with constraint validation and costs",
     "selective_patch": "HaoQI_V1 deterministic diff integrated; preserved unchanged records; experimental LLM rule mode disabled",
     "freeze_ref": "experiments/protocol.v1.json",
-    "cli": "./experiment: prepare / run / report / netlify; all results development unless separately reviewed"
+    "cli": "./experiment menu 7 benchmark / 3 papers wizard; plan hashes freeze all actual settings",
+    "benchmark_suite": "experiments/benchmark-v1.json"
   },
   "verified": {
     "task_id": 139,
@@ -77,13 +87,14 @@
     "ECS": null,
     "judge_valid": 5,
     "tests_passed": 68,
-    "evidence": "results/evidence/baseline-integration/verification.json"
+    "evidence": "results/evidence/baseline-integration/verification.json",
+    "historical_only": true
   },
   "not_claimed": [
     "完整 201-task 评测",
     "三策略优劣结论",
     "Netlify 用户登录前的真实发布验证",
-    "独立正式测试集与 under/over-update 归因已完成"
+    "独立任务族泛化与 under/over-update 因果分析已完成"
   ],
   "context_files": [
     "docs/.context/requirements.json",
@@ -99,5 +110,6 @@
     "results/evidence/.context/index.json",
     "reports/.context/report-template.json",
     "contributions/baselines/wu-muchu/sprint1/.context/provenance.json"
-  ]
+  ],
+  "current_verification": "results/evidence/benchmark-finalization/verification.json"
 }

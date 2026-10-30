@@ -6,7 +6,11 @@
     "prepare": "No model requests; fetches current pinned MCP metadata; freezes tasks, catalogs, config, source code and relevant locks. Save plan.json + plan.sha256.",
     "run": "Sequential seeded schedule; adapt then shared runner then exactly five official-rubric judge attempts. Explicit run is API execution. Single writer; no score-driven retries.",
     "resume": "Reuse completed/failed records and verify hashes; retain interrupted directories without silently rerunning; regenerate new experiment after code/config/input changes.",
-    "report": "Recompute TF/PE from all five preserved judge responses, keep max_rounds, ECS only when all stages present; CSV + JSON. Development-only, no fabricated recovery/retention labels."
+    "report": "Development diagnostic tables; reviewed suites additionally export evaluation manifests/ledgers and matched TF/PE/ECS/recovery/retention/cost CSVs through existing evaluation.py. Truncation and provider filtering are execution failures, not completion.",
+    "request_retry": "Agent/judge/updater: one identical-request retry for connection failure/429/5xx, backoff 2s and Retry-After up to 60s. Record each retry with unknown usage. No trajectory/tool/semantic retries.",
+    "papers": "Interactive install/login/link/source/prepare/run flow. Browser login and site selection belong to user; valid state reused. User can --prepare-only.",
+    "preflight": "Real low-token endpoint requests before new cells, separate costs in preflight/*.json; same plan controls across strategies. Stop after two consecutive model transport failures; untouched cells remain pending.",
+    "judge": "Pinned original rubric; five attempts; JSON object output mode, reasoning disabled. Unscored v1 measurement trial and failed v1.1 connection trial retained; course-v1.2 is fresh complete rerun."
   },
   "lineage": {
     "selective_patch": "Imported source and tests from origin/HaoQI_V1 at 4a16b56; retain contribution/provenance and prior live summary. Fixed duplicate native names across servers and incomplete candidate catalog validation.",
@@ -20,22 +24,23 @@
       "Early K0 separately adapts to Middle and Late",
       "No Update / complete LLM description rewrite / selective metadata patch",
       "same tasks, server set and judge protocol",
-      "fixed, documented one-task subset; --repeats 3 available",
+      "Fixed reviewed subset 133/235/283; default 3 repeats, explicit 1 permitted; actual catalog hashes checked during prepare.",
       "raw artifacts, TF/PE, both ECS definitions, updater/agent/judge costs",
-      "failed/partial attempts retained; unchanged records preserved"
+      "failed/partial attempts retained; unchanged records preserved",
+      "Reviewed transition labels and matched recovery/retention",
+      "Agent chooses tools, arguments and sequence in all three methods; patch scope selection is deterministic"
     ],
     "pending": [
-      "independent held-out subset and reviewed task-level TOOL/PARAM/DESC coverage",
-      "reviewed changed/unaffected task labels and recovery/retention",
-      "one causal under-update and one causal over-update trajectory",
-      "human review of latest-five paper correctness and judge ratings"
+      "Causally supported over-update example remains unobserved; task133 Late under-update call failure documented in benchmark-finalization/failure-analysis.json",
+      "Report and presentation; interpretation of observed results",
+      "User Netlify login/site and real publication verification"
     ],
-    "interpretation": "This is a runnable development benchmark, not a completed course report or reproduction of paper leaderboard."
+    "interpretation": "Runnable reviewed course benchmark suite; no independent task-family holdout claim, no full leaderboard claim. Report evidence remains separate from software readiness."
   },
   "netlify": {
     "cli_version": "23.15.1",
     "lock": "tools/netlify/package-lock.json",
-    "auth": "User runs netlify login via ./experiment; OAuth storage stays with Netlify. Optional NETLIFY_AUTH_TOKEN only passed to CLI. Agent/judge keys are not passed.",
+    "auth": "./experiment papers orchestrates installed CLI OAuth flow; user completes browser login. Credentials remain only in CLI.",
     "site": "User chooses a dedicated site with netlify link or NETLIFY_SITE_ID.",
     "deploy": "Draft URL; no --prod; only generated HTML in fresh directory. Anonymous HTTP check after deploy; record url/id/html hash.",
     "variant": "Original task question and stage tool metadata retained; deployment backend replaced; all strategies get same research-source/as-of hint. Original stage fetcher executes against frozen HTML replay; no runtime tool knowledge refresh.",
@@ -76,7 +81,7 @@
       "purpose": "Date-sorted source candidate; local 429 observed, not silently used as successful input"
     }
   ],
-  "verification": "results/evidence/experiment-cli-20261030/verification.json (created after checks)",
+  "verification": "results/evidence/benchmark-finalization/verification.json",
   "task223_review": {
     "catalog_changes": {
       "early_to_middle": [],
@@ -100,5 +105,6 @@
     ],
     "implication": "Current release is a webpage workflow/retention candidate; no harness-visible drift observed, cannot alone demonstrate adaptation recovery",
     "source_order": "Hugging Face query results are not date-sorted; latest-five requires date sorting and relevance review, never first-five assumption"
-  }
+  },
+  "benchmark_suite": "experiments/benchmark-v1.json"
 }

@@ -199,3 +199,36 @@ def test_pilot_entrypoint_with_mocked_api_and_runner(
     visible = (output / "report.txt").read_text()
     assert "7.00" in visible and "8.00" in visible
     assert ("adaptation_failed" in visible) == fail
+
+
+def test_transient_rewrite_retry_retains_attempts_and_unknown_total_cost(monkeypatch, tmp_path):
+    import httpx
+    from openai import APIConnectionError
+
+    calls = []
+
+    def provider(messages, settings):
+        calls.append(deepcopy(messages))
+        if len(calls) == 1:
+            raise APIConnectionError(request=httpx.Request("POST", "https://provider.invalid"))
+        return completion(
+            valid(), usage={"prompt_tokens": 10, "completion_tokens": 5, "cost": 0.001}
+        )
+
+    monkeypatch.setattr(baselines, "_request_completion", provider)
+    path = tmp_path / "audit.json"
+    _, _, cost = baselines.adapt(
+        {},
+        metadata(),
+        "full_rewrite",
+        {
+            "audit_path": str(path),
+            "updater": {"request_retry": {"max_retries": 1, "backoff_seconds": 0}},
+        },
+    )
+    assert len(calls) == 2 and calls[0] == calls[1]
+    assert cost["model_calls"] == 2
+    assert cost["input_tokens"] is None and cost["api_cost_usd"] is None
+    audit = json.loads(path.read_text())
+    assert len(audit["request_retries"]) == 1
+    assert audit["response"]["usage"]["cost"] == 0.001
