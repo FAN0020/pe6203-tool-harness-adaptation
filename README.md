@@ -40,9 +40,9 @@ uv sync --frozen
 
 `analysis/` 自动输出三策略匹配的 TF/PE/ECS、recovery/retention、费用、失败和缺失记录。五次有效 judge 才计分；ECS 要三阶段三策略齐全。`summary.json` / `runs.csv` 保留逐条结果；截断、超时、轮数耗尽与完成分开显示。
 
-当前验证：27 条真实模型轨迹已尝试，26 条完整评分，1 条 judge 截断排除；执行完成 18 条，另有 7 条轮数耗尽、2 条输出截断。282 项测试通过；归档可断网重算，resume 不重复调用。证据、原始记录压缩包与作业缺口见 [`results/evidence/benchmark-finalization/verification.json`](results/evidence/benchmark-finalization/verification.json)。这是每组 1 次的小样本，不支持稳定优劣结论。
+2026-10-31 复核：27 条均已尝试，24 条完整评分；17 条执行完成、7 条轮数耗尽、2 条生成额度耗尽、1 条连接失败。judge 截断及连接故障使本轮 **没有完整匹配的 ECS 组**。282 项测试通过；断网复算、知识快照和 resume 已验证。逐项验收与原始记录见 [`results/evidence/finalized-trial-20261031/verification.json`](results/evidence/finalized-trial-20261031/verification.json)。实验可运行，完整主结果、因果失败案例和最终报告/展示仍未就绪；历史试跑不用于补齐本轮缺失。
 
-已确认的发布包缺陷保留在所有方法中：Late `batch_evaluate` / `sequentialthinking` 缺失内部方法，以及新增 `parallel-thinking` 的输出 schema 不匹配。不能把这些直接归因为 under/over-update。**课程报告仍需基于真实轨迹完成两类错误的因果分析**；低分不自动证明原因。
+已确认的发布包缺陷保留在所有方法中：Late `batch_evaluate` / `sequentialthinking` / `review_workspace_health` 缺失内部方法，以及新增 `parallel-thinking` 的输出 schema 不匹配。不能把这些直接归因为 under/over-update。**课程报告仍需基于真实轨迹完成两类错误的因果分析**；低分不自动证明原因。
 
 ## 论文网页与 Netlify
 
