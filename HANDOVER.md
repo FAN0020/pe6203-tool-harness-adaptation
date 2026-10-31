@@ -12,7 +12,17 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：project_state_contract 四单元开发已淘汰
+### 当前最新断点：thinking_contract 四单元开发已冻结，准备执行
+
+- 上一 project_state_contract 在49013f7归档并淘汰，Goal继续。新筛查找到不同机制：Late sequentialthinking 新增调用不存在的 getThoughtHistory；Middle/Late parallel-thinking 的 readyForSynthesis=true 返回额外字段触发原生输出schema拒绝；Late convergent-synthesis 始终返回未声明synthesisData，且照抄不存在来源的结论。
+- 本地探测在3ccebd3/v1、8b49b7a/仅余Late续接、f2adb7b/v2预注册，共19工具调用+8catalog、模型费0；所有正负结果和中断日志在3ba9471归档。原生验证保持启用；已证明单路径 totalPaths=1，终态 pathStatus=completed、readyForSynthesis=false 正常返回并清空activePaths。三阶段原run_process均能逐字读取原始客户CSV预览。不要重跑probe。
+- 离线复核 `python3 results/evidence/thinking-contract-probes-v2-20261101/verify_probes.py`；79文件归档含源码和日志。仅采集器记录原始响应后继续原生校验，没有修改工具/SDK。v1 Middle最后调用的响应只存在错误日志，未重跑补样。所有MCP进程已退出。
+- 新候选cfa4d6b预注册；c7f499f修正反馈文件名冲突并逐字恢复原probe协议，规则/验收不变且此前无模型调用。ea35e07实现，39策略测试、361离线测试通过（13integration排除）。只追加3条工具使用规则，既有metadata/routing/schema不变，无任务事实或通用预算指令。
+- 原task29Late（规划并预览CSV）+235Late保持，各SP/候选一次，共4条。质量先冻结实际读取/真实预览、可执行消费分析计划、非空且不编造消费数据或越过确认阶段；235沿用原属性检查。通过才进入2批×每条件3重复的24条验证；每批完成和质量全项必须严格提高、TF不降，保持不降。
+- 协议`experiments/thinking-contract-v1.json`，反馈`experiments/thinking-contract-feedback-v1.json`。raw `results/raw/thinking-contract-pilot-20261101`，证据同名evidence目录。53计划输入和额外源码hash已冻结，随机匿名T01–T04映射已写；4份审阅冻结前不揭示方法/分数。先查experiment.json与进程再续接，不重复启动。source-ea35e07.tar供离线复现。
+- 同模型/供应商/预算/评分；原CSV逐字复制到隔离workspace，两个方法都只增加相同文件路径提示。新增共享mcp-server-commands profile已本地核实，不修上游工具。235两组仍精确K0。Goal未完成，无push/部署/TA消息。
+
+### 已结束的上一轮：project_state_contract 四单元开发已淘汰
 
 - session31424 正常退出，4/4 evaluated、20/20 judge。四份盲化产物审阅在 `1f71f01` 冻结后才揭示方法和评分。**不要重启本候选，不进入 24 条独立验证**；Goal仍活动。
 - 283Late 两组正常完成均0/1、质量全项均0/1、TF均9.8；候选PE9.0对SP8.2。候选25个有效任务记录，第11轮4096输出tokens全计reasoning而截断；SP50个有效记录，第12轮仍在创建子任务而耗尽轮数。两组最终答复为空，交付属性unknown，不算完整质量通过。
