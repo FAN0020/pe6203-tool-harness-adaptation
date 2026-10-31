@@ -12,7 +12,18 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：Slidev持久化产物机制已实测，尚未启动候选agent实验
+### 当前最新断点：artifact_contract 六条开发对照已启动，尚无改善结论
+
+- 在`0d49e0a`先冻结新策略机制、五项实际产物质量检查、开发门槛和两批独立验证规则。`artifact_contract`仅向变化的`create_bulk_slides`加入一条经合成probe核实的持久化效果/精确内容写入知识；无任务事实/答案/预算指令。352离线测试通过，13integration排除。
+- 新任务457必须读取三份原始PDF并生成有事实内容的15分钟dark Slidev deck；保持任务235。独立验证仍要求每批完成数与完整产物通过数均严格高于SP、TF不降，且235保持不降；不是只改善工具调用或主题参数。
+- 共用环境在模型前修复：固定原生canvas依赖；PDF本地路径分支传Buffer导致错误，因此三份逐字相同的原始PDF经只读`127.0.0.1:4783`URL供应，两组获同一文件清单。3阶段均成功读取3篇的1–3页，失败启动/本地路径尝试也归档。原生代码、上游工具未改。
+- 共用渲染器固定Slidev53.0.0、默认主题0.25.0；本地dark主题导入默认基础排版与发布工具原有dark CSS。未经改写的合成deck真实呈现dark/default差异与内容canary；同一非致命FloatingVue错误记录保留。不能宣称任意产物已通过或官方独立部署兼容。证据`results/evidence/slidev-readiness-20261031/`。
+- 第一份build在任何模型请求前因read_pdf旧式exclusiveMinimum布尔schema失败，原目录`results/raw/artifact-contract-pilot-20261031`保留。`fd12f0c`加入针对该已核实位置的两组共用等价格式转换，记录原/新值，不改变接受页码集合。新协议`experiments/artifact-contract-ready-v1.json`只增加环境说明，策略/质量门槛不变。
+- 当前执行目录：`results/raw/artifact-contract-pilot-ready-20261031`；证据目录：`results/evidence/artifact-contract-pilot-20261031`。6条日程/6份知识均已冻结；457每阶段仅bulk一条规则不同，235两组逐字K0。主执行session7284、PDF只读服务session10459，日志`run.log`。先查现有进程/experiment.json，**不要启动第二份或重跑已完成cell**。
+- 用`collect_blind.py`采集本轮已完成的匿名答案/调用和实际slides.md/theme.css。属性审阅存`blind-reviews/`，在全部冻结前不揭示方法/TF/PE；同一协调者不等于独立人类审阅。必须渲染真实deck检查全部页面，不能按schema或文件存在代替设计质量。
+- 原负结果全部保留；Goal仍活动。开发结束按事前门槛判定是否进入两批共36条独立验证，失败则淘汰，不能重复直到赢。
+
+### 上一个检查点：Slidev持久化产物机制已实测，候选agent尚未启动时的记录
 
 - 观测契约36条验证已完整关闭，负结果本地提交`613a0d1`；下节保留全部结论。Goal仍活动，不算完成。
 - 随后仅做离线机制筛选。任务管理器必填/长度约束已完整反映在公开schema，图谱新遍历工具也未证明接口错误，未据此重复跑模型。任务244缺少月度趋势数值且无明确新故障，未选择。使用现有`benchmark-inventory.json`中的question/server投影，未读取新任务的参考答案/评分/轨迹。
