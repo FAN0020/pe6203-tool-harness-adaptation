@@ -21,6 +21,7 @@
 - 可读入口：[`observed-contract-pilot.html`](reports/observed-contract-pilot.html)。原始256文件、源码41文件、盲化输入/先冻结属性审阅、独立复算见`results/evidence/observed-contract-pilot-20261031/`。52模型请求共$0.059853732，未知0；16本地probe零模型费。344离线测试通过/13integration排除。源码f892cad。
 - 通过原先较弱的进入验证门槛。下一步是已登记的两个独立批次、每条件每批3次，共36条：`experiments/observed-contract-validation-v1.json`，输出`results/raw/observed-contract-validation-20261031`。候选知识须与pilot哈希完全相同；**每批都必须正常完成数和产物全项通过数严格高于SP、TF不下降，并保持235能力**。不得根据结果修改候选/验收或重复直到赢。科学split为independent_validation；CLI的development字段仅承载日程，避开旧108格PE晋级逻辑。
 - **独立验证已启动**：36条日程及两组知识均在执行前核验；6份知识与pilot逐字相同，配置仅ledger路径变化。运行状态/续接信息见`results/evidence/observed-contract-validation-20261031/continuation.json`，原始输出`results/raw/observed-contract-validation-20261031/`。先查现有进程/experiment.json，不启动第二份或重跑已完成cell；验证结束后还需盲化属性审阅、独立复算与两批判定。
+- **验证审阅检查点**：原session28325已再次确认存活；20条以上执行已落盘，17份盲化属性审阅已冻结且输入hash/冻结属性键核对通过。`results/evidence/observed-contract-validation-20261031/progress-20261031-review17.json`记录此时状态；运行`collect_blind.py`获得待审阅ID，`verify_blind_reviews.py --require-complete`只在36份全部完成后使用。方法映射与TF/PE尚未揭示，不能提前晋级。
 - 盲化隐藏方法/分数，但由同一协调者审阅、可从答案推知方法，非独立审阅者；独立性来自冻结方法后的新执行。原27条课程/NU/FR/ECS与全部旧阴性保留。生成代码仅静态检查，未执行。
 
 ### 执行解释与当前断点
