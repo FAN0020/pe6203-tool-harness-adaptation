@@ -314,7 +314,7 @@ def main(root, arguments):
     )
     sub = parser.add_subparsers(dest="action", required=True)
     p = sub.add_parser("prepare", help="读取工具目录并固定计划，不调用模型")
-    p.add_argument("--spec", type=Path, default=Path("experiments/selective-search-v2.json"))
+    p.add_argument("--spec", type=Path, default=Path("experiments/selective-search-v2.1.json"))
     p.add_argument("--phase", choices=["development", "confirmation"], default="development")
     p.add_argument("--candidate", choices=VARIANTS)
     p.add_argument("--round", type=int, default=1)

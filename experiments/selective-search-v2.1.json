@@ -1,0 +1,82 @@
+{
+  "id": "selective-search-v2.1",
+  "status": "frozen_before_v2.1_model_calls",
+  "objective": "Find and independently confirm at least one better strategy; preserve all failed candidates and continue research if none qualifies.",
+  "baseline_commit": "828ea77",
+  "champion": "selective_patch",
+  "candidates": [
+    "sufficiency_notes",
+    "sufficiency_feedback"
+  ],
+  "model_config": "configs/course-benchmark-v1.3.json",
+  "updater_config": "configs/course-updater.json",
+  "control_policy": "Same agent/judge model, prompts, decoding, budgets and original tasks/rubric; only tool-knowledge usage rules and metadata adaptation differ. No new agent rounds, task hints or score changes. All strategies reuse exact K0 at Early.",
+  "development": {
+    "tasks": [
+      133,
+      235,
+      283
+    ],
+    "stages": [
+      "middle",
+      "late"
+    ],
+    "strategies": [
+      "selective_patch",
+      "sufficiency_notes",
+      "sufficiency_feedback"
+    ],
+    "repeats": 1,
+    "cells": 18,
+    "scope": "Already exposed course tasks. Development results select/refine candidate; never presented as protected test evidence."
+  },
+  "confirmation": {
+    "tasks": [
+      133,
+      235,
+      283
+    ],
+    "stages": [
+      "early",
+      "middle",
+      "late"
+    ],
+    "strategies": [
+      "no_update",
+      "full_rewrite",
+      "selective_patch",
+      "selected_candidate"
+    ],
+    "repeats": 3,
+    "cells": 108,
+    "scope": "Fresh prospective executions on known tasks, not unseen-task generalization; candidate and all knowledge frozen before starting. All cells terminal, 540 valid rating slots required."
+  },
+  "adaptation_freeze": "Generate each task/stage/method knowledge once, before executions, and reuse across repeats. Account update costs once per unique artifact. This measures performance of frozen harnesses, not updater-generation variance.",
+  "promotion_gate": {
+    "primary": "Mean PE over the post-change stages of the fixed three-task set",
+    "delta_PE_vs_champion_min": 0.5,
+    "TF_mean_noninferiority_margin": 0.2,
+    "ECS_noninferiority_margin": 0.2,
+    "max_task_stage_TF_regression": 0.5,
+    "completed_execution_count": "must not be lower than champion",
+    "repeat_consistency": "PE improvement on at least 2 of 3 repeat blocks",
+    "randomization_test": "one-sided paired sign-flip test on the 18 post-change task/stage/repeat differences; report conditional-on-task-set inference only",
+    "sequential_alpha": "round k uses 0.05 / 2**k; unsuccessful confirmation rounds retained, subsequent candidates require new frozen versions and fresh runs",
+    "baseline_comparison": "Always report No Update and Full Rewrite; promotion means improvement over current Selective Patch, not universal superiority over every method/metric"
+  },
+  "input_boundary": "Updater sees metadata plus explicitly frozen tool-probe observations only; no task question, expected answer, current-run trace, judge rationale or score.",
+  "history": "Old A/B/v1.3 evidence immutable. No low-score reruns or selective missing-cell replacement.",
+  "research_file": "experiments/.context/selective-literature.json",
+  "feedback_probes": "experiments/feedback-probes-v1.json",
+  "feedback_scope": "12 independent generic MCP probes collected before search; no course question, answer, judgement or scored trace. Exact raw observations plus hash retained.",
+  "previous_generation_failure": "results/evidence/selective-search-20261031/generation-v1-failure.json",
+  "schema_repair": "At most one additional note response to correct invalid JSON/allowed IDs/rule bounds. Every response, request and cost retained; no task execution or judge inputs. Same fixed updater model.",
+  "metric_rationale": "Course question: recover changed-task TF and retain unchanged-task TF. Main report contains TF/PE/ECS plus recovery, retention and update cost. Search objective: higher post-change PE constrained by TF/ECS/completion/per-task regression gates because exposed subset TF is near ceiling; this is an efficiency-improvement claim, not automatically a TF-recovery claim. Thresholds are our prospective decisions, not course/paper mandates.",
+  "previous_development": "results/evidence/selective-search-20261031/development-v1.1-review.json",
+  "hypotheses": {
+    "sufficiency_notes": "ACE-inspired deterministic delta plus a short completion/reuse policy, only on changed/new tools. No extra model call. Optional capabilities do not create new requirements; keep safety checks; never alter data merely to silence diagnostics.",
+    "sufficiency_feedback": "Combine the deterministic sufficiency policy with literal current-stage probe outcome memory on changed tools. No LLM-generated interpretation, alternative recommendation or task/score input; preserve exact probe provenance and input scope."
+  },
+  "design_provenance": "Designed after all 24 v1.1 development executions: no candidate improved PE. Human inspected development traces and judge rationales, including duplicated validation/evaluation and project over-expansion. No task text, answer, judge score/rationale or scored trace is supplied to the updater; only metadata and the same frozen 12 generic probes. This is development tuning on exposed tasks, not unseen-task evaluation. v2 workflow generation was rejected before any task executions for unsupported semantic advice. v2.1 removes that candidate from the matrix and uses deterministic observation memory instead.",
+  "rejected_generation": "results/evidence/selective-search-20261031/generation-v2-rejection.json"
+}

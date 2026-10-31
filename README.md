@@ -44,10 +44,10 @@ uv sync --frozen
 
 可读入口：[`当前实验结果、案例与剩余要求`](reports/course-v1.3-experiment.html)。原始包、审计和机器说明在 `results/evidence/course-v1.3-20261031/`。
 
-策略研究另见 [`候选方法、全部成功与失败记录`](reports/selective-strategy-search.html)：参考 ACE、A-MEM、Reflexion。首轮三个候选共 24 条轨迹已完成，未达到预设 PE 改善门槛；第二轮比较 `sufficiency_notes`、`workflow_notes` 与原 Selective Patch。课程主结论看 TF 恢复/保持和 ECS；当前搜索在 TF/ECS/完成率约束下优化 PE，并报告成本。开发筛选与三次重复确认分开，不能把开发高分当确认结果。
+策略研究另见 [`候选方法、全部成功与失败记录`](reports/selective-strategy-search.html)：参考 ACE、A-MEM、Reflexion。首轮三个候选共 24 条轨迹已完成，未达到预设 PE 改善门槛；第二轮比较 `sufficiency_notes`、`sufficiency_feedback` 与原 Selective Patch（生成式 workflow 候选因语义问题在执行前被拒绝）。课程主结论看 TF 恢复/保持和 ECS；当前搜索在 TF/ECS/完成率约束下优化 PE，并报告成本。开发筛选与三次重复确认分开，不能把开发高分当确认结果。
 
 ```bash
-./experiment search prepare --spec experiments/selective-search-v2.json --output results/raw/my-search
+./experiment search prepare --spec experiments/selective-search-v2.1.json --output results/raw/my-search
 ./experiment search build --output results/raw/my-search    # 调用 updater，保存原始响应及费用
 ./experiment search review --output results/raw/my-search --note '填写对生成规则依据的审查结论'
 ./experiment search run --output results/raw/my-search      # 固定知识后执行；再次运行只恢复允许的缺失步骤

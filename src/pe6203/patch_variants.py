@@ -13,7 +13,14 @@ from .costs import provider_usd
 from .selective import adapt_result as base_patch
 from .selective import validate_adaptation
 
-VARIANTS = ("delta_notes", "linked_notes", "feedback_notes", "sufficiency_notes", "workflow_notes")
+VARIANTS = (
+    "delta_notes",
+    "linked_notes",
+    "feedback_notes",
+    "sufficiency_notes",
+    "workflow_notes",
+    "sufficiency_feedback",
+)
 
 SUFFICIENCY_RULE = (
     "Use this capability only for an unmet requirement. Reuse successful evidence of the "
@@ -107,6 +114,34 @@ def relevant_feedback(observations, stage, changed_ids):
         if row["stage"] == stage and f"{row['server']}::{row['tool']}" in changed_ids:
             result.append(deepcopy(row))
     return result
+
+
+def probe_note(observation):
+    """Quote a bounded observation, without synthesizing capabilities or alternatives."""
+    args = {
+        k: v for k, v in observation["args"].items() if k not in ("workingDirectory", "workspace")
+    }
+    result = observation["result"]
+    if result.get("isError"):
+        detail = result.get("error") or " ".join(
+            c.get("text", "") for c in result.get("content", []) if c.get("type") == "text"
+        )
+        outcome = "reported failure: " + json.dumps(detail[:800], ensure_ascii=False)
+    else:
+        outcome = "reported success (no tool error)"
+    workspace = (
+        " Workspace path is omitted; use your current isolated workspace."
+        if len(args) != len(observation["args"])
+        else ""
+    )
+    return (
+        "Frozen independent probe with arguments "
+        + json.dumps(args, ensure_ascii=False)
+        + " "
+        + outcome
+        + ". This observation is scoped to those inputs, not a guarantee for other inputs."
+        + workspace
+    )
 
 
 def validate_notes(payload, selected, changed_ids):
@@ -308,7 +343,7 @@ def adapt_result(old, target, strategy, context=None):
         if strategy in ("linked_notes", "workflow_notes"):
             continue
         note = delta_note(tool, change)
-        if strategy == "sufficiency_notes":
+        if strategy in ("sufficiency_notes", "sufficiency_feedback"):
             note += " " + SUFFICIENCY_RULE
         tool["usage_rules"].append(note)
         modified.add(tool["tool_id"])
@@ -329,6 +364,22 @@ def adapt_result(old, target, strategy, context=None):
         ]
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
+    if strategy == "sufficiency_feedback":
+        by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
+        for observation in feedback:
+            tool_id = f"{observation['server']}::{observation['tool']}"
+            rule = probe_note(observation)
+            by_id[tool_id]["usage_rules"].append(rule)
+            modified.add(tool_id)
+            result["changes"].append(
+                {
+                    "operation": "append_delta_note",
+                    "tool_id": tool_id,
+                    "basis": [changes[tool_id]["change_id"]],
+                    "note": rule,
+                    "evidence": "frozen_probe_observation",
+                }
+            )
     if strategy in ("linked_notes", "workflow_notes") or (
         strategy == "feedback_notes" and feedback
     ):

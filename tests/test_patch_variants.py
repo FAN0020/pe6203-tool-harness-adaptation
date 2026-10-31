@@ -343,3 +343,40 @@ def test_workflow_policy_can_select_a_dependent_unchanged_tool_but_not_another_s
     assert knowledge["tools"][2] == other and cost["calls"] == 1
     assert {t["server_id"] for t in requests[0]["candidate_tools"]} == {"server"}
     assert adapt(old, deepcopy(old), "workflow_notes")[0] == old
+
+
+def test_probe_memory_quotes_both_observed_outcomes_without_inventing_an_alternative(monkeypatch):
+    import integration.baselines as provider
+
+    monkeypatch.setattr(
+        provider, "_request_completion", lambda *_: pytest.fail("probe compiler made a model call")
+    )
+    feedback = [
+        {
+            "stage": "late",
+            "server": "server",
+            "tool": "lookup",
+            "args": {"mode": True},
+            "result": {"isError": True, "error": "MISSING_HANDLER"},
+        },
+        {
+            "stage": "late",
+            "server": "server",
+            "tool": "lookup",
+            "args": {"mode": False},
+            "result": {"isError": False, "content": [{"type": "text", "text": "successful"}]},
+        },
+        {
+            "stage": "middle",
+            "server": "server",
+            "tool": "lookup",
+            "args": {},
+            "result": {"isError": True, "error": "OLD_STAGE_SENTINEL"},
+        },
+    ]
+    knowledge, _, cost = adapt(catalog(), changed(), "sufficiency_feedback", {"feedback": feedback})
+    rules = "\n".join(knowledge["tools"][0]["usage_rules"])
+    assert "MISSING_HANDLER" in rules and "true" in rules and "false" in rules
+    assert "success" in rules.lower() and "OLD_STAGE_SENTINEL" not in rules
+    assert knowledge["tools"][1] == catalog()["tools"][1]
+    assert cost["calls"] == 0 and cost["total_tokens"] == 0
