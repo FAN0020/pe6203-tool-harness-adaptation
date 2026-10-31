@@ -24,6 +24,7 @@ VARIANTS = (
     "budget_contract",
     "evidence_scope",
     "observed_contract",
+    "artifact_contract",
 )
 
 SUFFICIENCY_RULE = (
@@ -174,6 +175,37 @@ def probe_note(observation):
         + outcome
         + ". This observation is scoped to those inputs, not a guarantee for other inputs."
         + workspace
+    )
+
+
+def artifact_contract_note(observation):
+    """Local, reviewed artifact effects; never infer success from a tool receipt."""
+    result = observation["result"]
+    fields = (
+        "reported_output",
+        "persisted_state",
+        "instruction_effect",
+        "cover_effect",
+        "verified_alternatives",
+    )
+    if (
+        not isinstance(result, dict)
+        or set(result) != {"kind", "contract"}
+        or result["kind"] != "artifact_effects_v1"
+        or not isinstance(result["contract"], dict)
+        or set(result["contract"]) != set(fields)
+        or any(
+            not isinstance(value, str) or not value.strip() or len(value) > 600
+            for value in result["contract"].values()
+        )
+    ):
+        raise ValueError("Invalid reviewed artifact effect contract")
+    return (
+        "Frozen synthetic artifact-effect observations for this tool and stage: "
+        + " ".join(result["contract"][key] for key in fields)
+        + " Judge completion from the persisted artifact and required content, not just "
+        "a returned template count or successful tool receipt. These observations do not "
+        "prove another artifact's content or rendered quality."
     )
 
 
@@ -401,7 +433,7 @@ def adapt_result(old, target, strategy, context=None):
         if tool["tool_id"] not in changes:
             continue
         change = changes[tool["tool_id"]]
-        if strategy in ("linked_notes", "workflow_notes", "observed_contract"):
+        if strategy in ("linked_notes", "workflow_notes", "observed_contract", "artifact_contract"):
             continue
         note = delta_note(tool, change)
         if strategy in (
@@ -431,20 +463,28 @@ def adapt_result(old, target, strategy, context=None):
         ]
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
-    if strategy == "observed_contract":
+    if strategy in ("observed_contract", "artifact_contract"):
         by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
         for observation in feedback:
             tool_id = f"{observation['server']}::{observation['tool']}"
-            rule = observed_contract_note(observation)
+            rule = (
+                artifact_contract_note(observation)
+                if strategy == "artifact_contract"
+                else observed_contract_note(observation)
+            )
             by_id[tool_id]["usage_rules"].append(rule)
             modified.add(tool_id)
             result["changes"].append(
                 {
-                    "operation": "append_observed_contract",
+                    "operation": "append_" + strategy,
                     "tool_id": tool_id,
                     "basis": [changes[tool_id]["change_id"]],
                     "note": rule,
-                    "evidence": "frozen_probe_response_content",
+                    "evidence": (
+                        "reviewed_synthetic_artifact_effects"
+                        if strategy == "artifact_contract"
+                        else "frozen_probe_response_content"
+                    ),
                 }
             )
     if strategy in ("sufficiency_feedback", "budget_feedback", "budget_contract", "evidence_scope"):

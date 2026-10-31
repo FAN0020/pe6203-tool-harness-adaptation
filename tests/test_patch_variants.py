@@ -38,6 +38,69 @@ def changed():
     return target
 
 
+def artifact_observation(stage="late", name="lookup"):
+    return {
+        "stage": stage,
+        "server": "server",
+        "tool": name,
+        "args": {"synthetic_cases": ["existing_document"]},
+        "result": {
+            "kind": "artifact_effects_v1",
+            "contract": {
+                "reported_output": "Returned six templates.",
+                "persisted_state": "Seven pages persisted; old content survived.",
+                "instruction_effect": "Custom text canary was absent.",
+                "cover_effect": "Default call reset the cover theme.",
+                "verified_alternatives": "Explicit content replacement saved the exact text.",
+            },
+        },
+    }
+
+
+def test_artifact_contract_distinguishes_persisted_state_without_rewriting_metadata():
+    old, target = catalog(), changed()
+    before = deepcopy((old, target))
+    observation = artifact_observation()
+    knowledge, changes, cost = adapt(
+        old, target, "artifact_contract", {"feedback": [observation]}
+    )
+    original, _, _ = adapt(old, target, "selective_patch")
+    rules = knowledge["tools"][0]["usage_rules"]
+    assert rules[:-1] == original["tools"][0]["usage_rules"]
+    for fact in observation["result"]["contract"].values():
+        assert fact in rules[-1]
+    assert "persisted artifact" in rules[-1]
+    for field in original["tools"][0]:
+        if field != "usage_rules":
+            assert knowledge["tools"][0][field] == original["tools"][0][field]
+    assert knowledge["tools"][1] == old["tools"][1]
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+    assert len([x for x in changes if x["operation"] == "append_artifact_contract"]) == 1
+
+
+def test_artifact_contract_does_not_import_other_stage_or_unchanged_tool_evidence():
+    feedback = [artifact_observation("middle"), artifact_observation(name="unrelated")]
+    knowledge, _, _ = adapt(catalog(), changed(), "artifact_contract", {"feedback": feedback})
+    original, _, _ = adapt(catalog(), changed(), "selective_patch")
+    assert knowledge == original
+    early, _, _ = adapt(catalog(), catalog(), "artifact_contract", {"feedback": feedback})
+    assert early == catalog()
+
+
+@pytest.mark.parametrize("mutation", ["task_answer", "unreviewed", "oversized"])
+def test_artifact_contract_rejects_noncontract_or_unbounded_inputs(mutation):
+    observation = artifact_observation()
+    if mutation == "task_answer":
+        observation["result"]["contract"]["answer"] = "Do not import task material."
+    elif mutation == "unreviewed":
+        observation["result"]["kind"] = "raw_tool_response"
+    else:
+        observation["result"]["contract"]["persisted_state"] = "x" * 601
+    with pytest.raises(ValueError, match="artifact effect"):
+        adapt(catalog(), changed(), "artifact_contract", {"feedback": [observation]})
+
+
 def test_observed_contract_preserves_semantic_error_text_even_without_tool_error():
     # Losing content here turns a semantic rejection into a false success cue.
     observations = [
