@@ -32,6 +32,7 @@ VARIANTS = (
     "weather_provenance",
     "contract_reconcile",
     "native_media_contract",
+    "discovery_contract",
 )
 
 SUFFICIENCY_RULE = (
@@ -658,6 +659,21 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "discovery_contract":
+        from .discovery_contract import expected_discovery, validate_discovery
+
+        feedback = context.get("feedback", [])
+        result["knowledge"], annotations = expected_discovery(base, target, feedback)
+        result["changes"].extend(annotations)
+        result["validation"] = validate_discovery(
+            result["knowledge"], old, target, base, feedback
+        )
+        if result["validation"]["errors"]:
+            raise ValueError("Discovery reconciliation changed a protected contract")
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
         return result
     if strategy == "contract_reconcile":
         from .contract_reconcile import expected_reconciliation, validate_reconciliation
