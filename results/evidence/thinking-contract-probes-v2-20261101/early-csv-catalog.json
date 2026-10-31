@@ -1,0 +1,59 @@
+{
+  "_meta": null,
+  "nextCursor": null,
+  "tools": [
+    {
+      "name": "run_process",
+      "title": null,
+      "description": "Run a process on this darwin machine",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": [
+              "shell",
+              "executable"
+            ],
+            "description": "What are you running, two choices: 'shell' or 'executable' (required, no default)"
+          },
+          "command_line": {
+            "type": "string",
+            "description": "Shell command line. Required when mode='shell'. Forbidden when mode='executable'."
+          },
+          "argv": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Executable and arguments. argv[0] is the executable. Required when mode='executable'. Forbidden when mode='shell'."
+          },
+          "cwd": {
+            "type": "string",
+            "description": "Optional to set working directory"
+          },
+          "stdin": {
+            "type": "string",
+            "description": "Optional text written to STDIN (written fully, then closed). Useful for heredoc-style input or file contents."
+          },
+          "timeout_ms": {
+            "type": "number",
+            "description": "Optional timeout in milliseconds, defaults to 30,000ms"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Optional explain what would run, defaults to False."
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    }
+  ]
+}

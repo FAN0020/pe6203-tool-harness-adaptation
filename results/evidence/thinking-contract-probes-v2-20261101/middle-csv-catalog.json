@@ -1,0 +1,66 @@
+{
+  "_meta": null,
+  "nextCursor": null,
+  "tools": [
+    {
+      "name": "run_process",
+      "title": null,
+      "description": "Run a process on this darwin machine,                         oneOf: [\n                            {\n                                properties: { mode: { const: \"shell\" } },\n                                required: [\"command_line\"],\n                                not: { required: [\"argv\"] }\n                            },\n                            {\n                                properties: { mode: { const: \"executable\" } },\n                                required: [\"argv\"],\n                                not: { required: [\"command_line\"] }\n                            }\n                        ]",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "enum": [
+              "shell",
+              "executable"
+            ],
+            "description": "What are you running, two choices: 'shell' or 'executable' (required, no default)"
+          },
+          "command_line": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Shell command line. Required when mode='shell'. Forbidden when mode='executable'."
+          },
+          "argv": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Executable and arguments. argv[0] is the executable. Required when mode='executable'. Forbidden when mode='shell'."
+          },
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Working directory. Required and must be a non-empty string."
+          },
+          "stdin": {
+            "type": "string",
+            "description": "Optional text written to STDIN (written fully, then closed). Useful for heredoc-style input or file contents."
+          },
+          "timeout_ms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 300000,
+            "description": "Optional timeout in milliseconds, must be an integer between 1 and 300000, defaults to 30,000ms"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Optional explain what would run, defaults to False."
+          }
+        },
+        "required": [
+          "mode",
+          "cwd"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    }
+  ]
+}
