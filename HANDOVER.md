@@ -1,5 +1,14 @@
 # PE6203 交付交接 · 2026-10-31
 
+## 分支整合记录 · 2026-10-31
+
+- 基于远端 main `a240528` 整合；保留已经合入的 CLI、基线、课程证据、报告及队员 PR #9。
+- `codex/readable-benchmark-output` 的核心报告功能已由 `cb788dc`、`6309d7f` 接入并改进。本次记录合并该历史分支，只补回六项仍适用的离线报告测试；HTML 测试显式使用现行 `--format html`。不恢复旧 README/配置、未接入的 `agents/SimpleOpenAIAgent.py` 副本或旧 `run --format` 接口。
+- `baselines/wu-muchu-sprint1`、`baselines/xiaohua-integration`、`codex/baseline-smoke-integration`、`codex/experiment-cli`、`codex/selective-strategy-search`、`codex/delivery-docs-sync` 已在本次基线的提交历史内，无需重复合并。
+- **排除仍在编辑的 `codex/completion-quality-study` 全部分支。** 任务“推进完成率与质量改进目标”正在归档独立验证，检查时 HEAD 为 `c30aec3` 且存在未提交文件。此处不带入它的已提交研究快照，也不切换/修改该 checkout。后续研究目标及新结论以该分支为准；下文是 main 的课程交付快照。
+- 未删除分支，未 rebase 活跃研究，未执行模型、评分、策略搜索或部署。`origin/HaoQI_V1` 的未合入队员文档不属于本次会话改动，保留原分支。
+- 本次检查：Ruff lint/format 通过；离线测试 310 passed、9 skipped、13 integration deselected。跳过的依赖上游环境检查不代表真实服务验证通过。
+
 当前范围：完成课程交付与离线核查。**不新增模型调用、评分、策略、实验或部署。** 四条获批诊断已经结束；PE +0.5 和历史 promotion gates 不属于课程要求。下一步先做组内审阅及 TA 澄清，不以策略胜出为结束条件。
 
 ## 当前可交付内容
