@@ -16,7 +16,7 @@
 候选 MCP servers 由原始 benchmark 任务固定；agent 在提供的工具目录中选择，不会自行接入任意外部服务。
 区别只在供 agent 使用的知识：No Update 保留 Early；Full Rewrite 重建全部目标记录并用 LLM 重写全部描述；Selective Patch 自动用元数据差异和依赖规则选择需要更新的记录，其余保留。Selective Patch 的更新范围选择是确定性算法，不是另一个 LLM。三者的运行 agent 相同。
 
-当前 v1.3：299 项测试通过；task139 真实开发 smoke 完成，五个评分槽有效（TF 10 / PE 9），不计入正式子集。27 条正式试跑待完成。
+当前 v1.3 **已跑通一轮正式实验：27/27 条、135/135 个有效评分槽**，299 项测试通过。20 条执行完成、5 条轮数耗尽、2 条截断；独立复算、终态 resume 和归档离线复算通过。另跑 6 条描述回退诊断，未证实历史 over-update 候选。一次重复已披露，不能据此宣称方法普遍优越。
 
 ## 直接跑 benchmark
 
@@ -42,9 +42,9 @@ uv sync --frozen
 
 `analysis/` 自动输出三策略匹配的 TF/PE/ECS、recovery/retention、费用、失败和缺失记录。五个有效评分槽才计分；ECS 要三阶段三策略齐全。`summary.json` / `runs.csv` 保留逐条结果；截断、超时、轮数耗尽与完成分开显示。
 
-历史 v1.2 试跑 B（2026-10-31）：27 条均已尝试，24 条完整评分；17 条执行完成、7 条轮数耗尽、2 条生成额度耗尽、1 条连接失败。judge 截断及连接故障使本轮 **没有完整匹配的 ECS 组**。282 项测试通过；断网复算、知识快照和 resume 已验证。逐项验收与原始记录见 [`results/evidence/finalized-trial-20261031/verification.json`](results/evidence/finalized-trial-20261031/verification.json)。实验可运行，完整主结果、因果失败案例和最终报告/展示仍未就绪；历史试跑不用于补齐本轮缺失。
+可读入口：[`当前实验结果、案例与剩余要求`](reports/course-v1.3-experiment.html)。原始包、审计和机器说明在 `results/evidence/course-v1.3-20261031/`。
 
-可读入口：[`剩余计划与历史成功/失败案例`](reports/experiment-readiness.html)（含全部 54 条课程试跑记录）。v1.3 已实现评分恢复与 Netlify 账号核对；历史计划页面保留当时状态，机器说明在 `reports/.context/`。
+[`历史计划及成功/失败案例`](reports/experiment-readiness.html) 保留全部 54 条旧课程记录：A 为 26/27 完整评分，B 为 24/27；未用新结果回填。当前课程缺口是可靠的 patch under-update / over-update 因果案例及最终展示。Netlify 仍待用户选定专用站点后做真实发布。
 
 已确认的发布包缺陷保留在所有方法中：Late `batch_evaluate` / `sequentialthinking` / `review_workspace_health` 缺失内部方法，以及新增 `parallel-thinking` 的输出 schema 不匹配。不能把这些直接归因为 under/over-update。**课程报告仍需基于真实轨迹完成两类错误的因果分析**；低分不自动证明原因。
 
@@ -55,7 +55,7 @@ uv sync --frozen
 ./experiment papers --prepare-only        # 完成准备后，用 run 启动
 ```
 
-向导显示当前账号供你核对或切换；需要授权时由你在浏览器完成，并在终端选择已有专用站点。仅上传生成的单个 HTML 到 draft URL，不覆盖生产站点。可用 `--source-url 'HTTPS论文列表地址'` 指定来源。
+向导显示当前账号供你核对或切换；需要授权时由你在浏览器完成，并在终端选择已有专用站点。仅上传生成的单个 HTML 到 draft URL，不覆盖生产站点。可用 `--source-url 'HTTPS论文列表地址'` 指定来源。推荐 arXiv 日期倒序检索（见结果报告）；默认 Hugging Face 列表按相关性排列，不能直接取前五条。
 
 所有方法共用带时间/hash 的来源快照；agent 自动抓取、按发布日期选择相关的最新 5 篇并发布。检索结果前五条不一定最新，不能用旧论文掩盖抓取失败。快照回放禁用脚本/子资源，只允许固定来源。223 三阶段工具目录相同，用于网页流程与保持能力验证，不能独自证明恢复能力；结果不与原发布环境混算。真实发布需完成账号/站点选择后验证。相同 HTML 在同一 workspace 复用部署；只补网址核验：`./experiment netlify verify --workspace <run/workspace>`。
 

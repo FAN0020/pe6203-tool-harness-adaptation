@@ -1,0 +1,87 @@
+{
+  "kind": "pre_registered_diagnostic_not_main_benchmark",
+  "task": 235,
+  "stage": "late",
+  "cells": [
+    {
+      "arm": "rollback_descriptions",
+      "repeat": 1,
+      "id": "rollback_descriptions-r1"
+    },
+    {
+      "arm": "rewrite",
+      "repeat": 2,
+      "id": "rewrite-r2"
+    },
+    {
+      "arm": "rewrite",
+      "repeat": 1,
+      "id": "rewrite-r1"
+    },
+    {
+      "arm": "rewrite",
+      "repeat": 0,
+      "id": "rewrite-r0"
+    },
+    {
+      "arm": "rollback_descriptions",
+      "repeat": 2,
+      "id": "rollback_descriptions-r2"
+    },
+    {
+      "arm": "rollback_descriptions",
+      "repeat": 0,
+      "id": "rollback_descriptions-r0"
+    }
+  ],
+  "source_commit": "12d693c",
+  "source_knowledge": "results/raw/finalized-trial-20261031/cells/task235-late-full_rewrite-r0/adaptation/knowledge.json",
+  "source_sha256": "c393ca732abf7ab1ff5b197a5716f3fd56521ce3bed8bee473e0b66c638c91ec",
+  "early_sha256": "a1dd73d217ad9b60f979e6840027b123a26bc66789910ad0e0a421b0c3a12b66",
+  "knowledge_sha256": {
+    "rewrite": "c393ca732abf7ab1ff5b197a5716f3fd56521ce3bed8bee473e0b66c638c91ec",
+    "rollback_descriptions": "f89478d72530ca0ce0204a998330e0d282c56ef64b8d33dbfa1dbc6d6ae2c115"
+  },
+  "config": {
+    "agent": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "AGENT_BASE_URL",
+      "api_key_env": "AGENT_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096
+    },
+    "judge": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "JUDGE_BASE_URL",
+      "api_key_env": "JUDGE_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096,
+      "extra_body": {
+        "reasoning": {
+          "enabled": false
+        },
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "judge_runs": 5,
+    "max_rounds": 12,
+    "request_timeout_seconds": 120,
+    "run_timeout_seconds": 900,
+    "tool_timeout_seconds": 30,
+    "send_model_seed": false,
+    "tool_name_policy": "namespaced",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    },
+    "judge_recovery": {
+      "max_attempts": 2,
+      "stop_after_transport_failures": 2,
+      "format": "concise-counts-v1"
+    }
+  },
+  "hold_constant": "Same frozen structural records, usage rules, agent/judge model/settings and current Late server; only all 28 unrelated descriptions roll back. Provider seeds are not sent; repeats are independent trajectories, not common-random-number pairs.",
+  "purpose": "Test whether the recorded unrelated rewrite causes repeated calls/omitted map units; no outcome guaranteed, no score-driven retries, separate from main results."
+}

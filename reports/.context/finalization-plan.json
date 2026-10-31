@@ -1,6 +1,6 @@
 {
   "id": "finalization-plan-20261031",
-  "status": "planned_not_executed",
+  "status": "core_experiment_verified_team_demo_and_causal_cases_pending",
   "source_commit": "f9517a9",
   "requirement": "PE6203 Group Project 4, sections 3.1, 3.2, 4.1–4.3",
   "decisions": [
@@ -8,7 +8,7 @@
     "正式子集保持 133/283 变化任务 + 235 保持能力对照，三阶段、三策略；固定 DeepSeek 模型与全部共同推理设置。",
     "223 论文网页是单列的 Netlify 环境替代实验。其三个阶段目录相同；此前把它称为主优化案例并不准确，现阶段仅作端到端流程验证。若将来注入变化，另立明确标注的受控扩展，不冒充原 benchmark。",
     "Netlify 是 deploy_html / deploy_folder_or_zip 的执行后端。agent 选择工具、参数和时机；用户选择账号和专用站点，CLI 处理授权、检查与执行。",
-    "本文件是实施计划，不修改当前 course-v1.2，也不触发模型调用或网页发布。下一版拟命名 course-v1.3，须实现、验证后才能冻结。"
+    "本计划最初在 course-v1.2 后提出；course-v1.3 已在 12d693c 冻结，27 条正式矩阵及 6 条单列诊断已执行。原始计划见 Git 5e76a64 与历史 HTML。"
   ],
   "current_evidence": {
     "trial_A": {
@@ -52,7 +52,7 @@
       "验证 draft URL、页面内容和论文日期；保留部署与评分证据"
     ],
     "implemented": "./experiment papers 已有安装→登录→link→冻结→运行；--prepare-only 可停在运行前。只发布单个生成 HTML 的 draft。",
-    "gap": "现有向导仅判断已有凭据有效，未显示账号供用户核对/切换。浏览器已登录不证明 CLI 使用同一账号。需补充身份确认与切换流程，再验证真实发布。",
+    "gap": "账号显示、切换与专用站点确认已实现；真实 fetcher 已验证。用户尚未确认专用站点，发布与九条网页矩阵未执行。",
     "source_limit": "最新指冻结来源及时间范围内可验证的最新 5 篇相关论文，不宣称全互联网最新。来源须包含题名、日期和链接；若不足则明确失败，不替换为旧论文。",
     "official_reference": "https://docs.netlify.com/api-and-cli-guides/cli-guides/get-started-with-cli/"
   },
@@ -64,7 +64,7 @@
       "depends_on": [],
       "action": "保留全部旧日志与评分；建立成功/失败案例索引，明确 v1.3 变更范围和预算。",
       "gate": "历史 archive SHA256 未变；案例数字可追溯；主矩阵、网页和因果诊断分别记账。",
-      "status": "history_catalog_created_protocol_pending"
+      "status": "passed"
     },
     {
       "id": "P1",
@@ -75,7 +75,7 @@
       ],
       "action": "实现上述 judge slots、持久化预算、跨阶段断路器、失败分类和幂等恢复；补充 Netlify 账号核对/切换与部署核验恢复；保留现有 agent 设置与原始 rubric。",
       "gate": "离线注入截断 JSON、429/5xx、连接中断、评分途中退出和发布后退出；证明有限重试、无覆盖、无重复工具副作用、费用可追溯；现有测试通过。",
-      "status": "pending"
+      "status": "passed_299_tests"
     },
     {
       "id": "P2",
@@ -86,7 +86,7 @@
       ],
       "action": "做最小真实 API 检查；在预先列出的开发轨迹验证精简 judge 契约和语义一致性，历史失败提示仅作为已暴露的开发回归材料。检查原始 rubric 不变，然后提交代码并冻结 v1.3。",
       "gate": "有效结构输出且人工核对事实依据；列出验证样本、所有失败和费用。未通过则修复后重做整个开发检查，不启动正式矩阵。",
-      "status": "pending"
+      "status": "passed_frozen_12d693c"
     },
     {
       "id": "P3",
@@ -97,7 +97,7 @@
       ],
       "action": "使用已实现的账号核对/切换流程，通过 papers --prepare-only 完成用户授权和来源冻结。先运行冻结计划的一条 smoke，再按同一计划继续 task223 的三阶段×三策略共 9 条；各条同源、同站点、独立 workspace/draft。",
       "gate": "至少一条真实 agent 轨迹完成抓取→按日期筛选→生成→发布→HTTP 200及页面内容核验；全部 9 条结果/失败如实保留。五篇论文的题名、日期、链接能对回来源；每次发布可追溯。",
-      "status": "pending_optional_for_course_required_for_team_demo"
+      "status": "waiting_for_user_account_site_confirmation"
     },
     {
       "id": "P4",
@@ -108,7 +108,7 @@
       ],
       "action": "新输出目录，固定 3 tasks × 3 stages × 3 strategies × 1 repeat = 27 条，目标 135 个有效评分槽；使用冻结恢复策略。网页登录不阻塞主 benchmark。",
       "gate": "27 条均有终态、27 组完整评分、9 个三策略匹配组、3 个完整三阶段匹配任务；TF/PE/ECS/recovery/retention/update cost 可算且独立复算一致。语义任务失败不妨碍测量验收。任何缺失均报告未通过，不追跑到高分。",
-      "status": "pending",
+      "status": "passed_27_cells_135_ratings_independent_replay",
       "repeat_note": "本轮单次为跑通验收，作业允许但必须披露。3 次正式重复是建议扩展；必须事先冻结为独立 81 条计划，不能看成绩决定保留哪轮。"
     },
     {
@@ -120,7 +120,7 @@
       ],
       "action": "固定当前 task235 Late 候选，预注册 Full Rewrite 原知识 vs 仅回退无关描述两臂、每臂 3 次诊断；共 6 条，与主矩阵分开。检查调用行为、遗漏字段和评分分歧。整理 133 的陈旧参数证据，明确属于 No Update。",
       "gate": "明确区分 harness 原因、模型输出预算、评分、网络与上游实现缺陷；under/over 各有可信轨迹和因果解释才算失败分析齐全。若未证明 over-update 或 Selective Patch 漏改，保留未满足项，不把诊断注入或偶然低分当成真实失败。",
-      "status": "pending"
+      "status": "six_diagnostics_complete_causal_failure_gate_not_met"
     },
     {
       "id": "P6",
@@ -132,7 +132,7 @@
       ],
       "action": "输出主结果、成本、恢复/保持、局限与贡献说明；整理报告和 10 分钟展示/5 分钟问答；保存原始包、代码版本、配置、命令和校验值。",
       "gate": "干净环境下可离线复算；真实 API/Netlify 结果不冒充 mock；逐项核对作业 4.1–4.3。实验跑通不等于所有提交要求已经完成。",
-      "status": "pending"
+      "status": "report_and_talk_outline_ready_group_review_and_missing_cases_pending"
     }
   ],
   "existing_commands": [
@@ -160,5 +160,7 @@
       "command": "./experiment report --output results/raw/<新实验ID>",
       "meaning": "生成逐条记录和匹配结果；缺失评分不可自动补成分数。"
     }
-  ]
+  ],
+  "execution_evidence": "results/evidence/course-v1.3-20261031/acceptance.json",
+  "current_report": "reports/course-v1.3-experiment.html"
 }
