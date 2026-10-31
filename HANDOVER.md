@@ -12,12 +12,14 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：document_sequence 六单元开发对照已冻结，准备执行
+### 当前最新断点：document_sequence 开发对照已淘汰，需寻找不同机制
 
-- 新候选在`2dd0efb`冻结，实施与355项离线测试在`03a2574`提交。协议`experiments/document-sequence-v1.json`；仅为变化bulk及直接相关set_page/load_slidev/apply_theme追加4条实测工具顺序/合成格式知识；没有论文事实、通用预算指令或元数据修改。235保持任务两组精确K0。
-- 仍用457 Middle/Late与235 Late各两方法、共6条新执行；原模型/供应商/预算/5judge与五项457产物门槛不变。开发门槛通过才进入两批共36条独立验证；负结果不重跑。
-- 输出`results/raw/document-sequence-pilot-20261101`，证据`results/evidence/document-sequence-pilot-20261101`。知识审查accepted，模型前计划/知识/运行时hash与匿名映射已冻结；公共只读PDF服务器session96132。先核对experiment.json和进程，不启动重复批次。
-- 使用collect_blind.py采集本轮匿名实际产物，全部6份逐属性/渲染审阅冻结后才揭示方法与分数。同一协调者不等于独立审阅者。Goal仍活动，尚无真实agent改善结论。
+- 六单元日程正常退出，session61462结束；30评分齐全。6份逐属性审阅/全部3页渲染在`5b1538b`冻结后才揭示方法。**不要重启本候选或追加抽样**。PDF/两个渲染服务及浏览器均已关闭。
+- 457变化任务：候选正常完成0/2，对SP1/2；完整产物两组均0/2。候选TF4.6/PE7.6，SP TF1.8/PE6.6。235两组完成1/1、TF/PE10，摘要均错、全项0/1。开发门槛失败，不进入36条验证；Goal仍活动。
+- 候选Middle只有封面：最后15,469字符DSML式set_page文本并非真正调用，在4096tokens截断，TF却7.8。候选Late及SP Late末轮4096tokens全被计为reasoning。SP Middle虽然runner completed，但只有DSML正文、零实际调用；保留冻结完成定义，不能当成功交付。SP Late留下空白页+白底标题页。没有修改产物或再试模型。
+- 协议`experiments/document-sequence-v1.json`，2dd0efb预注册、03a2574实现/355离线测试、7df0b69执行前冻结。仅4条直接依赖工具规则，235精确K0。55计划输入与11额外文件hash均保持一致。
+- 可读报告`reports/document-sequence-pilot.html`；离线复算`python3 results/evidence/document-sequence-pilot-20261101/verify_trial.py`。284原始文件、138源码文件、全部原分数/产物/失败均归档；56请求（24agent+30judge+2preflight），$0.070742700，未知0；更新模型calls/tokens/USD均0。ECS不适用于本局部日程。
+- 下一步应离开已失败的长文档生成路径，定位其他变化工具的可复现接口/行为缺口。DSML泄漏、截断、算术错误属于执行/一般生成问题，不能未经证据包装成知识漂移；不改变模型、供应商、预算或评分，不重复已淘汰候选。先读定向任务/变化投影与必要源码，冻结新的本地probe，再决定是否有新策略。未加载完整历史或密钥。
 
 ### 已完成的前置机制探测：文档写入顺序
 
