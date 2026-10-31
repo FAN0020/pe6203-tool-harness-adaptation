@@ -18,7 +18,14 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：Context7发现接口缺陷与原生替代已实测
+### 当前最新断点：discovery_contract 进入冻结的独立验证，尚未启动
+
+- `fe9f500`已结束6单元开发试点；273原始文件、303源码输入文件归档并离线复核。变化任务候选正常完成2/2、SP1/2，TF9.9对9.8；完整质量均0/2，保持条件相等。全部四条未调用故障发现工具，完成差异原因未证实。只符合事前较弱的试点晋级规则，**不是双重改善**。
+- `50dd4f5`冻结`experiments/discovery-contract-validation-v1.json`与对应config：两批各18条，总36条；repeat0–2为A、3–5为B。两批分别要求变化任务完成数及完整质量通过数同时严格高于SP，TF不下降；保持条件完成/质量/TF均不下降。未知不计pass。同一协调者盲审，不是独立人工审阅。
+- 候选逐字复用试点的两处Context7说明替换、评分属性不变。原生源码/schema/模型/预算不变；不调参、不挑胜利重复、不因首批不利提前停止第二批。完整旧正负证据保留，不重跑试点或依赖探针。
+- 下一步prepare/build36条，审计知识哈希与共享原PDF、冻结盲号映射/来源后执行。此断点无模型进程，HTTP4783已停，执行前需以同一fixture目录重启。Goal活动，目标未完成。
+
+### 已归档前置：Context7发现接口缺陷与原生替代已实测
 
 - `890aacb`事前冻结`experiments/context7-discovery-probes-v1.json`与collector、20个源码/配置hash。session25317退出0，8工具调用/3catalog/0模型/0评分、费用0；完整42文件归档在`results/evidence/context7-discovery-probes-20261101/`，`verify_probes.py`离线核验通过。不要重跑。
 - Middle/Late新增`list-popular-libraries`均返回`ReferenceError: CONTEXT7_API_BASE_URL is not defined`，且`isError=false`，不能把信封成功当发现成功。原入口未导入所用常量/函数；没有修原生源码。
