@@ -1,0 +1,44 @@
+{
+  "status": "draft_not_implemented_or_executed",
+  "proposed_strategy": "budget_feedback",
+  "use_condition": "Only consider a fresh protocol after the current confirmation finishes; never modify its frozen artifacts or relax its gates.",
+  "motivation": "In the first two complete confirmation repeats, sufficiency_feedback improved post-change PE by 1.5333 and 0.5333, but completed 9/18 executions versus 12/18 for selective_patch.",
+  "basis": [
+    "ACE-inspired local incremental rules",
+    "Reflexion-inspired frozen observation memory"
+  ],
+  "parent": "sufficiency_feedback",
+  "proposed_rule": "Work within the existing turn and output limits. Group small independent calls only when their inputs are already known; await dependent results and keep arguments concise. Complete the required work and essential checks, then give a concise evidence-based final answer instead of reproducing full tool outputs. Do not add optional follow-up work.",
+  "locality": "Append only to changed/new tool usage_rules; preserve existing sufficiency/safety/diagnostic-integrity rules, probe provenance, authoritative contracts and unrelated records. Early and unchanged catalogs remain exact K0.",
+  "runtime_evidence": {
+    "source": "src/pe6203/runner.py:182-246 at f37b3a5",
+    "fact": "The runner accepts multiple model-selected tool calls in one response, executes them in order, and returns all results before the next model turn. This is batching within a turn, not a promise of parallel execution.",
+    "saved_example": "results/raw/selective-search-confirmation-r1-20261031/cells/task283-late-sufficiency_feedback-r0/run/raw_trace.json",
+    "calls_per_model_response": [
+      1,
+      1,
+      4,
+      12,
+      12,
+      1,
+      1,
+      1,
+      0
+    ]
+  },
+  "constraints": [
+    "No added rounds, token budget, model changes or extra agent retries.",
+    "Do not truncate tool results or alter task/judge inputs.",
+    "No preset tool order or task-specific instructions.",
+    "Do not skip required work or safety checks to increase completion counts.",
+    "Large batches may themselves truncate; use small batches and verify full required arguments.",
+    "No automatic promotion: new development screening and fresh full confirmation must pass the unchanged criteria."
+  ],
+  "planned_development_arms": [
+    "selective_patch",
+    "sufficiency_feedback",
+    "budget_feedback"
+  ],
+  "generation_model_calls": 0,
+  "new_probe_calls": 0
+}
