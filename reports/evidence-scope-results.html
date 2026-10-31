@@ -1,0 +1,65 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PE6203 · 证据边界规则试验</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#182437;background:#f5f7fa;margin:auto;max-width:1150px;padding:28px}main{background:white;padding:34px;border-radius:12px}h1{font-size:30px;line-height:1.3}h2{font-size:22px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;text-align:left;border-bottom:1px solid #d9e0e8;vertical-align:top}th{background:#eef3f8}a{color:#175da8}code,pre{font-size:13px;overflow-wrap:anywhere}pre{white-space:pre-wrap;background:#eef3f8;padding:12px}.note{border-left:4px solid #b57d13;padding:12px 16px;background:#fff8e7}.scroll{overflow-x:auto}summary{cursor:pointer;font-weight:600;margin-top:12px}.small{font-size:14px;color:#526074}@media(max-width:650px){body{padding:10px}main{padding:18px}}</style><main>
+<h1>证据边界规则：未改善完成率与任务质量</h1>
+<p class="note"><strong>不晋级。</strong>新规则 evidence_scope 正常完成1/3，对照 budget_feedback 完成2/3；TF和PE均下降。候选更清楚地解释了部分验证结果，但数学答复仍截断，项目规划仍耗尽轮数。该负结果及原评分完整保留。</p>
+<p>2026-10-31 · 3 tasks × Late × 2 methods ×1次，6条新轨迹、30个评分。用户已取消总费用/轨迹额度；每轨迹相同12轮、4096输出tokens，固定模型、DigitalOcean供应商、解码、任务和原judge协议。不是三阶段课程主矩阵，不计算ECS。</p>
+<h2>独立复算</h2><div class="scroll"><table><tr><th>方法</th><th>正常完成</th><th>变化任务</th><th>保持任务</th><th>TF</th><th>PE</th><th>Agent+judge USD</th></tr>
+<tr><td>evidence_scope</td><td>1/3</td><td>0/2</td><td>1/1</td><td>9.6000</td><td>9.0667</td><td>0.054578856</td></tr>
+<tr><td>budget_feedback</td><td>2/3</td><td>1/2</td><td>1/1</td><td>9.8000</td><td>9.4667</td><td>0.052759908</td></tr>
+</table></div><table><tr><th>Cell / task</th><th>方法</th><th>终态</th><th>TF</th><th>PE</th></tr>
+<tr><td>cell-001 / 283</td><td>evidence_scope</td><td>max_rounds</td><td>9</td><td>7.2</td></tr>
+<tr><td>cell-002 / 235</td><td>budget_feedback</td><td>completed</td><td>10</td><td>10</td></tr>
+<tr><td>cell-003 / 133</td><td>evidence_scope</td><td>output_truncated</td><td>9.8</td><td>10</td></tr>
+<tr><td>cell-004 / 133</td><td>budget_feedback</td><td>completed</td><td>9.6</td><td>9.8</td></tr>
+<tr><td>cell-005 / 283</td><td>budget_feedback</td><td>max_rounds</td><td>9.8</td><td>8.6</td></tr>
+<tr><td>cell-006 / 235</td><td>evidence_scope</td><td>completed</td><td>10</td><td>10</td></tr>
+</table>
+<h2>变化、产物与失败证据</h2><p>候选只在已受影响记录末尾加入一条固定规则：区分观察、建议与未验证示例，避免无需求的大型实现及未经核实的汇总。133添加10条、283添加11条；235保持精确K0。移除这条新增规则后，知识与对照完全相同。更新0模型tokens、0调用、$0，全部57个冻结输入和知识锁复核通过。</p>
+<ul><li><strong>133候选：</strong>正确指出allow_variables=false仍接受x+1，且词法拒绝不等于完整安全验证。但扩写大量Python代码，末尾测试表被截断；代码的字面量和异常处理与说明也不完全一致。TF9.8、PE10不能代表正常完成或安全代码。</li>
+<li><strong>133对照：</strong>完整返回，两个代码块可解析；未重现上一轮的字典语法错误。安全性未验证，thread-pool timeout本身不能保证终止计算，Decimal转换也不能挽回已经发生的浮点舍入。不能把语法通过当作安全证明。</li>
+<li><strong>283两组：</strong>均保存了覆盖CSV、logs、visualization的任务并进行了实际拆分，但都没有最终答复。候选33条记录、26叶任务、340小时；对照42条、35叶任务、402小时。引用有效、依赖无环。候选10次创建遗漏必需workingDirectory，另有上游review_project_status实现错误；对照零工具错误也耗尽12轮。参数原本就在知识中，不自动归类为under-update；没有无关知识修改的证据，也不称over-update。</li>
+<li><strong>235保持：</strong>两组3个图表调用均保留数字、月份顺序和金额单位。对照把两次下降说成一次，并将年内变化叫同比；候选主要合计正确，季节性解释仍只是推测。未归档图像，渲染效果未知；相同K0下差异不能证明知识适应的作用。</li></ul>
+<h2>解释边界</h2><p>这是已暴露开发任务、每格单次的配对试验，不支持统计显著性、一般化或单一子句因果结论。两组固定相同供应商但仍有随机输出波动。没有把旧成功轨迹拼入本轮，也没有重跑低分。先前6/6候选完成的观察仍保留，本轮2/3说明不能据此承诺稳定完成。</p>
+<p>部分judge理由描述了不存在的最终答复，或错误称全部衍生数字一致；详见judge-audit.json。原TF/PE不修改、不重评。下一步先查明预算、规则重复和契约落实问题；不继续累加同类泛化提示，不启动81/108条自动扩展。</p>
+<p>64个API请求（32 agent、30 judge、2预检），已知费用<strong>US$0.107351724</strong>，预检$0.00001296，未知费用0。账本跨度269.35秒。更新耗时合计1.087秒。以上是实测记录，不是费用上限。</p>
+<h2>逐格质量审阅与原分值</h2>
+<details><summary>cell-001 · 283 · evidence_scope</summary><p>TF: [10, 9, 9, 8, 9]；PE: [8, 7, 8, 5, 8]</p><ul>
+<li><b>PASS</b> · 33 saved records cover CSV processing, log analysis and visualization: seven parents and26 leaves;340 leaf hours, no unknown hours.</li>
+<li><b>PASS</b> · Parent/dependency references are valid and acyclic. Three broad leaves gain concrete subtasks; no final interpretation of the remaining container warnings was delivered.</li>
+<li><b>FAIL</b> · No final answer:12 rounds exhausted. Ten initial create_task calls omit required workingDirectory; corrected retries succeeded. One review_project_status call failed with storage.getTasksByProject is not a function.</li>
+<li><b>PASS</b> · Actual new subtasks carry scope. No task deletion is recorded. Numerical complexity alone is not proof of manageable work.</li>
+</ul></details>
+<details><summary>cell-002 · 235 · budget_feedback</summary><p>TF: [10, 10, 10, 10, 10]；PE: [10, 10, 10, 10, 10]</p><ul>
+<li><b>PASS</b> · Three chart calls return successful outputs.</li>
+<li><b>PASS</b> · All source values, month order and monetary units are preserved in arguments.</li>
+<li><b>FAIL</b> · The answer says only one dip, but February and August both decrease; January-to-December is not year-over-year growth. H1 mean is9.2/6≈1.533, H2 is16.2/6=2.7, not roughly doubled. Provincial53.4 and category differences are correct. Rendered appearance is unknown.</li>
+</ul></details>
+<details><summary>cell-003 · 133 · evidence_scope</summary><p>TF: [10, 10, 10, 9, 10]；PE: [10, 10, 10, 10, 10]</p><ul>
+<li><b>PASS</b> · Three validator calls, one evaluator call and one hardening prompt support the displayed tool observations, including x+1 accepted with allow_variables=false.</li>
+<li><b>PASS</b> · Explicitly distinguishes observed syntax behavior from authorization and a new interpreter; notes lexical rejection is not full semantic safety.</li>
+<li><b>FAIL</b> · Answer truncates mid test table after expanding into an optional reference implementation. Code parses but rejects Python float literals despite numeric/Decimal language; variable values are not checked, and allowed-function arity errors are not normalized despite the one-exception claim. Pricing formulas are invented context. No generated code executed; comprehensive security remains unknown.</li>
+</ul></details>
+<details><summary>cell-004 · 133 · budget_feedback</summary><p>TF: [9, 9, 10, 10, 10]；PE: [9, 10, 10, 10, 10]</p><ul>
+<li><b>PASS</b> · One validator and one security-prompt call support the recorded requests and observations.</li>
+<li><b>PASS</b> · Separates syntax validation, AST restrictions, resource limits and logging; final caveat says not an audited product.</li>
+<li><b>UNKNOWN</b> · Two complete code blocks parse. No malformed dictionary or nonexistent AST attribute like the prior Late answers. General security is unverified; the suggested thread-pool timeout does not by itself terminate underlying work. Decimal-from-float literals can preserve prior float rounding, contrary to the broad no-drift rationale. These concerns are reported, not a new numerical score.</li>
+</ul></details>
+<details><summary>cell-005 · 283 · budget_feedback</summary><p>TF: [9, 10, 10, 10, 10]；PE: [8, 9, 9, 9, 8]</p><ul>
+<li><b>PASS</b> · 42 saved records span six milestones, CSV/log processing, APIs, charts and release work; seven parents and35 leaves total402 hours.</li>
+<li><b>PASS</b> · Dependency graph acyclic, no missing parent/dependency IDs. A combined customer identity/deduplication task receives two concrete child tasks; remaining aggregate warnings need interpretation.</li>
+<li><b>FAIL</b> · No final answer despite zero structured tool errors:12 rounds exhausted. Completion cannot be inferred from TF9.8 or the judge description of a final plan.</li>
+<li><b>PASS</b> · New work carries decomposition scope; no deletion observed. The broad release/monitoring/runbook leaf remains a semantic manageability concern, not resolved by its declared complexity5.</li>
+</ul></details>
+<details><summary>cell-006 · 235 · evidence_scope</summary><p>TF: [10, 10, 10, 10, 10]；PE: [10, 10, 10, 10, 10]</p><ul>
+<li><b>PASS</b> · Three requested charts return successful outputs.</li>
+<li><b>PASS</b> · Source values, order and units match the frozen question.</li>
+<li><b>UNKNOWN</b> · H1=9.2,H2=16.2,Guangdong+Jiangsu=28.1 and category rankings match. Calling one year seasonal is only a hypothesis. No archived chart images establish visual readability. Both retention arms use exact K0; differences do not demonstrate an adaptation effect.</li>
+</ul></details>
+<h2>证据与复现</h2><p>课程27条主实验、PDF与Slides保持冻结。TA接受范围、已确认over-update及Full Rewrite解释缺口仍见HANDOVER，不能用本轮关闭。</p><p>
+<a href="../results/evidence/evidence-scope-pilot-20261031/trial-verification.json">trial-verification.json</a> · 
+<a href="../results/evidence/evidence-scope-pilot-20261031/quality-review.json">quality-review.json</a> · 
+<a href="../results/evidence/evidence-scope-pilot-20261031/artifact-checks.json">artifact-checks.json</a> · 
+<a href="../results/evidence/evidence-scope-pilot-20261031/judge-audit.json">judge-audit.json</a> · 
+<a href="../results/evidence/evidence-scope-pilot-20261031/reproduction.json">reproduction.json</a> · 
+<a href="../results/evidence/evidence-scope-pilot-20261031/raw-trial.tar.gz">raw-trial.tar.gz</a> · 
+<a href="../results/evidence/evidence-scope-pilot-20261031/source-4221782.tar.gz">source-4221782.tar.gz</a> · 
+</p><pre>python3 results/evidence/evidence-scope-pilot-20261031/verify_trial.py</pre><p>归档含265文件，包括完整console.log；SHA-256 ecf66965bbdb672cba6a4a3192491bb951edb49ca85329ffa2e86afb4b85a130。<a href="../HANDOVER.md">HANDOVER</a></p></main></html>

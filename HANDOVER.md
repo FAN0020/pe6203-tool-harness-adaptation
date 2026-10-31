@@ -1,6 +1,6 @@
 # PE6203 交付交接 · 2026-10-31
 
-**最新授权：用户要求“请不要设置上限和额度限制，以完成任务为优先目标”。后续研究按证据继续，不设总费用/轨迹额度；保持逐条记账、公平执行设置及历史证据。下文各轮限额及等待批准的表述仅描述当时状态。当前协议：`experiments/matched-existing-v1.json`；不含部署授权。**
+**最新授权：用户要求“请不要设置上限和额度限制，以完成任务为优先目标”。后续研究按证据继续，不设总费用/轨迹额度；保持逐条记账、公平执行设置及历史证据。下文各轮限额及等待批准的表述仅描述当时状态。最新已完成协议：`experiments/evidence-scope-v1.json`；不含部署授权。**
 
 课程交付已冻结。四条获批诊断已经结束；PE +0.5 和历史 promotion gates 不属于课程要求。后续新增的完成率 / 任务质量研究另列在文末；文末获批的 12 条试验已执行并归档，总费用 US$0.1572164470；**授权已用完，不自动扩展实验或部署**。课程验收仍需组内审阅及 TA 澄清，不以策略胜出为条件。
 
@@ -135,3 +135,15 @@ python3 results/evidence/budget-contract-20261031/verify_trial.py
 沿用最新无总额度授权。只在budget_feedback的变化/新增记录中追加一条固定证据边界usage rule，防止将工具观察扩展为未经验证的实现、可选汇总或虚构执行历史；保留原任务全部交付，不改模型/预算/评分。三个Late条件133/235/283 × 原budget_feedback/候选，各1次，6条同批次配对、30个原评分槽；预计$0.10–0.30、5–12分钟，均为估算。此阶段检查质量修复并保持完成率，不要求击败已经满完成率的budget_feedback；最终目标仍须对原Patch和课程基线完成三阶段验证。
 
 协议`experiments/evidence-scope-v1.json`，配置`configs/evidence-scope-v1.json`；精确规则和九个task-stage知识差异在`results/evidence/evidence-scope-pilot-20261031/offline-knowledge-checks.json`。五个Early/retention条件均为精确K0。Late133追加10条、283追加11条、235为0；其余字段逐项与budget_feedback一致。340项离线测试通过，尚未据此宣称行为改善。结果归档后以新结果节为准，不启动自动网格或108条确认。
+
+
+### evidence_scope 六条配对（完成，不晋级）
+
+- 冻结源码 `422178236198454f673748a782550a4438e81d44`；`experiments/evidence-scope-v1.json` 与同名 configs。3 tasks × Late × budget_feedback/evidence_scope，每格一次；没有复用旧agent轨迹、增加探测、部署或改评分。
+- 新候选1/3正常完成（变化0/2），对照2/3（变化1/2）；TF9.6/9.8，PE9.0667/9.4667。候选133截断，两组283耗尽12轮；235均完成且知识精确K0。不能推广之前6/6成功，更不能把judge高分当正常结束。
+- 64请求=32 agent+30 judge+2预检，全为DigitalOcean；已知$0.107351724、未知0，269.35秒。总费用/轨迹额度仍为null；单轨迹公平预算保持。更新0模型tokens/调用/$0，合计1.0873秒。
+- 归档265文件含console：`results/evidence/evidence-scope-pilot-20261031/raw-trial.tar.gz`，SHA-256 `ecf66965bbdb672cba6a4a3192491bb951edb49ca85329ffa2e86afb4b85a130`。同目录含独立verify_trial.py、trial-verification.json、quality-review.json、artifact-checks.json、judge-audit.json、reproduction.json及冻结源码包。57个输入和知识锁复核无漂移。
+- 可读报告：`reports/evidence-scope-results.html`。候选仍扩写未请求的数学实现；283十次缺workingDirectory，但字段已在知识中。两组283有真实拆分和有效引用，但无最终回答。保留工具实现缺陷、judge描述不存在最终答复等反证，不称已确认under/over-update。
+- **后续先查原因：**规则重复/长度、参数契约落实、输出与轮次预算；不继续叠加同类泛化提示。课程27条/PDF/Slides仍冻结。TA问题及研究目标尚未解决；本轮阴性，不可写成已找到稳健策略。最新授权允许必要研究继续，无需按旧额度逐轮询问，仍不部署。
+
+离线复核：`python3 results/evidence/evidence-scope-pilot-20261031/verify_trial.py`。
