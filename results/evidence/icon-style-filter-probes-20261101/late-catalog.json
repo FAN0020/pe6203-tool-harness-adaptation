@@ -1,0 +1,238 @@
+{
+  "_meta": null,
+  "nextCursor": null,
+  "tools": [
+    {
+      "name": "list_icons",
+      "title": null,
+      "description": "Get a list of all available Hugeicons icons",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "search_icons",
+      "title": null,
+      "description": "Search for icons by name or tags. Returns icon metadata only (name, tags, categories). Use commas to search for multiple icons (e.g. 'home, notification, settings'). For comprehensive glyph data across styles, use get_icons_batch_with_glyphs instead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query to find relevant icons. Separate multiple searches with commas"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Optional maximum number of results to return",
+            "minimum": 1
+          },
+          "style": {
+            "type": "string",
+            "description": "Optional style filter for results",
+            "enum": [
+              "bulk-rounded",
+              "duotone-rounded",
+              "solid-rounded",
+              "solid-sharp",
+              "solid-standard",
+              "stroke-rounded",
+              "stroke-sharp",
+              "stroke-standard",
+              "twotone-rounded"
+            ]
+          },
+          "exact_match": {
+            "type": "boolean",
+            "description": "When true, only exact icon name matches are returned"
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Optional number of results to skip before returning matches",
+            "minimum": 0
+          },
+          "include_metadata": {
+            "type": "boolean",
+            "description": "When false, returns only icon names instead of full metadata"
+          },
+          "case_sensitive": {
+            "type": "boolean",
+            "description": "When true, exact_match comparisons are case-sensitive"
+          },
+          "sort_by": {
+            "type": "string",
+            "description": "Optional result ordering mode for search results",
+            "enum": [
+              "relevance",
+              "name_asc",
+              "name_desc"
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "description": "Optional list of tags or categories to further filter matched icons",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fields": {
+            "type": "array",
+            "description": "Optional list of metadata fields to include when include_metadata is true",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "get_platform_usage",
+      "title": null,
+      "description": "Get platform-specific usage instructions for Hugeicons",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "description": "Platform name (react, vue, angular, svelte, react-native, flutter, html)",
+            "enum": [
+              "react",
+              "vue",
+              "angular",
+              "svelte",
+              "react-native",
+              "flutter",
+              "html"
+            ]
+          }
+        },
+        "required": [
+          "platform"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "get_icon_glyphs",
+      "title": null,
+      "description": "Get all glyphs (unicode characters) for a single specific icon across all available styles. For retrieving glyphs for multiple icons efficiently, use get_icons_batch_with_glyphs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "icon_name": {
+            "type": "string",
+            "description": "The name of the icon (e.g., 'home-01', 'notification-02')"
+          }
+        },
+        "required": [
+          "icon_name"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "get_icon_glyph_by_style",
+      "title": null,
+      "description": "Get the glyph (unicode character) for a single specific icon with a particular style. Ideal for precise single icon-style lookups. For multiple icons or styles, consider get_icons_batch_with_glyphs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "icon_name": {
+            "type": "string",
+            "description": "The name of the icon (e.g., 'home-01', 'notification-02')"
+          },
+          "style": {
+            "type": "string",
+            "description": "The icon style",
+            "enum": [
+              "bulk-rounded",
+              "duotone-rounded",
+              "solid-rounded",
+              "solid-sharp",
+              "solid-standard",
+              "stroke-rounded",
+              "stroke-sharp",
+              "stroke-standard",
+              "twotone-rounded"
+            ]
+          }
+        },
+        "required": [
+          "icon_name",
+          "style"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "get_icons_batch_with_glyphs",
+      "title": null,
+      "description": "Retrieve detailed information including glyphs for multiple icons in a single request. Returns comprehensive data with all available styles and their unicode characters for each icon.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "icon_names": {
+            "type": "array",
+            "description": "Array of icon names to retrieve (e.g., ['home-01', 'notification-02', 'settings-03'])",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "include_styles": {
+            "type": "array",
+            "description": "Optional array of specific styles to include. If omitted, all styles are returned.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "bulk-rounded",
+                "duotone-rounded",
+                "solid-rounded",
+                "solid-sharp",
+                "solid-standard",
+                "stroke-rounded",
+                "stroke-sharp",
+                "stroke-standard",
+                "twotone-rounded"
+              ]
+            }
+          }
+        },
+        "required": [
+          "icon_names"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    }
+  ]
+}

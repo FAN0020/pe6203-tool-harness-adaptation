@@ -18,7 +18,14 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：新增源码筛查完成；城市/车站过滤探测在原生启动处停止
+### 当前最新断点：图标样式过滤缺陷和原生替代接口已复现
+
+- `8f018f9`事前冻结合成query=calendar/style=stroke-rounded、8调用+3catalog；全部执行结束，模型/评分请求0、费用0。三阶段默认搜索均返回完全相同66项；Middle/Late加style均为空；三阶段对首项名称的get_icon_glyph_by_style均返回相同有效字形。
+- 原生search helper只投影id/name/tags/category/featured/version；新增style筛选读取不存在style/variant/stroke，造成假空。只证明这一固定合成查询的过滤缺陷与原生替代路径，不证明agent收益。原task57没有明确样式要求，策略触发率/完成率空间仍未知。
+- 证据`results/evidence/icon-style-filter-probes-20261101/`，离线`verify_probes.py`核验源码、协议、全部返回和归档；不要重跑8次探针。共用hugeicons入口build/index.js对应原包bin，未改工具实现/schema。
+- 下一步先单独冻结并验证task57依赖Ant Design文档和PlantUML生成路径可用，再决定固定规模的策略对照；知识仅限过滤语义及已有字形接口，不含题目答案/通用预算规则。当前没有模型进程，Goal继续，双重改善尚未成立。
+
+### 已结束的上一轮：新增源码筛查完成；城市/车站过滤探测在原生启动处停止
 
 - 上一轮contract_reconcile已淘汰（下节），本轮没有agent/judge请求。新筛查记录`results/evidence/mechanism-screening-20261101/post-reconciliation-source-screen.json`含20组有边界的判断；不是穷尽性证明。PDF、QR、图书/Maven、Remotion、思考工具、新闻、博客、LeetCode、游戏卡、SwiftUI、Meme、HeroUI、Clojars、OpenTofu、whois、memory、12306及Pollinations均保留具体理由和未审范围。
 - 补查非JS运行时源码/资源：`non-js-runtime-change-index-v2.json`覆盖224个包/阶段行，在明确筛选范围内没有新增程序/模板差异。首次v1哈希扫描误纳入包自带data/memory JSON，只计算hash、未解析或展示内容；v2明确排除data/memory/log/cache，重新统计文件数量。1301项跨阶段状态文件差异不是工具实现变化，不能当作新机制。两个索引均保留。
