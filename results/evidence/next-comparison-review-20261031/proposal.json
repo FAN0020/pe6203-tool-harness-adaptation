@@ -1,0 +1,289 @@
+{
+  "id": "matched-existing-method-comparison-draft",
+  "status": "preauthorization_draft_superseded_by_experiments/matched-existing-v1.json",
+  "new_candidate": false,
+  "why": "Knowledge identity audit shows unchanged budget_feedback flips from failure to success. Test the existing method against original Selective Patch with matched routing/path controls before any further rule optimization.",
+  "late_reply": {
+    "question_id": "call_62bdb5dae6024d6b8f948ef63b90b676",
+    "answer": "批准上述首轮上限",
+    "ambiguity": "Question says first round max12, candidate/control each6, US$1. That cohort already completed under an earlier explicit approval; do not count this late reply as a second allowance without clarification."
+  },
+  "prior_spend": {
+    "approved_first_12": "0.1572164470",
+    "approved_next_6": "0.089010216",
+    "total": "0.2462266630",
+    "not_a_new_spending_authorization": true
+  },
+  "matrix": {
+    "tasks": [
+      133,
+      235,
+      283
+    ],
+    "stages": [
+      "middle",
+      "late"
+    ],
+    "strategies": [
+      "selective_patch",
+      "budget_feedback"
+    ],
+    "repeats": 1,
+    "cells_in_combined_analysis": 12,
+    "reused": [
+      {
+        "task_id": 133,
+        "stage": "middle",
+        "strategy": "budget_feedback",
+        "archive": "results/evidence/budget-contract-20261031/raw-trial.tar.gz",
+        "archive_sha256": "b82b34719e304d3037ab465ecfe1bc46c7d1ff9be0712b1123623a39600c115a",
+        "member": "paired-pilot-20261031/cells/cell-001/run/result.json",
+        "knowledge_sha256": "3aa0a5a686fd0540cbba96d992ac4a49e93407b8903e408c1613a219a8685558"
+      },
+      {
+        "task_id": 235,
+        "stage": "middle",
+        "strategy": "budget_feedback",
+        "archive": "results/evidence/budget-contract-20261031/raw-trial.tar.gz",
+        "archive_sha256": "b82b34719e304d3037ab465ecfe1bc46c7d1ff9be0712b1123623a39600c115a",
+        "member": "paired-pilot-20261031/cells/cell-004/run/result.json",
+        "knowledge_sha256": "fc91ffee502f38b785c747c63438911cca34a48c89a99416d1b21fc19714db35"
+      },
+      {
+        "task_id": 283,
+        "stage": "late",
+        "strategy": "budget_feedback",
+        "archive": "results/evidence/budget-contract-20261031/raw-trial.tar.gz",
+        "archive_sha256": "b82b34719e304d3037ab465ecfe1bc46c7d1ff9be0712b1123623a39600c115a",
+        "member": "paired-pilot-20261031/cells/cell-003/run/result.json",
+        "knowledge_sha256": "385f7a34bd05fd9e2e12b4453bcbe4c33a00221293a3477ebedc0f8e1a275302"
+      }
+    ],
+    "new": [
+      {
+        "task_id": 133,
+        "stage": "middle",
+        "strategy": "selective_patch"
+      },
+      {
+        "task_id": 133,
+        "stage": "late",
+        "strategy": "selective_patch"
+      },
+      {
+        "task_id": 133,
+        "stage": "late",
+        "strategy": "budget_feedback"
+      },
+      {
+        "task_id": 235,
+        "stage": "middle",
+        "strategy": "selective_patch"
+      },
+      {
+        "task_id": 235,
+        "stage": "late",
+        "strategy": "selective_patch"
+      },
+      {
+        "task_id": 235,
+        "stage": "late",
+        "strategy": "budget_feedback"
+      },
+      {
+        "task_id": 283,
+        "stage": "middle",
+        "strategy": "selective_patch"
+      },
+      {
+        "task_id": 283,
+        "stage": "middle",
+        "strategy": "budget_feedback"
+      },
+      {
+        "task_id": 283,
+        "stage": "late",
+        "strategy": "selective_patch"
+      }
+    ],
+    "new_agent_trajectories_max": 9,
+    "new_valid_judge_slots": 45,
+    "new_preflight_calls_max": 2
+  },
+  "controls": {
+    "model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "DigitalOcean only, no fallback, require_parameters true; verify every actual response",
+    "agent_temperature": 0,
+    "agent_max_output_tokens": 4096,
+    "agent_max_rounds": 12,
+    "agent_timeout_seconds": 900,
+    "judge": "Same frozen original rubric, five first-valid slots, existing bounded recovery. No historical rescoring.",
+    "task_selection": "All original task text and pinned MCP implementation unchanged. Opaque IDs and workspace-path template for both arms. Agent chooses tool calls.",
+    "knowledge": "Reuse registered methods without implementation or rule changes; exact frozen feedback and protected-field validation; no new probes or updater model calls.",
+    "cost_guard": "Independent US$1 shared ledger; existing full-context request reservations and price ceilings. Fail closed on unknown cost, unavailable provider, mismatch or insufficient reserve."
+  },
+  "evaluation": [
+    {
+      "task_id": 133,
+      "split": "exposed_development_regression",
+      "provenance": "Original MCPEvol-Bench task and archived raw trajectories; original question unchanged",
+      "required_properties": [
+        "Requested expression validation and OWASP-related security recommendations are supported by actual observations.",
+        "Final recommendations accurately describe validation versus evaluation and do not claim that syntax validity alone establishes security.",
+        "Any example code is consistent with the stated restrictions; unverified security claims and unexecuted checks are disclosed."
+      ],
+      "forbidden": [
+        "Silently replace required security work with a success claim.",
+        "Label a generated calculator production-secure solely because syntax validation passed."
+      ],
+      "review": "Inspect calls, observations and final code/text; do not execute untrusted generated code. Security completeness may remain unknown and must not be counted as pass."
+    },
+    {
+      "task_id": 235,
+      "split": "exposed_retention_control",
+      "provenance": "Original question contains all provincial, monthly and category sales values",
+      "required_properties": [
+        "All three requested chart types have successful recorded outputs.",
+        "Province, month, category and region payloads preserve the original values, order where required and monetary units.",
+        "Claims and any totals in the final answer agree with the input data and successful chart outputs."
+      ],
+      "forbidden": [
+        "Change source data to make a chart or diagnostic pass.",
+        "Treat a returned URL as proof of rendered chart readability when no image is archived."
+      ],
+      "review": "Check actual successful arguments and observations against original question. Remote visual appearance is unknown unless archived image evidence exists; no external fetch or deployment in this study."
+    },
+    {
+      "task_id": 283,
+      "split": "exposed_changed_task_regression",
+      "provenance": "Original analytics dashboard planning request; archived task store, calls and final answer",
+      "required_properties": [
+        "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work.",
+        "Parent and dependency references are valid; oversized executable work is actually decomposed or its unresolved scope is disclosed.",
+        "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations.",
+        "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings."
+      ],
+      "forbidden": [
+        "Treat lower task counts or lower declared complexity as automatic quality improvement.",
+        "Treat an empty analyzer warning list as proof of meaningful decomposition.",
+        "Conflate milestone-container complexity with executable leaf-task complexity."
+      ],
+      "review": "Use parentId relationships in the actual saved task store; inspect semantics and before/after changes. Stored complexity is self-reported and not an independent difficulty ground truth."
+    }
+  ],
+  "positive_requires": [
+    "Candidate completes more of four changed cells than original Selective Patch; no retention completion loss.",
+    "Mean TF no lower; all TF/PE per-cell and original ratings retained.",
+    "At least one paired artifact/answer accuracy improvement independent of completion; no new material quality failures; unknown material quality means hold.",
+    "Retained task235 remains exact K0; no loss of data/unit/answer properties."
+  ],
+  "limits": [
+    "Reusing three previously observed candidate cells saves calls but creates a two-block, partly retrospective comparison; not fresh interleaved confirmation or statistical superiority. Report each cell cohort/source explicitly.",
+    "No unseen-task generalization; single execution per task-stage-arm; no causal isolation of every note or operational variability.",
+    "No Early and no contemporary NU/FR: this cannot establish new ECS or alone complete course validation for a replacement headline method.",
+    "Do not pool scores or completion rates from historical cohorts with different controls."
+  ],
+  "cost_estimate": {
+    "expected_usd_range": [
+      0.2,
+      0.6
+    ],
+    "expected_minutes_range": [
+      8,
+      15
+    ],
+    "independent_cap_usd": "1.00",
+    "historical_proxy_cells": [
+      {
+        "task_id": 133,
+        "stage": "middle",
+        "strategy": "selective_patch",
+        "prompt_tokens": 101921,
+        "completion_tokens": 6780,
+        "seconds": 36.762783
+      },
+      {
+        "task_id": 133,
+        "stage": "late",
+        "strategy": "selective_patch",
+        "prompt_tokens": 180543,
+        "completion_tokens": 4309,
+        "seconds": 36.314868
+      },
+      {
+        "task_id": 133,
+        "stage": "late",
+        "strategy": "budget_feedback",
+        "prompt_tokens": 72989,
+        "completion_tokens": 2597,
+        "seconds": 17.023202
+      },
+      {
+        "task_id": 235,
+        "stage": "middle",
+        "strategy": "selective_patch",
+        "prompt_tokens": 82111,
+        "completion_tokens": 2047,
+        "seconds": 15.204256
+      },
+      {
+        "task_id": 235,
+        "stage": "late",
+        "strategy": "selective_patch",
+        "prompt_tokens": 84402,
+        "completion_tokens": 2754,
+        "seconds": 16.104261
+      },
+      {
+        "task_id": 235,
+        "stage": "late",
+        "strategy": "budget_feedback",
+        "prompt_tokens": 80805,
+        "completion_tokens": 1877,
+        "seconds": 13.811807
+      },
+      {
+        "task_id": 283,
+        "stage": "middle",
+        "strategy": "selective_patch",
+        "prompt_tokens": 508341,
+        "completion_tokens": 17960,
+        "seconds": 88.117619
+      },
+      {
+        "task_id": 283,
+        "stage": "middle",
+        "strategy": "budget_feedback",
+        "prompt_tokens": 472251,
+        "completion_tokens": 22363,
+        "seconds": 112.935265
+      },
+      {
+        "task_id": 283,
+        "stage": "late",
+        "strategy": "selective_patch",
+        "prompt_tokens": 589298,
+        "completion_tokens": 26235,
+        "seconds": 157.044027
+      }
+    ],
+    "prompt_tokens": 2172661,
+    "completion_tokens": 86922,
+    "historical_seconds_sum": 493.318088,
+    "no_cache_price_snapshot_usd": "0.45366282",
+    "price_ceiling_proxy_usd": "0.7561047",
+    "basis": "Observed token volumes for the exact nine conditions in the prior 12-cell archive; 2026-10-31 saved DigitalOcean public price snapshot (.18/M input, .72/M output), not a current quote or guarantee. Preflight and routing/caching/recovery variability included in range. Guard can stop before all nine complete if worst-case reserve does not fit."
+  },
+  "stopping": [
+    "No execution until the user clarifies new authorization.",
+    "Stop after at most nine new trajectories and original scoring, or an infrastructure/provider/cost guard stop. Preserve every failure; no low-score reruns.",
+    "Negative or uncertain result: no new candidate or automatic repeat.",
+    "Positive result: report observed gain only. To present this method as a new course headline would still need Early and matched NU/FR coverage (at most21 additional trajectories if six candidate cells reusable), separate cost proposal and approval. Do not execute that extension now."
+  ],
+  "course_requirements_unchanged": [
+    "Course main 27 and deliverables remain frozen and reusable for their documented methods.",
+    "Controlled under-update TA acceptance, confirmed unrelated-knowledge over-update, Full Rewrite interpretation and tool-removal/rename coverage gaps remain."
+  ],
+  "no_new_paid_calls": true,
+  "superseded_by_user_text": "请不要设置上限和额度限制，以完成任务为优先目标"
+}

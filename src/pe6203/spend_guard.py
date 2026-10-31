@@ -1,4 +1,4 @@
-"""Optional shared per-request reservation ledger for bounded OpenRouter studies."""
+"""Shared OpenRouter request accounting, with optional financial limits."""
 
 import fcntl
 import hashlib
@@ -59,8 +59,10 @@ def reserve(client, policy, kwargs):
     if type(policy["context_tokens"]) is not int or policy["context_tokens"] < maximum:
         raise BudgetStopped("Invalid model context bound")
     rates = [Decimal(policy[k]) for k in ("prompt_per_million", "completion_per_million")]
-    limit = Decimal(policy["limit_usd"])
-    if any(not v.is_finite() or v < 0 for v in rates) or not limit.is_finite() or limit <= 0:
+    limit = None if policy["limit_usd"] is None else Decimal(policy["limit_usd"])
+    if any(not v.is_finite() or v < 0 for v in rates) or (
+        limit is not None and (not limit.is_finite() or limit <= 0)
+    ):
         raise BudgetStopped("Invalid finite price/limit")
     request = deepcopy(kwargs)
     extra = request.setdefault("extra_body", {})
@@ -70,16 +72,21 @@ def reserve(client, policy, kwargs):
     supplied_route = {k: v for k, v in extra.get("provider", {}).items() if k != "max_price"}
     if supplied_route and supplied_route != route:
         raise BudgetStopped("Unexpected provider override")
-    extra["provider"] = {
-        **deepcopy(route),
-        "max_price": {"prompt": float(rates[0]), "completion": float(rates[1]), "request": 0},
-    }
-    # Full published context is a conservative input bound; output is additionally reserved.
+    extra["provider"] = deepcopy(route)
+    if limit is not None:
+        extra["provider"]["max_price"] = {
+            "prompt": float(rates[0]),
+            "completion": float(rates[1]),
+            "request": 0,
+        }
+    # In uncapped mode this is an accounting estimate, never an enforced price bound.
     bound = (policy["context_tokens"] * rates[0] + maximum * rates[1]) / Decimal(1000000)
     with ledger(policy) as data:
         if data["blocked"] or any(r["status"] == "pending" for r in data["requests"]):
             raise BudgetStopped("Unsettled/unknown charge or previous budget stop")
-        if Decimal(data["known_usd"]) + Decimal(data["unknown_reserved_usd"]) + bound > limit:
+        if limit is not None and (
+            Decimal(data["known_usd"]) + Decimal(data["unknown_reserved_usd"]) + bound > limit
+        ):
             data.update(blocked=True, stop_reason="insufficient_worst_case_reserve")
             raise BudgetStopped("Insufficient funds for worst-case request; no request sent")
         index = len(data["requests"])
@@ -129,7 +136,7 @@ def settle(policy, index, response=None, error=None):
             actual = Decimal(str(cost))
             row.update(status="settled", actual_usd=str(actual))
             data["known_usd"] = str(Decimal(data["known_usd"]) + actual)
-            if actual > Decimal(row["reserved_usd"]):
+            if policy["limit_usd"] is not None and actual > Decimal(row["reserved_usd"]):
                 data.update(blocked=True, stop_reason="provider_exceeded_declared_price_bound")
 
 

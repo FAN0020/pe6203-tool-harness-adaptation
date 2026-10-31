@@ -167,3 +167,27 @@ def test_budget_contract_rejects_config_that_conflicts_with_its_advertised_limit
     with pytest.raises(ValueError, match="budget_contract.*12.*4096"):
         prepare_search(tmp_path, tmp_path / "out", "spec.json", "development")
     assert not (tmp_path / "out").exists()
+
+
+def test_explicit_execution_cells_reuse_prior_results_without_rerunning_them():
+    from pe6203.strategy_search import cells_for
+
+    group = {
+        "tasks": [133, 235, 283],
+        "stages": ["middle", "late"],
+        "strategies": ["selective_patch", "budget_feedback"],
+        "repeats": 1,
+        "opaque_cell_ids": True,
+        "execution_cells": [
+            [133, "middle", "selective_patch", 0],
+            [283, "late", "budget_feedback", 0],
+        ],
+    }
+    cells = cells_for({"development": group}, "development")
+    assert len(cells) == 2
+    assert {(c["task_id"], c["version"], c["strategy"], c["seed"]) for c in cells} == {
+        tuple(c) for c in group["execution_cells"]
+    }
+    for invalid in [[], [[999, "middle", "selective_patch", 0]], [group["execution_cells"][0]] * 2]:
+        with pytest.raises(ValueError, match="distinct supported execution cells"):
+            cells_for({"development": {**group, "execution_cells": invalid}}, "development")

@@ -37,6 +37,17 @@ def cells_for(spec, phase, candidate=None):
         if not pairs or len(pairs) != len(set(pairs)) or not set(pairs) <= allowed:
             raise ValueError("Need distinct supported task-stage pairs")
         cells = [c for c in cells if (c["task_id"], c["version"]) in pairs]
+    if "execution_cells" in group:
+        requested = [tuple(row) for row in group["execution_cells"]]
+        fields = ("task_id", "version", "strategy", "seed")
+        available = {tuple(c[k] for k in fields) for c in cells}
+        if (
+            not requested
+            or len(requested) != len(set(requested))
+            or not set(requested) <= available
+        ):
+            raise ValueError("Need distinct supported execution cells")
+        cells = [c for c in cells if tuple(c[k] for k in fields) in requested]
     # Complete repeat blocks, randomized within each block; no model seed promise.
     random.Random(1729).shuffle(cells)
     cells = sorted(cells, key=lambda c: c["seed"])

@@ -289,6 +289,42 @@ def test_conflicting_provider_override_is_rejected_before_network(tmp_path):
     assert not (tmp_path / "budget.json").exists()
 
 
+def test_uncapped_accounting_records_spend_without_total_or_price_ceiling(tmp_path):
+    rules = {
+        **policy(tmp_path),
+        "limit_usd": None,
+        "provider_route": {"only": ["digitalocean"]},
+        "expected_provider": "DigitalOcean",
+    }
+    payloads = []
+
+    def handle(request):
+        payloads.append(json.loads(request.content))
+        return httpx.Response(200, json={**response(2), "provider": "DigitalOcean"})
+
+    with OpenAI(
+        api_key="test",
+        base_url="https://openrouter.ai/api/v1",
+        max_retries=0,
+        http_client=httpx.Client(transport=httpx.MockTransport(handle)),
+    ) as client:
+        for _ in range(3):
+            spend_guard.complete_sync(client, rules, **kwargs())
+    data = json.loads((tmp_path / "budget.json").read_text())
+    assert float(data["known_usd"]) == 6
+    assert not data["blocked"]
+    assert len(data["requests"]) == 3
+    assert all(p["provider"] == rules["provider_route"] for p in payloads)
+    assert all(r["actual_provider"] == "DigitalOcean" for r in data["requests"])
+
+
+@pytest.mark.parametrize("limit", ["-1", "0", "NaN", "Infinity"])
+def test_invalid_explicit_limits_remain_rejected(tmp_path, limit):
+    with OpenAI(api_key="test", base_url="https://openrouter.ai/api/v1", max_retries=0) as client:
+        with pytest.raises(spend_guard.BudgetStopped, match="Invalid"):
+            spend_guard.reserve(client, {**policy(tmp_path), "limit_usd": limit}, kwargs())
+
+
 def test_preflight_cap_blocks_an_extra_session_without_a_request(tmp_path):
     from pe6203.experiment import availability_preflight
 
