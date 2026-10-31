@@ -1,0 +1,170 @@
+[
+  {
+    "stage": "middle",
+    "index": 1,
+    "kind": "discovery",
+    "tool": "list-popular-libraries",
+    "arguments": {
+      "category": "testing",
+      "limit": 1
+    },
+    "started_utc": "2026-10-31T19:13:05.434240+00:00",
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Error fetching popular libraries: ReferenceError: CONTEXT7_API_BASE_URL is not defined"
+        }
+      ],
+      "isError": false
+    },
+    "ended_utc": "2026-10-31T19:13:05.435674+00:00"
+  },
+  {
+    "stage": "late",
+    "index": 2,
+    "kind": "discovery",
+    "tool": "list-popular-libraries",
+    "arguments": {
+      "category": "testing",
+      "limit": 1
+    },
+    "started_utc": "2026-10-31T19:13:05.757243+00:00",
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Error fetching popular libraries: ReferenceError: CONTEXT7_API_BASE_URL is not defined"
+        }
+      ],
+      "isError": false
+    },
+    "ended_utc": "2026-10-31T19:13:05.758569+00:00"
+  },
+  {
+    "stage": "early",
+    "index": 3,
+    "kind": "resolve",
+    "tool": "resolve-library-id",
+    "arguments": {
+      "libraryName": "Zod",
+      "query": "Validate a string with a minimum length of three characters in Zod."
+    },
+    "started_utc": "2026-10-31T19:13:06.077116+00:00",
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Available Libraries:\n\n- Title: Zod\n- Context7-compatible library ID: /colinhacks/zod\n- Description: Zod is a TypeScript-first schema validation library that provides static type inference for strongly typed, validated data.\n- Code Snippets: 1901\n- Source Reputation: High\n- Benchmark Score: 65.92\n- Versions: v3.24.2, v4.0.1, v4.3.6, v4.0.0-beta, v4.6.5\n----------\n- Title: Zod\n- Context7-compatible library ID: /websites/zod_dev\n- Description: Zod is a TypeScript-first schema validation library that enables you to define and validate data schemas with static type inference, from simple strings to complex nested objects.\n- Code Snippets: 1223\n- Source Reputation: High\n- Benchmark Score: 69.56\n- Versions: v3\n----------\n- Title: Zod\n- Context7-compatible library ID: /llmstxt/zod_dev_llms-full_txt\n- Description: Zod is a TypeScript-first schema validation library with static type inference, offering comprehensive features for defining and validating data structures.\n- Code Snippets: 2442\n- Source Reputation: High\n- Benchmark Score: 80.33\n----------\n- Title: Zod\n- Context7-compatible library ID: /llmstxt/zod_dev_llms_txt\n- Description: Zod is a TypeScript-first schema validation library that provides static type inference for robust data validation.\n- Code Snippets: 3592\n- Source Reputation: High\n- Benchmark Score: 77.31\n----------\n- Title: Zod (Deepwiki)\n- Context7-compatible library ID: /websites/deepwiki_colinhacks_zod\n- Description: Zod is a TypeScript-first schema validation library that enables runtime type checking with static type inference.\n- Code Snippets: 766\n- Source Reputation: High\n- Benchmark Score: 38"
+        }
+      ],
+      "isError": false
+    },
+    "ended_utc": "2026-10-31T19:13:07.628174+00:00"
+  },
+  {
+    "stage": "early",
+    "index": 4,
+    "kind": "documentation",
+    "tool": "query-docs",
+    "arguments": {
+      "query": "Show the minimal Zod schema for a string with a minimum length of three characters.",
+      "libraryId": "/colinhacks/zod"
+    },
+    "started_utc": "2026-10-31T19:13:07.629383+00:00",
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "### z.string()\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/api.mdx\n\nCreates a schema for string validation and transformation. Supports validation methods for length, regex, prefixes, suffixes, substrings, and casing, as well as transformation methods like trimming and normalization.\n\n```APIDOC\n### Function Signature\n`z.string()`\n\n### Validation Methods\n- `.max(length: number)` - Validates maximum length (in Unicode code points).\n- `.min(length: number)` - Validates minimum length (in Unicode code points).\n- `.length(length: number)` - Validates exact length (in Unicode code points).\n- `.nonempty()` - Alias for `.min(1)`.\n- `.regex(pattern: RegExp)` - Validates that string matches regex pattern.\n- `.startsWith(prefix: string)` - Validates string starts with prefix.\n- `.endsWith(suffix: string)` - Validates string ends with suffix.\n- `.includes(substring: string)` - Validates string contains substring.\n- `.uppercase()` - Validates string is uppercase.\n- `.lowercase()` - Validates string is lowercase.\n\n### Transform Methods\n- `.trim()` - Trims whitespace from string.\n- `.toLowerCase()` - Converts string to lowercase.\n- `.toUpperCase()` - Converts string to uppercase.\n- `.normalize()` - Normalizes unicode characters.\n\n### Examples\n```ts\n// Validations\nz.string().max(5);\nz.string().min(5);\nz.string().length(5);\nz.string().nonempty();\nz.string().regex(/^[a-z]+$/);\nz.string().startsWith(\"aaa\");\nz.string().endsWith(\"zzz\");\nz.string().includes(\"---\");\nz.string().uppercase();\nz.string().lowercase();\n\n// Unicode length handling\nz.string().length(1).parse(\"😀\"); // one code point, two UTF-16 units\nz.string().length(2).parse(\"e\\u0301\"); // \"é\" — an e plus a combining acute\nz.string().length(3).parse(\"🧑‍🍼\"); // person + ZWJ + baby bottle\n\n// Transforms\nz.string().trim();\nz.string().toLowerCase();\nz.string().toUpperCase();\nz.string().normalize();\n```\n```\n\n--------------------------------\n\n### Validate string constraints in Zod and Zod Mini\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/api.mdx\n\nApplies common string validation methods such as length limits, regular expressions, prefixes, suffixes, and casing checks. Zod Mini uses the .check() method with standalone validators.\n\n```typescript\nz.string().max(5);\nz.string().min(5);\nz.string().length(5);\nz.string().nonempty(); // alias for .min(1)\nz.string().regex(/^[a-z]+$/);\nz.string().startsWith(\"aaa\");\nz.string().endsWith(\"zzz\");\nz.string().includes(\"---\");\nz.string().uppercase();\nz.string().lowercase();\n```\n\n```typescript\nz.string().check(z.maxLength(5));\nz.string().check(z.minLength(5));\nz.string().check(z.length(5));\nz.string().check(z.minLength(1)); // alias for .nonempty()\nz.string().check(z.regex(/^[a-z]+$/));\nz.string().check(z.startsWith(\"aaa\"));\nz.string().check(z.endsWith(\"zzz\"));\nz.string().check(z.includes(\"---\"));\nz.string().check(z.uppercase());\nz.string().check(z.lowercase());\n```\n\n--------------------------------\n\n### Chain validation and transformation methods on z.string\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/packages/zod.mdx\n\nDemonstrates concise, chainable method calls to configure length bounds and casing rules on a string schema.\n\n```typescript\nz.string()\n  .min(5)\n  .max(10)\n  .toLowerCase();\n```\n\n--------------------------------\n\n### Classic ZodString API: min/regex accept { error } params; trim is an explicit opt-in\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/zod/src/v4/classic/schemas.ts\n\nThe classic `_ZodString` interface declares the chainable methods the question uses. The `string` factory (also in this file) is `string(params?: string | core.$ZodStringParams)` returning `core._string(ZodString, params)`, where `$ZodStringParams`' base `Params` type adds `error?: string | errors.$ZodErrorMap<IssueTypes>` — so `z.string({ error: localizedMessage })` is valid. `.min(n, { error: required })`, `.min(8, { error: minLength })` and `.regex(pattern, { error: message })` are these `min`/`regex` methods whose `params` may be a plain string or an object with `error`. `trim()` appears only under transforms, so the input is not trimmed unless it is explicitly added.\n\n```typescript\nexport interface _ZodString<T extends core.$ZodStringInternals<unknown> = core.$ZodStringInternals<unknown>>\n  extends _ZodType<T> {\n  format: string | null;\n  minLength: number | null;\n  maxLength: number | null;\n\n  // miscellaneous checks\n  regex(regex: RegExp, params?: string | core.$ZodCheckRegexParams): this;\n  includes(value: string, params?: string | core.$ZodCheckIncludesParams): this;\n  startsWith(value: string, params?: string | core.$ZodCheckStartsWithParams): this;\n  endsWith(value: string, params?: string | core.$ZodCheckEndsWithParams): this;\n  min(minLength: number, params?: string | core.$ZodCheckMinLengthParams): this;\n  max(maxLength: number, params?: string | core.$ZodCheckMaxLengthParams): this;\n  length(len: number, params?: string | core.$ZodCheckLengthEqualsParams): this;\n  nonempty(params?: string | core.$ZodCheckMinLengthParams): this;\n  lowercase(params?: string | core.$ZodCheckLowerCaseParams): this;\n  uppercase(params?: string | core.$ZodCheckUpperCaseParams): this;\n\n  // transforms\n  trim(): this;\n  normalize(form?: \"NFC\" | \"NFD\" | \"NFKC\" | \"NFKD\" | (string & {})): this;\n  toLowerCase(): this;\n  toUpperCase(): this;\n  slugify(): this;\n}\n```\n\n--------------------------------\n\n### Validate Unicode code point length with z.string().length\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/api.mdx\n\nCalculates string length using Unicode code points instead of UTF-16 code units. Non-BMP emoji count as a single code point, while combining characters and ZWJ sequences count as multiple code points.\n\n```typescript\nz.string().length(1).parse(\"😀\"); // one code point, two UTF-16 units\nz.string().length(2).parse(\"e\\u0301\"); // \"é\" — an e plus a combining acute\nz.string().length(3).parse(\"🧑‍🍼\"); // person + ZWJ + baby bottle\n```"
+        }
+      ],
+      "isError": false
+    },
+    "ended_utc": "2026-10-31T19:13:09.749963+00:00"
+  },
+  {
+    "stage": "middle",
+    "index": 5,
+    "kind": "resolve",
+    "tool": "resolve-library-id",
+    "arguments": {
+      "libraryName": "Zod",
+      "query": "Validate a string with a minimum length of three characters in Zod."
+    },
+    "started_utc": "2026-10-31T19:13:09.753066+00:00",
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Available Libraries:\n\n- Title: Zod\n- Context7-compatible library ID: /colinhacks/zod\n- Description: Zod is a TypeScript-first schema validation library that provides static type inference for strongly typed, validated data.\n- Code Snippets: 1901\n- Source Reputation: High\n- Benchmark Score: 65.92\n- Versions: v3.24.2, v4.0.1, v4.3.6, v4.0.0-beta, v4.6.5\n----------\n- Title: Zod\n- Context7-compatible library ID: /websites/zod_dev\n- Description: Zod is a TypeScript-first schema validation library that enables you to define and validate data schemas with static type inference, from simple strings to complex nested objects.\n- Code Snippets: 1223\n- Source Reputation: High\n- Benchmark Score: 69.56\n- Versions: v3\n----------\n- Title: Zod\n- Context7-compatible library ID: /llmstxt/zod_dev_llms-full_txt\n- Description: Zod is a TypeScript-first schema validation library with static type inference, offering comprehensive features for defining and validating data structures.\n- Code Snippets: 2442\n- Source Reputation: High\n- Benchmark Score: 80.33\n----------\n- Title: Zod\n- Context7-compatible library ID: /llmstxt/zod_dev_llms_txt\n- Description: Zod is a TypeScript-first schema validation library that provides static type inference for robust data validation.\n- Code Snippets: 3592\n- Source Reputation: High\n- Benchmark Score: 77.31\n----------\n- Title: Zod (Deepwiki)\n- Context7-compatible library ID: /websites/deepwiki_colinhacks_zod\n- Description: Zod is a TypeScript-first schema validation library that enables runtime type checking with static type inference.\n- Code Snippets: 766\n- Source Reputation: High\n- Benchmark Score: 38"
+        }
+      ],
+      "isError": false
+    },
+    "ended_utc": "2026-10-31T19:13:11.395801+00:00"
+  },
+  {
+    "stage": "middle",
+    "index": 6,
+    "kind": "documentation",
+    "tool": "query-docs",
+    "arguments": {
+      "query": "Show the minimal Zod schema for a string with a minimum length of three characters.",
+      "libraryId": "/colinhacks/zod"
+    },
+    "started_utc": "2026-10-31T19:13:11.396993+00:00",
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "### z.string()\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/api.mdx\n\nCreates a schema for string validation and transformation. Supports validation methods for length, regex, prefixes, suffixes, substrings, and casing, as well as transformation methods like trimming and normalization.\n\n```APIDOC\n### Function Signature\n`z.string()`\n\n### Validation Methods\n- `.max(length: number)` - Validates maximum length (in Unicode code points).\n- `.min(length: number)` - Validates minimum length (in Unicode code points).\n- `.length(length: number)` - Validates exact length (in Unicode code points).\n- `.nonempty()` - Alias for `.min(1)`.\n- `.regex(pattern: RegExp)` - Validates that string matches regex pattern.\n- `.startsWith(prefix: string)` - Validates string starts with prefix.\n- `.endsWith(suffix: string)` - Validates string ends with suffix.\n- `.includes(substring: string)` - Validates string contains substring.\n- `.uppercase()` - Validates string is uppercase.\n- `.lowercase()` - Validates string is lowercase.\n\n### Transform Methods\n- `.trim()` - Trims whitespace from string.\n- `.toLowerCase()` - Converts string to lowercase.\n- `.toUpperCase()` - Converts string to uppercase.\n- `.normalize()` - Normalizes unicode characters.\n\n### Examples\n```ts\n// Validations\nz.string().max(5);\nz.string().min(5);\nz.string().length(5);\nz.string().nonempty();\nz.string().regex(/^[a-z]+$/);\nz.string().startsWith(\"aaa\");\nz.string().endsWith(\"zzz\");\nz.string().includes(\"---\");\nz.string().uppercase();\nz.string().lowercase();\n\n// Unicode length handling\nz.string().length(1).parse(\"😀\"); // one code point, two UTF-16 units\nz.string().length(2).parse(\"e\\u0301\"); // \"é\" — an e plus a combining acute\nz.string().length(3).parse(\"🧑‍🍼\"); // person + ZWJ + baby bottle\n\n// Transforms\nz.string().trim();\nz.string().toLowerCase();\nz.string().toUpperCase();\nz.string().normalize();\n```\n```\n\n--------------------------------\n\n### Validate string constraints in Zod and Zod Mini\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/api.mdx\n\nApplies common string validation methods such as length limits, regular expressions, prefixes, suffixes, and casing checks. Zod Mini uses the .check() method with standalone validators.\n\n```typescript\nz.string().max(5);\nz.string().min(5);\nz.string().length(5);\nz.string().nonempty(); // alias for .min(1)\nz.string().regex(/^[a-z]+$/);\nz.string().startsWith(\"aaa\");\nz.string().endsWith(\"zzz\");\nz.string().includes(\"---\");\nz.string().uppercase();\nz.string().lowercase();\n```\n\n```typescript\nz.string().check(z.maxLength(5));\nz.string().check(z.minLength(5));\nz.string().check(z.length(5));\nz.string().check(z.minLength(1)); // alias for .nonempty()\nz.string().check(z.regex(/^[a-z]+$/));\nz.string().check(z.startsWith(\"aaa\"));\nz.string().check(z.endsWith(\"zzz\"));\nz.string().check(z.includes(\"---\"));\nz.string().check(z.uppercase());\nz.string().check(z.lowercase());\n```\n\n--------------------------------\n\n### Chain validation and transformation methods on z.string\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/packages/zod.mdx\n\nDemonstrates concise, chainable method calls to configure length bounds and casing rules on a string schema.\n\n```typescript\nz.string()\n  .min(5)\n  .max(10)\n  .toLowerCase();\n```\n\n--------------------------------\n\n### Classic ZodString API: min/regex accept { error } params; trim is an explicit opt-in\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/zod/src/v4/classic/schemas.ts\n\nThe classic `_ZodString` interface declares the chainable methods the question uses. The `string` factory (also in this file) is `string(params?: string | core.$ZodStringParams)` returning `core._string(ZodString, params)`, where `$ZodStringParams`' base `Params` type adds `error?: string | errors.$ZodErrorMap<IssueTypes>` — so `z.string({ error: localizedMessage })` is valid. `.min(n, { error: required })`, `.min(8, { error: minLength })` and `.regex(pattern, { error: message })` are these `min`/`regex` methods whose `params` may be a plain string or an object with `error`. `trim()` appears only under transforms, so the input is not trimmed unless it is explicitly added.\n\n```typescript\nexport interface _ZodString<T extends core.$ZodStringInternals<unknown> = core.$ZodStringInternals<unknown>>\n  extends _ZodType<T> {\n  format: string | null;\n  minLength: number | null;\n  maxLength: number | null;\n\n  // miscellaneous checks\n  regex(regex: RegExp, params?: string | core.$ZodCheckRegexParams): this;\n  includes(value: string, params?: string | core.$ZodCheckIncludesParams): this;\n  startsWith(value: string, params?: string | core.$ZodCheckStartsWithParams): this;\n  endsWith(value: string, params?: string | core.$ZodCheckEndsWithParams): this;\n  min(minLength: number, params?: string | core.$ZodCheckMinLengthParams): this;\n  max(maxLength: number, params?: string | core.$ZodCheckMaxLengthParams): this;\n  length(len: number, params?: string | core.$ZodCheckLengthEqualsParams): this;\n  nonempty(params?: string | core.$ZodCheckMinLengthParams): this;\n  lowercase(params?: string | core.$ZodCheckLowerCaseParams): this;\n  uppercase(params?: string | core.$ZodCheckUpperCaseParams): this;\n\n  // transforms\n  trim(): this;\n  normalize(form?: \"NFC\" | \"NFD\" | \"NFKC\" | \"NFKD\" | (string & {})): this;\n  toLowerCase(): this;\n  toUpperCase(): this;\n  slugify(): this;\n}\n```\n\n--------------------------------\n\n### String length now counts code points\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/blog/zod-4-5.mdx\n\n.min(), .max(), and .length() now count Unicode code points instead of UTF-16 code units. .max() only loosens; .min() and .length() tighten for astral input, and graphemes are unchanged.\n\n```ts\nz.string().max(5).parse(\"😀😀😀😀😀\"); // was too_big, now passes\nz.string().min(5).parse(\"😀😀😀\");     // was fine, now too_small\n```"
+        }
+      ],
+      "isError": false
+    },
+    "ended_utc": "2026-10-31T19:13:13.115316+00:00"
+  },
+  {
+    "stage": "late",
+    "index": 7,
+    "kind": "resolve",
+    "tool": "resolve-library-id",
+    "arguments": {
+      "libraryName": "Zod",
+      "query": "Validate a string with a minimum length of three characters in Zod."
+    },
+    "started_utc": "2026-10-31T19:13:13.117045+00:00",
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Available Libraries:\n\n- Title: Zod\n- Context7-compatible library ID: /colinhacks/zod\n- Description: Zod is a TypeScript-first schema validation library that provides static type inference for strongly typed, validated data.\n- Code Snippets: 1901\n- Source Reputation: High\n- Benchmark Score: 65.92\n- Versions: v3.24.2, v4.0.1, v4.3.6, v4.0.0-beta, v4.6.5\n----------\n- Title: Zod\n- Context7-compatible library ID: /websites/zod_dev\n- Description: Zod is a TypeScript-first schema validation library that enables you to define and validate data schemas with static type inference, from simple strings to complex nested objects.\n- Code Snippets: 1223\n- Source Reputation: High\n- Benchmark Score: 69.56\n- Versions: v3\n----------\n- Title: Zod\n- Context7-compatible library ID: /llmstxt/zod_dev_llms-full_txt\n- Description: Zod is a TypeScript-first schema validation library with static type inference, offering comprehensive features for defining and validating data structures.\n- Code Snippets: 2442\n- Source Reputation: High\n- Benchmark Score: 80.33\n----------\n- Title: Zod\n- Context7-compatible library ID: /llmstxt/zod_dev_llms_txt\n- Description: Zod is a TypeScript-first schema validation library that provides static type inference for robust data validation.\n- Code Snippets: 3592\n- Source Reputation: High\n- Benchmark Score: 77.31\n----------\n- Title: Zod (Deepwiki)\n- Context7-compatible library ID: /websites/deepwiki_colinhacks_zod\n- Description: Zod is a TypeScript-first schema validation library that enables runtime type checking with static type inference.\n- Code Snippets: 766\n- Source Reputation: High\n- Benchmark Score: 38"
+        }
+      ],
+      "isError": false
+    },
+    "ended_utc": "2026-10-31T19:13:14.774198+00:00"
+  },
+  {
+    "stage": "late",
+    "index": 8,
+    "kind": "documentation",
+    "tool": "query-docs",
+    "arguments": {
+      "query": "Show the minimal Zod schema for a string with a minimum length of three characters.",
+      "libraryId": "/colinhacks/zod"
+    },
+    "started_utc": "2026-10-31T19:13:14.775580+00:00",
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "### z.string()\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/api.mdx\n\nCreates a schema for string validation and transformation. Supports validation methods for length, regex, prefixes, suffixes, substrings, and casing, as well as transformation methods like trimming and normalization.\n\n```APIDOC\n### Function Signature\n`z.string()`\n\n### Validation Methods\n- `.max(length: number)` - Validates maximum length (in Unicode code points).\n- `.min(length: number)` - Validates minimum length (in Unicode code points).\n- `.length(length: number)` - Validates exact length (in Unicode code points).\n- `.nonempty()` - Alias for `.min(1)`.\n- `.regex(pattern: RegExp)` - Validates that string matches regex pattern.\n- `.startsWith(prefix: string)` - Validates string starts with prefix.\n- `.endsWith(suffix: string)` - Validates string ends with suffix.\n- `.includes(substring: string)` - Validates string contains substring.\n- `.uppercase()` - Validates string is uppercase.\n- `.lowercase()` - Validates string is lowercase.\n\n### Transform Methods\n- `.trim()` - Trims whitespace from string.\n- `.toLowerCase()` - Converts string to lowercase.\n- `.toUpperCase()` - Converts string to uppercase.\n- `.normalize()` - Normalizes unicode characters.\n\n### Examples\n```ts\n// Validations\nz.string().max(5);\nz.string().min(5);\nz.string().length(5);\nz.string().nonempty();\nz.string().regex(/^[a-z]+$/);\nz.string().startsWith(\"aaa\");\nz.string().endsWith(\"zzz\");\nz.string().includes(\"---\");\nz.string().uppercase();\nz.string().lowercase();\n\n// Unicode length handling\nz.string().length(1).parse(\"😀\"); // one code point, two UTF-16 units\nz.string().length(2).parse(\"e\\u0301\"); // \"é\" — an e plus a combining acute\nz.string().length(3).parse(\"🧑‍🍼\"); // person + ZWJ + baby bottle\n\n// Transforms\nz.string().trim();\nz.string().toLowerCase();\nz.string().toUpperCase();\nz.string().normalize();\n```\n```\n\n--------------------------------\n\n### Validate string constraints in Zod and Zod Mini\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/api.mdx\n\nApplies common string validation methods such as length limits, regular expressions, prefixes, suffixes, and casing checks. Zod Mini uses the .check() method with standalone validators.\n\n```typescript\nz.string().max(5);\nz.string().min(5);\nz.string().length(5);\nz.string().nonempty(); // alias for .min(1)\nz.string().regex(/^[a-z]+$/);\nz.string().startsWith(\"aaa\");\nz.string().endsWith(\"zzz\");\nz.string().includes(\"---\");\nz.string().uppercase();\nz.string().lowercase();\n```\n\n```typescript\nz.string().check(z.maxLength(5));\nz.string().check(z.minLength(5));\nz.string().check(z.length(5));\nz.string().check(z.minLength(1)); // alias for .nonempty()\nz.string().check(z.regex(/^[a-z]+$/));\nz.string().check(z.startsWith(\"aaa\"));\nz.string().check(z.endsWith(\"zzz\"));\nz.string().check(z.includes(\"---\"));\nz.string().check(z.uppercase());\nz.string().check(z.lowercase());\n```\n\n--------------------------------\n\n### Chain validation and transformation methods on z.string\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/packages/zod.mdx\n\nDemonstrates concise, chainable method calls to configure length bounds and casing rules on a string schema.\n\n```typescript\nz.string()\n  .min(5)\n  .max(10)\n  .toLowerCase();\n```\n\n--------------------------------\n\n### Classic ZodString API: min/regex accept { error } params; trim is an explicit opt-in\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/zod/src/v4/classic/schemas.ts\n\nThe classic `_ZodString` interface declares the chainable methods the question uses. The `string` factory (also in this file) is `string(params?: string | core.$ZodStringParams)` returning `core._string(ZodString, params)`, where `$ZodStringParams`' base `Params` type adds `error?: string | errors.$ZodErrorMap<IssueTypes>` — so `z.string({ error: localizedMessage })` is valid. `.min(n, { error: required })`, `.min(8, { error: minLength })` and `.regex(pattern, { error: message })` are these `min`/`regex` methods whose `params` may be a plain string or an object with `error`. `trim()` appears only under transforms, so the input is not trimmed unless it is explicitly added.\n\n```typescript\nexport interface _ZodString<T extends core.$ZodStringInternals<unknown> = core.$ZodStringInternals<unknown>>\n  extends _ZodType<T> {\n  format: string | null;\n  minLength: number | null;\n  maxLength: number | null;\n\n  // miscellaneous checks\n  regex(regex: RegExp, params?: string | core.$ZodCheckRegexParams): this;\n  includes(value: string, params?: string | core.$ZodCheckIncludesParams): this;\n  startsWith(value: string, params?: string | core.$ZodCheckStartsWithParams): this;\n  endsWith(value: string, params?: string | core.$ZodCheckEndsWithParams): this;\n  min(minLength: number, params?: string | core.$ZodCheckMinLengthParams): this;\n  max(maxLength: number, params?: string | core.$ZodCheckMaxLengthParams): this;\n  length(len: number, params?: string | core.$ZodCheckLengthEqualsParams): this;\n  nonempty(params?: string | core.$ZodCheckMinLengthParams): this;\n  lowercase(params?: string | core.$ZodCheckLowerCaseParams): this;\n  uppercase(params?: string | core.$ZodCheckUpperCaseParams): this;\n\n  // transforms\n  trim(): this;\n  normalize(form?: \"NFC\" | \"NFD\" | \"NFKC\" | \"NFKD\" | (string & {})): this;\n  toLowerCase(): this;\n  toUpperCase(): this;\n  slugify(): this;\n}\n```\n\n--------------------------------\n\n### String length now counts code points\n\nSource: https://github.com/colinhacks/zod/blob/main/packages/docs/content/blog/zod-4-5.mdx\n\n.min(), .max(), and .length() now count Unicode code points instead of UTF-16 code units. .max() only loosens; .min() and .length() tighten for astral input, and graphemes are unchanged.\n\n```ts\nz.string().max(5).parse(\"😀😀😀😀😀\"); // was too_big, now passes\nz.string().min(5).parse(\"😀😀😀\");     // was fine, now too_small\n```"
+        }
+      ],
+      "isError": false
+    },
+    "ended_utc": "2026-10-31T19:13:16.917066+00:00"
+  }
+]

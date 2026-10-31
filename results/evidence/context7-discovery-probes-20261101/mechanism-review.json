@@ -1,0 +1,44 @@
+{
+  "native_findings": {
+    "discovery": {
+      "middle": "ReferenceError: CONTEXT7_API_BASE_URL is not defined",
+      "late": "ReferenceError: CONTEXT7_API_BASE_URL is not defined",
+      "isError_each": false,
+      "meaning": "Error text confirms failed discovery despite successful envelope."
+    },
+    "alternative": {
+      "stages": [
+        "early",
+        "middle",
+        "late"
+      ],
+      "resolved_library_each": "/colinhacks/zod",
+      "searches_byte_identical": true,
+      "documentation_relevant_each": true,
+      "basis": "Full raw docs inspected: z.string() and min(length) signature, minimum-length examples and linked upstream source present."
+    }
+  },
+  "source_finding_not_separately_network_tested": "fetchLibraryContext reads only request.query and request.libraryId, ignoring all added options. Do not describe the absence of additional runtime calls as a measured filter result.",
+  "comparability": {
+    "documentation_chars": {
+      "early": 6019,
+      "middle": 5899,
+      "late": 5899
+    },
+    "middle_late_identical": true,
+    "early_middle_identical": false,
+    "difference": "Final Unicode-length snippet comes from api.mdx in Early and blog/zod-4-5.mdx in Middle/Late. Core minimum-length material agrees. Dynamic retrieval is not frozen; retain this limitation.",
+    "early_to_middle_diff": "--- \n+++ \n@@ -141,13 +141,12 @@\n --------------------------------\n \n-### Validate Unicode code point length with z.string().length\n+### String length now counts code points\n \n-Source: https://github.com/colinhacks/zod/blob/main/packages/docs/content/api.mdx\n+Source: https://github.com/colinhacks/zod/blob/main/packages/docs/content/blog/zod-4-5.mdx\n \n-Calculates string length using Unicode code points instead of UTF-16 code units. Non-BMP emoji count as a single code point, while combining characters and ZWJ sequences count as multiple code points.\n+.min(), .max(), and .length() now count Unicode code points instead of UTF-16 code units. .max() only loosens; .min() and .length() tighten for astral input, and graphemes are unchanged.\n \n-```typescript\n-z.string().length(1).parse(\"😀\"); // one code point, two UTF-16 units\n-z.string().length(2).parse(\"e\\u0301\"); // \"é\" — an e plus a combining acute\n-z.string().length(3).parse(\"🧑‍🍼\"); // person + ZWJ + baby bottle\n+```ts\n+z.string().max(5).parse(\"😀😀😀😀😀\"); // was too_big, now passes\n+z.string().min(5).parse(\"😀😀😀\");     // was fine, now too_small\n ```"
+  },
+  "execution": {
+    "tool_calls": 8,
+    "catalog_calls": 3,
+    "model_calls": 0,
+    "model_usd": 0,
+    "retries": 0,
+    "native_source_modified": false,
+    "freeze_commit": "890aacb"
+  },
+  "conclusion": "Mechanism and generic native alternative confirmed. No agent completion, actual task quality or retention improvement measured. Do not rerun this probe. Before any task87 pilot, verify/reuse actual PDF and isolated memory dependencies and freeze a distinct candidate, requirements and gates.",
+  "goal_complete": false
+}

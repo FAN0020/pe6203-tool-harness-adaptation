@@ -18,7 +18,16 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：必需路径源码复核继续；没有新模型日程
+### 当前最新断点：Context7发现接口缺陷与原生替代已实测
+
+- `890aacb`事前冻结`experiments/context7-discovery-probes-v1.json`与collector、20个源码/配置hash。session25317退出0，8工具调用/3catalog/0模型/0评分、费用0；完整42文件归档在`results/evidence/context7-discovery-probes-20261101/`，`verify_probes.py`离线核验通过。不要重跑。
+- Middle/Late新增`list-popular-libraries`均返回`ReferenceError: CONTEXT7_API_BASE_URL is not defined`，且`isError=false`，不能把信封成功当发现成功。原入口未导入所用常量/函数；没有修原生源码。
+- 合成Zod查询的三阶段`resolve-library-id`均得到`/colinhacks/zod`，搜索全文相同；接着`query-docs`均返回实际最小字符串长度文档。Middle/Late文档相同，Early最后一段Unicode示例来源不同；原文/diff/时间全部保存，不能声称实时内容完全受控。
+- 新`query-docs`可选参数仅在wrapper传递，下游函数只读query/libraryId；这是源码结论，本轮没有额外网络参数对照。共用profile按原包bin加入`@upstash/context7-mcp:dist/index.js`，子进程没有凭据；无修改SDK/服务端/查询端点。
+- 新筛查`context-and-swift-screen.json`：Swiftipedia新relationships读取与helper的relatedSymbols/conformsTo不一致，但原题要求示例，旧task430已经SP完成3/3，不重复。其他复核理由保留，不宣称穷尽。
+- **下一步**：task87确有文档库发现需要，其原始RT-2 PDF文件已找到；还须复用/核对PDF读取与隔离记忆写入依赖。之后才可冻结具体选择性知识差异、逐项产物质量及6单元开发/独立重复验收。当前尚无新agent候选/日程；本轮只证明机制与替代，Goal活动，双重改善未成立。
+
+### 已归档前置：必需路径源码复核；没有新模型日程
 
 - 上轮native_media_contract六单元仍淘汰，见下节；本轮是有边界的源码/包布局复核，新增记录`results/evidence/mechanism-screening-20261101/post-media-required-path-screen.json`。无新原生工具、agent或judge请求，未改运行时/源码。不是方法空间穷尽证明。
 - HeroUI默认docs路径保留；新增wrapper的数组下标对齐风险尚无真实响应证据，task378还缺当前React源码。Flowbite新显式样式控制未发现必需操作阻塞，Figma新工具不在原题要求内。fetch旧raw→response_format迁移保留GET/auto；filesystem范围/排序默认兼容；commands新增忽略的资源/环境参数暂无原题必需依赖。不要用可选能力代替完成率机制。
