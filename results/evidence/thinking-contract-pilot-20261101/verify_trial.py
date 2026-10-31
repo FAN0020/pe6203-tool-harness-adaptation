@@ -70,6 +70,9 @@ def main():
         for artifact in packet["artifacts"]:
             raw_path = prefix + f"cells/{cell['id']}/run/workspace/" + artifact["path"]
             assert sha(files[raw_path]) == artifact["sha256"]
+        original_relative = "anotation_path/csv/customers-100.csv"
+        original_sha = plan["files"][plan["config"]["fixture_dir"] + "/" + original_relative]
+        assert sha(files[prefix + f"cells/{cell['id']}/run/workspace/" + original_relative]) == original_sha
         assert review["task_id"] == cell["task_id"]
         row.update(review_id=name, properties=review["properties"], core_pass=review["core_pass"])
         rows.append(row)
@@ -113,7 +116,7 @@ def main():
                 for k in ("completed", "core_pass", "TF")))
     output = {
         "verified": True, "file_count": len(files), "source_files": len(source),
-        "review_freeze_commit": "REVIEW_FREEZE_PENDING", "rows": rows, "summary": summary,
+        "review_freeze_commit": "b049456", "rows": rows, "summary": summary,
         "pilot_gate": gate, "decision": "enter_validation" if gate else "reject_candidate",
         "api_requests": len(ledger["requests"]), "judge_slots": 20, "known_usd": str(spent),
         "preflight_usd": str(preflight_usd), "unknown_cost_items": 0,

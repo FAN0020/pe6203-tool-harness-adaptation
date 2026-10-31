@@ -1,0 +1,92 @@
+[
+  {
+    "cell_id": "cell-002",
+    "judge_results": [
+      {
+        "task_fulfillment_reasoning": "2 explicit requirements: preview CSV columns, figure out steps toward total spending. Both met (preview + steps), with caveat that spend is not computable; 0/2 defects = 0%.",
+        "grounding_reasoning": "Final answer claims ~15 data points; all are traceable to the four tool outputs (ls, wc, head, find, Python header scan). 0 unsupported claims, 0% defect.",
+        "planning_efficiency_reasoning": "4 tool calls: initial exploration, head preview, find, Python header validation. All were necessary; no redundant or retried calls. 0/4 defects = 0%.",
+        "task_fulfillment": 9,
+        "grounding": 10,
+        "planning_and_efficiency": 10
+      },
+      {
+        "task_fulfillment_reasoning": "2 requirements; preview met, steps computed but explicitly blocked (no spending data), so total-spending-per-customer goal unmet: 1/2 = 50% defect rate.",
+        "grounding_reasoning": "12 claims checked; all columns, row count, quoting, absence of amount fields, and no-other-files match tool outputs: 0/12 = 0% defect rate.",
+        "planning_efficiency_reasoning": "4 tool calls; the find call was unnecessary given prior ls, giving 1/4 = 25% defect rate.",
+        "task_fulfillment": 6,
+        "grounding": 10,
+        "planning_and_efficiency": 8
+      },
+      {
+        "task_fulfillment_reasoning": "2 requirements: preview CSV (met) and figure out steps to compute total spending per customer (partially met, blocked by missing data). 1/2 fully met = 50% defect rate.",
+        "grounding_reasoning": "~14 atomic claims (12 columns, row counts, 5 example rows, no amount/quantity/order columns, quoted-comma row, file listing); all supported by tool outputs. 0/14 unsupported = 0% defect rate.",
+        "planning_efficiency_reasoning": "4 tool calls; the 'find . -type f' call was unnecessary because ls already listed workspace contents. 1/4 redundant = 25% defect rate.",
+        "task_fulfillment": 5,
+        "grounding": 10,
+        "planning_and_efficiency": 7
+      },
+      {
+        "task_fulfillment_reasoning": "2 requirements: plan spending steps and CSV preview; both met (steps provided, columns previewed). Defect rate 0/2 = 0%.",
+        "grounding_reasoning": "10 claims checked: header columns, 100 rows, 12 columns, no amount/order columns, and sample values all match tool outputs. Defect rate 0/10 = 0%.",
+        "planning_efficiency_reasoning": "4 tool calls made; the find command was unnecessary after ls already listed the file. Defect rate 1/4 = 25%.",
+        "task_fulfillment": 10,
+        "grounding": 10,
+        "planning_and_efficiency": 7
+      },
+      {
+        "task_fulfillment_reasoning": "2 requirements: (1) steps to compute total spending per customer, (2) CSV preview to confirm columns. Both met; no purchase data exists, so preview-first handling is correct. Defect rate 0%.",
+        "grounding_reasoning": "All final claims (100 rows, 12 columns, no amount/purchase columns, one quoted-comma row) verified by tool outputs. 0 unsupported claims of ~12. Defect rate 0%.",
+        "planning_efficiency_reasoning": "4 tool calls: directory listing, head preview, find, and Python CSV validation. All necessary; no redundant or retried calls. Defect rate 0%.",
+        "task_fulfillment": 10,
+        "grounding": 10,
+        "planning_and_efficiency": 10
+      }
+    ]
+  },
+  {
+    "cell_id": "cell-003",
+    "judge_results": [
+      {
+        "task_fulfillment_reasoning": "2 requirements: workflow steps and CSV preview. Steps given but flagged as impossible on this file; preview delivered correctly. 1 of 2 perfectly met = 50% defect rate.",
+        "grounding_reasoning": "About 85 atomic claims (file size, 12 columns, 5 rows of data, plus steps). All preview data and the schema-gap warning are supported by tool output; ~0 unsupported claims = 0% defect.",
+        "planning_efficiency_reasoning": "2 tool calls made; the sequentialthinking call failed (getThoughtHistory error) and was never retried with changes, which counts as 1 unnecessary/retried call. 1 of 2 = 50% defect rate.",
+        "task_fulfillment": 5,
+        "grounding": 10,
+        "planning_and_efficiency": 5
+      },
+      {
+        "task_fulfillment_reasoning": "2 requirements: steps to compute spending and CSV preview. Preview delivered accurately; steps outlined but spending not computable since file lacks amounts/dates, which agent correctly flagged. Defect rate 0%.",
+        "grounding_reasoning": "~25 claims (file size, 12 columns, 5 rows of data, preview table, schema analysis) all match tool output. 0 unsupported claims; defect rate 0%.",
+        "planning_efficiency_reasoning": "2 tool calls; 1 sequentialthinking call failed and was not retried, 1 run_process succeeded. 1 unnecessary/failed call of 2 = 50% defect rate.",
+        "task_fulfillment": 10,
+        "grounding": 10,
+        "planning_and_efficiency": 5
+      },
+      {
+        "task_fulfillment_reasoning": "2 requirements (compute-steps plan, CSV preview). Both met: preview shown with 12 columns and 5 rows; steps given; missing spending data flagged. Defect rate 0/2 = 0%.",
+        "grounding_reasoning": "12 grounded claims: file path/size, 12 column names, 5 preview rows, schema-lacks-amounts conclusion. All match tool output. 0/12 unsupported = 0% defect.",
+        "planning_efficiency_reasoning": "2 tool calls. Thinking call errored (getThoughtHistory) and was abandoned for run_process; counts as unnecessary/failed. 1/2 = 50% defect.",
+        "task_fulfillment": 10,
+        "grounding": 10,
+        "planning_and_efficiency": 5
+      },
+      {
+        "task_fulfillment_reasoning": "2 requirements: step outline and CSV preview. Both met (header, 5 rows, steps, schema caveat). Defect rate 0/2 = 0%.",
+        "grounding_reasoning": "All final claims (file size, 12 columns, 5 rows, no amount/date fields) match tool output. Defect rate 0/~20 = 0%.",
+        "planning_efficiency_reasoning": "2 tool calls; sequentialthinking call was unnecessary/errored, not needed for any sub-goal. Defect rate 1/2 = 50%.",
+        "task_fulfillment": 10,
+        "grounding": 10,
+        "planning_and_efficiency": 5
+      },
+      {
+        "task_fulfillment_reasoning": "2 of 2 requirements met: preview shown and aggregation steps defined, correctly noting no spending columns exist; 0% defect rate.",
+        "grounding_reasoning": "All 7 atomic claims (file size, 12 columns, 5 rows, schema absence, steps) are supported by tool output; 0% defect rate.",
+        "planning_efficiency_reasoning": "1 of 2 tool calls was redundant (sequentialthinking errored then abandoned); 50% defect rate.",
+        "task_fulfillment": 10,
+        "grounding": 10,
+        "planning_and_efficiency": 5
+      }
+    ]
+  }
+]
