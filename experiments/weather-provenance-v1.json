@@ -1,0 +1,146 @@
+{
+  "id": "weather-provenance-v1",
+  "status": "mechanism_and_acceptance_frozen_before_implementation_and_agent_execution",
+  "objective": "Test selective provenance knowledge for synthetic weather advice versus real forecasts, with normal completion and actual persisted task quality compared to original Selective Patch.",
+  "champion": "selective_patch",
+  "candidates": [
+    "weather_provenance"
+  ],
+  "model_config": "configs/weather-provenance-v1.json",
+  "updater_config": "configs/daily-migration-updater-v1.json",
+  "feedback_probes": "experiments/weather-provenance-feedback-v1.json",
+  "mechanism": {
+    "cause": "New Middle/Late get-weather-advice promises practical location/activity advice but creates estimated weather from a latitude-only formula, with no weather/time source. It may substitute synthetic conditions for actual forecast evidence or introduce conflicting recommendations.",
+    "intervention": "Original Selective Patch plus two fixed provenance/alternative rules; one on the newly added advice tool and one on the directly dependent real forecast capability. Preserve all descriptions, schemas, routing and existing rules.",
+    "inputs": "Stage metadata and frozen synthetic probe facts only; no task question, forecast values for the task location, reference answer, agent trace or scores enter updater.",
+    "changed_basis": "Both notes cite actual addition/change of get-weather-advice. Middle get-forecast is unchanged but is the verified alternative for the changed overlapping capability. No changes to project or task tools.",
+    "source_evidence": "99f185f preregistration;61f282c seven native calls and three catalogs archived. Exact sources unmodified.",
+    "scope": "Middle/Late task26 and unchanged235. No guarantee of weather accuracy beyond observed native data and source provenance.",
+    "uncertainty": "The required artifact has a direct quality risk, but baseline normal-completion headroom is unknown. Neither probe success nor a quality-only gain satisfies final goal.",
+    "frozen_rules": {
+      "mcp-weather-demo::get-weather-advice": "Verified Middle/Late provenance: this tool computes its estimated temperature from latitude alone (round(30 - abs(latitude)/3), clamped to -10..35 C) and emits fixed activity advice. It does not read weather observations, forecasts or time; its estimated feels-like wording is not measured or forecast weather. Do not use it as evidence of current or future local conditions. For a weather-dependent decision, obtain the actual forecast through get-forecast and base the decision on those returned conditions.",
+      "mcp-weather-demo::get-forecast": "Verified alternative to the synthetic get-weather-advice: this tool queries the NWS points and forecast services and returns named forecast periods with temperature, wind and short forecast text. Use the returned periods as the weather evidence for the requested place and time range; a period may be a day or a night, not a whole day. If the response is unavailable or an error, the latitude-based advice does not supply the missing forecast. Keep recommendations tied to actual returned conditions and distinguish missing evidence."
+    }
+  },
+  "development": {
+    "tasks": [
+      26,
+      235
+    ],
+    "stages": [
+      "middle",
+      "late"
+    ],
+    "task_stage_pairs": [
+      [
+        26,
+        "middle"
+      ],
+      [
+        26,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "weather_provenance"
+    ],
+    "repeats": 1,
+    "opaque_cell_ids": true,
+    "cells": 6
+  },
+  "validation_schedule": {
+    "split": "Fresh executions on a predeclared already-exposed task subset; independent from pilot outcomes; not unseen-task generalization.",
+    "blocks": 2,
+    "repeats_per_block_per_condition": 3,
+    "task_stage_pairs": [
+      [
+        26,
+        "middle"
+      ],
+      [
+        26,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "weather_provenance"
+    ],
+    "knowledge": "Freeze exact candidate from pilot, byte-identical in validation. No tuning, selection or low-score reruns.",
+    "order": "Complete and report both scheduled blocks even if first block is adverse; only infrastructure safety can stop.",
+    "total_validation_trajectories": 36
+  },
+  "quality_cases": [
+    {
+      "task_id": 26,
+      "properties": [
+        {
+          "id": "forecast_evidence",
+          "required": "A real native forecast is obtained for the requested location. Any claimed local forecast conditions in the final answer or persisted project/task match the returned periods. Latitude-template estimates are not treated as forecast evidence. Preserve time-range uncertainty where no exact shoot date was provided; do not claim unavailable days are forecast."
+        },
+        {
+          "id": "project_and_gear_task",
+          "required": "An actual persisted project for the photo shoot and at least one valid task linked to that project exist in the isolated workspace, with an actionable reminder to prepare gear according to observed forecast conditions. A tool receipt or final suggestion without the stored records is insufficient; generic gear advice unrelated to the forecast does not meet this property."
+        },
+        {
+          "id": "delivery",
+          "required": "Nonempty final response reports the requested forecast-based planning and created project/task truthfully, including material limitations. No invented completion, omitted requested artifact, or synthetic weather presented as observed conditions."
+        }
+      ],
+      "review": "Freeze pass/fail/unknown for all properties before method/TF/PE reveal, using actual native outputs, stored JSON records and final answer. No published answers. Same coordinator, not independent human reviewer."
+    },
+    {
+      "task_id": 235,
+      "properties": [
+        {
+          "id": "charts",
+          "required": "Three requested chart types returned successfully with source values, ordering, provinces/categories and monetary units preserved."
+        },
+        {
+          "id": "summary",
+          "required": "Any substantive final claim about these data matches the inputs; source totals if stated are exact."
+        }
+      ],
+      "review": "Frozen question and actual chart payloads; rendering remains unknown for both arms and is not added as a requirement."
+    }
+  ],
+  "evaluation": {
+    "normal_completion": "Runner execution_status==completed; truncation/max_rounds/error are not normal even if TF high.",
+    "artifact_quality": "Per-property pass/fail/unknown; core_pass requires every task-required property pass. Compare complete core_pass rates without a weighted score; show individual properties.",
+    "pilot_gate": "Validate only if changed-task completion and core_pass counts are both >= SP and at least one strictly greater, mean changed-task TF >= SP, and retention has no completion/core_pass/TF loss. Else reject this candidate without rerunning it until it wins.",
+    "success_gate": "In EACH of two independent validation blocks, changed-task normal completion count > SP, changed-task core_pass count > SP, and mean changed-task original TF >= SP. Retention completion/core_pass counts and mean TF >= SP in each block. Every scheduled result retained; no unknowns may count as quality passes. No requirement to win every cell or baseline.",
+    "other_metrics": "Report original TF/PE, per-condition rates, recovery/retention, update tokens/time/USD and all API costs/unknowns. ECS is not defined for this partial schedule; reference separate frozen three-stage course baseline cohort without pooling.",
+    "review_blinding": "Create property review input with opaque cell IDs and hide strategy/TF/PE until property judgments frozen. Same rubric in pilot and validation. Five judges are ratings, not executions.",
+    "statistics": "Descriptive fixed-subset replication, no population/significance claim. Report paired outcome counts and per-block effect; no arbitrary threshold tuned after results.",
+    "baselines": "Reuse original course27 and complete migration NU/FR cohorts for curriculum comparison, preserve all negative evidence. Do not substitute those scores as concurrent pilot controls."
+  },
+  "fairness": {
+    "model_provider": "Unchanged pinned DigitalOcean and model from existing-method-recheck-v1",
+    "decode": "temperature0,4096 output tokens,12rounds,900s; unchanged five first-valid judge slots with original1000-character observation truncation",
+    "other": "Same original questions, native runtimes, empty isolated workspaces, budgets and original five judge slots. No extra fixture or task context. Task235 candidate knowledge exactly K0."
+  },
+  "authorization": {
+    "approved": true,
+    "source": "Current user /goal and HANDOVER New Goal text",
+    "total_cost_limit_usd": null,
+    "total_trajectory_cap": null,
+    "deployment": false,
+    "push": false
+  },
+  "stop_rule": "One fixed pilot; failed candidate rejected. Research goal remains active until dual reproducible improvement. New mechanisms require separate preregistration.",
+  "environment": {
+    "runtime": "Shared native mcp-weather-demo build/index.js profile; existing project/chart profiles. No native source or SDK changes. No credentials passed to child servers.",
+    "fixtures": "Empty isolated workspace per run; source question includes coordinates and scenario. No input fixtures needed.",
+    "live_source_rule": "Retain every raw NWS-derived tool result and acquisition time. Compare forecast outputs across arms within each stage. If forecast contents differ, report the difference; a dual-improvement claim requires that observed conditions and availability are equivalent for required decisions. A nonequivalent pair blocks promotion, not deletion or an automatic retry. Do not mock or rewrite weather responses.",
+    "source_audit": "Probe/source archive verified. No network writes; project/task writes stay within experiment workspaces."
+  }
+}
