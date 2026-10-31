@@ -13,11 +13,12 @@
 
 **三种方法均由 agent 自动选择工具、参数和下一步。** 原任务固定候选 MCP servers；No Update 保留 Early 知识，Full Rewrite 重建全部目标记录并用 LLM 重写全部描述，Selective Patch 用元数据差异与依赖规则更新受影响记录。模型相同，更新范围选择是确定性算法。范围与生成机制同时不同，不能声称纯范围消融。
 
-当前主实验 **27/27 轨迹有评分、135/135 评分槽有效**，其中 **20 正常完成、5 轮数耗尽、2 输出截断**。一次执行符合 brief 的计算预算例外；5 个 judge 评分不等于5次执行。独立复算、终态恢复和归档离线复现已通过。报告、独立复算与共享演示已整理；主要缺口仍是严格的 patch under-update / over-update 例证，以及组内审阅/排练；6 条回退诊断未证实 over-update，负结果保留。
+当前主实验 **27/27 轨迹有评分、135/135 评分槽有效**，其中 **20 正常完成、5 轮数耗尽、2 输出截断**。一次执行符合 brief 的计算预算例外；5 个 judge 评分不等于5次执行。独立复算、终态恢复和归档离线复现已通过。报告、独立复算与共享演示已整理；受控缺参机制已确认，是否满足课程案例要求待 TA 判断；over-update 的“无关知识修改导致损害”仍未证实。brief 未要求失败必须自然发生。6 条旧回退负结果保留；组内审阅/排练待完成。
 
-- **获批诊断附录**：[4条受控诊断与复算](submission/diagnostics-20261031/index.html)：20个评分，$0.046002，已停止扩展；缺参机制已确认，额外规则影响仍为提示性证据。原报告和复现包保持冻结。
-- **交付审阅入口**：[报告、复现包、案例与演示](submission/index.html)。九个 Selective Patch PE 合计82，平均9.1111；正常完成6/9。
-- **冻结计划**：[课程完成计划](reports/course-completion-plan.html)，机器依据：`experiments/course-completion-plan.json`；最新交付状态以审阅入口及 `submission/.context/delivery-status.json` 为准。
+- **最新交付**：[审阅入口](submission/handover-20261031/index.html)、[整合报告](submission/report-final.html)、[PDF](submission/PE6203-final-report.pdf)、[HANDOVER](HANDOVER.md)。核查结论、未发送的 TA 问题及下一步以此为准。
+- **获批诊断历史附录**：[4条受控诊断与复算](submission/diagnostics-20261031/index.html)：20个评分，$0.046002，已停止扩展；缺参机制已确认，额外规则影响仍为提示性证据。原报告和复现包保持冻结；课程适用性以最新整合报告 Appendix E 为准。
+- **历史交付快照**：[报告、复现包、案例与演示](submission/index.html)。九个 Selective Patch PE 合计82，平均9.1111；正常完成6/9。
+- **冻结计划**：[课程完成计划](reports/course-completion-plan.html)，机器依据：`experiments/course-completion-plan.json`；这是原冻结计划；最新状态见 `HANDOVER.md` 与 `submission/handover-20261031/findings.json`。
 - **主实验**：[27 条结果、指标与案例](reports/course-v1.3-experiment.html)。
 - **历史研究**：[全部成功与失败记录](reports/selective-strategy-search.html)；108 条 R1 已完成，其中原三方法81条各有3次重复，可独立作附录。R2/R3 因连接失败停止，不再自动恢复。PE +0.5 等阈值仅为历史研究标准。
 - **旧课程试验**：[A/B 的 54 条记录](reports/experiment-readiness.html)，与 v1.3 分开，不回填或混算。
@@ -27,7 +28,7 @@
 当前仅做离线检查，不调用模型：
 
 ```bash
-python3 results/evidence/course-completion-20261031/audit_reuse.py
+python3 submission/handover-20261031/verify.py
 ```
 
 复现时先用 `uv sync --frozen` 安装依赖。`./experiment` 是中文交互入口，自动加载本机 `.env`；勿提交密钥。**以下是真实实验的参考命令，需批准后使用，不要对已完成主实验再次执行：**
@@ -57,7 +58,7 @@ python3 results/evidence/course-completion-20261031/audit_reuse.py
 | `results/raw/` | 本机冻结计划、知识、原始轨迹、评分、费用；不提交。 |
 | `results/evidence/`、`results/evaluation/` | 可分享归档、hash、离线审计和整理结果。 |
 | `tests/`、`scripts/` | 测试、核验与报告工具；先核对命令是否调用真实服务。 |
-| `submission/` | 离线复算脚本、最终报告审阅稿、原始证据包、讲稿与共享演示链接。大型归档仅本机打包。 |
+| `submission/` | 离线复算脚本、最终报告审阅稿、原始证据包、讲稿与共享演示链接。冻结原始包可离线复算；大型 ZIP 保留本机。 |
 | `reports/` | 可读计划、主结果与完整成功/失败案例；历史结果不覆盖。 |
 | `docs/`、`contributions/` | 机器说明、来源与成员贡献记录。 |
 | `tools/netlify/` | 可选 Netlify CLI 的版本与依赖锁。 |

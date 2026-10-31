@@ -21,10 +21,12 @@ def test_costs_by_arm_deduplicate_updates_and_preserve_unknown_fees(tmp_path):
     for index, charge in enumerate([0.2, None]):
         write_json(
             tmp_path / "cells" / f"run{index}" / "run/result.json",
-            {"cost": {
-                "agent": {"usd": charge, "known_usd": 0.2, "total_tokens": 200},
-                "judge": {"usd": 0.05, "total_tokens": 50},
-            }},
+            {
+                "cost": {
+                    "agent": {"usd": charge, "known_usd": 0.2, "total_tokens": 200},
+                    "judge": {"usd": 0.05, "total_tokens": 50},
+                }
+            },
         )
     result = costs_by_arm(tmp_path, plan)[0]
     assert result["update"]["usd"] == 0.1
