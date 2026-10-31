@@ -9,7 +9,7 @@ from collections import Counter
 from pathlib import Path
 
 from pe6203.benchmark import read_json, write_json
-from pe6203.experiment import summarize
+from pe6203.experiment import adaptation_path, summarize
 
 ROOT = Path(__file__).resolve().parents[1]
 NAMES = {133: "数学表达式与安全建议", 235: "销售图表／保持能力", 283: "项目拆解"}
@@ -41,6 +41,43 @@ def table(headers, rows):
 def link(path, label, destination):
     relative = os.path.relpath(Path(path).resolve(), destination.parent)
     return f'<a href="{esc(relative)}">{esc(label)}</a>'
+
+
+def costs_by_arm(directory, plan):
+    def totals(costs):
+        result = {}
+        for field in ("usd", "total_tokens", "seconds"):
+            values = [cost.get(field) for cost in costs]
+            result[field] = (
+                sum(values) if values and all(v is not None for v in values) else None
+            )
+        result["known_usd"] = sum(
+            (c.get("known_usd") if c.get("known_usd") is not None else c.get("usd")) or 0
+            for c in costs
+        )
+        result["unknown_totals"] = sum(c.get("usd") is None for c in costs)
+        return result
+
+    result = []
+    for arm in sorted({c["strategy"] for c in plan["cells"]}):
+        cells = [c for c in plan["cells"] if c["strategy"] == arm]
+        paths = {adaptation_path(directory, plan, c) for c in cells}
+        updates = [read_json(p)["cost"] if p.exists() else {} for p in paths]
+        runs = [Path(directory) / "cells" / c["id"] / "run/result.json" for c in cells]
+        recorded = [read_json(p).get("cost", {}) for p in runs if p.exists()]
+        result.append(
+            {
+                "strategy": arm,
+                "planned": len(cells),
+                "recorded_executions": len(recorded),
+                "unique_updates": len(paths),
+                "generated_updates": sum(p.exists() for p in paths),
+                "update": totals(updates),
+                "agent": totals([r.get("agent", {}) for r in recorded]),
+                "judge": totals([r.get("judge", {}) for r in recorded]),
+            }
+        )
+    return result
 
 
 def analyze(directory):
@@ -111,6 +148,7 @@ def analyze(directory):
         "metrics": metrics,
         "recovery_retention": comparisons,
         "cases": cases,
+        "costs_by_arm": costs_by_arm(directory, read_json(directory / "plan.json")),
     }
     write_json(directory / "readable-analysis.json", result)
     return result
@@ -132,7 +170,7 @@ def render(directories, destination):
                 ["补充运行证据", "完成率、截断、轮数耗尽、工具错误及完整轨迹", "补充解释 TF/PE；不改原 benchmark 的评分"],
             ],
         ),
-        "<p>本项目预设筛选门槛：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定。开发集结果只用于选候选，不能作为独立确认结果。</p>",
+        "<p>本项目预设筛选门槛：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定；均值容差也不是统计意义上的无退化证明。开发集结果只用于选候选，不能作为独立确认结果。</p>",
         "<p>所有 agent 自行选择工具及参数。固定模型、任务、judge 与执行预算；新规则只来自工具元数据和独立小型探针。三阶段 Early 共用 K0。开发结果用于筛选，确认结果才用于晋级；既有任务上的新重复不代表未见任务泛化。</p>",
         "<p>原有结果："
         + link(ROOT / "reports/course-v1.3-experiment.html", "v1.3 与六条诊断", destination)
@@ -271,10 +309,35 @@ def render(directories, destination):
             )
         )
         sections.append(
-            "<p>每份冻结知识的更新成本只计一次，三次执行复用。API 预检费用另存 preflight/。任何未知收费均保留 null。</p><pre>"
-            + esc(json.dumps(s["cost"], ensure_ascii=False, indent=2))
-            + "</pre>"
+            "<p>每份冻结知识的更新成本只计一次，三次执行复用。API 预检费用另存 preflight/。执行费用仅累计已保存的运行；存在未知收费时，下界不等于总额。</p>"
         )
+        sections.append(
+            table(
+                ["策略", "已保存运行", "更新 tokens", "更新秒数", "更新 $", "执行 $ 下界", "评分 $ 下界", "未知费用记录数"],
+                [
+                    [
+                        esc(r["strategy"]),
+                        f"{r['recorded_executions']}/{r['planned']}",
+                        fmt(r["update"]["total_tokens"]),
+                        fmt(r["update"]["seconds"]),
+                        "—" if r["update"]["usd"] is None else f"{r['update']['usd']:.6f}",
+                        f"{r['agent']['known_usd']:.6f}",
+                        f"{r['judge']['known_usd']:.6f}",
+                        str(sum(r[k]["unknown_totals"] for k in ["update", "agent", "judge"])),
+                    ]
+                    for r in a["costs_by_arm"]
+                ],
+            )
+        )
+        sections.append(
+            "<details><summary>所有策略合计的原始成本统计</summary><pre>"
+            + esc(json.dumps(s["cost"], ensure_ascii=False, indent=2))
+            + "</pre></details>"
+        )
+        if any("feedback" in row["strategy"] for row in s["rows"]):
+            sections.append(
+                "<p>探针准备成本另计：反馈方法复用研究开始前采集的 12 次独立本地 MCP 探测，没有模型调用；采集耗时未记录，记为未知，不能算作 0。上表更新耗时仅包含冻结反馈已存在时的补丁生成；不代表从零建立反馈记忆的全部成本。12 次探测是一次性共享成本，不应乘以任务重复数，也不能完全忽略。</p>"
+            )
         billing = directory / "billing-audit.json"
         if billing.exists():
             sections.append(

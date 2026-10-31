@@ -2,7 +2,7 @@
 <p>研究目标：在不明显损伤 TF、ECS、完成率及逐任务表现的前提下，提高环境变化后的 PE。报告同时保留 recovery、retention 和更新成本；效率改善不自动等于恢复能力改善。</p>
 <p>依据课程 brief 与 <a href="https://arxiv.org/html/2607.14642v1">MCPEvol 论文</a>，分别报告指标，不合成任意加权总分。课程核心是变化任务能否恢复、原本可用的任务是否受损；本小子集 TF 接近上限，故候选搜索以受约束的 PE 改善为目标。</p>
 <div class="scroll"><table><thead><tr><th>评价层次</th><th>指标与比较</th><th>判断范围</th></tr></thead><tbody><tr><td>主要结果</td><td>变化任务 TF：Middle/Late 与同阶段 No Update 对照，并展示自身 Early</td><td>衡量恢复；高绝对 TF 不自动证明有恢复增益</td></tr><tr><td>主要结果</td><td>未变化任务 TF：与原 Selective Patch 及自身 Early 对照</td><td>衡量保持；逐任务展示，避免均值掩盖退化</td></tr><tr><td>跨版本稳定性</td><td>ECS＝三个版本 TF 均值减标准差</td><td>同时列发布代码与论文附录的标准差口径</td></tr><tr><td>效率与代价</td><td>PE、更新 tokens／秒／费用；执行费用另列</td><td>满足质量约束后比较效率；PE 不等同于 token 成本</td></tr><tr><td>补充运行证据</td><td>完成率、截断、轮数耗尽、工具错误及完整轨迹</td><td>补充解释 TF/PE；不改原 benchmark 的评分</td></tr></tbody></table></div>
-<p>本项目预设筛选门槛：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定。开发集结果只用于选候选，不能作为独立确认结果。</p>
+<p>本项目预设筛选门槛：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定；均值容差也不是统计意义上的无退化证明。开发集结果只用于选候选，不能作为独立确认结果。</p>
 <p>所有 agent 自行选择工具及参数。固定模型、任务、judge 与执行预算；新规则只来自工具元数据和独立小型探针。三阶段 Early 共用 K0。开发结果用于筛选，确认结果才用于晋级；既有任务上的新重复不代表未见任务泛化。</p>
 <p>原有结果：<a href="course-v1.3-experiment.html">v1.3 与六条诊断</a> · <a href="experiment-readiness.html">旧 A/B 的成功与失败案例</a></p>
 <h2>方法依据</h2>
@@ -20,7 +20,9 @@
 <div class="scroll"><table><thead><tr><th>策略</th><th>阶段</th><th>子集</th><th>ΔTF / No Update</th><th>ΔTF / 原 Patch</th><th>ΔTF / own Early</th><th>ΔPE / 原 Patch</th></tr></thead><tbody><tr><td>delta_notes</td><td>middle</td><td>recovery</td><td>—</td><td>0</td><td>—</td><td>-1.200</td></tr><tr><td>delta_notes</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>delta_notes</td><td>late</td><td>recovery</td><td>—</td><td>0.100</td><td>—</td><td>0.000</td></tr><tr><td>delta_notes</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>feedback_notes</td><td>middle</td><td>recovery</td><td>—</td><td>0</td><td>—</td><td>0.500</td></tr><tr><td>feedback_notes</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>feedback_notes</td><td>late</td><td>recovery</td><td>—</td><td>-0.100</td><td>—</td><td>-1.200</td></tr><tr><td>feedback_notes</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>linked_notes</td><td>middle</td><td>recovery</td><td>—</td><td>-0.300</td><td>—</td><td>-2.100</td></tr><tr><td>linked_notes</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>linked_notes</td><td>late</td><td>recovery</td><td>—</td><td>0.000</td><td>—</td><td>-0.500</td></tr><tr><td>linked_notes</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>selective_patch</td><td>middle</td><td>recovery</td><td>—</td><td>0</td><td>—</td><td>0.000</td></tr><tr><td>selective_patch</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>selective_patch</td><td>late</td><td>recovery</td><td>—</td><td>0.000</td><td>—</td><td>0.000</td></tr><tr><td>selective_patch</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr></tbody></table></div>
 <h3>ECS 与成本</h3>
 <div class="scroll"><table><thead><tr><th>任务</th><th>策略</th><th>重复</th><th>ECS：发布代码</th><th>ECS：论文附录</th></tr></thead><tbody><tr><td>133</td><td>delta_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>feedback_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>linked_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>delta_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>feedback_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>linked_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>delta_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>feedback_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>linked_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr></tbody></table></div>
-<p>每份冻结知识的更新成本只计一次，三次执行复用。API 预检费用另存 preflight/。任何未知收费均保留 null。</p><pre>{
+<p>每份冻结知识的更新成本只计一次，三次执行复用。API 预检费用另存 preflight/。执行费用仅累计已保存的运行；存在未知收费时，下界不等于总额。</p>
+<div class="scroll"><table><thead><tr><th>策略</th><th>已保存运行</th><th>更新 tokens</th><th>更新秒数</th><th>更新 $</th><th>执行 $ 下界</th><th>评分 $ 下界</th><th>未知费用记录数</th></tr></thead><tbody><tr><td>delta_notes</td><td>6/6</td><td>0</td><td>1.050</td><td>0.000000</td><td>0.069269</td><td>0.016515</td><td>0</td></tr><tr><td>feedback_notes</td><td>6/6</td><td>40251</td><td>11.118</td><td>0.002026</td><td>0.054540</td><td>0.014582</td><td>1</td></tr><tr><td>linked_notes</td><td>6/6</td><td>50253</td><td>13.898</td><td>0.003798</td><td>0.042832</td><td>0.014936</td><td>0</td></tr><tr><td>selective_patch</td><td>6/6</td><td>0</td><td>0.824</td><td>0.000000</td><td>0.067277</td><td>0.015283</td><td>0</td></tr></tbody></table></div>
+<details><summary>所有策略合计的原始成本统计</summary><pre>{
   &quot;update&quot;: {
     &quot;total_tokens&quot;: 90504,
     &quot;usd&quot;: 0.005824302,
@@ -36,7 +38,8 @@
     &quot;usd&quot;: 0.061316372,
     &quot;seconds&quot;: null
   }
-}</pre>
+}</pre></details>
+<p>探针准备成本另计：反馈方法复用研究开始前采集的 12 次独立本地 MCP 探测，没有模型调用；采集耗时未记录，记为未知，不能算作 0。上表更新耗时仅包含冻结反馈已存在时的补丁生成；不代表从零建立反馈记忆的全部成本。12 次探测是一次性共享成本，不应乘以任务重复数，也不能完全忽略。</p>
 <p>已知费用下界及未知总额记录：</p><pre>{
   &quot;known_usd&quot;: {
     &quot;agent&quot;: 0.23391871549999999,
@@ -1862,7 +1865,9 @@ A few notes for your dashboard:
 <div class="scroll"><table><thead><tr><th>策略</th><th>阶段</th><th>子集</th><th>ΔTF / No Update</th><th>ΔTF / 原 Patch</th><th>ΔTF / own Early</th><th>ΔPE / 原 Patch</th></tr></thead><tbody><tr><td>selective_patch</td><td>middle</td><td>recovery</td><td>—</td><td>0.000</td><td>—</td><td>0.000</td></tr><tr><td>selective_patch</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>selective_patch</td><td>late</td><td>recovery</td><td>—</td><td>0</td><td>—</td><td>0.000</td></tr><tr><td>selective_patch</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>sufficiency_feedback</td><td>middle</td><td>recovery</td><td>—</td><td>0.200</td><td>—</td><td>4.000</td></tr><tr><td>sufficiency_feedback</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>sufficiency_feedback</td><td>late</td><td>recovery</td><td>—</td><td>-0.100</td><td>—</td><td>-0.400</td></tr><tr><td>sufficiency_feedback</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>sufficiency_notes</td><td>middle</td><td>recovery</td><td>—</td><td>0.200</td><td>—</td><td>5.000</td></tr><tr><td>sufficiency_notes</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>sufficiency_notes</td><td>late</td><td>recovery</td><td>—</td><td>0</td><td>—</td><td>-0.200</td></tr><tr><td>sufficiency_notes</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>-3</td></tr></tbody></table></div>
 <h3>ECS 与成本</h3>
 <div class="scroll"><table><thead><tr><th>任务</th><th>策略</th><th>重复</th><th>ECS：发布代码</th><th>ECS：论文附录</th></tr></thead><tbody><tr><td>133</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>sufficiency_feedback</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>sufficiency_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>sufficiency_feedback</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>sufficiency_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>sufficiency_feedback</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>sufficiency_notes</td><td>1</td><td>—</td><td>—</td></tr></tbody></table></div>
-<p>每份冻结知识的更新成本只计一次，三次执行复用。API 预检费用另存 preflight/。任何未知收费均保留 null。</p><pre>{
+<p>每份冻结知识的更新成本只计一次，三次执行复用。API 预检费用另存 preflight/。执行费用仅累计已保存的运行；存在未知收费时，下界不等于总额。</p>
+<div class="scroll"><table><thead><tr><th>策略</th><th>已保存运行</th><th>更新 tokens</th><th>更新秒数</th><th>更新 $</th><th>执行 $ 下界</th><th>评分 $ 下界</th><th>未知费用记录数</th></tr></thead><tbody><tr><td>selective_patch</td><td>6/6</td><td>0</td><td>0.848</td><td>0.000000</td><td>0.062152</td><td>0.015176</td><td>0</td></tr><tr><td>sufficiency_feedback</td><td>6/6</td><td>0</td><td>1.078</td><td>0.000000</td><td>0.048245</td><td>0.016280</td><td>0</td></tr><tr><td>sufficiency_notes</td><td>6/6</td><td>0</td><td>1.062</td><td>0.000000</td><td>0.054037</td><td>0.014380</td><td>0</td></tr></tbody></table></div>
+<details><summary>所有策略合计的原始成本统计</summary><pre>{
   &quot;update&quot;: {
     &quot;total_tokens&quot;: 0,
     &quot;usd&quot;: 0.0,
@@ -1878,7 +1883,8 @@ A few notes for your dashboard:
     &quot;usd&quot;: 0.045836758,
     &quot;seconds&quot;: null
   }
-}</pre>
+}</pre></details>
+<p>探针准备成本另计：反馈方法复用研究开始前采集的 12 次独立本地 MCP 探测，没有模型调用；采集耗时未记录，记为未知，不能算作 0。上表更新耗时仅包含冻结反馈已存在时的补丁生成；不代表从零建立反馈记忆的全部成本。12 次探测是一次性共享成本，不应乘以任务重复数，也不能完全忽略。</p>
 <p>已知费用下界及未知总额记录：</p><pre>{
   &quot;known_usd&quot;: {
     &quot;agent&quot;: 0.16443360939999999,
@@ -3467,4 +3473,1377 @@ Guangdong leads in every category, with the widest gap in Clothing (+¥1.5M) and
 - The map only colors the five provinces with data; other regions remain unfilled.
 - The column chart is grouped (not stacked) so you can compare Guangdong and Jiangsu side-by-side per category.
 
-Would you like me to add a KPI summary card, a pie/donut chart for category share, or combine these into a single dashboard layout?</pre><a href="../results/raw/selective-search-v2.1-development-20261031/cells/task235-late-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details></main></html>
+Would you like me to add a KPI summary card, a pie/donut chart for category share, or combine these into a single dashboard layout?</pre><a href="../results/raw/selective-search-v2.1-development-20261031/cells/task235-late-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<h2>selective-search-confirmation-r1-20261031</h2>
+<p>confirmation：完整评分 12/108；执行完成 6。截断或轮数耗尽即使 TF 高，也不算执行完成。</p>
+<p><a href="../results/raw/selective-search-confirmation-r1-20261031/plan.json">冻结计划</a> · <a href="../results/raw/selective-search-confirmation-r1-20261031/runs.csv">全部单元 CSV</a> · <a href="../results/raw/selective-search-confirmation-r1-20261031/readable-analysis.json">结构化分析与完整错误</a></p>
+<div class="scroll"><table><thead><tr><th>策略</th><th>完整评分</th><th>整体 TF</th><th>整体 PE</th><th>正常完成</th></tr></thead><tbody><tr><td>full_rewrite</td><td>3/27</td><td>—</td><td>—</td><td>1</td></tr><tr><td>no_update</td><td>1/27</td><td>—</td><td>—</td><td>1</td></tr><tr><td>selective_patch</td><td>4/27</td><td>—</td><td>—</td><td>2</td></tr><tr><td>sufficiency_feedback</td><td>4/27</td><td>—</td><td>—</td><td>2</td></tr></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>策略</th><th>阶段</th><th>完整评分</th><th>TF</th><th>PE</th></tr></thead><tbody><tr><td>full_rewrite</td><td>early</td><td>1/9</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>middle</td><td>1/9</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>late</td><td>1/9</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>early</td><td>0/9</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>middle</td><td>1/9</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>late</td><td>0/9</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>early</td><td>1/9</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>middle</td><td>1/9</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>late</td><td>2/9</td><td>—</td><td>—</td></tr><tr><td>sufficiency_feedback</td><td>early</td><td>3/9</td><td>—</td><td>—</td></tr><tr><td>sufficiency_feedback</td><td>middle</td><td>0/9</td><td>—</td><td>—</td></tr><tr><td>sufficiency_feedback</td><td>late</td><td>1/9</td><td>—</td><td>—</td></tr></tbody></table></div>
+<h3>恢复与保持</h3><p>recovery＝133/283，retention＝235。Δ 是同阶段配对差值；own Early 衡量各方法自身的跨阶段变化。— 表示对照缺失或评分不完整，不能解读为 0。</p>
+<div class="scroll"><table><thead><tr><th>策略</th><th>阶段</th><th>子集</th><th>ΔTF / No Update</th><th>ΔTF / 原 Patch</th><th>ΔTF / own Early</th><th>ΔPE / 原 Patch</th></tr></thead><tbody><tr><td>full_rewrite</td><td>middle</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>middle</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>late</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>late</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>middle</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>middle</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>late</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>late</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>middle</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>middle</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>late</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>late</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>sufficiency_feedback</td><td>middle</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>sufficiency_feedback</td><td>middle</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>sufficiency_feedback</td><td>late</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>sufficiency_feedback</td><td>late</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>
+<h3>ECS 与成本</h3>
+<div class="scroll"><table><thead><tr><th>任务</th><th>策略</th><th>重复</th><th>ECS：发布代码</th><th>ECS：论文附录</th></tr></thead><tbody><tr><td>133</td><td>full_rewrite</td><td>1</td><td>9.839</td><td>9.818</td></tr><tr><td>133</td><td>full_rewrite</td><td>2</td><td>—</td><td>—</td></tr><tr><td>133</td><td>full_rewrite</td><td>3</td><td>—</td><td>—</td></tr><tr><td>133</td><td>no_update</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>no_update</td><td>2</td><td>—</td><td>—</td></tr><tr><td>133</td><td>no_update</td><td>3</td><td>—</td><td>—</td></tr><tr><td>133</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>selective_patch</td><td>2</td><td>—</td><td>—</td></tr><tr><td>133</td><td>selective_patch</td><td>3</td><td>—</td><td>—</td></tr><tr><td>133</td><td>sufficiency_feedback</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>sufficiency_feedback</td><td>2</td><td>—</td><td>—</td></tr><tr><td>133</td><td>sufficiency_feedback</td><td>3</td><td>—</td><td>—</td></tr><tr><td>235</td><td>full_rewrite</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>full_rewrite</td><td>2</td><td>—</td><td>—</td></tr><tr><td>235</td><td>full_rewrite</td><td>3</td><td>—</td><td>—</td></tr><tr><td>235</td><td>no_update</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>no_update</td><td>2</td><td>—</td><td>—</td></tr><tr><td>235</td><td>no_update</td><td>3</td><td>—</td><td>—</td></tr><tr><td>235</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>selective_patch</td><td>2</td><td>—</td><td>—</td></tr><tr><td>235</td><td>selective_patch</td><td>3</td><td>—</td><td>—</td></tr><tr><td>235</td><td>sufficiency_feedback</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>sufficiency_feedback</td><td>2</td><td>—</td><td>—</td></tr><tr><td>235</td><td>sufficiency_feedback</td><td>3</td><td>—</td><td>—</td></tr><tr><td>283</td><td>full_rewrite</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>full_rewrite</td><td>2</td><td>—</td><td>—</td></tr><tr><td>283</td><td>full_rewrite</td><td>3</td><td>—</td><td>—</td></tr><tr><td>283</td><td>no_update</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>no_update</td><td>2</td><td>—</td><td>—</td></tr><tr><td>283</td><td>no_update</td><td>3</td><td>—</td><td>—</td></tr><tr><td>283</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>selective_patch</td><td>2</td><td>—</td><td>—</td></tr><tr><td>283</td><td>selective_patch</td><td>3</td><td>—</td><td>—</td></tr><tr><td>283</td><td>sufficiency_feedback</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>sufficiency_feedback</td><td>2</td><td>—</td><td>—</td></tr><tr><td>283</td><td>sufficiency_feedback</td><td>3</td><td>—</td><td>—</td></tr></tbody></table></div>
+<p>每份冻结知识的更新成本只计一次，三次执行复用。API 预检费用另存 preflight/。执行费用仅累计已保存的运行；存在未知收费时，下界不等于总额。</p>
+<div class="scroll"><table><thead><tr><th>策略</th><th>已保存运行</th><th>更新 tokens</th><th>更新秒数</th><th>更新 $</th><th>执行 $ 下界</th><th>评分 $ 下界</th><th>未知费用记录数</th></tr></thead><tbody><tr><td>full_rewrite</td><td>3/27</td><td>178529</td><td>177.063</td><td>0.049287</td><td>0.019606</td><td>0.014823</td><td>0</td></tr><tr><td>no_update</td><td>1/27</td><td>0</td><td>0.000</td><td>0.000000</td><td>0.005486</td><td>0.001250</td><td>0</td></tr><tr><td>selective_patch</td><td>4/27</td><td>0</td><td>1.165</td><td>0.000000</td><td>0.045792</td><td>0.008275</td><td>0</td></tr><tr><td>sufficiency_feedback</td><td>4/27</td><td>0</td><td>1.367</td><td>0.000000</td><td>0.033122</td><td>0.010819</td><td>0</td></tr></tbody></table></div>
+<details><summary>所有策略合计的原始成本统计</summary><pre>{
+  &quot;update&quot;: {
+    &quot;total_tokens&quot;: 178529,
+    &quot;usd&quot;: 0.049287216,
+    &quot;seconds&quot;: 179.59505533200354
+  },
+  &quot;agent&quot;: {
+    &quot;total_tokens&quot;: 2205153,
+    &quot;usd&quot;: 0.10400532,
+    &quot;seconds&quot;: null
+  },
+  &quot;judge&quot;: {
+    &quot;total_tokens&quot;: 889647,
+    &quot;usd&quot;: 0.03516718,
+    &quot;seconds&quot;: null
+  }
+}</pre></details>
+<p>探针准备成本另计：反馈方法复用研究开始前采集的 12 次独立本地 MCP 探测，没有模型调用；采集耗时未记录，记为未知，不能算作 0。上表更新耗时仅包含冻结反馈已存在时的补丁生成；不代表从零建立反馈记忆的全部成本。12 次探测是一次性共享成本，不应乘以任务重复数，也不能完全忽略。</p>
+<h3>逐条成功与失败证据</h3><p>保留全部单元，不只展示高分。工具报错可能被恢复；低分、工具错误或截断本身不能证明 under-update / over-update，需要定位具体知识改动并做对照归因。</p>
+<details><summary>task133-early-full_rewrite-r0 · TF 9.800 / PE 5.400 · output_truncated · 34 次工具调用 / 5 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 10,
+  &quot;evaluate__7722fb090eee&quot;: 22,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;get_variable__27c09eb2f06c&quot;: 1
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 22.85665,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 3,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_e92c0635f18947cc8ff0c37e&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expression\&quot;: \&quot;eval(\\\&quot;1+1\\\&quot;)\&quot;}&quot;,
+        &quot;name&quot;: &quot;evaluate__7722fb090eee&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 4
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Evaluation error: Function not allowed: eval&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  },
+  {
+    &quot;elapsed_seconds&quot;: 22.857449,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 3,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_2e340666a76e4769a88d89b9&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expression\&quot;: \&quot;open(\\\&quot;/etc/passwd\\\&quot;)\&quot;}&quot;,
+        &quot;name&quot;: &quot;evaluate__7722fb090eee&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 5
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Evaluation error: Function not allowed: open&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  },
+  {
+    &quot;elapsed_seconds&quot;: 26.909779,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 4,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_84abbfd3ae084e14ac7ad1f8&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expression\&quot;: \&quot;globals()\&quot;}&quot;,
+        &quot;name&quot;: &quot;evaluate__7722fb090eee&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 4
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Evaluation error: Function not allowed: globals&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  },
+  {
+    &quot;elapsed_seconds&quot;: 26.910492,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 4,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_66318f39e1f249ca9117a8dc&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expression\&quot;: \&quot;lambda: 1\&quot;}&quot;,
+        &quot;name&quot;: &quot;evaluate__7722fb090eee&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 5
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Evaluation error: Undefined variable: lambda&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  },
+  {
+    &quot;elapsed_seconds&quot;: 29.435637,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 5,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_9b2e92d0c3f942cf87c5e5ef&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expression\&quot;: \&quot;\\\&quot;a\\\&quot; + \\\&quot;b\\\&quot;\&quot;}&quot;,
+        &quot;name&quot;: &quot;evaluate__7722fb090eee&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 2
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Evaluation error: [DecimalError] Invalid argument: a&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><h4>回答</h4><pre>## What I actually verified first
+
+I ran your exact scenario against the validator/evaluator in this environment. The results are the best argument for *why* you need layered controls:
+
+| Expression | Syntax check | Evaluation result | Why it matters |
+|---|---|---|---|
+| `(2 + 3) * 4 / 8 - 1` | ✅ valid | `1.5` | Baseline works |
+| `sqrt(144) + abs(-7) + max(3,9,2)` | ✅ valid | `28` | Function allowlist works |
+| `2 ** 3` | ❌ rejected | — | `**` not in this grammar |
+| `2 ^ 3` | ✅ valid | `8` | **`^` means power here, XOR in Python** |
+| `x = 5` | ✅ valid | `5` | **Assignment accepted** |
+| `[1, 2, 3]` | ✅ valid | `[1,2,3]` (`type: object`) | **Type confusion** |
+| `1 == 1` | ✅ valid | `true` (`type: boolean`) | Non-numeric result |
+| `&quot;a&quot; * 3` | ✅ valid | `&quot;3 a&quot;` (string) | Non-numeric result |
+| `1/0` | ✅ valid | `null`, `type: number` | **Silent fail-open** |
+| `sqrt(-1)`, `log(0)`, `1e309` | ✅ valid | `null` | **Silent fail-open** |
+| `factorial(2000)`, `2 ^ 2000` | ✅ valid | `null` | Silent resource/magnitude cap |
+| `open(&quot;/etc/passwd&quot;)` | ✅ valid | ❌ `Function not allowed: open` | Allowlist caught it |
+| `eval(&quot;1+1&quot;)`, `globals()` | ✅ valid | ❌ `Function not allowed` | Allowlist caught it |
+| `__import__(&#x27;os&#x27;).system(...)` | ❌ rejected | — | Rejected on lexing, not security logic |
+
+Then `get_variable(&quot;x&quot;)` returned **`x = 5`** — the assignment persisted in shared context.
+
+### Three lessons that should drive your design
+
+1. **Syntax validation is not a security control.** `x = 5`, `[1,2,3]`, `1 == 1`, and `open(&quot;/etc/passwd&quot;)` all passed syntax validation. Only the *function allowlist at evaluation time* stopped `open`/`eval`/`globals`. Never treat &quot;it parses&quot; as &quot;it&#x27;s safe.&quot;
+2. **Silent `null` is a vulnerability, not a convenience.** `1/0`, `sqrt(-1)`, `log(0)`, `1e309`, `factorial(2000)` all returned `result: null, type: number` with **no error**. Downstream code that does `if result:` or `float(result)` will either fail open or crash. Your implementation must **raise**, never return a sentinel.
+3. **Shared evaluator state leaks across requests.** `x = 5` persisted. In a multi-tenant service that is cross-tenant state contamination (OWASP A01). Use a fresh, immutable context per request.
+
+Also note the **semantic divergence**: this grammar treats `^` as exponentiation (`2^3 → 8`), while Python treats `^` as XOR (`2^3 → </pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task133-early-full_rewrite-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-early-sufficiency_feedback-r0 · TF 10 / PE 5 · completed · 5 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 3,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>Your sales performance dashboard is ready — three charts, all built from the figures you supplied.
+
+**1. 2025年各省销售额分布 (Provincial Sales Distribution Map)**
+A China province-level choropleth covering your five reporting regions, with values in ¥ millions:
+
+| Province | Sales |
+|---|---|
+| 广东省 Guangdong | ¥15.8M |
+| 江苏省 Jiangsu | ¥12.3M |
+| 浙江省 Zhejiang | ¥9.7M |
+| 山东省 Shandong | ¥8.4M |
+| 北京市 Beijing | ¥7.2M |
+
+Guangdong and Jiangsu form a clear top tier — together they account for ¥28.1M, roughly 53% of the ¥53.4M total across these five regions.
+
+**2. 2025年月度销售额趋势 (Monthly Sales Trend Area Chart)**
+January through December, ¥ millions. The shape is a strong, near-unbroken climb: a soft start (Jan 1.2M, Feb 1.1M — the only month-over-month dip), then steady acceleration through the year, with the sharpest jumps in Q4 (Oct 2.7M → Nov 3.0M → Dec 3.5M). December alone is ~2.9× January, and the Q4 quarter (9.2M) is more than double Q1 (3.7M). Worth noting for planning: this is a heavily back-loaded year, so any capacity or inventory model built on a flat monthly average will under-serve Q4.
+
+**3. 各区域主要产品品类销售额对比 (Product Category Comparison by Region)**
+Grouped column chart, Guangdong vs. Jiangsu across three categories (¥ millions):
+
+| Category | Guangdong | Jiangsu |
+|---|---|---|
+| 电子产品 Electronics | 6.2 | 4.8 |
+| 家用电器 Home Appliances | 4.5 | 3.9 |
+| 服装 Clothing | 5.1 | 3.6 |
+
+Guangdong leads in all three categories. Electronics is the top category in both regions, while the widest relative gap is in Clothing (Guangdong is ~42% higher) — the narrowest is Home Appliances (~15%), suggesting that&#x27;s the most contested category.
+
+Two caveats on the data as given: the category chart only covers Guangdong and Jiangsu, so it doesn&#x27;t reconcile against the Zhejiang/Shandong/Beijing figures in the map; and the map&#x27;s five regions sum to ¥53.4M while the twelve monthly values sum to ¥25.4M — the two totals describe different scopes, so I&#x27;ve kept them as separate views rather than forcing them into one number. If you want a single dashboard-level total, let me know which scope is authoritative and I&#x27;ll align the rest.</pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task235-early-sufficiency_feedback-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-middle-selective_patch-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>Your sales performance dashboard is ready — all three charts were generated successfully:
+
+**1. 2025 Provincial Sales Distribution Map (2025年各省销售额分布)**
+A China regional map shading provinces by sales volume (in ¥ millions):
+- Guangdong: ¥15.8M (highest)
+- Jiangsu: ¥12.3M
+- Zhejiang: ¥9.7M
+- Shandong: ¥8.4M
+- Beijing: ¥7.2M
+
+**2. Monthly Sales Trend Area Chart (2025年月度销售额趋势)**
+Shows a clear upward trajectory through 2025 — starting at ¥1.2M in January, dipping slightly in February (¥1.1M), then climbing steadily to a peak of ¥3.5M in December. That&#x27;s roughly a 3× increase year-over-year, with the strongest acceleration in Q4 (Oct–Dec).
+
+**3. Product Category Comparison by Region (各区域主要产品类别销售额对比)**
+Grouped column chart comparing Guangdong vs. Jiangsu across three categories:
+- **Electronics**: Guangdong ¥6.2M vs. Jiangsu ¥4.8M
+- **Home Appliances**: Guangdong ¥4.5M vs. Jiangsu ¥3.9M
+- **Clothing**: Guangdong ¥5.1M vs. Jiangsu ¥3.6M
+
+Guangdong leads in every category, with its largest gap in Clothing (+¥1.5M) and Electronics (+¥1.4M). Electronics is the top category in both regions.
+
+A few notes on the data: all values were converted to units of ¥ millions (百万元) for consistency across the charts. The map only shades the five provinces you provided — other provinces will appear in the default fill color without data. If you&#x27;d like, I can add the remaining provinces, switch the map to a specific region view, or build a combined KPI summary table to round out the dashboard.</pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task235-middle-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-late-selective_patch-r0 · TF 10 / PE 9 · completed · 40 次工具调用 / 1 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;review_workspace_health__fcb7e985546d&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 32,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 2,
+  &quot;list_tasks__5cb11580c2d8&quot;: 1,
+  &quot;update_task__e40dd373c4ac&quot;: 1,
+  &quot;get_next_task_recommendation__83b9706df23d&quot;: 1
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 2.673202,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 1,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_484cfad235284a88b339a8b5b2545c1d&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;workingDirectory\&quot;: \&quot;/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety/results/raw/selective-search-confirmation-r1-20261031/cells/task283-late-selective_patch-r0/run/workspace\&quot;}&quot;,
+        &quot;name&quot;: &quot;review_workspace_health__fcb7e985546d&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 1
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Error: memoryStorage.listMemories is not a function&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><h4>回答</h4><pre>Done! I&#x27;ve set up the **Analytics Dashboard** project with 4 major milestones broken into 28 small, executable tasks — and verified every task is within a safe complexity threshold.
+
+## 📊 Project Structure
+
+**Project:** Analytics Dashboard (ID: `aad80da7-9ec3-4037-9293-af05e8e3208e`)
+
+### Milestone 1 — Customer CSV Ingestion &amp; Processing (60h)
+| Task | Complexity | Est. |
+|---|---|---|
+| Define customer CSV schema &amp; data contract | 2 | 4h |
+| Build CSV file intake service | 3 | 8h |
+| Implement CSV schema validation &amp; error reporting | 4 | 10h |
+| Implement data cleaning &amp; normalization | 4 | 10h |
+| Build transformation to analytics-ready dataset | 4 | 12h |
+| Load processed customer data into storage | 3 | 8h |
+| Write tests for CSV ingestion pipeline | 3 | 8h |
+
+### Milestone 2 — Application Log Analysis Pipeline (52h)
+| Task | Complexity | Est. |
+|---|---|---|
+| Define log format &amp; parsing specification | 2 | 4h |
+| Build log collection &amp; ingestion | 3 | 8h |
+| Implement log parser to structured events | 4 | 12h |
+| Build metrics aggregation (errors, latency, usage) | 4 | 12h |
+| Store aggregated log metrics | 3 | 8h |
+| Write tests for log analysis pipeline | 3 | 8h |
+
+### Milestone 3 — Visualization Components (64h)
+| Task | Complexity | Est. |
+|---|---|---|
+| Define visualization requirements &amp; design system | 3 | 8h |
+| Build chart component library (line/bar/pie) | 4 | 12h |
+| Build data table component | 4 | 10h |
+| Build filter &amp; date-range controls | 3 | 8h |
+| Connect components to data API (mock then real) | 4 | 10h |
+| Accessibility &amp; responsive design pass | 3 | 8h |
+| Write component tests | 3 | 8h |
+
+### Milestone 4 — Dashboard Integration &amp; Deployment (80h)
+| Task | Complexity | Est. |
+|---|---|---|
+| Design dashboard layout &amp; navigation | 3 | 8h |
+| Build API layer / data endpoints | 4 | 12h |
+| Integrate pipelines with dashboard | 4 | 12h |
+| Implement authentication &amp; access control | 4 | 10h |
+| Set up CI/CD &amp; deployment | 4 | 12h |
+| Add monitoring &amp; alerting | 3 | 8h |
+| Write user &amp; operations documentation | 2 | 6h |
+| End-to-end testing &amp; user acceptance | 4 | 12h |
+
+## ✅ Complexity Verification
+- **32 tasks analyzed** (4 milestones + 28 subtasks)
+- **0 tasks above the complexity threshold** (≥7)
+- **Average complexity: 3.7/10** — all tasks are well-scoped and manageable
+- Total estimated effort: **~256 hours**
+
+## 🚀 Recommended Starting Point
+The top recommendation is **&quot;Define customer CSV schema &amp; data contract&quot;** (priority 9, complexity 2, 4h) — a low-risk foundation task that unblocks the rest of the CSV pipeline. The log parsing spec is a good parallel starter since the two data tracks are independent.
+
+**Suggested execution order:** Start both data tracks in parallel (schema + log spec), then build intake/collection → validation/parsing → transformation/aggregation → storage. Visualization work can begin once the design system is defined, and integration/deployment follows once both pipelines and components are ready.
+
+Would you like me to add formal task dependencies to enforce this sequencing, or assign owners and due dates to any of the milestones?</pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task283-late-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-late-full_rewrite-r0 · TF 10 / PE 8 · output_truncated · 15 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 7,
+  &quot;evaluate__7722fb090eee&quot;: 6,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;code-analysis-prompt-builder__7a7918cd2f5e&quot;: 1
+}</pre><h4>回答</h4><pre>## What I verified first (tool evidence)
+
+I ran the expression-validation tools against representative inputs so the guidance below is grounded in observed behavior, not assumption:
+
+| Expression | Tool result | What it tells you |
+|---|---|---|
+| `(2 + 3) * 4 / 2 - sqrt(16)` | ✅ valid → `6` | Grammar + function calls work, returns typed number |
+| `__import__(&#x27;os&#x27;).system(&#x27;curl … \| sh&#x27;)` | ❌ rejected (unexpected `_`) | No dunder/attribute access — the core RCE vector is blocked |
+| `os.system(&#x27;id&#x27;)` | ❌ rejected | Bare attribute access on names is blocked |
+| `(2 + 3` | ❌ rejected (`Expected &#x27;)&#x27;`) | Unbalanced brackets caught by `check_balanced` |
+| `1 / 0` | ⚠️ **`result: null`, no error** | Division by zero is silently null — **you must treat null as failure** |
+| `sqrt(-1)` | ⚠️ `result: null` | Domain errors also surface as null, not exceptions |
+| `2 ^ 10 + 3` | ✅ → `1027` | `^` means **power**, not XOR — a semantic trap when porting Python syntax |
+| `principal * (1 + rate) ** years` | ❌ rejected at col 25 | `**` is *not* accepted; only `^` |
+| 13 nested parens with `max_depth: 5` | ✅ reported &quot;valid&quot; | **The depth guard did not fire** — don&#x27;t rely on it alone |
+
+Two of these are the ones that bite people in production: **null-instead-of-exception** on `1/0` and `sqrt(-1)`, and **`^` ≠ XOR**. Both silently produce wrong answers in financial code if you don&#x27;t assert on them.
+
+---
+
+## The one rule that matters most
+
+&gt; **Never let user input reach `eval()`, `exec()`, or `compile()` — and never build a &quot;restricted&quot; `__builtins__` dict and call it safe.**
+
+A restricted `__builtins__` is bypassable in one line:
+
+```python
+().__class__.__bases__[0].__subclasses__()   # walk to subprocess.Popen
+```
+
+The only defensible Python pattern is **parse to an AST, walk it yourself, and refuse every node type you did not explicitly whitelist.** Validation and evaluation must use the *same* whitelist.
+
+---
+
+## Reference implementation: `safe_math.py`
+
+```python
+&quot;&quot;&quot;Allow-listed math expression evaluator. No eval/exec anywhere.&quot;&quot;&quot;
+from __future__ import annotations
+
+import ast
+import logging
+import math
+import operator
+from decimal import Decimal, InvalidOperation
+
+log = logging.getLogger(&quot;math.eval&quot;)
+
+MAX_LEN        = 512        # chars
+MAX_NODES      = 200        # AST nodes
+MAX_DEPTH      = 25         # nesting
+MAX_EXPONENT   = 64         # guard 9**9**9 / 2**1e9 DoS
+MAX_ABS_RESULT = Decimal(10) ** 18
+MAX_VARIABLES  = 32
+MAX_IDENT_LEN  = 32
+
+
+class MathExpressionError(ValueError):
+    &quot;&quot;&quot;Raised for any rejected or failed expression. Message is safe to log/return.&quot;&quot;&quot;
+    def __init__(self, code: str, detail: str = &quot;&quot;):
+        super().__init__(code)
+        self.code = code          # stable machine-readable reason
+        self.detail = detail      # internal only — never send to the client
+
+
+_BIN_OPS = {
+    ast.Add: operator.add,      ast.Sub: operator.sub,
+    ast.Mult: operator.mul,     ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv, ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+}
+_UNARY_OPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}
+
+
+def _sqrt(x):
+    if x &lt; 0:
+        raise MathExpressionError(&quot;domain_error&quot;, &quot;sqrt of negative&quot;)
+    return math.sqrt(x)
+
+
+def _log(x):
+    if x &lt;= 0:
+        raise MathExpressionError(&quot;domain_error&quot;, &quot;log of non-positive&quot;)
+    return math.log(x)
+
+
+def _div(a, b):
+    if b == 0:
+        raise MathExpressionError(&quot;division_by_zero&quot;)
+    return a / b
+
+
+# name -&gt; (min_args, max_args, callable)
+_FUNCS = {
+    &quot;sqrt&quot;: (1, 1, _sqrt),
+    &quot;abs&quot;:  (1, 1, abs),
+    &quot;log&quot;:  (1, 2, _log),          # log(x[, base]) — validate base separately
+    &quot;exp&quot;:  (1, 1, math.exp),
+    &quot;sin&quot;:  (1, 1, math.sin),
+    &quot;cos&quot;:  (1, 1, math.cos),
+    &quot;min&quot;:  (1, 8, min),
+    &quot;max&quot;:  (1, 8, max),
+    &quot;round&quot;: (1, 2, round),
+}
+
+
+def _check_budget(expr: str, tree: ast.AST) -&gt; None:
+    if len(expr) &gt; MAX_LEN:
+        raise MathExpressionError(&quot;expression_too_long&quot;)
+    nodes = 0
+    stack = [(tree, 0)]
+    while stack:
+        node, depth = stack.pop()
+        nodes += 1
+        if nodes &gt; MAX_NODES:
+            raise MathExpressionError(&quot;expression_too_complex&quot;)
+        if depth &gt; MAX_DEPTH:
+            raise MathExpressionError(&quot;nesting_too_deep&quot;)
+        stack.extend((child, depth + 1) for child in ast.iter_child_nodes(node))
+
+
+def _bind_variables(variables: dict | None) -&gt; dict[str, float]:
+    out: dict[str, float] = {}
+    if not variables:
+        return out
+    if len(variables) &gt; MAX_VARIABLES:
+        raise MathExpressionError(&quot;too_many_variables&quot;)
+    for name, value in variables.items():
+        if not isinstance(name, str) or name.startswith(&quot;_&quot;) or not name.isidentifier():
+            raise MathExpressionError(&quot;invalid_variable_name&quot;)
+        if len(name) &gt; MAX_IDENT_LEN:
+            raise MathExpressionError(&quot;invalid_variable_name&quot;)
+        if isinstance(value, bool) or not isinstance(value, (int, float, Decimal)):
+            raise MathExpressionError(&quot;invalid_variable_type&quot;, name)
+        if isinstance(value, float) and not math.isfinite(value):
+            raise MathExpressionError(&quot;non_finite_variable&quot;, name)
+        if abs(Decimal(str(value))) &gt; MAX_ABS_RESULT:
+            raise MathExpressionError(&quot;variable_out_of_range&quot;, name)
+        out[name] = value
+    return out
+
+
+def _eval(node: ast.AST, env: dict[str, float]):
+    if isinstance(node, ast.Expression):
+        return _eval(node.body, env)
+    if isinstance(node, ast.Constant):
+        if isinstance(node.value, bool) or not isinstance(node.value, (int, float)):
+            raise MathExpressionError(&quot;unsupported_literal&quot;)
+        if isinstance(node.value, float) and not math.isfinite(node.value):
+            raise MathExpressionError(&quot;non_finite_literal&quot;)
+        if abs(Decimal(str(node.value))) &gt; MAX_ABS_RESULT:
+            raise MathExpressionError(&quot;literal_out_of_range&quot;)
+        return node.value
+    if isinstance(node, ast.Name):
+        if node.id not in env:
+            raise MathExpressionError(&quot;unknown_variable&quot;)
+        return env[node.id]
+    if isinstance(node, ast.BinOp):
+        op = _BIN_OPS.get(type(node.op))
+        if op is None:
+            raise MathExpressionError(&quot;unsupported_operator&quot;)
+        left, right = _eval(node.left, env), _eval(node.right, env)
+        if isinstance(node.op, ast.Pow):
+            if abs(right) &gt; MAX_EXPONENT:
+                raise MathExpressionError(&quot;exponent_too_large&quot;)
+            if abs(left) &gt; 1 and right &gt; 0 and abs(right) * math.log10(abs(left)) &gt; 18:
+                raise MathExpressionError(&quot;result_would_overflow&quot;)
+        if isinstance(node.op, (ast.Div, ast.FloorDiv, ast.Mod)) and right == 0:
+            raise MathExpressionError(&quot;division_by_zero&quot;)
+        return op(left, right)
+    if isinstance(node, ast.UnaryOp):
+        op = _UNARY_OPS.get(type(node.op))
+        if op is None:
+            raise MathExpressionError(&quot;unsupported_operator&quot;)
+        return op(_eval(node.operand, env))
+    if isinstance(node, ast.Call):
+        if not isinstance(node.func, ast.Name):
+            raise MathExpressionError(&quot;unsupported_call&quot;)      # blocks a.b()
+        spec = _FUNCS.get(node.func.id)
+        if spec is None:
+            raise MathExpressionError(&quot;function_not_allowed&quot;)
+        lo, hi, fn = spec
+        args = [_eval(a, env) for a in node.args]
+        if node.keywords or not (lo &lt;= len(args) &lt;= hi):
+            raise MathExpressionError(&quot;bad_arity&quot;)
+        if len(args) == 2 and fn is _log:
+            base = args[1]
+            if base &lt;= 0 or base == 1:
+                raise MathExpressionError(&quot;domain_error&quot;, &quot;bad log base&quot;)
+            return math.log(args[0], base)
+        return fn(*args)
+    # Anything else — Attribute, Subscript, Lambda, comprehensions, f-strings,
+    # walrus, Starred, Compare, BoolOp, Dict/List/Set, NamedExpr — is refused.
+    raise MathExpressionError(&quot;unsupported_syntax&quot;, type(node).__name__)
+
+
+def validate(expression: str, variables: dict | None = None) -&gt; None:
+    &quot;&quot;&quot;Raise MathExpressionError if the expression would be rejected. Never executes.&quot;&quot;&quot;
+    if not isinstance(expression, str) or not expression.strip():
+        raise MathExpressionError(&quot;empty_expression&quot;)
+    env = _bind_variables(variables)
+    try:
+        tree = ast.parse(expression, mode=&quot;eval&quot;)
+    except SyntaxError as exc:
+        raise MathExpressionError(&quot;syntax_error&quot;) from exc
+    _check_budget(expression, tree)
+    _walk_allowed(tree)          # structural pass, no evaluation
+    _check_names(tree, set(env)) # unresolved names fail at validate time, not runtime
+
+
+def safe_evaluate(expression: str, variables: dict | None = None) -&gt; Decimal:
+    validate(expression, variables)
+    env = _bind_variables(variables)
+    tree = ast.parse(expression, mode=&quot;eval&quot;)
+    result = _eval(tree, env)
+    result = Decimal(str(result))
+    if not result.is_finite():
+        raise MathExpressionError(&quot;non_finite_result&quot;)
+    if abs(result) &gt; MAX_ABS_RESULT:
+        raise MathExpressionError(&quot;result_out_of_range&quot;)
+    return result
+```
+
+`_walk_allowed` and `_check_names` are the same traversal with a set of permitted node classes — keep them as a single `ALLOWED_NODES` frozenset so validation and evaluation can never drift apart.
+
+### Calling it from a request handler
+
+```python
+from flask import jsonify, request
+
+@app.post(&quot;/api/calculate&quot;)
+@rate_limit(&quot;calculate&quot;, per_minute=60)          # A04: abuse / DoS quota
+@require_auth                                     # A01: no anonymous compute
+def calculate():
+    payload = request.get_json(silent=True) or {}
+    try:
+        value = safe_evaluate(payload.get(&quot;expression&quot;), payload.get(&quot;variables&quot;))
+    except MathExpressionError as exc:
+        log.warning(&quot;calc_rejected code=%s user=%s len=%d&quot;,
+                    exc.code, g.user_id, len(str(payload.get(&quot;expression&quot;, &quot;&quot;))),
+                    extra={&quot;detail&quot;: exc.detail})   # A09: structured, no raw payload
+        return jsonify(error={&quot;code&quot;: exc.code, &quot;message&quot;:
+                        &quot;Invalid expression. Allowed: numbers, variables, + - * / // % ^, &quot;
+                        &quot;and sqrt/abs/log/exp/sin/cos/min/max/round.&quot;}), 400
+    except Exception:
+        log.exception(&quot;calc_failure user=%s&quot;, g.user_id)  # A09: internal only
+        return jsonify(error={&quot;code&quot;: &quot;internal_error&quot;,
+                              &quot;message&quot;: &quot;Calculation failed.&quot;}), 500  # A05: no traceback
+    return jsonify(result=str(value))              # Decimal → string, never float
+```
+
+---
+
+## Controls, mapped to OWASP
+
+| # |</pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task133-late-full_rewrite-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-early-selective_patch-r0 · TF 10 / PE 9 · max_rounds · 48 次工具调用 / 0 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;sequentialthinking__603ae38a08e1&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 41,
+  &quot;update_task__e40dd373c4ac&quot;: 2,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 2
+}</pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task283-early-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-late-sufficiency_feedback-r0 · TF 10 / PE 9.800 · completed · 33 次工具调用 / 0 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 28,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 1,
+  &quot;list_tasks__5cb11580c2d8&quot;: 1,
+  &quot;get_next_task_recommendation__83b9706df23d&quot;: 1
+}</pre><h4>回答</h4><pre>Your **Analytics Dashboard** project is fully structured. Here&#x27;s the complete plan.
+
+## Project Overview
+**Analytics Dashboard** — 4 milestones, 24 executable tasks, ~300 estimated hours.
+
+## Milestones &amp; Task Breakdown
+
+### 🏗️ Milestone 1 — Customer CSV Data Processing Pipeline
+| Task | Complexity | Est. |
+|---|---|---|
+| Define customer CSV schema &amp; data contract | 3 | 6h |
+| Build CSV ingestion/upload service | 5 | 16h |
+| Implement data validation &amp; quality checks | 5 | 14h |
+| Build transformation &amp; cleaning layer | 5 | 16h |
+| Design &amp; implement customer data storage layer | 5 | 14h |
+| Write unit &amp; integration tests for CSV pipeline | 4 | 12h |
+
+### 📋 Milestone 2 — Application Log Analysis Pipeline
+| Task | Complexity | Est. |
+|---|---|---|
+| Define log sources &amp; collection strategy | 3 | 6h |
+| Build log ingestion/collection service | 5 | 16h |
+| Implement log parsing &amp; normalization | 5 | 16h |
+| Build log metrics aggregation | 5 | 14h |
+| Implement error &amp; anomaly detection | 5 | 14h |
+| Write unit &amp; integration tests for log pipeline | 4 | 12h |
+
+### 📊 Milestone 3 — Visualization Components
+| Task | Complexity | Est. |
+|---|---|---|
+| Design dashboard UX &amp; wireframes | 4 | 10h |
+| Set up frontend project &amp; charting library | 4 | 10h |
+| Build reusable chart components | 5 | 18h |
+| Build dashboard layout &amp; pages | 5 | 16h |
+| Implement interactivity &amp; filters | 5 | 14h |
+| Connect visualization layer to data APIs | 5 | 14h |
+
+### 🚀 Milestone 4 — Integration, Testing &amp; Deployment
+| Task | Complexity | Est. |
+|---|---|---|
+| Define API contracts between layers | 3 | 8h |
+| Integrate data sources into dashboard | 5 | 16h |
+| End-to-end testing | 5 | 16h |
+| Performance &amp; load testing | 5 | 14h |
+| Set up CI/CD &amp; deployment | 5 | 14h |
+| Documentation &amp; handover | 3 | 8h |
+
+## Complexity Check ✅
+- **All 24 executable tasks are complexity ≤ 5/10** — none are too complex to execute.
+- The complexity analyzer flagged the **4 milestones** (7–8/10), but these are **organizational containers**, not work items — each is already fully decomposed into the leaf tasks above. Their score reflects aggregate scope, not a single unit of work.
+- Average task complexity: **5.0/10**; every task has a clear, bounded deliverable and hour estimate.
+
+## Recommended Starting Point
+1. 🥇 **Define customer CSV schema &amp; data contract** (priority 9, complexity 3, 6h)
+2. 🥈 **Define log sources &amp; collection strategy** (priority 8, complexity 3, 6h)
+3. 🥉 **Define API contracts between layers** (priority 8, complexity 3, 8h)
+
+These three low-complexity &quot;definition&quot; tasks are the natural foundation — they unblock the ingestion, parsing, and visualization work that follows. Want me to mark the first one as in-progress, or add dependencies between tasks to enforce the build order?</pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task283-late-sufficiency_feedback-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-late-selective_patch-r0 · TF 10 / PE 5 · output_truncated · 29 次工具调用 / 1 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 16,
+  &quot;evaluate__7722fb090eee&quot;: 12,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 12.315521,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 3,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_7125b14b52c940449bdf034a&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expression\&quot;:\&quot;lambda: 1\&quot;}&quot;,
+        &quot;name&quot;: &quot;evaluate__7722fb090eee&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 0
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Evaluation error: Undefined variable: lambda&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><h4>回答</h4><pre>## Short answer
+
+Never let user input reach `eval()`, `exec()`, or `compile()`. Instead validate against a **deny-by-default grammar**, then **walk the AST against an allow-list**, then **bound the resources** and **fix the numeric semantics**. I ran a battery of probes against the available validator to ground this advice in observed behaviour rather than theory — and the results are more interesting than expected.
+
+## What I actually observed
+
+| Probe | Validator verdict | Risk |
+|---|---|---|
+| `__import__(&#x27;os&#x27;).system(...)` | rejected — `Unexpected character &#x27;_&#x27;` | ✅ blocked |
+| `().__class__.__bases__[0].__subclasses__()` | rejected | ✅ blocked |
+| `open(&#x27;/etc/passwd&#x27;).read()` | rejected — `Expected &#x27;)&#x27;` | ✅ blocked |
+| `[x for x in range(10)]` | rejected | ✅ blocked |
+| `import os` | rejected | ✅ blocked |
+| `rate * months` (vars allowed) | accepted | ✅ works |
+| `lambda: 1` | **accepted as valid**, then `Undefined variable: lambda` | ⚠️ validator/evaluator desync |
+| `max_depth=3` vs `50` on 5-deep `1+(1+(1+(1+(1+1))))` | **both accepted** | ⚠️ depth limit not enforced |
+| `2 ** 3` | **rejected** — `Expected expression` | ⚠️ no exponent support |
+| `1 / 0`, `0 / 0`, `1e308 * 10` | `result: null, type: &quot;number&quot;` | 🔴 silent failure, no exception |
+| `-7 % 3` | **`-1`** (Python says `2`) | 🔴 wrong semantics |
+| `-21 % 4` | **`-1`** (Python says `3`) | 🔴 wrong semantics |
+
+Four conclusions that shape the recommendation:
+
+1. **A grammar validator alone is insufficient.** `lambda: 1` passed syntax validation because `lambda` isn&#x27;t a keyword in that grammar — it parsed as an identifier. Safety came from evaluation failing, not from validation. Validation that passes must still be followed by an allow-list walk.
+2. **Don&#x27;t trust a third-party `max_depth` parameter.** It accepted depth-5 nesting under both `max_depth=3` and `max_depth=50`. If you need a nesting cap, count it yourself in your own AST walk.
+3. **Silent `null` on overflow and division by zero is the most dangerous finding here.** `1/0` and `1e308 * 10` both returned `type: &quot;number&quot;` with a `null` value. A caller checking only the type will happily persist `null` or `NaN` into a ledger. Arithmetic failure must raise.
+4. **Modulo uses truncated (C `fmod`) semantics, not Python&#x27;s.** `-7 % 3` → `-1` instead of `2`. For anything rate-, billing-, or schedule-related this is a silent correctness bug, and it will diverge from the same formula written in your own Python code.
+
+## The four layers
+
+### Layer 1 — Character allow-list before parsing
+
+Cheap, fail-fast, and it kills the `_`-based payloads at the door.
+
+```python
+import re
+MAX_LEN = 512
+_SAFE_CHARS = re.compile(r&quot;^[0-9eE+\-*/%.() \t]+$&quot;)
+```
+
+Reject anything failing this *before* `ast.parse`. This is a pre-filter, not the control.
+
+### Layer 2 — AST allow-list (the actual control)
+
+```python
+import ast, operator
+
+class ExpressionError(ValueError):
+    &quot;&quot;&quot;Client-safe message. Never carries internals.&quot;&quot;&quot;
+
+_ALLOWED_BINOPS = {ast.Add: operator.add, ast.Sub: operator.sub,
+                   ast.Mult: operator.mul, ast.Div: operator.truediv,
+                   ast.Mod: operator.mod}
+_ALLOWED_UNARYOPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}
+MAX_DEPTH = 25
+
+def validate(expression: str) -&gt; ast.Expression:
+    if not isinstance(expression, str):
+        raise ExpressionError(&quot;expression must be a string&quot;)
+    if len(expression) &gt; MAX_LEN:
+        raise ExpressionError(&quot;expression too long&quot;)
+    if not _SAFE_CHARS.match(expression):
+        raise ExpressionError(&quot;expression contains disallowed characters&quot;)
+    try:
+        tree = ast.parse(expression, mode=&quot;eval&quot;)
+    except SyntaxError as exc:
+        raise ExpressionError(&quot;expression is not valid arithmetic&quot;) from exc
+    _check(tree)
+    return tree
+
+def _check(node: ast.AST, depth: int = 0) -&gt; None:
+    if depth &gt; MAX_DEPTH:
+        raise ExpressionError(&quot;expression nested too deeply&quot;)
+    if isinstance(node, ast.Expression):
+        return _check(node.body, depth + 1)
+    if isinstance(node, ast.Constant):
+        # bool is an int subclass -&gt; reject explicitly
+        if isinstance(node.value, bool) or not isinstance(node.value, (int, float)):
+            raise ExpressionError(&quot;only plain numbers are allowed&quot;)
+        return
+    if isinstance(node, ast.BinOp):
+        if type(node.op) not in _ALLOWED_BINOPS:
+            raise ExpressionError(&quot;operator not allowed&quot;)
+        _check(node.left, depth + 1)
+        _check(node.right, depth + 1)
+        return
+    if isinstance(node, ast.UnaryOp):
+        if type(node.op) not in _ALLOWED_UNARYOPS:
+            raise ExpressionError(&quot;operator not allowed&quot;)
+        _check(node.operand, depth + 1)
+        return
+    # Name, Attribute, Call, Subscript, Lambda, Compare, BoolOp,
+    # comprehensions, JoinedStr, ... all land here
+    raise ExpressionError(&quot;expression element not allowed&quot;)
+```
+
+This is deny-by-default: the terminal `raise` is what stops `lambda`, `Call`, and `Attribute`. Note it rejects `**` too, since `ast.Pow` is absent — add it deliberately only if you cap the exponent.
+
+### Layer 3 — Safe numeric semantics
+
+Fix the two defects I found. Use `Decimal`, raise on non-finite, and correct `%` to divisor-sign semantics.
+
+```python
+from decimal import (Decimal, localcontext, DivisionByZero,
+                     InvalidOperation, ROUND_FLOOR)
+
+MAX_ABS = Decimal(&quot;1e100&quot;)
+
+def evaluate(expression: str) -&gt; Decimal:
+    tree = validate(expression)
+    with localcontext() as ctx:
+        ctx.prec = 34
+        try:
+            result = _eval(tree.body)
+        except (DivisionByZero, InvalidOperation, ZeroDivisionError):
+            raise ExpressionError(&quot;arithmetic error&quot;) from None
+    if not result.is_finite() or abs(result) &gt; MAX_ABS:
+        raise ExpressionError(&quot;result out of range&quot;)
+    return result
+
+def _eval(node: ast.AST) -&gt; Decimal:
+    if isinstance(node, ast.Constant):
+        return Decimal(str(node.value))       # str() avoids float artefacts
+    if isinstance(node, ast.UnaryOp):
+        return _ALLOWED_UNARYOPS[type(node.op)](_eval(node.operand))
+    if isinstance(node, ast.BinOp):
+        left, right = _eval(node.left), _eval(node.right)
+        if type(node.op) in (ast.Div, ast.Mod) and right == 0:
+            raise ExpressionError(&quot;division by zero&quot;)
+        if type(node.op) is ast.Mod:
+            # divisor-sign semantics: -7 % 3 -&gt; 2, matching Python
+            return left - right * (left / right).to_integral_value(rounding=ROUND_FLOOR)
+        return _ALLOWED_BINOPS[type(node.op)](left, right)
+    raise ExpressionError(&quot;expression element not allowed&quot;)
+```
+
+`Decimal(str(0.1))` also removes the `0.1 + 0.2` drift — I observed the harness returning `0.3`, which is display rounding, not a fix.
+
+### Layer 4 — Resource isolation
+
+Python cannot enforce memory or CPU limits in-process; a pure-Python AST walk will still burn CPU on a pathological input. Run the evaluator in a throwaway process.
+
+```python
+import json, resource, subprocess, sys
+
+def _limits(mem_mb: int = 128):
+    resource.setrlimit(resource.RLIMIT_CPU, (1, 1))
+    resource.setrlimit(resource.RLIMIT_AS, (mem_mb &lt;&lt; 20, mem_mb &lt;&lt; 20))
+
+def evaluate_isolated(expression: str, *, timeout: float = 0.25) -&gt; str:
+    try:
+        proc = subprocess.run(
+            [sys.executable, &quot;-I&quot;, &quot;-S&quot;, &quot;-m&quot;, &quot;myapp.safe_cli&quot;],
+            input=json.dumps({&quot;expr&quot;: expression}),
+            capture_output=True, text=True, timeout=timeout,
+            preexec_fn=lambda: _limits(), env={&quot;PATH&quot;: &quot;&quot;},
+        )
+    except subprocess.TimeoutExpired:
+        raise ExpressionError(&quot;expression took too long&quot;) from None
+    if proc.returncode != </pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task133-late-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-early-sufficiency_feedback-r0 · TF 10 / PE 9 · max_rounds · 52 次工具调用 / 0 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 28,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 1,
+  &quot;list_tasks__5cb11580c2d8&quot;: 1,
+  &quot;update_task__e40dd373c4ac&quot;: 21
+}</pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task283-early-sufficiency_feedback-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-middle-full_rewrite-r0 · TF 10 / PE 7 · completed · 8 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;validate_syntax__b7e42007400a&quot;: 2,
+  &quot;evaluate__7722fb090eee&quot;: 5
+}</pre><h4>回答</h4><pre># Securing Mathematical Operations in Python
+
+Below is a complete, OWASP-aligned approach. I validated the concepts live against the expression engine available here, and generated a security-hardening assessment framework.
+
+---
+
+## 1. The Core Threat: `eval()` / `exec()` on Untrusted Input
+
+This is **OWASP A03:2021 – Injection** (and A08 – Software &amp; Data Integrity). A &quot;math&quot; input like this is a full RCE:
+
+```python
+# ❌ NEVER DO THIS
+result = eval(user_input)
+```
+
+I ran that exact payload through the syntax validator here — note that a *naive* validator that only checks &quot;is it parseable&quot; would **pass** it:
+
+| Input | Syntax check | Verdict |
+|---|---|---|
+| `(2 + 3) * 4 / 2 - 1` | ✅ valid → evaluates to **9** | Safe |
+| `2 ^ 10` | ✅ valid → **1024** | Safe |
+| `10 % 3` | ✅ valid → **1** | Safe |
+| `sqrt(16) + abs(-3)` | ✅ valid → **7** | Safe (allowlisted funcs) |
+| `__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)` | ❌ rejected (`Unexpected character &#x27;_&#x27;`) | **Blocked** |
+
+**Key lesson:** the malicious payload was rejected only because the grammar forbade `_`. A permissive parser (like Python&#x27;s own `eval`) would happily execute it. **Syntax validity ≠ safety.** You need an *allowlist*, not a *denylist*.
+
+---
+
+## 2. The Secure Pattern: AST Allowlist Evaluation
+
+Parse with `ast.parse`, then walk the tree and **reject any node type not explicitly permitted**. This is the industry-standard safe-eval pattern.
+
+```python
+import ast
+import operator
+from typing import Union
+
+# --- 1. Allowlisted operators (explicit, minimal) ---
+_ALLOWED_BINOPS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+}
+_ALLOWED_UNARYOPS = {
+    ast.UAdd: operator.pos,
+    ast.USub: operator.neg,
+}
+# --- 2. Allowlisted functions (pure, no side effects) ---
+_ALLOWED_FUNCS = {
+    &quot;abs&quot;: abs,
+    &quot;round&quot;: round,
+    &quot;min&quot;: min,
+    &quot;max&quot;: max,
+    &quot;sqrt&quot;: __import__(&quot;math&quot;).sqrt,
+}
+
+MAX_LEN = 200          # input length cap
+MAX_POW_EXP = 1000     # prevent 9**9**9 DoS
+MAX_NODES = 100        # complexity cap
+
+
+class UnsafeExpression(ValueError):
+    &quot;&quot;&quot;Raised when an expression violates the allowlist.&quot;&quot;&quot;
+
+
+def safe_eval(expr: str) -&gt; Union[int, float]:
+    # --- Guard 1: length (cheap, before parsing) ---
+    if not isinstance(expr, str) or len(expr) &gt; MAX_LEN:
+        raise UnsafeExpression(&quot;Expression too long or wrong type&quot;)
+
+    # --- Guard 2: parse (syntax only, no execution) ---
+    try:
+        tree = ast.parse(expr, mode=&quot;eval&quot;)
+    except SyntaxError as e:
+        raise UnsafeExpression(&quot;Invalid syntax&quot;) from e
+
+    # --- Guard 3: complexity cap ---
+    if sum(1 for _ in ast.walk(tree)) &gt; MAX_NODES:
+        raise UnsafeExpression(&quot;Expression too complex&quot;)
+
+    # --- Guard 4: recursive allowlist walk ---
+    def _eval(node: ast.AST) -&gt; Union[int, float]:
+        if isinstance(node, ast.Expression):
+            return _eval(node.body)
+        if isinstance(node, ast.Constant):
+            if isinstance(node.value, (int, float)) and not isinstance(node.value, bool):
+                return node.value
+            raise UnsafeExpression(&quot;Only numeric constants allowed&quot;)
+        if isinstance(node, ast.BinOp):
+            op = _ALLOWED_BINOPS.get(type(node.op))
+            if op is None:
+                raise UnsafeExpression(f&quot;Operator {type(node.op).__name__} not allowed&quot;)
+            left, right = _eval(node.left), _eval(node.right)
+            # Guard 5: bound exponentiation (DoS)
+            if isinstance(node.op, ast.Pow) and abs(right) &gt; MAX_POW_EXP:
+                raise UnsafeExpression(&quot;Exponent too large&quot;)
+            return op(left, right)
+        if isinstance(node, ast.UnaryOp):
+            op = _ALLOWED_UNARYOPS.get(type(node.op))
+            if op is None:
+                raise UnsafeExpression(&quot;Unary operator not allowed&quot;)
+            return op(_eval(node.operand))
+        if isinstance(node, ast.Call):
+            if not isinstance(node.func, ast.Name) or node.func.id not in _ALLOWED_FUNCS:
+                raise UnsafeExpression(&quot;Function not allowed&quot;)
+            if node.keywords:
+                raise UnsafeExpression(&quot;Keyword args not allowed&quot;)
+            return _ALLOWED_FUNCS[node.func.id](*[_eval(a) for a in node.args])
+        # Anything else (Attribute, Subscript, Lambda, Name, ...) is rejected
+        raise UnsafeExpression(f&quot;Disallowed node: {type(node).__name__}&quot;)
+
+    return _eval(tree)
+```
+
+**Why this is safe:** `ast.parse` never executes code. The walker only descends into node types you named. `__import__`, attribute access (`.system`), subscripts, lambdas, and comprehensions are all *structurally impossible* to reach — they hit the final `raise`.
+
+---
+
+## 3. OWASP Top 10 Mapping for This Codebase
+
+| OWASP Risk | How it applies to math evaluation | Control |
+|---|---|---|
+| **A03 Injection** | `eval`/`exec` → RCE | AST allowlist (above); never `eval` |
+| **A04 Insecure Design** | Unbounded `**` → CPU/memory DoS | `MAX_POW_EXP`, `MAX_NODES`, `MAX_LEN` |
+| **A05 Security Misconfiguration** | Verbose tracebacks leak internals | Catch and return generic errors |
+| **A08 Data Integrity** | `pickle`/`yaml.load` of expressions | Use JSON + `yaml.safe_load` |
+| **A09 Logging Failures** | Attacks go unnoticed | Log every `UnsafeExpression` with source IP |
+| **A06 Vulnerable Components** | Outdated parser libs | Pin &amp; scan deps (`pip-audit`) |
+
+---
+
+## 4. Hardening Checklist (from the generated assessment)
+
+- [ ] **Never** call `eval()`, `exec()`, or `compile()` on user input — grep your codebase for these.
+- [ ] Use **AST allowlisting**, not regex denylists (denylists are bypassable).
+- [ ] Enforce **length, node-count, and exponent bounds** (defense against algorithmic complexity DoS).
+- [ ] **Fail closed** — unknown node type = reject, never &quot;try anyway.&quot;
+- [ ] **Sanitize errors** — return `&quot;Invalid expression&quot;`, log details server-side only.
+- [ ] **Log &amp; monitor** rejected inputs (A09) — repeated failures signal an attacker.
+- [ ] If you must accept structured data, use **`json`**, never `pickle` (A08).
+- [ ] Run **`pip-audit`** / **`safety`** in CI for dependency CVEs (A06).
+- [ ] Add **rate limiting** on any endpoint that evaluates expressions.
+
+---
+
+## 5. Error Handling &amp; Logging (A05 + A09)
+
+```python
+import logging
+logger = logging.getLogger(&quot;math.eval&quot;)
+
+def handle_expression(user_input: str, client_ip: str):
+    try:
+        return {&quot;ok&quot;: True, &quot;result&quot;: safe_eval(user_input)}
+    except UnsafeExpression as e:
+        # Log full detail server-side; return generic message to client
+        logger.warning(&quot;Rejected expression from %s: %r (%s)&quot;, client_ip, user_input, e)
+        return {&quot;ok&quot;: False, &quot;error&quot;: &quot;Invalid expression&quot;}   # no internals leaked
+    except Exception:
+        logger.exception(&quot;Unexpected eval failure from %s&quot;, client_ip)
+        return {&quot;ok&quot;: False, &quot;error&quot;: &quot;Invalid expression&quot;}
+```
+
+---
+
+## 6. Security Test Cases
+
+```python
+import pytest
+
+@pytest.mark.parametrize(&quot;payload&quot;, [
+    &quot;__import__(&#x27;os&#x27;).system(&#x27;id&#x27;)&quot;,
+    &quot;().__class__.__bases__[0].__subclasses__()&quot;,
+    &quot;open(&#x27;/etc/passwd&#x27;).read()&quot;,
+    &quot;lambda: 1&quot;,
+    &quot;[x for x in range(10)]&quot;,
+    &quot;9**9**9&quot;,              # DoS
+    &quot;a + b&quot;,                # undefined name
+])
+def test_rejects_dangerous(payload):
+    with pytest.raises(UnsafeExpression):
+        safe_eval(payload)
+
+@pytest.mark.parametrize(&quot;expr,expected&quot;, [
+    (&quot;(2 + 3) * 4 / 2 - 1&quot;, 9),
+    (&quot;2 ^ 10&quot;, 1024),        # note: ^ is XOR in Python; use ** for power
+    (&quot;10 % 3&quot;, 1),
+    (&quot;sqrt(16) + abs(-3)&quot;, 7),
+])
+def test_allows_arithmetic(expr, expected):
+    assert safe_eval(expr) == expected
+```
+
+&gt; ⚠️ **Gotcha I confirmed live:** in Python, `^` is **bitwise XOR**, not exponentiation — `2 ^ 10 == 1024` only coincidentally. Use `**` for powers, and be aware the expression engine here treats `^` as power. Document your operator semantics explicitly to avoid silent logic bugs.
+
+---
+
+## 7. Recommended Libraries (don&#x27;t hand-roll if you can avoid it)
+
+- **`asteval`** — mature, sandboxed AST evaluator with configurable symbol tables.
+- **`simpleeval`** — lightweight, allowlist-based, good for arithmetic.
+- **`numexpr`** — fast numeric array expressions (not for untrusted input by default).
+- **`pydantic`** — validate/coerce the *inputs* before they reach the evaluator.
+
+---
+
+### Bottom line
+1. **Ban `eval`/`exec`** — enforce with a linter rule (`flake8-bandit` / `ruff` rule `S307`).
+2. **Parse → allowlist-walk → evaluate** with hard bounds on size, complexity, and exponents.
+3. **Fail closed, log loudly, leak nothing.**
+4. **Test with real attack payloads** in CI.
+
+This maps directly to OWASP **A03 (Injection)**, **A04 (Insecure Design)**, **A05 (Misconfiguration)**, and **A09 (Logging)** — the four risks that dominate expression-evaluation code.</pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task133-middle-full_rewrite-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-early-sufficiency_feedback-r0 · TF 10 / PE 5.400 · output_truncated · 25 次工具调用 / 2 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 9,
+  &quot;evaluate__7722fb090eee&quot;: 14,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;set_variable__b4e6856a10df&quot;: 1
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 12.459711,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 3,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;chatcmpl-tool-9a60040a100dabe0&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expression\&quot;: \&quot;eval(user_input)\&quot;}&quot;,
+        &quot;name&quot;: &quot;evaluate__7722fb090eee&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 3
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Evaluation error: Undefined variable: user_input&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  },
+  {
+    &quot;elapsed_seconds&quot;: 16.070771,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 4,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;chatcmpl-tool-82e5c68bcd267590&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expression\&quot;: \&quot;principal &gt; 1000 and True\&quot;}&quot;,
+        &quot;name&quot;: &quot;evaluate__7722fb090eee&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 5
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Evaluation error: Undefined variable: True&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><h4>回答</h4><pre>## Short answer
+
+Validate in **three separate layers**, and never let one layer stand in for another: (1) a **grammar/AST allowlist** that rejects everything not explicitly permitted, (2) a **name-bound evaluation** against a small function registry plus caller-supplied parameters, and (3) **resource + numeric domain limits** so a valid expression can&#x27;t DoS you or silently produce garbage. Then review the implementation against OWASP A03/A04/A05/A09 with the generated hardening prompt at the end.
+
+I ran probes against the math sandbox here to test that layered model. The results are the best illustration of why layer 2 is mandatory:
+
+| Probe | Result | Lesson |
+|---|---|---|
+| `eval(user_input)` | **&quot;Expression is syntactically valid&quot;** | Syntax validation is *not* a security control. It only proves the parser could parse it. |
+| `__import__(&quot;os&quot;).system(&quot;id&quot;)` | Rejected at parse (underscore) | String-level rejection is real but incidental — don&#x27;t build your design on it. |
+| `os.system(&#x27;id&#x27;)` / `principal.value * 2` | Rejected | Attribute access + non-registry calls blocked. This is the layer that actually saves you. |
+| `eval(user_input)` at eval time | `Undefined variable: user_input` | **Name binding** to a typed dict is the real gate, not the parser. |
+| `1/0`, `0/0`, `(-1)^0.5` | `result: null, type: &quot;number&quot;`, `isError: false` | **Fail-open.** Division by zero and domain errors became `null`, not errors. Copy this into a pricing service and you get silent wrong invoices. |
+| `10 ^ 400`, `2 ^ 100000` | `null`, no error | Same fail-open path for overflow. |
+| `2 ^ 10` → `1024` | `^` is **exponentiation**, not Python&#x27;s XOR | Semantic divergence trap: an expression valid here means something different in `eval`. Never mix the two. |
+| `1 &lt; 2 &lt; 3` → `true` | Booleans are a valid return type | Decide explicitly whether a boolean may land in a numeric column. |
+
+Two conclusions: **syntax-valid ≠ safe**, and **&quot;no exception raised&quot; ≠ correct**. I also generated a full OWASP/NIST/SOC-2 hardening prompt (see §4).
+
+---
+
+## 1. Reference implementation
+
+Replace every `eval`/`exec`/`compile` on user or partner input with a validator that walks the AST and an evaluator that only walks *your* whitelist.
+
+```python
+# safe_math.py
+import ast, math, operator, signal
+from contextlib import contextmanager
+from decimal import Decimal, InvalidOperation
+
+class ExprError(ValueError):
+    &quot;&quot;&quot;Caller-safe message. Detail goes to the log, never to the response.&quot;&quot;&quot;
+
+MAX_LEN, MAX_NODES, MAX_DEPTH = 512, 200, 25
+MAX_ABS, MAX_INT_BITS, MAX_EXPONENT = 1e12, 4096, 64
+
+_ALLOWED = (
+    ast.Expression, ast.BinOp, ast.UnaryOp, ast.Compare, ast.BoolOp, ast.IfExp,
+    ast.Call, ast.Name, ast.Load, ast.Constant,
+    ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow,
+    ast.USub, ast.UAdd, ast.Not,
+    ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
+    ast.And, ast.Or,
+)
+_BINOPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
+           ast.Div: operator.truediv, ast.FloorDiv: operator.floordiv,
+           ast.Mod: operator.mod}
+_CMPOPS = {ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,
+           ast.LtE: operator.le, ast.Gt: operator.gt, ast.GtE: operator.ge}
+_FUNCS = {&quot;sqrt&quot;: math.sqrt, &quot;abs&quot;: abs, &quot;min&quot;: min, &quot;max&quot;: max,
+          &quot;floor&quot;: math.floor, &quot;ceil&quot;: math.ceil, &quot;round&quot;: round,
+          &quot;log&quot;: math.log, &quot;exp&quot;: math.exp}
+_CONSTS = {&quot;pi&quot;: math.pi, &quot;e&quot;: math.e}
+
+
+def compile_expr(src: str, params: set[str]) -&gt; ast.Expression:
+    if not isinstance(src, str) or len(src) &gt; MAX_LEN:
+        raise ExprError(&quot;expression too long&quot;)
+    try:
+        tree = ast.parse(src, mode=&quot;eval&quot;)
+    except SyntaxError:
+        raise ExprError(&quot;invalid syntax&quot;) from None          # no chained traceback
+
+    count = 0
+    def walk(node, depth):
+        nonlocal count
+        count += 1
+        if count &gt; MAX_NODES:
+            raise ExprError(&quot;expression too complex&quot;)
+        if depth &gt; MAX_DEPTH:
+            raise ExprError(&quot;expression too deeply nested&quot;)
+        if not isinstance(node, _ALLOWED):
+            raise ExprError(&quot;disallowed construct&quot;)          # attributes, subscripts, lambda, comprehensions, f-strings, walrus
+        if isinstance(node, ast.Name):
+            if node.id not in params and node.id not in _FUNCS and node.id not in _CONSTS:
+                raise ExprError(&quot;unknown name&quot;)
+        if isinstance(node, ast.Constant):
+            v = node.value
+            if isinstance(v, bool) or not isinstance(v, (int, float)):
+                raise ExprError(&quot;only numeric literals&quot;)
+            if isinstance(v, int) and v.bit_length() &gt; MAX_INT_BITS:
+                raise ExprError(&quot;literal too large&quot;)
+        if isinstance(node, ast.Call):
+            if not isinstance(node.func, ast.Name) or node.func.id not in _FUNCS:
+                raise ExprError(&quot;call to non-allowlisted function&quot;)
+            if node.keywords:
+                raise ExprError(&quot;keyword arguments not allowed&quot;)
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Pow):
+            exp = node.right
+            if isinstance(exp, ast.Constant) and abs(exp.value) &gt; MAX_EXPONENT:
+                raise ExprError(&quot;exponent out of range&quot;)     # kills 9**9**9**9 before it runs
+        for child in ast.iter_child_nodes(node):
+            walk(child, depth + 1)
+
+    walk(tree, 0)
+    return tree
+
+
+def _pow(l, r):
+    if abs(r) &gt; MAX_EXPONENT:
+        raise ExprError(&quot;exponent out of range&quot;)
+    if l &lt;= 0 and not float(r).is_integer():
+        raise ExprError(&quot;complex result&quot;)                    # (-1) ** 0.5
+    if l &gt; 1 and math.log10(l) * r &gt; 12:
+        raise ExprError(&quot;result too large&quot;)                  # bounded *before* computing
+    return l ** r
+
+
+def _eval(node, env):
+    if isinstance(node, ast.Constant):
+        return node.value
+    if isinstance(node, ast.Name):
+        return env[node.id]
+    if isinstance(node, ast.BinOp):
+        l, r = _eval(node.left, env), _eval(node.right, env)
+        if isinstance(node.op, ast.Pow):
+            return _pow(l, r)
+        if isinstance(node.op, (ast.Div, ast.FloorDiv, ast.Mod)) and r == 0:
+            raise ExprError(&quot;division by zero&quot;)              # explicit, never null
+        return _BINOPS[type(node.op)](l, r)
+    if isinstance(node, ast.UnaryOp):
+        v = _eval(node.operand, env)
+       </pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task133-early-sufficiency_feedback-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-middle-no_update-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>已完成三张销售绩效图表：
+
+1. **2025年省级销售额分布地图**：广东 ¥15.8M 居首，江苏 ¥12.3M 次之。  
+2. **2025年月度销售趋势面积图**：全年合计 ¥23.4M，12月达到峰值 ¥3.5M，8月出现小幅回落。  
+3. **区域重点品类对比柱状图**：电子产品在两省均排名第一；广东三大品类合计 ¥15.8M，江苏合计 ¥12.3M。
+
+**关键观察：**  
+- 广东、江苏合计占列出省份销售额的 **52.6%**。  
+- 月度销售整体上升，第四季度合计 ¥9.2M，占全年 **39.3%**。  
+- 广东在电子产品、家用电器和服装三个品类上均领先江苏。</pre><a href="../results/raw/selective-search-confirmation-r1-20261031/cells/task235-middle-no_update-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-late-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-sufficiency_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-sufficiency_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-sufficiency_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-sufficiency_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-sufficiency_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-sufficiency_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-sufficiency_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-sufficiency_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-sufficiency_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-sufficiency_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-sufficiency_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-sufficiency_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-sufficiency_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-sufficiency_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-sufficiency_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-sufficiency_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-sufficiency_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-sufficiency_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-sufficiency_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-sufficiency_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-sufficiency_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-sufficiency_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-sufficiency_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details></main></html>
