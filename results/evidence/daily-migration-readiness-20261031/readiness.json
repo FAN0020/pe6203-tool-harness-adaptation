@@ -1,0 +1,31 @@
+{
+  "status": "ready_for_explicit_12_cell_protocol",
+  "new_model_calls": 0,
+  "public_tool_calls": 5,
+  "catalog_counts": {
+    "early": 12,
+    "middle": 13,
+    "late": 13
+  },
+  "image": {
+    "bytes": 76747,
+    "base64_characters": 102332,
+    "sha256": "6c10d3634d8a30bf2fb5f3c305e452582c48a4a156e7d92d1d697666c4499f85",
+    "jpeg_markers_valid": true
+  },
+  "unchanged_card_contracts": [
+    "get_card_by_id",
+    "get_card_image"
+  ],
+  "actual_daily_migration_probe": "Early get_daily_challenge and Late get_problem(daily=true) both return the same current dated problem. Exact values retained in observations; no answer prefill in model requests.",
+  "production_changes": "Only add two reviewed launch profiles; no strategy, runner or judge edits.",
+  "fairness": "Same image JSON-text serialization for every arm; byte fetching is distinct from actual inline display or image understanding.",
+  "data_exposure": "Task90 is explicitly exposed development. Released answers/trajectories were seen in a prior overly broad read; current daily answer seen in read-only readiness. Neither is supplied to updater or agent.",
+  "tests": {
+    "command": "uv run pytest -q tests/test_profiles.py tests/test_strategy_search.py tests/test_spend_guard.py -m not_integration",
+    "result": "30 passed in 1.13s",
+    "actual_marker_expression": "not integration"
+  },
+  "protocol": "experiments/daily-migration-v1.json",
+  "source_before_profile_additions": "51136de73a1351fad399a6280c55cf0fb2f26636"
+}
