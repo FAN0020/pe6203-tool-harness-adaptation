@@ -1,0 +1,37 @@
+{
+  "id": "slidev-document-write-probes-v2",
+  "status": "frozen_before_probe_execution",
+  "purpose": "Check a distinct serialization/round-trip mechanism before any new method or model run. Prior artifact_contract rejected; do not repeat its bulk probes.",
+  "stages": [
+    "middle",
+    "late"
+  ],
+  "cases": {
+    "body_sequence": "# Synthetic Alpha\n\nVALUE_A=17\n\n---\nlayout: default\n---\n\n# Synthetic Beta\n\nVALUE_B=29\n\n---\nlayout: default\n---\n\n# Synthetic Gamma\n\nVALUE_C=43"
+  },
+  "sequence": [
+    "create_slidev fresh project",
+    "set_page index0/layoutcover with bodysequence",
+    "load_slidev tosplit persistedpages intoindividualrecords",
+    "apply_theme dark",
+    "get_all_slides",
+    "load_slidev sameproject again",
+    "get_all_slides"
+  ],
+  "planned_tool_calls": 14,
+  "catalog_calls": 2,
+  "model_calls": 0,
+  "acceptance": {
+    "body_sequence": "Allthree exact canaries persist; root theme dark; persisted file unchanged by load; post-loadget_all yields exactly3intendedslides; real render hasexactly3legible darkpages with correctcontent. Any failedcondition rejects this path as anestablished alternative.",
+    "scope": "Only a fresh project whose initialcover is replaced. No claim ofdeletingotherstoredpages, arbitrary Markdown validity, all-slideeditatomicity oragentquality/completion improvement."
+  },
+  "forbidden": [
+    "No paperfacts/benchmarkanswers",
+    "No model/judge",
+    "No upstreamcode changes",
+    "No installation/export/publichosting",
+    "No repair ofprobedecks after results"
+  ],
+  "next": "If verified, freeze a different selective mechanism andqualitygates before newagentcalls; thetoolknowledge mustreflect realwriterlimitations andnotgeneralbudget advice.",
+  "reason_for_new_sequence": "v1proves apply_theme immediately aftermulti-page write discardsall butfirstbody: updateSlideFrontmatter splits theunsplit record andkeeps parts[1]. Source showsload splitsrecords before themeupdate. Test this specific ordering; retain24priorcalls andfailure without changingthem."
+}
