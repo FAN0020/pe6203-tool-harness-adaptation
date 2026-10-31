@@ -296,3 +296,50 @@ def test_note_schema_repair_is_bounded_audited_and_keeps_both_response_costs(tmp
     assert len(audit["attempts"]) == 2 and audit["attempts"][0]["validation_error"]
     assert note()["rules"][0] in knowledge["tools"][0]["usage_rules"]
     assert "server::lookup" in sent[1][-1]["content"]
+
+
+def test_sufficiency_policy_is_local_and_keeps_existing_contract_without_a_model(monkeypatch):
+    import integration.baselines as provider
+
+    monkeypatch.setattr(
+        provider,
+        "_request_completion",
+        lambda *_: pytest.fail("deterministic patch made a model call"),
+    )
+    old, target = catalog(), changed()
+    knowledge, log, cost = adapt(old, target, "sufficiency_notes")
+    assert knowledge["tools"][1] == old["tools"][1]
+    assert knowledge["tools"][0]["parameters"] == target["tools"][0]["parameters"]
+    assert knowledge["tools"][0]["usage_rules"][:1] == old["tools"][0]["usage_rules"]
+    assert len(knowledge["tools"][0]["usage_rules"]) > len(old["tools"][0]["usage_rules"])
+    assert cost["calls"] == 0 and cost["usd"] == 0
+    assert adapt(old, catalog("late"), "sufficiency_notes")[0] == old
+
+
+def test_workflow_policy_can_select_a_dependent_unchanged_tool_but_not_another_service(monkeypatch):
+    import integration.baselines as provider
+
+    old = catalog()
+    other = deepcopy(old["tools"][1])
+    other.update(
+        server_id="other",
+        tool_id="other::unrelated",
+        routing={"server_id": "other", "tool_name": "unrelated"},
+    )
+    old["tools"].append(other)
+    target = changed()
+    target["tools"].append({**deepcopy(other), "version": "late"})
+    requests = []
+
+    def respond(messages, settings):
+        requests.append(json.loads(messages[1]["content"]))
+        return completion([note("server::unrelated")])
+
+    monkeypatch.setattr(provider, "_request_completion", respond)
+    knowledge, _, cost = adapt(
+        old, target, "workflow_notes", {"updater": {"allow_metadata_api": True}}
+    )
+    assert note()["rules"][0] in knowledge["tools"][1]["usage_rules"]
+    assert knowledge["tools"][2] == other and cost["calls"] == 1
+    assert {t["server_id"] for t in requests[0]["candidate_tools"]} == {"server"}
+    assert adapt(old, deepcopy(old), "workflow_notes")[0] == old

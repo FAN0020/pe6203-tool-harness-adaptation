@@ -289,7 +289,7 @@ def check_plan(root, output, plan):
     }
     for role, settings in roles.items():
         if role == "updater" and not any(
-            c["strategy"] in ("full_rewrite", "linked_notes", "feedback_notes")
+            c["strategy"] in ("full_rewrite", "linked_notes", "feedback_notes", "workflow_notes")
             and c["version"] != "early"
             for c in plan["cells"]
         ):

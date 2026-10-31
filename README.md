@@ -44,6 +44,18 @@ uv sync --frozen
 
 可读入口：[`当前实验结果、案例与剩余要求`](reports/course-v1.3-experiment.html)。原始包、审计和机器说明在 `results/evidence/course-v1.3-20261031/`。
 
+策略研究另见 [`候选方法、全部成功与失败记录`](reports/selective-strategy-search.html)：参考 ACE、A-MEM、Reflexion。首轮三个候选共 24 条轨迹已完成，未达到预设 PE 改善门槛；第二轮比较 `sufficiency_notes`、`workflow_notes` 与原 Selective Patch。课程主结论看 TF 恢复/保持和 ECS；当前搜索在 TF/ECS/完成率约束下优化 PE，并报告成本。开发筛选与三次重复确认分开，不能把开发高分当确认结果。
+
+```bash
+./experiment search prepare --spec experiments/selective-search-v2.json --output results/raw/my-search
+./experiment search build --output results/raw/my-search    # 调用 updater，保存原始响应及费用
+./experiment search review --output results/raw/my-search --note '填写对生成规则依据的审查结论'
+./experiment search run --output results/raw/my-search      # 固定知识后执行；再次运行只恢复允许的缺失步骤
+./experiment search report --output results/raw/my-search
+```
+
+`review` 前检查 `adaptations/*/updater-audit.json`；自动结构校验不能证明所有自然语言规则都有依据。确认阶段 prepare 另加 `--phase confirmation --candidate <候选名称>`，运行 108 个单元，保留两基线和原 Selective Patch。
+
 [`历史计划及成功/失败案例`](reports/experiment-readiness.html) 保留全部 54 条旧课程记录：A 为 26/27 完整评分，B 为 24/27；未用新结果回填。当前课程缺口是可靠的 patch under-update / over-update 因果案例及最终展示。Netlify 仍待用户选定专用站点后做真实发布。
 
 已确认的发布包缺陷保留在所有方法中：Late `batch_evaluate` / `sequentialthinking` / `review_workspace_health` 缺失内部方法，以及新增 `parallel-thinking` 的输出 schema 不匹配。不能把这些直接归因为 under/over-update。**课程报告仍需基于真实轨迹完成两类错误的因果分析**；低分不自动证明原因。

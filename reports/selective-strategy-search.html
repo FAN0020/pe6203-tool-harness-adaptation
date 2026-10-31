@@ -1,0 +1,1822 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Selective Patch 策略研究</title><style>body{font:16px/1.65 system-ui,sans-serif;max-width:1180px;margin:32px auto;padding:0 20px;color:#20272e;background:#fafbfc}h1,h2,h3{line-height:1.3}h2{margin-top:42px;border-bottom:2px solid #d9e2ec;padding-bottom:10px}a{color:#0969a6}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #d9e2ec;padding:8px;text-align:left;vertical-align:top}th{background:#eaf1f7}th:first-child,td:first-child{min-width:85px}.scroll{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2f6;padding:14px;border-radius:6px;font-size:13px}details{background:white;border:1px solid #d9e2ec;border-radius:7px;margin:10px 0;padding:12px}summary{cursor:pointer;font-weight:600;overflow-wrap:anywhere}td{overflow-wrap:anywhere}p{max-width:100ch}</style><main><h1>Selective Patch 策略研究</h1>
+<p>研究目标：在不明显损伤 TF、ECS、完成率及逐任务表现的前提下，提高环境变化后的 PE。报告同时保留 recovery、retention 和更新成本；效率改善不自动等于恢复能力改善。</p>
+<p>所有 agent 自行选择工具及参数。固定模型、任务、judge 与执行预算；新规则只来自工具元数据和独立小型探针。三阶段 Early 共用 K0。开发结果用于筛选，确认结果才用于晋级；既有任务上的新重复不代表未见任务泛化。</p>
+<p>原有结果：<a href="course-v1.3-experiment.html">v1.3 与六条诊断</a> · <a href="experiment-readiness.html">旧 A/B 的成功与失败案例</a></p>
+<h2>方法依据</h2>
+<div class="scroll"><table><thead><tr><th>论文</th><th>我们的改造</th><th>与原方法的区别</th></tr></thead><tbody><tr><td><a href="https://arxiv.org/html/2510.04618v1">ACE</a></td><td>delta_notes：先应用元数据差异补丁，再只向变化/新增工具追加当前必需参数与使用边界提示。</td><td>首版采用确定性编译，没有复现 ACE 的 Generator/Reflector/Curator 训练循环或 helpful/harmful 计数。</td></tr><tr><td><a href="https://arxiv.org/html/2502.12110v1">A-MEM</a></td><td>linked_notes：从变化工具出发检索少量同服务候选邻居，LLM 根据元数据为相关工具生成局部使用规则。</td><td>工具知识替代对话记忆；首版用词项相似度候选过滤而非额外 embedding 模型，并锁定 schema/routing/description。</td></tr><tr><td><a href="https://proceedings.neurips.cc/paper_files/paper/2023/file/1b44b878bb782e6954cd888628510e90-Paper-Conference.pdf">Reflexion</a></td><td>feedback_notes：只使用冻结的安全工具探测反馈，生成针对变化工具的错误规避规则；正式运行中不从 judge 学习。</td><td>经验在执行前冻结；不重试已评分任务，不增加 agent 轮数，不复现论文的整任务多次试错。</td></tr></tbody></table></div>
+<h2>保留的生成失败</h2>
+<p>v1 在任务执行前被拦截：关联补丁引用了不属于变化集合的工具 ID。执行轨迹数为 0；失败响应、已生成补丁与费用均已归档。v1.1 增加明确 ID 列表及最多一次结构修复，不按分数重试。<a href="../results/evidence/selective-search-20261031/generation-v1-failure.json">完整记录</a>；已知更新费用 $0.005274。</p>
+<h2>selective-search-v1.1-development-20261031</h2>
+<p>development：完整评分 24/24；执行完成 16。截断或轮数耗尽即使 TF 高，也不算执行完成。</p>
+<p><a href="../results/raw/selective-search-v1.1-development-20261031/plan.json">冻结计划</a> · <a href="../results/raw/selective-search-v1.1-development-20261031/runs.csv">全部单元 CSV</a> · <a href="../results/raw/selective-search-v1.1-development-20261031/readable-analysis.json">结构化分析与完整错误</a></p>
+<div class="scroll"><table><thead><tr><th>策略</th><th>阶段</th><th>完整评分</th><th>TF</th><th>PE</th></tr></thead><tbody><tr><td>delta_notes</td><td>middle</td><td>3/3</td><td>10</td><td>8.600</td></tr><tr><td>delta_notes</td><td>late</td><td>3/3</td><td>10</td><td>8.933</td></tr><tr><td>feedback_notes</td><td>middle</td><td>3/3</td><td>10</td><td>9.733</td></tr><tr><td>feedback_notes</td><td>late</td><td>3/3</td><td>9.867</td><td>8.133</td></tr><tr><td>linked_notes</td><td>middle</td><td>3/3</td><td>9.800</td><td>8</td></tr><tr><td>linked_notes</td><td>late</td><td>3/3</td><td>9.933</td><td>8.600</td></tr><tr><td>selective_patch</td><td>middle</td><td>3/3</td><td>10</td><td>9.400</td></tr><tr><td>selective_patch</td><td>late</td><td>3/3</td><td>9.933</td><td>8.933</td></tr></tbody></table></div>
+<h3>恢复与保持</h3><p>recovery＝133/283，retention＝235。Δ 是同阶段配对差值；own Early 衡量各方法自身的跨阶段变化。— 表示对照缺失或评分不完整，不能解读为 0。</p>
+<div class="scroll"><table><thead><tr><th>策略</th><th>阶段</th><th>子集</th><th>ΔTF / No Update</th><th>ΔTF / 原 Patch</th><th>ΔTF / own Early</th><th>ΔPE / 原 Patch</th></tr></thead><tbody><tr><td>delta_notes</td><td>middle</td><td>recovery</td><td>—</td><td>0</td><td>—</td><td>-1.200</td></tr><tr><td>delta_notes</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>delta_notes</td><td>late</td><td>recovery</td><td>—</td><td>0.100</td><td>—</td><td>0.000</td></tr><tr><td>delta_notes</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>feedback_notes</td><td>middle</td><td>recovery</td><td>—</td><td>0</td><td>—</td><td>0.500</td></tr><tr><td>feedback_notes</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>feedback_notes</td><td>late</td><td>recovery</td><td>—</td><td>-0.100</td><td>—</td><td>-1.200</td></tr><tr><td>feedback_notes</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>linked_notes</td><td>middle</td><td>recovery</td><td>—</td><td>-0.300</td><td>—</td><td>-2.100</td></tr><tr><td>linked_notes</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>linked_notes</td><td>late</td><td>recovery</td><td>—</td><td>0.000</td><td>—</td><td>-0.500</td></tr><tr><td>linked_notes</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>selective_patch</td><td>middle</td><td>recovery</td><td>—</td><td>0</td><td>—</td><td>0.000</td></tr><tr><td>selective_patch</td><td>middle</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr><tr><td>selective_patch</td><td>late</td><td>recovery</td><td>—</td><td>0.000</td><td>—</td><td>0.000</td></tr><tr><td>selective_patch</td><td>late</td><td>retention</td><td>—</td><td>0</td><td>—</td><td>0</td></tr></tbody></table></div>
+<h3>ECS 与成本</h3>
+<div class="scroll"><table><thead><tr><th>任务</th><th>策略</th><th>重复</th><th>ECS：发布代码</th><th>ECS：论文附录</th></tr></thead><tbody><tr><td>133</td><td>delta_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>feedback_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>linked_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>delta_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>feedback_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>linked_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>delta_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>feedback_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>linked_notes</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr></tbody></table></div>
+<p>每份冻结知识的更新成本只计一次，三次执行复用。API 预检费用另存 preflight/。任何未知收费均保留 null。</p><pre>{
+  &quot;update&quot;: {
+    &quot;total_tokens&quot;: 90504,
+    &quot;usd&quot;: 0.005824302,
+    &quot;seconds&quot;: 26.889374331
+  },
+  &quot;agent&quot;: {
+    &quot;total_tokens&quot;: null,
+    &quot;usd&quot;: null,
+    &quot;seconds&quot;: null
+  },
+  &quot;judge&quot;: {
+    &quot;total_tokens&quot;: 1989651,
+    &quot;usd&quot;: 0.061316372,
+    &quot;seconds&quot;: null
+  }
+}</pre>
+<h3>逐条成功与失败证据</h3><p>保留全部单元，不只展示高分。工具报错可能被恢复；低分、工具错误或截断本身不能证明 under-update / over-update，需要定位具体知识改动并做对照归因。</p>
+<details><summary>task283-middle-linked_notes-r0 · TF 9.400 / PE 9 · max_rounds · 61 次工具调用 / 0 次错误</summary><p>项目拆解 · evaluated</p><h4>人工分析（不改评分）</h4><p>工具操作可能满足不少要求，但执行耗尽轮数且没有最终回答。因此正常完成率必须与 judge 分数分开报告；单条轨迹不能证明补丁造成了这一结果。</p><pre>{
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 56,
+  &quot;update_task__e40dd373c4ac&quot;: 3,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 1
+}</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task283-middle-linked_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-late-linked_notes-r0 · TF 10 / PE 8.800 · completed · 30 次工具调用 / 0 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 24,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 2,
+  &quot;update_task__e40dd373c4ac&quot;: 1,
+  &quot;list_tasks__5cb11580c2d8&quot;: 1
+}</pre><h4>回答</h4><pre>Done! I&#x27;ve created the **Analytics Dashboard** project and structured it into 4 major milestones with 20 concrete, manageable tasks. A complexity analysis confirms **0 tasks exceed the threshold** (average complexity 4.7/10, all ≤5).
+
+## Project Structure
+
+### 🎯 Milestone 1: Customer CSV Data Pipeline (Priority 9)
+1. Define CSV schema &amp; data contract — 4h
+2. Build CSV ingestion loader — 8h
+3. Implement data validation &amp; cleaning — 10h
+4. Build transformation &amp; normalization — 10h
+5. Set up customer data storage layer — 8h
+
+### 🎯 Milestone 2: Application Log Analysis (Priority 8)
+1. Define log format &amp; parsing spec — 4h
+2. Build log ingestion — 8h
+3. Implement log parser &amp; normalizer — 10h
+4. Implement error pattern detection — 10h
+5. Build log metrics aggregation — 8h
+
+### 🎯 Milestone 3: Visualization Components (Priority 8)
+1. Design dashboard layout &amp; wireframes — 6h
+2. Build reusable chart component library — 12h
+3. Build customer data visualizations — 10h
+4. Build log insight visualizations — 10h
+5. Add filters &amp; interactivity — 10h
+
+### 🎯 Milestone 4: Integration, Testing &amp; Delivery (Priority 7)
+1. Integrate pipelines into dashboard — 10h
+2. End-to-end testing — 12h
+3. Performance tuning — 10h
+4. Write documentation — 6h
+5. Deployment &amp; release — 8h
+
+## Complexity Verification
+- **Total tasks:** 24 (4 milestones + 20 subtasks)
+- **Complex tasks (≥7):** 0 ✅
+- **Average complexity:** 4.7/10
+- **Total estimated effort:** ~180 hours
+
+I initially flagged Milestone 1 as a &quot;complex&quot; container, but since it&#x27;s already decomposed into 5 focused subtasks, I re-scoped it as a tracking milestone (complexity 4) — the re-analysis now reports all tasks as well-scoped and manageable.
+
+## Suggested Execution Order
+The natural dependency flow is **Milestone 1 &amp; 2 in parallel** (both feed data into the dashboard), then **Milestone 3** (visualizations consume their outputs), and finally **Milestone 4** (integration, testing, delivery). Within each milestone, the &quot;define spec&quot; tasks should come first, followed by build tasks.
+
+Would you like me to add explicit dependencies between tasks (e.g., making visualization tasks depend on the data/log pipelines) or assign owners and due dates?</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task283-late-linked_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-late-feedback_notes-r0 · TF 10 / PE 7.400 · completed · 56 次工具调用 / 0 次错误</summary><p>项目拆解 · evaluated</p><h4>人工分析（不改评分）</h4><p>错误经验提示没有解决过度规划。轨迹中出现直接调低父任务复杂度和改名，可能只是在绕开工具的启发式规则，不能据高 TF 就断言真正降低了工作复杂度。</p><pre>{
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 37,
+  &quot;update_task__e40dd373c4ac&quot;: 12,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 3,
+  &quot;get_next_task_recommendation__83b9706df23d&quot;: 1,
+  &quot;list_tasks__5cb11580c2d8&quot;: 1
+}</pre><h4>回答</h4><pre>The project is fully structured. Here&#x27;s what&#x27;s in place.
+
+## 📊 Project: Analytics Dashboard
+**ID:** `f500fe4b-97ce-4e5c-95bd-0b5055ce3dff` · 6 milestones · 31 executable tasks · ~204 engineering hours
+
+### Milestone roadmap (sequenced by dependencies)
+
+| # | Milestone | Tasks | Hours | Depends on |
+|---|-----------|-------|-------|------------|
+| M1 | Project Setup &amp; Architecture | 4 | 20 | — |
+| M2 | Customer CSV Ingestion &amp; Processing | 5 | 34 | M1 |
+| M3 | Application Log Analysis Pipeline | 5 | 34 | M1 |
+| M4 | Metrics &amp; Aggregation API | 5 | 30 | M2, M3 |
+| M5 | Visualization &amp; Dashboard UI | 6 | 42 | M4 |
+| M6 | Quality Assurance &amp; Release | 6 | 44 | M5 |
+
+M2 and M3 can run **in parallel** after M1 — that&#x27;s your main schedule compression opportunity.
+
+### Task breakdown
+
+**M1 — Setup &amp; Architecture (20h)**
+- Define architecture &amp; technology stack (6h)
+- Design data schemas &amp; models (6h)
+- Scaffold repository &amp; CI skeleton (4h)
+- Set up local dev environment (4h)
+
+**M2 — Customer CSV Ingestion (34h)**
+- Build CSV upload/ingest endpoint (6h)
+- Implement CSV schema validation &amp; error reporting (6h)
+- Build cleaning &amp; normalization transforms (8h)
+- Implement load into analytics store (6h)
+- Handle schema drift &amp; malformed rows (8h)
+
+**M3 — Log Analysis (34h)**
+- Build log ingestion, file &amp; stream (6h)
+- Implement log parser for structured fields (8h)
+- Error classification &amp; severity tagging (6h)
+- Anomaly detection rules (8h)
+- Emit log-derived metrics (6h)
+
+**M4 — Metrics &amp; Aggregation API (30h)**
+- Define metric catalog (4h)
+- Implement aggregation queries (8h)
+- Build REST API endpoints (8h)
+- Add caching layer (6h)
+- API documentation &amp; contract tests (4h)
+
+**M5 — Visualization &amp; Dashboard UI (42h)**
+- Dashboard shell &amp; routing (6h)
+- Reusable chart component library (8h)
+- Customer analytics views (8h)
+- Log &amp; error analytics views (8h)
+- Filters &amp; global date range (6h)
+- Responsive layout &amp; accessibility pass (6h)
+
+**M6 — Quality Assurance &amp; Release (44h)**
+- Unit &amp; integration test suites (8h)
+- End-to-end tests (8h)
+- Performance benchmarking &amp; tuning (8h)
+- Security review (6h)
+- CI/CD pipeline (6h)
+- Production deployment &amp; monitoring (8h)
+
+### Complexity check ✅
+Every one of the 31 executable tasks is **complexity ≤ 4/10 and ≤ 8 hours** — no task exceeds a single working day. Average complexity across the project is 3.5/10.
+
+One note on the audit: the analyzer still flags **M6** at 6/10, but that&#x27;s a keyword heuristic reacting to its description (&quot;test suites, performance benchmarks, security review, CI/CD pipeline&quot;). M6 is an epic container, not a work item — its six children are all 6–8h and complexity ≤4. I deliberately left the description intact rather than stripping useful scope detail to satisfy the heuristic.
+
+### Recommended starting point
+**&quot;Define architecture &amp; technology stack&quot;** and **&quot;Design data schemas &amp; models&quot;** (both 6h, complexity 3) — they&#x27;re the highest-scoring ready tasks and unblock everything downstream. I&#x27;d run them together, since the schema design depends on the stack decision.
+
+Want me to mark those two as in-progress, or add intra-milestone dependencies (e.g., validation before load) to enforce execution order within each milestone?</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task283-late-feedback_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-middle-delta_notes-r0 · TF 10 / PE 7.800 · output_truncated · 13 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 5,
+  &quot;evaluate__7722fb090eee&quot;: 6,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;code-analysis-prompt-builder__7a7918cd2f5e&quot;: 1
+}</pre><h4>回答</h4><pre>I&#x27;ve now got a clear, empirical picture. Here&#x27;s a complete answer, grounded in what the tools just demonstrated and mapped to OWASP.
+
+---
+
+## The core principle: replace `eval()` with a whitelist grammar
+
+The single most important rule for secure math in Python: **never pass untrusted input to `eval()`, `exec()`, or `compile()`.** Instead, parse into an AST and evaluate **only an explicitly allowed set of nodes/operators** — a whitelist grammar.
+
+The `validate_syntax` / `evaluate` tools you have are a working example of exactly this. Their behavior on my test inputs:
+
+| Input | Result | Why it matters |
+|---|---|---|
+| `2 + 3 * (4 - 1) / 2` | ✅ **valid → 6.5** | Legitimate arithmetic works |
+| `10 % 3` / `-5 + 3` | ✅ `1` / `-2` | Operators &amp; unary handled |
+| `__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)` | ❌ rejected (`Unexpected character &#x27;_&#x27;`) | **RCE attempt blocked** (A03) |
+| `open(&#x27;/etc/passwd&#x27;).read()` | ❌ rejected | Attribute/IO access blocked |
+| `math.sqrt(16)` | ❌ rejected | Function calls blocked |
+| `9**9**9**9` | ❌ rejected | **Exponent-bomb DoS blocked** (A04) |
+| `10 / 0` | ⚠️ `null` (no crash) | Graceful, sanitized failure |
+| `1e309` | ⚠️ `null` | Overflow handled, no traceback leak |
+
+Two lessons from this: (1) the whitelist blocks injection *and* function/attribute access; (2) errors fail **closed and quietly** — no stack traces leaked back to the caller.
+
+---
+
+## Reference implementation: a safe AST evaluator
+
+```python
+import ast
+import operator
+
+# ---- Limits (tune to your workload) ----
+MAX_INPUT_LEN = 1_000      # total characters
+MAX_NODES     = 200        # AST size / nesting cap  -&gt; blocks deep recursion &amp; giant trees
+MAX_INT_BITS  = 4_096      # max size of any integer  -&gt; blocks huge-int DoS
+MAX_EXPONENT  = 1_000      # cap on `a ** b`          -&gt; blocks exponent bombs
+
+_BIN_OPS = {
+    ast.Add: operator.add,        ast.Sub: operator.sub,
+    ast.Mult: operator.mul,       ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv, ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+}
+_UNARY_OPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}
+
+
+class SafeEvalError(ValueError):
+    &quot;&quot;&quot;Raised on any disallowed or unsafe expression.&quot;&quot;&quot;
+
+
+def safe_eval(expr: str) -&gt; int | float:
+    if not isinstance(expr, str):
+        raise SafeEvalError(&quot;expression must be a string&quot;)
+    if len(expr) &gt; MAX_INPUT_LEN:
+        raise SafeEvalError(&quot;expression too long&quot;)
+
+    try:
+        tree = ast.parse(expr, mode=&quot;eval&quot;)
+    except SyntaxError as exc:
+        raise SafeEvalError(&quot;invalid syntax&quot;) from exc
+
+    if sum(1 for _ in ast.walk(tree)) &gt; MAX_NODES:
+        raise SafeEvalError(&quot;expression too large or deeply nested&quot;)
+
+    return _eval(tree.body)
+
+
+def _eval(node):
+    # 1) Numeric literals only (rejects str, bytes, bool, complex)
+    if isinstance(node, ast.Constant):
+        if isinstance(node.value, bool) or not isinstance(node.value, (int, float)):
+            raise SafeEvalError(&quot;only numeric literals are allowed&quot;)
+        return node.value
+
+    # 2) Binary operators — whitelist only
+    if isinstance(node, ast.BinOp):
+        op = _BIN_OPS.get(type(node.op))
+        if op is None:
+            raise SafeEvalError(f&quot;operator not allowed: {type(node.op).__name__}&quot;)
+        left, right = _eval(node.left), _eval(node.right)
+
+        if isinstance(node.op, (ast.Div, ast.FloorDiv, ast.Mod)) and right == 0:
+            raise SafeEvalError(&quot;division by zero&quot;)
+        if isinstance(node.op, ast.Pow) and abs(right) &gt; MAX_EXPONENT:
+            raise SafeEvalError(&quot;exponent too large&quot;)
+
+        result = op(left, right)
+        if isinstance(result, int) and result.bit_length() &gt; MAX_INT_BITS:
+            raise SafeEvalError(&quot;result too large&quot;)
+        return result
+
+    # 3) Unary + / -
+    if isinstance(node, ast.UnaryOp):
+        fn = _UNARY_OPS.get(type(node.op))
+        if fn is None:
+            raise SafeEvalError(&quot;unary operator not allowed&quot;)
+        return fn(_eval(node.operand))
+
+    # 4) Everything else (Call, Attribute, Name, Lambda, ListComp, ...) is rejected
+    raise SafeEvalError(f&quot;disallowed expression: {type(node).__name__}&quot;)
+```
+
+Key safety properties: no `Name`/`Attribute`/`Call` nodes are ever evaluated, so there is **no path to imports, I/O, or attribute access**.</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task133-middle-delta_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-middle-linked_notes-r0 · TF 10 / PE 5 · completed · 6 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · evaluated</p><h4>人工分析（不改评分）</h4><p>judge 判定三次调用多余。部分数值求值可能超出“语法验证和安全建议”的请求，但不同的对抗样例也可能有价值。不能为了减少调用而省略必要安全检查，也不修改 rubric 来抬高分数。</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 2,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;evaluate__7722fb090eee&quot;: 3
+}</pre><h4>回答</h4><pre># Securing Mathematical Operations in Python
+
+Below is a practical, OWASP-aligned playbook. I also ran live checks against the validation tools to show the behavior you want to reproduce in your own code.
+
+## 1. What the validation tools showed
+
+| Input | Result |
+|---|---|
+| `2 + 3 * (4 - 1) / 2` | ✅ Valid → evaluates to `6.5` |
+| `__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)` | ❌ Rejected — `Unexpected character &#x27;_&#x27;` |
+| `9 ** 9 ** 9` | ❌ Rejected — grammar error (and would be a DoS bomb anyway) |
+
+**Key takeaway:** a strict grammar that only permits numbers, operators, parentheses, and a whitelist of function names is your first line of defense. It rejects attribute access (`_`), imports, and arbitrary identifiers before evaluation ever happens.
+
+## 2. The core rule: never use `eval()` / `exec()` on user input
+
+`eval()` executes arbitrary Python. Even &quot;sanitized&quot; input can be bypassed via `__class__`, `__subclasses__`, `__globals__`, etc. This is **OWASP A03: Injection** and **CWE-95 (Code Injection)**.
+
+### ❌ Vulnerable
+```python
+def calculate(expr: str):
+    return eval(expr)          # RCE, data exfiltration, DoS
+```
+
+### ✅ Safe: AST whitelist evaluator
+```python
+import ast
+import operator
+
+# Only these node types are allowed
+_ALLOWED_BINOPS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+}
+_ALLOWED_UNARY = {ast.UAdd: operator.pos, ast.USub: operator.neg}
+_ALLOWED_FUNCS = {&quot;abs&quot;: abs, &quot;round&quot;: round, &quot;min&quot;: min, &quot;max&quot;: max}
+
+MAX_EXPR_LEN = 256
+MAX_POW_EXPONENT = 1000
+MAX_DEPTH = 20
+
+class UnsafeExpression(ValueError):
+    pass
+
+def _eval_node(node, depth=0):
+    if depth &gt; MAX_DEPTH:
+        raise UnsafeExpression(&quot;Expression too deeply nested&quot;)
+
+    if isinstance(node, ast.Expression):
+        return _eval_node(node.body, depth + 1)
+
+    if isinstance(node, ast.Constant):
+        if isinstance(node.value, (int, float)) and not isinstance(node.value, bool):
+            return node.value
+        raise UnsafeExpression(&quot;Only numeric constants allowed&quot;)
+
+    if isinstance(node, ast.BinOp):
+        op = _ALLOWED_BINOPS.get(type(node.op))
+        if op is None:
+            raise UnsafeExpression(f&quot;Operator not allowed: {type(node.op).__name__}&quot;)
+        left = _eval_node(node.left, depth + 1)
+        right = _eval_node(node.right, depth + 1)
+        # Guard against exponent bombs
+        if isinstance(node.op, ast.Pow) and abs(right) &gt; MAX_POW_EXPONENT:
+            raise UnsafeExpression(&quot;Exponent too large&quot;)
+        return op(left, right)
+
+    if isinstance(node, ast.UnaryOp):
+        op = _ALLOWED_UNARY.get(type(node.op))
+        if op is None:
+            raise UnsafeExpression(&quot;Unary operator not allowed&quot;)
+        return op(_eval_node(node.operand, depth + 1))
+
+    if isinstance(node, ast.Call):
+        if not isinstance(node.func, ast.Name) or node.func.id not in _ALLOWED_FUNCS:
+            raise UnsafeExpression(&quot;Function not allowed&quot;)
+        if node.keywords:
+            raise UnsafeExpression(&quot;Keyword arguments not allowed&quot;)
+        args = [_eval_node(a, depth + 1) for a in node.args]
+        return _ALLOWED_FUNCS[node.func.id](*args)
+
+    raise UnsafeExpression(f&quot;Disallowed syntax: {type(node).__name__}&quot;)
+
+def safe_eval(expr: str) -&gt; float:
+    if not isinstance(expr, str):
+        raise UnsafeExpression(&quot;Expression must be a string&quot;)
+    if len(expr) &gt; MAX_EXPR_LEN:
+        raise UnsafeExpression(&quot;Expression too long&quot;)
+    try:
+        tree = ast.parse(expr, mode=&quot;eval&quot;)
+    except SyntaxError as e:
+        raise UnsafeExpression(f&quot;Invalid syntax: {e.msg}&quot;) from e
+    return _eval_node(tree)
+```
+
+This mirrors exactly what the validation tool did: parse → reject anything outside the grammar → evaluate only whitelisted operations.
+
+## 3. Defense-in-depth checklist (mapped to OWASP Top 10)
+
+| Control | OWASP | Implementation |
+|---|---|---|
+| **Strict input validation** (allowlist grammar) | A03 Injection | AST whitelist above; reject `_`, `.`, `[`, `]`, `lambda`, `import` |
+| **Length &amp; complexity limits** | A04 Insecure Design | `MAX_EXPR_LEN`, `MAX_DEPTH`, exponent cap |
+| **Resource limits** | A04 / DoS | Run in a subprocess with `resource.setrlimit` (CPU/memory), or a timeout |
+| **No dynamic code execution** | A03 | Ban `eval`, `exec`, `compile`, `pickle` on user data |
+| **Safe error handling** | A05 Misconfiguration | Return generic errors; never leak stack traces or internals |
+| **Security logging** | A09 Logging Failures | Log rejected expressions (with rate limiting) for monitoring |
+| **Dependency hygiene** | A06 Vulnerable Components | Pin &amp; scan `sympy`/`numexpr`/`numpy` with `pip-audit` |
+| **Least privilege** | A01 Access Control | Evaluate in a sandboxed process with no filesystem/network access |
+
+### Hard resource limits (subprocess sandbox)
+```python
+import resource, subprocess, sys
+
+def evaluate_isolated(expr: str, timeout=1.0) -&gt; str:
+    def _limit():
+        resource.setrlimit(resource.RLIMIT_CPU, (1, 1))          # 1s CPU
+        resource.setrlimit(resource.RLIMIT_AS, (256*1024*1024,)*2)  # 256 MB
+    result = subprocess.run(
+        [sys.executable, &quot;-I&quot;, &quot;-c&quot;,
+         &quot;import sys; from safe_eval import safe_eval; print(safe_eval(sys.argv[1]))&quot;, expr],
+        capture_output=True, text=True, timeout=timeout,
+        preexec_fn=_limit,
+    )
+    if result.returncode != 0:
+        raise UnsafeExpression(&quot;Evaluation failed&quot;)
+    return result.stdout.strip()
+```
+
+## 4. Security test cases to add to your suite
+
+```python
+import pytest
+
+@pytest.mark.parametrize(&quot;expr,expected&quot;, [
+    (&quot;2 + 3 * (4 - 1) / 2&quot;, 6.5),
+    (&quot;abs(-5) + round(2.7)&quot;, 8),
+    (&quot;2 ** 10&quot;, 1024),
+])
+def test_valid(expr, expected):
+    assert safe_eval(expr) == expected
+
+@pytest.mark.parametrize(&quot;expr&quot;, [
+    &quot;__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)&quot;,   # code injection
+    &quot;().__class__.__bases__[0].__subclasses__()&quot;,  # sandbox escape
+    &quot;open(&#x27;/etc/passwd&#x27;).read()&quot;,            # file access
+    &quot;9 ** 9 ** 9&quot;,                           # DoS / exponent bomb
+    &quot;x + 1&quot;,                                 # undefined name
+    &quot;lambda: 1&quot;,                             # lambda
+    &quot;a[0]&quot;,                                  # subscript
+    &quot;1; import os&quot;,                          # statement injection
+    &quot;2 + &quot; * 500,                            # length / depth abuse
+])
+def test_rejected(expr):
+    with pytest.raises(UnsafeExpression):
+        safe_eval(expr)
+```
+
+## 5. If you need symbolic math
+
+For richer math (variables, functions, calculus), prefer a **purpose-built parser** over `eval`:
+
+- **`sympy.sympify`** with `parse_expr(..., evaluate=False)` and a restricted `local_dict` — but still validate the string first and cap complexity.
+- **`numexpr`** for fast numeric array expressions (no arbitrary code).
+- **`asteval`** — a safe AST-based evaluator designed for exactly this use case.
+
+Always wrap these with the same length/depth/timeout guards, since they can still be abused for resource exhaustion.
+
+## 6. Summary
+
+1. **Never** `eval`/`exec` user input.
+2. **Parse with `ast`** and allowlist only numeric constants, arithmetic operators, and named functions.
+3. **Cap** length, nesting depth, and exponent size.
+4. **Sandbox** with subprocess + `resource` limits for untrusted input.
+5. **Log** rejections and **scan dependencies** (`pip-audit`).
+6. **Test** with injection, escape, and DoS payloads.
+
+The validation tools you have available already enforce a strict grammar (rejecting `_`, imports, and malformed expressions) — replicate that same allowlist philosophy in your production evaluator, and layer the resource limits and logging on top for full OWASP coverage.</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task133-middle-linked_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-late-selective_patch-r0 · TF 9.800 / PE 9 · max_rounds · 82 次工具调用 / 3 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;review_workspace_health__fcb7e985546d&quot;: 1,
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 42,
+  &quot;update_task__e40dd373c4ac&quot;: 35,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 2
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 3.576549,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 1,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;chatcmpl-tool-bb7a380c2978a50e&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;workingDirectory\&quot;: \&quot;/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety/results/raw/selective-search-v1.1-development-20261031/cells/task283-late-selective_patch-r0/run/workspace\&quot;}&quot;,
+        &quot;name&quot;: &quot;review_workspace_health__fcb7e985546d&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 0
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Error: memoryStorage.listMemories is not a function&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  },
+  {
+    &quot;elapsed_seconds&quot;: 23.29896,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 4,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;chatcmpl-tool-9909114fee643b02&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;workingDirectory\&quot;: \&quot;/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety/results/raw/selective-search-v1.1-development-20261031/cells/task283-late-selective_patch-r0/run/workspace\&quot;, \&quot;projectId\&quot;: \&quot;590e7122-1ff4-4210-9db8-00c3491670cb\&quot;, \&quot;parentId\&quot;: \&quot;efc08d56-f4e4-4e8f-8170-b18ffa5506c3\&quot;}&quot;,
+        &quot;name&quot;: &quot;create_task__b5da5518c9ba&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 9
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;MCP error -32602: Input validation error: Invalid arguments for tool create_task: [\n  {\n    \&quot;code\&quot;: \&quot;invalid_type\&quot;,\n    \&quot;expected\&quot;: \&quot;string\&quot;,\n    \&quot;received\&quot;: \&quot;undefined\&quot;,\n    \&quot;path\&quot;: [\n      \&quot;name\&quot;\n    ],\n    \&quot;message\&quot;: \&quot;Required\&quot;\n  },\n  {\n    \&quot;code\&quot;: \&quot;invalid_type\&quot;,\n    \&quot;expected\&quot;: \&quot;string\&quot;,\n    \&quot;received\&quot;: \&quot;undefined\&quot;,\n    \&quot;path\&quot;: [\n      \&quot;details\&quot;\n    ],\n    \&quot;message\&quot;: \&quot;Required\&quot;\n  }\n]&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  },
+  {
+    &quot;elapsed_seconds&quot;: 33.670778,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 5,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;chatcmpl-tool-83debcb959317978&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;workingDirectory\&quot;: \&quot;/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety/results/raw/selective-search-v1.1-development-20261031/cells/task283-late-selective_patch-r0/run/workspace\&quot;, \&quot;projectId\&quot;: \&quot;590e7122-1ff4-4210-9db8-00c3491670cb\&quot;, \&quot;parentId\&quot;: \&quot;ecabcfa\&quot;}&quot;,
+        &quot;name&quot;: &quot;create_task__b5da5518c9ba&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 12
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;MCP error -32602: Input validation error: Invalid arguments for tool create_task: [\n  {\n    \&quot;code\&quot;: \&quot;invalid_type\&quot;,\n    \&quot;expected\&quot;: \&quot;string\&quot;,\n    \&quot;received\&quot;: \&quot;undefined\&quot;,\n    \&quot;path\&quot;: [\n      \&quot;name\&quot;\n    ],\n    \&quot;message\&quot;: \&quot;Required\&quot;\n  },\n  {\n    \&quot;code\&quot;: \&quot;invalid_type\&quot;,\n    \&quot;expected\&quot;: \&quot;string\&quot;,\n    \&quot;received\&quot;: \&quot;undefined\&quot;,\n    \&quot;path\&quot;: [\n      \&quot;details\&quot;\n    ],\n    \&quot;message\&quot;: \&quot;Required\&quot;\n  }\n]&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task283-late-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-middle-feedback_notes-r0 · TF 10 / PE 10 · completed · 4 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · evaluated</p><h4>人工分析（不改评分）</h4><p>这是单条开发实验的积极结果。仍需完整配对对照和新的重复确认，不能单独宣布策略优越。</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 2,
+  &quot;evaluate__7722fb090eee&quot;: 1,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1
+}</pre><h4>回答</h4><pre>Here&#x27;s a complete, practical guide to securing mathematical operations in Python, grounded in what the validation tools just demonstrated and OWASP guidance.
+
+## What the tools showed
+
+| Input | Result |
+|-------|--------|
+| `2 + 3 * 4 - (10 / 2)` | ✅ Valid → evaluates to **9** |
+| `__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)` | ❌ **Rejected** — `Unexpected character &#x27;_&#x27;` |
+
+The key insight: a **strict allowlist grammar** (only digits, `+ - * / ( ) .` and whitespace) rejects the malicious payload *before* any evaluation happens. That is the core defense — you never hand untrusted text to Python&#x27;s interpreter.
+
+---
+
+## The #1 rule: never `eval()` / `exec()` untrusted input
+
+`eval(&quot;__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)&quot;)` is a **remote code execution (RCE)** vulnerability (OWASP **A03: Injection**). Even `eval()` with `{&quot;__builtins__&quot;: None}` is escapable. Do not rely on it.
+
+## Recommended architecture (defense in depth)
+
+**Layer 1 — Strict grammar validation (allowlist).** Reject anything outside the permitted character set and enforce length/complexity limits (DoS protection).
+
+**Layer 2 — AST-based safe evaluation.** Parse with `ast.parse(mode=&quot;eval&quot;)` and walk the tree, permitting *only* arithmetic node types. Reject names, calls, attributes, subscripts, comprehensions, etc.
+
+**Layer 3 — Safe error handling &amp; logging.** Return generic errors to users; log full detail (with the offending input) for monitoring.
+
+### Reference implementation
+
+```python
+import ast
+import operator
+import logging
+
+logger = logging.getLogger(&quot;safe_math&quot;)
+
+# Layer 1: allowlist of characters + length cap
+ALLOWED_CHARS = set(&quot;0123456789+-*/(). &quot;)
+MAX_LEN = 200
+
+# Layer 2: only these AST nodes are permitted
+_ALLOWED_NODES = (
+    ast.Expression, ast.BinOp, ast.UnaryOp, ast.Constant,
+    ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow, ast.Mod,
+    ast.USub, ast.UAdd, ast.FloorDiv,
+)
+_BIN_OPS = {
+    ast.Add: operator.add, ast.Sub: operator.sub,
+    ast.Mult: operator.mul, ast.Div: operator.truediv,
+    ast.Pow: operator.pow, ast.Mod: operator.mod,
+    ast.FloorDiv: operator.floordiv,
+}
+_UNARY_OPS = {ast.USub: operator.neg, ast.UAdd: operator.pos}
+
+
+class UnsafeExpression(ValueError):
+    pass
+
+
+def _validate_chars(expr: str) -&gt; None:
+    if not isinstance(expr, str):
+        raise UnsafeExpression(&quot;Expression must be a string&quot;)
+    if len(expr) &gt; MAX_LEN:
+        raise UnsafeExpression(&quot;Expression too long&quot;)
+    if not set(expr) &lt;= ALLOWED_CHARS:
+        raise UnsafeExpression(&quot;Illegal characters in expression&quot;)
+
+
+def _eval_node(node):
+    if isinstance(node, ast.Expression):
+        return _eval_node(node.body)
+    if isinstance(node, ast.Constant):
+        if isinstance(node.value, (int, float)) and not isinstance(node.value, bool):
+            return node.value
+        raise UnsafeExpression(&quot;Only numeric constants allowed&quot;)
+    if isinstance(node, ast.BinOp) and type(node.op) in _BIN_OPS:
+        return _BIN_OPS[type(node.op)](_eval_node(node.left), _eval_node(node.right))
+    if isinstance(node, ast.UnaryOp) and type(node.op) in _UNARY_OPS:
+        return _UNARY_OPS[type(node.op)](_eval_node(node.operand))
+    raise UnsafeExpression(f&quot;Disallowed syntax: {type(node).__name__}&quot;)
+
+
+def safe_eval(expr: str) -&gt; float:
+    try:
+        _validate_chars(expr)                       # Layer 1
+        tree = ast.parse(expr, mode=&quot;eval&quot;)
+        for n in ast.walk(tree):                    # Layer 2 (belt &amp; suspenders)
+            if not isinstance(n, _ALLOWED_NODES):
+                raise UnsafeExpression(f&quot;Disallowed node: {type(n).__name__}&quot;)
+        return _eval_node(tree)
+    except UnsafeExpression as e:
+        logger.warning(&quot;Rejected expression %r: %s&quot;, expr, e)   # Layer 3
+        raise UnsafeExpression(&quot;Invalid expression&quot;) from None  # generic to user
+```
+
+&gt; Note: `ast.literal_eval` is safe but only handles literals — it **cannot** do arithmetic like `2+3`. The AST visitor above is the correct tool for math.
+
+## OWASP Top 10 mapping
+
+| OWASP risk | How this design addresses it |
+|-----------|------------------------------|
+| **A03: Injection** | Allowlist grammar + AST node allowlist; no `eval`/`exec` |
+| **A04: Insecure Design** | Defense in depth (char check → AST check → safe ops) |
+| **A05: Security Misconfiguration** | No `__builtins__` exposure; explicit operator table |
+| **A09: Logging &amp; Monitoring** | Rejected inputs logged for detection/alerting |
+| **A06: Vulnerable Components** | Prefer stdlib `ast`/`operator`; keep deps patched |
+
+## Hardening checklist
+
+- ✅ **Allowlist, not blocklist** — permit known-good characters/nodes; never try to blacklist &quot;bad&quot; words.
+- ✅ **Cap length &amp; nesting depth** — prevents ReDoS/CPU-exhaustion DoS.
+- ✅ **Reject `**` with huge exponents** — `9**9**9` is a DoS; bound exponent size or drop `Pow`.
+- ✅ **Guard division by zero** and return controlled errors.
+- ✅ **Generic user errors, detailed logs** — don&#x27;t leak internals.
+- ✅ **Server-side validation only** — never trust client-side checks.
+- ✅ **Fuzz test** with payloads like `__import__`, `().__class__`, `open(...)`, `[x for x in ...]`, `lambda`, `1e999999`.
+- ✅ **Consider a vetted library** (e.g., `simpleeval`, `asteval`) if you need functions/variables — audit it first.
+
+## Security test cases to include
+
+```python
+import pytest
+
+@pytest.mark.parametrize(&quot;payload&quot;, [
+    &quot;__import__(&#x27;os&#x27;).system(&#x27;id&#x27;)&quot;,
+    &quot;().__class__.__bases__[0].__subclasses__()&quot;,
+    &quot;open(&#x27;/etc/passwd&#x27;).read()&quot;,
+    &quot;[x for x in range(10)]&quot;,
+    &quot;lambda: 1&quot;,
+    &quot;9**9**9&quot;,              # DoS
+    &quot;a + b&quot;,                # names
+])
+def test_rejects_malicious(payload):
+    with pytest.raises(UnsafeExpression):
+        safe_eval(payload)
+
+def test_valid_math():
+    assert safe_eval(&quot;2 + 3 * 4 - (10 / 2)&quot;) == 9
+```
+
+---
+
+The generated OWASP/NIST assessment prompt (from the security tool) gives you a full audit template — executive summary, severity/likelihood risk matrix, before/after code, and test scenarios — if you want to run a formal review of an existing codebase. Want me to tailor that prompt to a specific file or expand the evaluator to support variables/functions safely?</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task133-middle-feedback_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-late-linked_notes-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>All three charts for your sales performance dashboard are ready:
+
+**1. 2025年各省销售额分布 (Provincial Sales Distribution Map)**
+A China district map showing sales across the five provinces, with Guangdong leading at ¥15.8M, followed by Jiangsu (¥12.3M), Zhejiang (¥9.7M), Shandong (¥8.4M), and Beijing (¥7.2M). The color gradient highlights the concentration of sales in the eastern coastal regions.
+
+**2. 2025年月度销售额趋势 (Monthly Sales Trend Area Chart)**
+An area chart tracking January–December 2025, showing a clear upward trajectory from ¥1.2M in January to ¥3.5M in December — nearly a 3x increase over the year, with a slight dip in February and August.
+
+**3. 各区域主要产品类别销售额对比 (Product Category Comparison Column Chart)**
+A grouped column chart comparing Guangdong vs. Jiangsu across three categories. Electronics is the top performer in both regions (Guangdong ¥6.2M, Jiangsu ¥4.8M), with Clothing and Home Appliances following. Guangdong consistently outperforms Jiangsu across all categories.
+
+All values are expressed in millions of yuan (百万元). Let me know if you&#x27;d like to adjust the color themes, add more regions, or combine these into a single dashboard layout.</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task235-late-linked_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-late-delta_notes-r0 · TF 10 / PE 9 · max_rounds · 72 次工具调用 / 2 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;review_workspace_health__fcb7e985546d&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 34,
+  &quot;update_task__e40dd373c4ac&quot;: 31,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 2,
+  &quot;list_tasks__5cb11580c2d8&quot;: 1,
+  &quot;get_next_task_recommendation__83b9706df23d&quot;: 1
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 3.202931,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 1,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_2da767a2e0dc45c6b7fcee40&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;workingDirectory\&quot;: \&quot;/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety/results/raw/selective-search-v1.1-development-20261031/cells/task283-late-delta_notes-r0/run/workspace\&quot;}&quot;,
+        &quot;name&quot;: &quot;review_workspace_health__fcb7e985546d&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 1
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Error: memoryStorage.listMemories is not a function&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  },
+  {
+    &quot;elapsed_seconds&quot;: 44.200249,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 5,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_efe3f9806c794c52b46ef419&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;workingDirectory\&quot;: \&quot;/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety/results/raw/selective-search-v1.1-development-20261031/cells/task283-late-delta_notes-r0/run/workspace\&quot;, \&quot;name\&quot;: \&quot;Run end-to-end integration testing\&quot;, \&quot;details\&quot;: \&quot;Test the full path from CSV/log ingestion through processing to dashboard rendering using representative fixtures. Cover happy paths, malformed data, and empty datasets. Log and triage defects. Deliverable: E2E test suite + defect report.\&quot;, \&quot;projectId\&quot;: \&quot;3ebfd578-2d37-4bca-928c-d4fe092d3fb3\&quot;, \&quot;parentId\&quot;: \&quot;bb01bab2-f191-4843-bdbb-07879335a984\&quot;&quot;,
+        &quot;name&quot;: &quot;create_task__b5da5518c9ba&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 12
+    },
+    &quot;result&quot;: {
+      &quot;isError&quot;: true,
+      &quot;error&quot;: &quot;JSONDecodeError: Expecting &#x27;,&#x27; delimiter: line 1 column 594 (char 593)&quot;
+    }
+  }
+]</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task283-late-delta_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-middle-selective_patch-r0 · TF 10 / PE 8.200 · max_rounds · 47 次工具调用 / 0 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 37,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 2,
+  &quot;update_task__e40dd373c4ac&quot;: 5,
+  &quot;list_tasks__5cb11580c2d8&quot;: 1
+}</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task283-middle-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-middle-delta_notes-r0 · TF 10 / PE 8 · max_rounds · 69 次工具调用 / 1 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 57,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 2,
+  &quot;update_task__e40dd373c4ac&quot;: 8,
+  &quot;list_tasks__5cb11580c2d8&quot;: 1
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 19.052839,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 3,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_627b8099210442e39c6c3d1e142d8313&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;workingDirectory\&quot;: \&quot;/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety/results/raw/selective-search-v1.1-development-20261031/cells/task283-middle-delta_notes-r0/run/workspace\&quot;, \&quot;name\&quot;: \&quot;Persist log data &amp; metrics to storage\&quot;, \&quot;details\&quot;: \&quot;Store normalized log events\&quot;}&quot;,
+        &quot;name&quot;: &quot;create_task__b5da5518c9ba&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 12
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;MCP error -32602: Input validation error: Invalid arguments for tool create_task: [\n  {\n    \&quot;code\&quot;: \&quot;invalid_type\&quot;,\n    \&quot;expected\&quot;: \&quot;string\&quot;,\n    \&quot;received\&quot;: \&quot;undefined\&quot;,\n    \&quot;path\&quot;: [\n      \&quot;projectId\&quot;\n    ],\n    \&quot;message\&quot;: \&quot;Required\&quot;\n  }\n]&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task283-middle-delta_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-late-feedback_notes-r0 · TF 9.600 / PE 7 · output_truncated · 11 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;validate_syntax__b7e42007400a&quot;: 5,
+  &quot;evaluate__7722fb090eee&quot;: 5
+}</pre><h4>回答</h4><pre>## Short answer
+
+Never let user input reach `eval()`/`exec()`. Parse the expression with `ast.parse(expr, mode=&quot;eval&quot;)` and walk the tree yourself, evaluating **only** an explicit whitelist of node types (numbers, names you allow, `+ - * / %`, unary `+/-`). Everything else — `Call`, `Attribute`, `Subscript`, comprehensions, f-strings — is rejected. Then bound length, bound depth, bound exponents, and make failure *loud*.
+
+## What the tooling here actually does
+
+I ran the validator and evaluator against representative inputs. Some results are load-bearing for your design, and two are **worse than they look**:
+
+| Input | Result | Meaning for you |
+|---|---|---|
+| `(rate/100)*principal + sqrt(2)` | valid | Normal arithmetic parses |
+| `__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)` | **rejected** (lexer, col 1) | Underscore isn&#x27;t in the grammar — good, but this is a *lexical* rejection, not a semantic one |
+| `sqrt(abs(min(1, max(2, sqrt(abs(3))))))` with `max_depth: 3` | **&quot;valid&quot;** ⚠️ | **`max_depth` was not enforced** — 4 nesting levels passed a limit of 3 |
+| `10 ** 10 ** 10` | syntax error | `**` isn&#x27;t supported at all — removes the classic exponent DoS, but also means no power operator |
+| `1/0`, `5/0`, `0/0` | `result: null`, `type: &quot;number&quot;`, **`isError: false`** ⚠️ | **Silent failure.** Division by zero returns null dressed as a number |
+| `principal * 1.05` with `allow_variables: false` | valid | Variable gating isn&#x27;t enforced as documented |
+
+The two flagged rows matter. If you wrap any evaluator in `if not response.isError: store(result)`, the `1/0` case stores `null` as a valid numeric result — a data-integrity bug, not a crash. Treat `null` as an error yourself, and do not rely on `max_depth` as your only complexity guard.
+
+## Reference implementation
+
+```python
+import ast
+import operator
+from decimal import Decimal, DivisionByZero, InvalidOperation
+
+MAX_LEN, MAX_DEPTH = 256, 12
+MAX_ABS_EXPONENT = 64
+
+class ExpressionRejected(ValueError):
+    &quot;&quot;&quot;Message text is fixed and safe to return to clients.&quot;&quot;&quot;
+
+_BINOPS = {ast.Add: operator.add, ast.Sub: operator.sub,
+           ast.Mult: operator.mul, ast.Div: operator.truediv,
+           ast.Mod: operator.mod}
+_UNARYOPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}
+
+def _check_depth(node: ast.AST) -&gt; None:
+    # Iterative on purpose: the checker must not hit the recursion limit itself.
+    stack = [(node, 1)]
+    while stack:
+        cur, d = stack.pop()
+        if d &gt; MAX_DEPTH:
+            raise ExpressionRejected(&quot;expression is too deeply nested&quot;)
+        stack.extend((c, d + 1) for c in ast.iter_child_nodes(cur))
+
+def safe_eval(expr: str, variables: dict[str, Decimal] | None = None) -&gt; Decimal:
+    if not isinstance(expr, str) or len(expr) &gt; MAX_LEN:
+        raise ExpressionRejected(&quot;expression is invalid&quot;)
+    variables = variables or {}
+    try:
+        tree = ast.parse(expr, mode=&quot;eval&quot;)   # mode=&quot;eval&quot; blocks statements
+    except SyntaxError:
+        raise ExpressionRejected(&quot;expression is invalid&quot;) from None
+    _check_depth(tree)
+    return _eval(tree.body, variables)
+
+def _eval(node: ast.AST, variables: dict[str, Decimal]) -&gt; Decimal:
+    if isinstance(node, ast.Constant):
+        # bool is an int subclass — reject it explicitly
+        if isinstance(node.value, bool) or not isinstance(node.value, (int, float)):
+            raise ExpressionRejected(&quot;unsupported literal&quot;)
+        return Decimal(str(node.value))
+    if isinstance(node, ast.Name):
+        if node.id not in variables:          # allowlist lookup, never globals()
+            raise ExpressionRejected(&quot;unknown variable&quot;)
+        return Decimal(variables[node.id])
+    if isinstance(node, ast.BinOp) and type(node.op) in _BINOPS:
+        return _BINOPS[type(node.op)](_eval(node.left, variables),
+                                      _eval(node.right, variables))
+    if isinstance(node, ast.UnaryOp) and type(node.op) in _UNARYOPS:
+        return _UNARYOPS[type(node.op)](_eval(node.operand, variables))
+    raise ExpressionRejected(&quot;unsupported construct&quot;)
+```
+
+Call site — note there is no code path that returns `None` as success:
+
+```python
+try:
+    value = safe_eval(payload, {&quot;principal&quot;: principal})
+except ExpressionRejected as exc:
+    log.warning(&quot;expr rejected: %s&quot;, type(exc).__name__)   # type only, not raw payload
+    return 400, {&quot;error&quot;: str(exc)}
+except (DivisionByZero, ZeroDivisionError, InvalidOperation, OverflowError):
+    return 400, {&quot;error&quot;: &quot;expression could not be evaluated&quot;}
+```
+
+Three deliberate choices worth defending in review:
+
+- **`type(node.op) in _BINOPS`** is the whitelist. There is no &quot;try it and see&quot; fallback branch.
+- **`Decimal(str(x))`** rather than float. `0.1 + 0.2` is `0.30000000000000004` in binary float; for rates and money that&#x27;s a correctness defect. `Decimal` also raises `DivisionByZero` instead of producing `inf`.
+- **Omitted `ast.Pow`.** If you add it, gate it: `if abs(right) &gt; MAX_ABS_EXPONENT: raise`, and cap the result magnitude — otherwise you have a CPU/memory DoS.
+
+`ast.literal_eval` is **not** a substitute — it&#x27;s for literals, and `literal_eval(&quot;1+2&quot;)` raises. Don&#x27;t repurpose it.
+
+## OWASP mapping
+
+- **A03 Injection** — the primary risk. `eval` on input is remote code execution via `__import__`, `().__class__.__bases__[0].__subclasses__()`, etc. The AST whitelist is the control.
+- **A04 Insecure Design** — no complexity ceiling means a valid-but-hostile expression is a denial of service. Length + depth + exponent bounds are design-level, not patches.
+- **A05 Security Misconfiguration** — never surface tracebacks; log exception *type*, return fixed strings.
+- **A08 Software &amp; Data Integrity** — the silent `null` case above. A failed computation must not become a stored value.
+- **A09 Logging Failures** — count rejections per principal and alert on spikes; they&#x27;re a reliable injection-probe signal. Don&#x27;t log raw payloads if expressions can embed PII.
+
+## Tests to lock it in
+
+```python
+@pytest.mark.parametrize(&quot;bad&quot;, [
+    &quot;__import__(&#x27;os&#x27;).system(&#x27;id&#x27;)&quot;, &quot;(1).__class__.__bases__&quot;,
+    &quot;[x for x in range(10**9)]&quot;, &quot;&#x27;a&#x27;*999999&quot;, &quot;lambda: 1&quot;,
+    &quot;(&quot; * 500 + &quot;1&quot; + &quot;)&quot; * 500,
+])
+def test_rejects(bad):
+    with pytest.raises(ExpressionRejected):
+        safe_eval(bad)
+
+def test_div_zero_raises_not_none():
+    with pytest.raises(ZeroDivisionError):
+        safe_eval(&quot;1/0&quot;)
+
+def test_precision():
+    assert safe_eval(&quot;0.1+0.2&quot;) == Decimal(&quot;0.3&quot;)
+```
+
+## Defense in depth
+
+If a product requirement forces a full interpreter (unit conversions, symbolic math), isolate it: run in a subprocess or container with `resource.setrlimit` on `RLIMIT_AS` and `RLIMIT_CPU`, no network, no writable FS. For most cases the AST whitelist above is both simpler and strictly safer.
+
+One caveat on my evidence: `max_depth`, `allow_variables`, and division-by-zero all behaved contrary to their documented contract in this environment. Verify those three against your pinned tool version before you build a safety argument</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task133-late-feedback_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-late-linked_notes-r0 · TF 9.800 / PE 7 · completed · 10 次工具调用 / 1 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 3,
+  &quot;evaluate__7722fb090eee&quot;: 5,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;batch_evaluate__59d51f1760fa&quot;: 1
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 13.661389,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 2,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_297e277a401644b1ad0e8767&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expressions\&quot;: [\&quot;2 + 3 * 4\&quot;, \&quot;(10 - 2) / 4\&quot;, \&quot;2 ** 10\&quot;, \&quot;sqrt(16) + 1\&quot;], \&quot;stop_on_error\&quot;: false}&quot;,
+        &quot;name&quot;: &quot;batch_evaluate__59d51f1760fa&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 0
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Error: this.toolHandlers.handleBatchEvaluate is not a function&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><h4>回答</h4><pre>I now have everything I need. Here&#x27;s a complete, practical guide to securing mathematical operations in Python, grounded in what the validation tools just demonstrated and the OWASP-aligned assessment generated.
+
+---
+
+# Securing Mathematical Operations in Python
+
+## 1. The Core Threat
+
+The single biggest risk in &quot;math in Python&quot; is **`eval()` / `exec()` on untrusted input**. That is **OWASP A03:2021 – Injection** (and CWE-95: *Improper Neutralization of Directives in Dynamically Evaluated Code*). A &quot;math&quot; field that accepts `2+2` also accepts:
+
+```python
+__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)      # arbitrary command execution
+open(&#x27;/etc/passwd&#x27;).read()                # data exfiltration
+[].__class__.__base__.__subclasses__()    # sandbox escape
+9**9**9**9                                # CPU/memory DoS (A04 Insecure Design)
+```
+
+Notice in the demo above, the validator **rejected** `__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)` at the syntax layer (`Unexpected character &#x27;_&#x27;`) while accepting `2 + 3 * 4` and `sqrt(16) + 1`. That is exactly the boundary you want in production: **a strict grammar that only admits arithmetic, not Python.**
+
+## 2. The Secure Pattern: Whitelist via AST, Never `eval`
+
+Do **not** try to &quot;sanitize&quot; with regex or blocklists — they are bypassable. Instead, **parse to an AST and walk it, allowing only an explicit whitelist of node types and functions.** This is the same approach the validation tools use.
+
+```python
+import ast
+import operator as op
+
+# 1. Whitelist of allowed binary/unary operators
+_ALLOWED_BINOPS = {
+    ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
+    ast.Div: op.truediv, ast.FloorDiv: op.floordiv,
+    ast.Mod: op.mod, ast.Pow: op.pow,
+}
+_ALLOWED_UNARYOPS = {ast.UAdd: op.pos, ast.USub: op.neg}
+
+# 2. Whitelist of allowed functions (NO builtins, NO imports)
+_ALLOWED_FUNCS = {
+    &quot;sqrt&quot;: math.sqrt, &quot;abs&quot;: abs, &quot;min&quot;: min, &quot;max&quot;: max,
+    &quot;round&quot;: round, &quot;log&quot;: math.log, &quot;exp&quot;: math.exp,
+}
+
+class UnsafeExpressionError(ValueError):
+    pass
+
+def safe_eval(expr: str, max_len: int = 200, max_depth: int = 20) -&gt; float:
+    # --- Guard rails BEFORE parsing (DoS protection, A04) ---
+    if not isinstance(expr, str) or len(expr) &gt; max_len:
+        raise UnsafeExpressionError(&quot;Expression too long or wrong type&quot;)
+
+    try:
+        tree = ast.parse(expr, mode=&quot;eval&quot;)
+    except SyntaxError as e:
+        raise UnsafeExpressionError(f&quot;Invalid syntax: {e}&quot;) from e
+
+    # --- Depth guard (prevents deeply nested / exponential blowups) ---
+    if _depth(tree) &gt; max_depth:
+        raise UnsafeExpressionError(&quot;Expression nesting too deep&quot;)
+
+    return _eval_node(tree.body)
+
+def _depth(node, level=1):
+    children = list(ast.iter_child_nodes(node))
+    return level if not children else max(_depth(c, level + 1) for c in children)
+
+def _eval_node(node):
+    if isinstance(node, ast.Constant):                 # numbers only
+        if isinstance(node.value, (int, float)) and not isinstance(node.value, bool):
+            return node.value
+        raise UnsafeExpressionError(&quot;Only numeric constants allowed&quot;)
+    if isinstance(node, ast.BinOp) and type(node.op) in _ALLOWED_BINOPS:
+        return _ALLOWED_BINOPS[type(node.op)](_eval_node(node.left), _eval_node(node.right))
+    if isinstance(node, ast.UnaryOp) and type(node.op) in _ALLOWED_UNARYOPS:
+        return _ALLOWED_UNARYOPS[type(node.op)](_eval_node(node.operand))
+    if isinstance(node, ast.Call):
+        if not isinstance(node.func, ast.Name) or node.func.id not in _ALLOWED_FUNCS:
+            raise UnsafeExpressionError(f&quot;Function not allowed: {ast.dump(node.func)}&quot;)
+        if node.keywords:
+            raise UnsafeExpressionError(&quot;Keyword arguments not allowed&quot;)
+        return _ALLOWED_FUNCS[node.func.id](*[_eval_node(a) for a in node.args])
+    # Everything else (Attribute, Subscript, Name, Lambda, comprehensions...) is rejected
+    raise UnsafeExpressionError(f&quot;Disallowed construct: {type(node).__name__}&quot;)
+```
+
+**Why this is safe:** `ast.parse` never *executes* anything. The walker only ever returns numbers, and any node type not explicitly whitelisted (attribute access, imports, subscripts, lambdas) raises. There is no path to `__import__`, `open`, or `os`.
+
+&gt; ⚠️ **Note on `**` (power):** the demo grammar rejected `2 ** 10` because it wasn&#x27;t in its operator set. If you *do* allow `Pow`, add a magnitude guard — `9**9**9` is a trivial DoS. Cap the exponent and result size.
+
+## 3. Defense-in-Depth Checklist (mapped to OWASP)
+
+| Control | OWASP / CWE | Implementation |
+|---|---|---|
+| **Never `eval`/`exec` untrusted input** | A03 Injection / CWE-95 | AST whitelist above |
+| **Strict input validation** | A03 / CWE-20 | Length cap, type check, grammar whitelist |
+| **DoS / resource limits** | A04 Insecure Design | Max length, max depth, exponent caps, timeouts |
+| **Fail closed with generic errors** | A05 Misconfiguration | Raise `UnsafeExpressionError`; don&#x27;t leak internals |
+| **Least privilege** | A01 Broken Access Control | Run evaluator in a restricted process/container if exposed |
+| **Log &amp; monitor rejections** | A09 Logging Failures | Log rejected expressions (rate, source) for anomaly detection |
+| **Dependency hygiene** | A06 Vulnerable Components | Pin &amp; scan deps (e.g., `pip-audit`, Dependabot) |
+| **Integrity of inputs** | A08 Data Integrity | Validate at trust boundary; don&#x27;t trust client-side checks |
+
+## 4. Security Test Cases (validate your fix)
+
+```python
+import pytest
+
+SAFE = [&quot;2 + 3 * 4&quot;, &quot;(10 - 2) / 4&quot;, &quot;sqrt(16) + 1&quot;, &quot;-5 + 2&quot;]
+MALICIOUS = [
+    &quot;__import__(&#x27;os&#x27;).system(&#x27;id&#x27;)&quot;,
+    &quot;open(&#x27;/etc/passwd&#x27;).read()&quot;,
+    &quot;().__class__.__bases__[0].__subclasses__()&quot;,
+    &quot;eval(&#x27;1+1&#x27;)&quot;,
+    &quot;9**9**9**9&quot;,                 # DoS
+    &quot;x + 1&quot;,                      # undefined name
+    &quot;lambda: 1&quot;,
+    &quot;a.b.c&quot;,                      # attribute access
+]
+
+@pytest.mark.parametrize(&quot;expr&quot;, SAFE)
+def test_safe(expr):
+    assert isinstance(safe_eval(expr), (int, float))
+
+@pytest.mark.parametrize(&quot;expr&quot;, MALICIOUS)
+def test_malicious_rejected(expr):
+    with pytest.raises(UnsafeExpressionError):
+        safe_eval(expr)
+```
+
+## 5. If You Must Use a Library
+
+Rather than hand-rolling, consider battle-tested options:
+- **`asteval`** — AST-based, restricted namespace, widely used for scientific expressions.
+- **`simpleeval`** — small, whitelist-based evaluator.
+- **`numexpr`** — fast numeric array expressions (no arbitrary code).
+- **`sympy.sympify`** with `parse_expr(..., evaluate=False)` — for symbolic math, but still restrict the namespace.
+
+Even with a library, **always** wrap it with length/depth limits and run it with least privilege.
+
+## 6. The OWASP-Aligned Assessment Prompt
+
+I generated a full **security-hardening prompt** (OWASP Top 10 + NIST CSF) tailored to &quot;Python code that evaluates user-supplied math expressions.&quot; It includes the A01–A10 checklist, a risk-rating matrix (Likelihood × Impact), remediation guidance, and before/after code examples. You can feed that prompt to your coding agent to audit your actual codebase file-by-file.
+
+---
+
+### TL;DR
+1. **Never `eval()` untrusted math** — parse with `ast` and walk a strict whitelist (operators + a few functions only).
+2. **Add DoS guards** — length, nesting depth, exponent/result caps.
+3. **Fail closed** with generic errors and **log rejections**.
+4. **Test with malicious payloads** (`__import__`, attribute chains, `9**9**9`).
+5. **Map to OWASP A03 (Injection) + A04 (Insecure Design)** and run the generated hardening prompt against your real code.
+
+Want me to adapt the `safe_eval` implementation to your specific use case (e.g., allow variables, units, or a specific function set), or generate the full audit report against a code snippet you paste in?</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task133-late-linked_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-late-selective_patch-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>All three charts for your Chinese regional sales dashboard are ready:
+
+**1. 2025 Sales Distribution Map (2025年各省销售额分布)**
+A China provincial map showing the five key markets, with Guangdong leading at ¥15.8M, followed by Jiangsu (¥12.3M), Zhejiang (¥9.7M), Shandong (¥8.4M), and Beijing (¥7.2M). The color intensity reflects sales volume.
+
+**2. Monthly Sales Trend Area Chart (2025年月度销售额趋势)**
+Shows a clear upward trajectory from January (¥1.2M) through December (¥3.5M). Notable points: a slight dip in February (¥1.1M), steady growth through mid-year, a small plateau in August (¥2.2M), then acceleration in Q4 — December is the strongest month at nearly 3× January&#x27;s volume.
+
+**3. Product Category Comparison Column Chart (各区域主要产品类别销售额对比)**
+Grouped by region (Guangdong vs. Jiangsu) across three categories:
+- **Electronics (电子产品):** Guangdong ¥6.2M vs. Jiangsu ¥4.8M — the top category overall
+- **Clothing (服装):** Guangdong ¥5.1M vs. Jiangsu ¥3.6M
+- **Home Appliances (家用电器):** Guangdong ¥4.5M vs. Jiangsu ¥3.9M
+
+Guangdong outperforms Jiangsu in every category, with the widest gap in Electronics (+¥1.4M) and the narrowest in Home Appliances (+¥0.6M).
+
+A few observations worth noting for your dashboard narrative: the strong Q4 acceleration in the trend chart aligns with the year-end push, and Guangdong&#x27;s dominance in Electronics suggests it&#x27;s the anchor market for that category. If you&#x27;d like, I can add a pie chart for category share or a dual-axis chart overlaying monthly growth rate.</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task235-late-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-middle-linked_notes-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>All three charts for your sales performance dashboard are ready:
+
+**1. 2025年各省销售额分布 (Provincial Sales Distribution Map)**
+A China district map showing 2025 sales across the five provinces, with Guangdong leading at ¥15.8M, followed by Jiangsu (¥12.3M), Zhejiang (¥9.7M), Shandong (¥8.4M), and Beijing (¥7.2M).
+
+**2. 2025年月度销售趋势 (Monthly Sales Trend Area Chart)**
+An area chart tracking January–December 2025, showing a clear upward trajectory from ¥1.2M in January to a peak of ¥3.5M in December — nearly a 3x increase over the year, with a slight dip in February and August.
+
+**3. 各区域主要产品类别销售额对比 (Product Category Comparison Column Chart)**
+A grouped column chart comparing Electronics, Home Appliances, and Clothing across Guangdong and Jiangsu. Electronics is the top category in both regions (Guangdong ¥6.2M, Jiangsu ¥4.8M), and Guangdong consistently outperforms Jiangsu across all three categories.
+
+A few notes on the data:
+- I used **百万元 (millions)** as the unit for the map and charts to match your ¥M figures.
+- The map only colors the five provinces with data; other provinces will appear in the default fill color.
+- The column chart only includes Guangdong and Jiangsu since those were the only regions with category-level data provided. If you&#x27;d like, I can extend it to include Zhejiang, Shandong, and Beijing once that breakdown is available.</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task235-middle-linked_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-late-selective_patch-r0 · TF 10 / PE 7.800 · output_truncated · 19 次工具调用 / 2 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 8,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;batch_evaluate__59d51f1760fa&quot;: 1,
+  &quot;set_variable__b4e6856a10df&quot;: 2,
+  &quot;evaluate__7722fb090eee&quot;: 7
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 9.930647,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 2,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;chatcmpl-tool-98b08762235a0190&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expressions\&quot;: [\&quot;(price * qty) * 1.08\&quot;, \&quot;1 / 0\&quot;, \&quot;2 ^ 8\&quot;, \&quot;10 % 3\&quot;], \&quot;stop_on_error\&quot;: false}&quot;,
+        &quot;name&quot;: &quot;batch_evaluate__59d51f1760fa&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 3
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Error: this.toolHandlers.handleBatchEvaluate is not a function&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  },
+  {
+    &quot;elapsed_seconds&quot;: 19.822563,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 5,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;chatcmpl-tool-9fd57bb1e524d857&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expression\&quot;: \&quot;eval(x)\&quot;}&quot;,
+        &quot;name&quot;: &quot;evaluate__7722fb090eee&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 1
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Evaluation error: Undefined variable: x&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><h4>回答</h4><pre>## What I found when I actually probed the validator
+
+I ran your scenario through the live expression validator (grammar + evaluation) using a realistic hostile/edge-case corpus. Four of the ten probes revealed real defects — and all four are the same classes of bug that show up in hand-rolled `ast`-based calculators.
+
+| Probe | Result | Lesson |
+|---|---|---|
+| `__import__(&quot;os&quot;).system(&quot;rm -rf /&quot;)` | **REJECTED** — &quot;Unexpected character `_`&quot; | Blocked by the *tokenizer&#x27;s character set*, **not** by a security policy. Any tokenizer tweak reopens RCE. |
+| `open(&quot;/etc/passwd&quot;).read()` | **REJECTED** — parse error at `.read(` | Again blocked by *syntax* (method call on a call result), not by policy. |
+| `eval(x)` | **VALID** | Bare function calls pass the grammar. `eval`/`exec`/`__import__` would sail through anywhere `_` is permitted. |
+| `y = 5` with `allow_variables=false` | **VALID** | The `allow_variables` flag is not enforced on assignment forms — statement injection isn&#x27;t stopped at this layer. |
+| `(((((a)))))` with `max_depth=5` | **VALID** | The depth limit is not enforced. |
+| `2 ^ 8` | **256** (Python says `10`) | `^` means *exponentiation* here, not XOR — validator semantics diverge from the language it&#x27;s emulating. |
+| `2 ^ 8 ^ 2` | `18446744073709552000` (exact: `18446744073709551616`) | **384 units of precision loss** — float arithmetic where money math was intended. |
+| `1 / 0` | `null`, `&quot;type&quot;: &quot;number&quot;`, **no error flag** | Division by zero silently yields null. Data-integrity bug with no audit trail. |
+| `abs(x) + sqrt(y)` → `sqrt(16)+abs(0-3)` | valid, → `7` | Bare function allow-listing is genuinely needed. |
+
+**The transferable rule:** &quot;it didn&#x27;t parse&quot; is not a security control. Only an explicit **node allow-list** is.
+
+---
+
+## The architecture that actually holds
+
+Three layers, each assuming the previous one already failed:
+
+1. **Cheap pre-checks** — type, length, node count, depth (run *before* parsing to avoid parser DoS).
+2. **AST allow-list** — reject any node type not explicitly enumerated. Allow-list beats deny-list because Python&#x27;s grammar keeps growing.
+3. **Constrained evaluator** — `Decimal`, trapped IEEE exceptions, bounded exponents, bounded results.
+
+Never `eval()`, never `exec()`, never `compile()`. And note: `eval(expr, {})` with &quot;empty builtins&quot; is **not** a sandbox — `().__class__.__bases__[0].__subclasses__()` reaches `subprocess.Popen` through pure attribute traversal.
+
+```python
+&quot;&quot;&quot;safe_calc.py — evaluate untrusted arithmetic with zero code execution.&quot;&quot;&quot;
+from __future__ import annotations
+
+import ast
+import logging
+from decimal import Decimal, DivisionByZero, InvalidOperation, Overflow, localcontext
+
+log = logging.getLogger(&quot;calc.audit&quot;)
+
+MAX_EXPR_LEN   = 256           # byte bound before parsing (parser DoS guard)
+MAX_NODES      = 128           # AST size bound
+MAX_DEPTH      = 12            # nesting bound  &lt;-- the probe above proved this is needed
+MAX_EXPONENT   = 64</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task133-late-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-late-feedback_notes-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>I&#x27;ve created all three visualizations for your Chinese regional sales performance dashboard:
+
+### 1. 🗺️ 2025 Provincial Sales Distribution Map
+A choropleth map of China showing sales across the five reporting provinces/regions:
+- **Guangdong** ¥15.8M (highest)
+- **Jiangsu** ¥12.3M
+- **Zhejiang** ¥9.7M
+- **Shandong** ¥8.4M
+- **Beijing** ¥7.2M
+
+The color intensity maps to sales value, making it easy to spot Guangdong and Jiangsu as the top performers.
+
+### 2. 📈 2025 Monthly Sales Trend (Area Chart)
+Shows a clear **upward trajectory** throughout the year, rising from ¥1.2M in January to ¥3.5M in December — roughly a **3x increase**. The growth is steadily progressive with only two minor dips (Feb and Aug), with a strong Q4 acceleration suggesting good momentum heading into the next year.
+
+### 3. 📊 Product Category Comparison by Region (Column Chart)
+Grouped column chart comparing Guangdong vs. Jiangsu across three categories:
+- **Electronics**: Guangdong ¥6.2M vs. Jiangsu ¥4.8M
+- **Clothing**: Guangdong ¥5.1M vs. Jiangsu ¥3.6M
+- **Home Appliances**: Guangdong ¥4.5M vs. Jiangsu ¥3.9M
+
+**Key insights:** Guangdong leads in every category, with the widest margin in Clothing (+42%). Electronics is the top category in both regions. Jiangsu&#x27;s strongest relative position is in Home Appliances, where it&#x27;s closest to parity.
+
+All charts are rendered and ready to embed in your dashboard. Would you like me to add any KPI summary cards or a combined dashboard view?</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task235-late-feedback_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-late-delta_notes-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>Your sales performance dashboard is ready with all three components:
+
+**1. 2025 Regional Sales Distribution Map (区域销售额分布)**
+A China province-level map showing 2025 sales, with a warm color gradient scaled to revenue:
+- 广东 (Guangdong): ¥15.8M — highest
+- 江苏 (Jiangsu): ¥12.3M
+- 浙江 (Zhejiang): ¥9.7M
+- 山东 (Shandong): ¥8.4M
+- 北京 (Beijing): ¥7.2M
+
+**2. Monthly Sales Trend Area Chart (月度销售额趋势)**
+January–December 2025, showing a clear upward trajectory from ¥1.2M in January to a peak of ¥3.5M in December — roughly a 3x increase over the year, with only a minor dip in February.
+
+**3. Product Category Comparison Column Chart (产品品类对比)**
+Grouped columns comparing Guangdong vs. Jiangsu across three categories:
+- **Electronics (电子产品):** Guangdong ¥6.2M vs. Jiangsu ¥4.8M
+- **Home Appliances (家用电器):** Guangdong ¥4.5M vs. Jiangsu ¥3.9M
+- **Clothing (服装):** Guangdong ¥5.1M vs. Jiangsu ¥3.6M
+
+Guangdong leads in every category, with the widest gap in Clothing (+¥1.5M) and the narrowest in Home Appliances (+¥0.6M).
+
+All values are in millions of yuan (百万元). The charts are ready to render in your dashboard. If you&#x27;d like, I can add a KPI summary card, adjust the color palette to match your brand, or break the map down to city level for the top provinces.</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task235-late-delta_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-middle-feedback_notes-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>## 销售业绩仪表盘｜2025
+
+### 1. 各省销售分布
+&gt; 单位：万元（¥15.8M = ¥1,580万）
+
+```vis-chart
+{&quot;type&quot;:&quot;district-map&quot;,&quot;title&quot;:&quot;2025各省销售额分布&quot;,&quot;data&quot;:{&quot;name&quot;:&quot;中国&quot;,&quot;showAllSubdistricts&quot;:true,&quot;dataLabel&quot;:&quot;销售额&quot;,&quot;dataValueUnit&quot;:&quot;万元&quot;,&quot;dataType&quot;:&quot;number&quot;,&quot;colors&quot;:[&quot;#F0884D&quot;],&quot;style&quot;:{&quot;fillColor&quot;:&quot;#EEF2F6&quot;},&quot;subdistricts&quot;:[{&quot;name&quot;:&quot;广东省&quot;,&quot;dataValue&quot;:&quot;1580&quot;},{&quot;name&quot;:&quot;江苏省&quot;,&quot;dataValue&quot;:&quot;1230&quot;},{&quot;name&quot;:&quot;浙江省&quot;,&quot;dataValue&quot;:&quot;970&quot;},{&quot;name&quot;:&quot;山东省&quot;,&quot;dataValue&quot;:&quot;840&quot;},{&quot;name&quot;:&quot;北京市&quot;,&quot;dataValue&quot;:&quot;720&quot;}]},&quot;width&quot;:1000,&quot;height&quot;:720}
+```
+
+**区域洞察：** 广东销售额最高（¥1,580万），随后是江苏、浙江、山东和北京。
+
+### 2. 2025年月度销售趋势
+
+```vis-chart
+{&quot;type&quot;:&quot;area&quot;,&quot;title&quot;:&quot;2025年月度销售额趋势&quot;,&quot;axisXTitle&quot;:&quot;月份&quot;,&quot;axisYTitle&quot;:&quot;销售额（百万元）&quot;,&quot;data&quot;:[{&quot;time&quot;:&quot;1月&quot;,&quot;value&quot;:1.2},{&quot;time&quot;:&quot;2月&quot;,&quot;value&quot;:1.1},{&quot;time&quot;:&quot;3月&quot;,&quot;value&quot;:1.4},{&quot;time&quot;:&quot;4月&quot;,&quot;value&quot;:1.6},{&quot;time&quot;:&quot;5月&quot;,&quot;value&quot;:1.8},{&quot;time&quot;:&quot;6月&quot;,&quot;value&quot;:2.1},{&quot;time&quot;:&quot;7月&quot;,&quot;value&quot;:2.3},{&quot;time&quot;:&quot;8月&quot;,&quot;value&quot;:2.2},{&quot;time&quot;:&quot;9月&quot;,&quot;value&quot;:2.5},{&quot;time&quot;:&quot;10月&quot;,&quot;value&quot;:2.7},{&quot;time&quot;:&quot;11月&quot;,&quot;value&quot;:3},{&quot;time&quot;:&quot;12月&quot;,&quot;value&quot;:3.5}],&quot;style&quot;:{&quot;palette&quot;:[&quot;#1783FF&quot;],&quot;lineWidth&quot;:3},&quot;width&quot;:900,&quot;height&quot;:460}
+```
+
+**趋势洞察：** 销售总体呈上升趋势，由1月的¥1.2M增长至12月的¥3.5M；8月出现小幅回落。
+
+### 3. 重点品类区域销售对比
+
+```vis-chart
+{&quot;type&quot;:&quot;column&quot;,&quot;title&quot;:&quot;重点品类区域销售额对比&quot;,&quot;axisXTitle&quot;:&quot;产品品类&quot;,&quot;axisYTitle&quot;:&quot;销售额（百万元）&quot;,&quot;group&quot;:true,&quot;stack&quot;:false,&quot;data&quot;:[{&quot;category&quot;:&quot;电子产品&quot;,&quot;value&quot;:6.2,&quot;group&quot;:&quot;广东&quot;},{&quot;category&quot;:&quot;电子产品&quot;,&quot;value&quot;:4.8,&quot;group&quot;:&quot;江苏&quot;},{&quot;category&quot;:&quot;家用电器&quot;,&quot;value&quot;:4.5,&quot;group&quot;:&quot;广东&quot;},{&quot;category&quot;:&quot;家用电器&quot;,&quot;value&quot;:3.9,&quot;group&quot;:&quot;江苏&quot;},{&quot;category&quot;:&quot;服装&quot;,&quot;value&quot;:5.1,&quot;group&quot;:&quot;广东&quot;},{&quot;category&quot;:&quot;服装&quot;,&quot;value&quot;:3.6,&quot;group&quot;:&quot;江苏&quot;}],&quot;style&quot;:{&quot;palette&quot;:[&quot;#1783FF&quot;,&quot;#00C9C9&quot;]},&quot;width&quot;:900,&quot;height&quot;:460}
+```
+
+**品类洞察：** 电子产品在两个地区均为最大品类；广东在所有三个品类上的销售额均高于江苏，其中电子产品差距最大。</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task235-middle-feedback_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-late-delta_notes-r0 · TF 10 / PE 7.800 · completed · 13 次工具调用 / 1 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 10,
+  &quot;evaluate__7722fb090eee&quot;: 1,
+  &quot;batch_evaluate__59d51f1760fa&quot;: 1,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 5.906238,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 1,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_f84958316b3345ed8027c109&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expressions\&quot;:[\&quot;2 + 3 * 4\&quot;,\&quot;(2 + 3) * 4\&quot;,\&quot;10 / 2 - 3\&quot;,\&quot;2 ** 10\&quot;,\&quot;abs(-7) + max(3, 9)\&quot;],\&quot;stop_on_error\&quot;:false}&quot;,
+        &quot;name&quot;: &quot;batch_evaluate__59d51f1760fa&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 3
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Error: this.toolHandlers.handleBatchEvaluate is not a function&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><h4>回答</h4><pre>## What the tooling actually verified
+
+I ran your validation surface against both benign and hostile inputs. Results:
+
+| Input | `allow_variables` | `max_depth` | Outcome |
+|---|---|---|---|
+| `2 + 3 * 4` | false | – | ✅ valid |
+| `(2 + 3) * 4 - 10 / 2` | – | – | ✅ evaluates to `15` |
+| `((((1 + 2) * 3) - 4) / 5)` | false | **3** | ⚠️ **accepted** despite exceeding depth |
+| `((1 + 2))` | false | **1** | ⚠️ **accepted** despite exceeding depth |
+| `rate * quantity` | **false** | – | ⚠️ **accepted** despite variables disabled |
+| `__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)` | false | – | ✅ rejected (col 10, `_`) |
+| `(1).__class__.__bases__[0].__subclasses__()` | false | – | ✅ rejected (col 26, `_`) |
+| `&quot;&#x27;; DROP TABLE users; --&quot;` | false | – | ⚠️ **accepted** (string literal) |
+| `2 ** 999999999` | false | – | ✅ rejected (no `**` in grammar) |
+
+&gt; **Two tool caveats, reported honestly:** `batch_evaluate` failed with a handler error (`handleBatchEvaluate is not a function`), and the `max_depth` / `allow_variables` flags were **not enforced** in the cases above.
+
+**The takeaway is the important part:** a syntax validator answers *&quot;is this parseable?&quot;*, not *&quot;is this safe?&quot;*. It accepted string literals, bare identifiers, and over-deep nesting. If you pass validated output into `eval()`, you have validated nothing. **Syntax validation is a logging/UX gate; the security boundary must be an allowlist evaluator.**
+
+---
+
+## The only safe architecture: AST allowlist, never `eval`
+
+Do not sanitize with regex, and do not call `eval`/`exec`/`compile` on user input — OWASP **A03: Injection**. Parse to an AST and walk only explicitly permitted node types.
+
+```python
+import ast
+import math
+import operator as op
+
+MAX_LEN       = 256
+MAX_DEPTH     = 12
+MAX_EXPONENT  = 64
+MAX_ABS_VALUE = 1e12
+
+class UnsafeExpression(ValueError):
+    &quot;&quot;&quot;Raised for any rejected expression. Message is deliberately generic.&quot;&quot;&quot;
+
+_BINOPS = {
+    ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
+    ast.Div: op.truediv, ast.FloorDiv: op.floordiv,
+    ast.Mod: op.mod, ast.Pow: op.pow,
+}
+_UNARY = {ast.UAdd: op.pos, ast.USub: op.neg}
+_FUNCS = {
+    &quot;abs&quot;: abs, &quot;min&quot;: min, &quot;max&quot;: max, &quot;round&quot;: round,
+    &quot;sqrt&quot;: math.sqrt, &quot;floor&quot;: math.floor, &quot;ceil&quot;: math.ceil,
+}
+
+def _depth(node: ast.AST, level: int = 0) -&gt; int:
+    children = list(ast.iter_child_nodes(node))
+    return level if not children else max(_depth(c, level + 1) for c in children)
+
+def safe_eval(expr: str, variables: dict[str, float] | None = None) -&gt; float:
+    variables = variables or {}
+    if not isinstance(expr, str) or not expr or len(expr) &gt; MAX_LEN:
+        raise UnsafeExpression(&quot;expression rejected&quot;)
+
+    try:
+        tree = ast.parse(expr, mode=&quot;eval&quot;)
+    except (SyntaxError, ValueError, MemoryError, RecursionError):
+        raise UnsafeExpression(&quot;expression rejected&quot;) from None
+
+    if _depth(tree) &gt; MAX_DEPTH:
+        raise UnsafeExpression(&quot;expression rejected&quot;)
+
+    try:
+        result = _eval(tree.body, variables)
+    except UnsafeExpression:
+        raise
+    except (ArithmeticError, ValueError, TypeError, RecursionError):
+        raise UnsafeExpression(&quot;expression rejected&quot;) from None
+
+    if isinstance(result, complex) or not isinstance(result, (int, float)):
+        raise UnsafeExpression(&quot;expression rejected&quot;)
+    return float(result)
+
+def _num(value: float) -&gt; float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise UnsafeExpression(&quot;expression rejected&quot;)
+    if abs(value) &gt; MAX_ABS_VALUE:
+        raise UnsafeExpression(&quot;expression rejected&quot;)
+    return value
+
+def _eval(node: ast.AST, variables: dict[str, float]) -&gt; float:
+    if isinstance(node, ast.Constant):          # rejects str/bytes/bool/None
+        return _num(node.value)
+
+    if isinstance(node, ast.Name):
+        if node.id not in variables:
+            raise UnsafeExpression(&quot;expression rejected&quot;)
+        return _num(variables[node.id])
+
+    if isinstance(node, ast.BinOp) and type(node.op) in _BINOPS:
+        left, right = _eval(node.left, variables), _eval(node.right, variables)
+        if isinstance(node.op, ast.Pow):
+            if abs(right) &gt; MAX_EXPONENT:       # guard BEFORE computing
+                raise UnsafeExpression(&quot;expression rejected&quot;)
+        return _num(_BINOPS[type(node.op)](left, right))
+
+    if isinstance(node, ast.UnaryOp) and type(node.op) in _UNARY:
+        return _num(_UNARY[type(node.op)](_eval(node.operand, variables)))
+
+    if isinstance(node, ast.Call):
+        if (not isinstance(node.func, ast.Name)
+                or node.func.id not in _FUNCS
+                or node.keywords
+                or any(isinstance(a, ast.Starred) for a in node.args)
+                or len(node.args) &gt; 3):
+            raise UnsafeExpression(&quot;expression rejected&quot;)
+        args = [_eval(a, variables) for a in node.args]
+        return _num(_FUNCS[node.func.id](*args))
+
+    raise UnsafeExpression(&quot;expression rejected&quot;)   # Attribute, Subscript, Lambda, JoinedStr…
+```
+
+Why each guard matters:
+
+- **`ast.Constant` type check** blocks the `&quot;&#x27;; DROP TABLE users; --&quot;` string that the syntax validator accepted.
+- **`ast.Name` allowlist** makes `allow_variables` a real policy instead of a hint.
+- **`_depth` on the AST** enforces nesting yourself, since the tool&#x27;s `max_depth` did not.
+- **Exponent guard before evaluation** stops `9**9**9` from hanging a worker — never compute first and check after.
+- **`_num` result bound** catches overflow-to-infinity and `(-2) ** 0.5` producing `complex`.
+- **Keyword/starred-arg rejection** closes `sqrt(x, **payload)` style tricks.
+- **No `ast.Attribute` / `ast.Subscript` branch** is what kills `().__class__.__bases__[0].__subclasses__()` — the classic sandbox escape.
+
+---
+
+## Defence in depth around the evaluator
+
+| Layer | Control | OWASP |
+|---|---|---|
+| Transport | HTTPS only; endpoint behind auth (API key/JWT) | A02, A07 |
+| Access | Per-tenant rate limit + body size cap at the gateway | A01, A04 |
+| Input | `MAX_LEN`, token count, `MAX_DEPTH`, numeric bounds | A03, A04 |
+| Compute | `signal.alarm`/subprocess timeout around `safe_eval` | A04 |
+| Output | Generic `{&quot;error&quot;: &quot;invalid expression&quot;}`; never echo the input or traceback | A05, A09 |
+| Observability | Structured log `{event, correlation_id, rule, expr_hash}`; alert on reject spikes | A09 |
+| Supply chain | Pin `pip-audit`/Dependabot on the parsing libs | A06 |
+
+```python
+from fastapi import FastAPI, HTTPException, Request
+app = FastAPI()
+
+@app.post(&quot;/calc&quot;)
+async def calc(request: Request):
+    body = await request.json()
+    try:
+        return {&quot;result&quot;: safe_eval(body.get(&quot;expr&quot;, &quot;&quot;), body.get(&quot;vars&quot;))}
+    except UnsafeExpression:
+        # log rule + correlation id, return nothing useful to the attacker
+        logger.warning(&quot;calc_rejected&quot;, extra={&quot;cid&quot;: request.state.cid})
+        raise HTTPException(status_code=400, detail=&quot;invalid expression&quot;)
+```
+
+**Do not** log the raw expression at INFO level — expressions are attacker-controlled and may carry injected log content (log forging / A09).
+
+---
+
+## OWASP-aligned test cases
+
+| Test | Expected |
+|---|---|
+| `__import__(&#x27;os&#x27;).system(&#x27;id&#x27;)` | 400 |
+| `().__class__.__bases__[0].__subclasses__()` | 400 |
+| `open(&#x27;/etc/passwd&#x27;).read()` | 400 |
+| `&quot;a&quot; * 1000000` | 400 (string literal rejected) |
+| `2 ** 999999999` | 400, fast (&lt;50 ms) |
+| `9 ** 9 ** 9` | 400, fast |
+| `((((…))))` × 50 | 400 (depth) |
+| `1 / 0` | 400, no traceback |
+| `rate * qty` with `rate` not supplied | 400 |
+| `2 + 3 * 4` | 200, `14.0` |
+| 10 000 requests/min | 429, not 500 |
+
+Regression-test the **timing** of the DoS cases — a correct 400 that takes 30 seconds is still an outage.
+
+---
+
+## Reusable security review prompt
+
+I generated a full OWASP/NIST/SOC-2 assessment prompt (filename `security-hardening-vulnerability-analysis-prompt.prompt.md`) scoped to your exact scenario — `eval()`-based expression endpoints in FastAPI/Flask, low risk tolerance. Its priority findings for this codebase:
+
+1. **Critical** — `eval()` on request bodies ⇒ remote code execution (A03).
+2. **Critical** — unbounded exponentiation/operand size ⇒ CPU exhaustion DoS (A04).
+3. **High** — stack traces returned to caller ⇒ internal disclosure (A05).
+4. **Medium** — no per-principal rate limiting on the compute path (A04/A07).
+5. **Medium** — expressions logged raw ⇒ log injection and PII leakage (A09).
+
+---
+
+## Bottom line
+
+Validation alone will not secure this. Enforce four things in order: **parse with `ast`, allowlist node types, bound cost before computing, and fail closed with generic errors.** Treat any &quot;syntax OK&quot; signal from an external validator as an observability input only — as the depth and variable tests above show, it will let things through that would hand an attacker your process.</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task133-late-delta_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-middle-delta_notes-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>All three dashboard components are ready:
+
+**1. 2025 Provincial Sales Distribution Map (2025年各省销售额分布)**
+- A China provincial map with the five territories colored by sales intensity (warm continuous scale)
+- Guangdong ¥1,580万 → Jiangsu ¥1,230万 → Zhejiang ¥970万 → Shandong ¥840万 → Beijing ¥720万
+- Note: values were converted to 万元 for the map&#x27;s data labeling (¥15.8M = 1,580万元); provinces without data render in a neutral gray, which also highlights coverage gaps for your regional teams
+
+**2. Monthly Sales Trend Area Chart (2025年月度销售额趋势)**
+- January–December 2025, ranging from ¥1.1M (Feb) to ¥3.5M (Dec)
+- Clear H2 acceleration: the curve climbs steadily from ~¥1.2M in Q1 to ¥3.5M in December — roughly a 3× increase across the year, with only a minor dip in August
+
+**3. Product Category Comparison Column Chart (各区域重点品类销售额对比)**
+- Grouped columns showing Guangdong vs. Jiangsu for Electronics (¥6.2M / ¥4.8M), Home Appliances (¥4.5M / ¥3.9M), and Clothing (¥5.1M / ¥3.6M)
+- Guangdong leads in all three categories; Electronics is the largest category in both regions, while Home Appliances is Jiangsu&#x27;s weakest relative segment
+
+A quick read for your team: Guangdong is ~28% ahead of Jiangsu overall, and December&#x27;s spike suggests strong Q4 seasonality worth planning inventory around.</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task235-middle-delta_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-middle-feedback_notes-r0 · TF 10 / PE 9.200 · completed · 48 次工具调用 / 0 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;list_memories__e3429fc8e756&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 37,
+  &quot;update_task__e40dd373c4ac&quot;: 6,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 1,
+  &quot;list_tasks__5cb11580c2d8&quot;: 1
+}</pre><h4>回答</h4><pre>Done. Here&#x27;s the structure I built in the **Customer Analytics Dashboard** project.
+
+## Project at a glance
+- **Project ID:** `13652124-48d8-418f-b223-027080914f40`
+- **5 milestones → 32 executable tasks**, ~244 estimated hours
+- Dependencies wired so work flows in the right order
+
+## Milestones
+
+| # | Milestone | Tasks | Est. hrs | Depends on |
+|---|-----------|-------|----------|------------|
+| 1 | Foundation &amp; Architecture Setup | 5 | 24 | — |
+| 2 | Customer CSV Data Processing Pipeline | 7 | 60 | M1 |
+| 3 | Application Log Analysis Pipeline | 6 | 52 | M1 |
+| 4 | Visualization Components | 8 | 64 | M1 |
+| 5 | Integration, Testing &amp; Deployment | 6 | 44 | M2, M3, M4 |
+
+## Task breakdown
+
+**M1 – Foundation (5 tasks):** requirements &amp; success metrics · system architecture &amp; data flow · repo/tooling/CI-CD · data schemas &amp; contracts for CSV + logs · dev/staging environments &amp; storage
+
+**M2 – CSV pipeline (7 tasks):** ingestion &amp; file discovery · schema validation &amp; error handling · cleaning/normalization · deduplication &amp; PII masking · warehouse loading · incremental refresh scheduling · pipeline tests &amp; data quality checks
+
+**M3 – Log analysis (6 tasks):** parsing rules &amp; formats · log ingestion &amp; parsing · metrics &amp; error aggregation · anomaly/trend detection · warehouse loading · pipeline tests &amp; validation
+
+**M4 – Visualization (8 tasks):** frontend scaffold &amp; component library · shared line/bar/pie charts · KPI cards &amp; widgets · customer analytics views · log/error monitoring views · filters/date ranges/drill-downs · responsive layout &amp; accessibility · connect to data APIs
+
+**M5 – Integration &amp; launch (6 tasks):** API layer · end-to-end integration testing · performance/load testing · security review &amp; access control · production deployment &amp; monitoring · documentation &amp; handover
+
+## Complexity check
+I ran the complexity audit. **Every executable task scores 2–5 out of 10** (average ~4.4), with each scoped to 4–10 hours — nothing is oversized.
+
+The audit did flag four items at 7–8/10, but those are the **milestone roll-up containers**, not work items. They aggregate 5–8 leaf tasks each and are never executed as a single unit. The actual work beneath them is fully decomposed. I also added two cross-cutting dependencies: &quot;Connect components to data APIs&quot; and &quot;End-to-end integration testing&quot; both wait on the API layer task.
+
+## Suggested starting sequence
+1. Define dashboard requirements &amp; success metrics
+2. Define data schemas &amp; contracts for CSV and logs
+3. Design system architecture &amp; data flow
+4. Set up repository, tooling &amp; CI/CD skeleton
+5. Provision dev/staging environments &amp; storage
+
+Then M2 and M3 can run in parallel, with M4 starting once the data contracts are stable. Want me to mark the first task in-progress or adjust any estimates?</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task283-middle-feedback_notes-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-middle-selective_patch-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;validate_syntax__b7e42007400a&quot;: 2
+}</pre><h4>回答</h4><pre>Here&#x27;s a complete, OWASP-aligned approach to securing mathematical operations in Python. I&#x27;ve validated the concept with the expression tools above — note how `(2 + 3) * 4 / 2 - 1` passes syntax validation while `__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)` is rejected at the character level (the `_` in `__import__` is not part of a safe math grammar). That&#x27;s the first line of defense.
+
+---
+
+## 1. The Core Threat: Never `eval()` Untrusted Input
+
+The single biggest risk is `eval()` / `exec()` on user-supplied expressions. This maps directly to **OWASP A03:2021 – Injection** and **CWE-95 (Improper Neutralization of Directives in Dynamically Evaluated Code)**.
+
+```python
+# ❌ CRITICAL VULNERABILITY — arbitrary code execution
+result = eval(user_input)   # user_input = &quot;__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)&quot;
+```
+
+`eval()` executes *any* Python expression, including imports, attribute access, and function calls. There is no reliable blacklist — attackers bypass `__builtins__` restrictions routinely.
+
+---
+
+## 2. The Safe Pattern: AST Whitelist Evaluation
+
+Parse the expression into an Abstract Syntax Tree and **allow only a fixed set of node types and operators**. This is the recommended defense-in-depth approach.
+
+```python
+import ast
+import operator
+
+# Whitelist of allowed binary/unary operators
+_ALLOWED_OPERATORS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+    ast.USub: operator.neg,
+    ast.UAdd: operator.pos,
+}
+
+MAX_EXPRESSION_LENGTH = 200
+MAX_POWER_EXPONENT = 1000   # prevent 9**9**9 DoS
+
+def safe_eval(expression: str) -&gt; float:
+    # 1. Input validation: length + type
+    if not isinstance(expression, str) or len(expression) &gt; MAX_EXPRESSION_LENGTH:
+        raise ValueError(&quot;Expression too long or invalid type&quot;)
+
+    # 2. Parse to AST (raises SyntaxError on malformed input)
+    try:
+        tree = ast.parse(expression, mode=&quot;eval&quot;)
+    except SyntaxError as e:
+        raise ValueError(f&quot;Invalid expression syntax: {e}&quot;) from e
+
+    # 3. Recursively evaluate only whitelisted nodes
+    def _eval(node):
+        if isinstance(node, ast.Expression):
+            return _eval(node.body)
+        if isinstance(node, ast.Constant):
+            if isinstance(node.value, (int, float)) and not isinstance(node.value, bool):
+                return node.value
+            raise ValueError(&quot;Only numeric constants allowed&quot;)
+        if isinstance(node, ast.BinOp):
+            op = _ALLOWED_OPERATORS.get(type(node.op))
+            if op is None:
+                raise ValueError(f&quot;Operator not allowed: {type(node.op).__name__}&quot;)
+            left, right = _eval(node.left), _eval(node.right)
+            # DoS guard for exponentiation
+            if isinstance(node.op, ast.Pow) and abs(right) &gt; MAX_POWER_EXPONENT:
+                raise ValueError(&quot;Exponent too large&quot;)
+            return op(left, right)
+        if isinstance(node, ast.UnaryOp):
+            op = _ALLOWED_OPERATORS.get(type(node.op))
+            if op is None:
+                raise ValueError(&quot;Unary operator not allowed&quot;)
+            return op(_eval(node.operand))
+        # Anything else (Call, Attribute, Name, Subscript, Import...) is rejected
+        raise ValueError(f&quot;Disallowed expression element: {type(node).__name__}&quot;)
+
+    return _eval(tree)
+```
+
+**Why this works:** `ast.parse` never executes code. The recursive evaluator only handles `Constant`, `BinOp`, and `UnaryOp` — so `Call`, `Attribute`, `Name`, `Import`, and `Subscript` nodes (the attack surface) are structurally impossible to reach.
+
+---
+
+## 3. OWASP Top 10 Mapping for Math Evaluation
+
+| OWASP Risk | How it applies to expression evaluation | Control |
+|---|---|---|
+| **A03 – Injection** | `eval()`/`exec()` on user input → RCE | AST whitelist, no `eval` |
+| **A04 – Insecure Design** | No threat model for untrusted input | Define trust boundary; assume all input hostile |
+| **A05 – Security Misconfiguration** | `eval` with `__builtins__` tricks | Remove `eval` entirely; fail closed |
+| **A06 – Vulnerable Components** | Outdated `sympy`/parser libs with CVEs | Pin &amp; scan dependencies (`pip-audit`) |
+| **A08 – Data Integrity** | Unsafe `pickle`/`yaml.load` for expression data | Use JSON; `yaml.safe_load` |
+| **A09 – Logging Failures** | Silent failures hide attacks | Log rejected expressions with context |
+
+---
+
+## 4. Additional Hardening Layers
+
+**Resource-exhaustion (DoS) guards** — `9**9**9` or huge factorials can hang a process:
+- Cap expression length, exponent magnitude, and recursion depth.
+- Run evaluation in a subprocess with a timeout and memory limit (`resource.setrlimit` on Linux) for untrusted workloads.
+
+**If you must use `sympy`** (symbolic math), never pass raw strings to `sympify()` — it uses `eval` internally. Use `parse_expr(..., evaluate=False)` with a restricted `local_dict` and `global_dict`, or better, build expressions programmatically from validated tokens.
+
+**Error handling** — fail closed and return generic messages to users; log details server-side:
+```python
+import logging
+logger = logging.getLogger(&quot;math.eval&quot;)
+
+try:
+    result = safe_eval(user_input)
+except ValueError as e:
+    logger.warning(&quot;Rejected expression: %r — %s&quot;, user_input[:200], e)
+    raise  # surface a generic error to the caller
+```
+
+**Never** use `pickle` to transport expressions or results (A08) — use JSON.
+
+---
+
+## 5. Security Test Cases
+
+```python
+import pytest
+
+@pytest.mark.parametrize(&quot;expr,expected&quot;, [
+    (&quot;(2 + 3) * 4 / 2 - 1&quot;, 9.0),
+    (&quot;2 ** 10&quot;, 1024),
+    (&quot;-5 + 3&quot;, -2),
+])
+def test_valid(expr, expected):
+    assert safe_eval(expr) == expected
+
+@pytest.mark.parametrize(&quot;malicious&quot;, [
+    &quot;__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)&quot;,   # RCE
+    &quot;open(&#x27;/etc/passwd&#x27;).read()&quot;,            # file access
+    &quot;().__class__.__bases__[0].__subclasses__()&quot;,  # sandbox escape
+    &quot;9 ** 9 ** 9&quot;,                           # DoS
+    &quot;x + 1&quot;,                                 # undefined name
+    &quot;a.b&quot;,                                   # attribute access
+    &quot;exec(&#x27;print(1)&#x27;)&quot;,                      # statement injection
+])
+def test_rejected(malicious):
+    with pytest.raises(ValueError):
+        safe_eval(malicious)
+```
+
+---
+
+## 6. Prioritized Recommendations
+
+1. **Critical** — Remove all `eval()`/`exec()` on untrusted input; replace with the AST whitelist evaluator above.
+2. **High** — Add DoS guards (length, exponent, timeout, memory limits).
+3. **High** — Fail closed with generic user errors + detailed server-side logging (A09).
+4. **Medium** — Pin and scan dependencies with `pip-audit` / `safety` (A06).
+5. **Medium** — Replace `pickle`/unsafe `yaml` with JSON / `safe_load` (A08).
+6. **Low** — Add the test suite above to CI as a security regression gate.
+
+---
+
+### Quick reference: the tooling I used
+- **`validate_syntax`** — grammar-level validation that rejects non-math characters (caught the `__import__` payload immediately).
+- **`evaluate`** — safe evaluation of validated expressions.
+- **`security-hardening-prompt-builder`** — generated the full OWASP/NIST assessment framework above.
+
+Would you like me to generate a ready-to-run `safe_eval` module file, or produce a full security review prompt tailored to a specific file in your codebase?</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task133-middle-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-middle-selective_patch-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>All three visualizations for your Chinese regional sales dashboard are ready:
+
+**1. 2025 Sales Distribution Map (Province Level)**
+A China district map showing the five provinces with sales data:
+- 广东省 (Guangdong): ¥15.8M — highest
+- 江苏省 (Jiangsu): ¥12.3M
+- 浙江省 (Zhejiang): ¥9.7M
+- 山东省 (Shandong): ¥8.4M
+- 北京市 (Beijing): ¥7.2M
+
+**2. Monthly Sales Trend Area Chart (Jan–Dec 2025)**
+Shows a clear upward trajectory from ¥1.2M in January to ¥3.5M in December, with a slight dip in February (¥1.1M) and August (¥2.2M), then strong acceleration in Q4.
+
+**3. Product Category Comparison Column Chart (Grouped by Region)**
+Compares Guangdong vs. Jiangsu across three categories:
+- 电子产品 (Electronics): Guangdong ¥6.2M vs. Jiangsu ¥4.8M
+- 家用电器 (Home Appliances): Guangdong ¥4.5M vs. Jiangsu ¥3.9M
+- 服装 (Clothing): Guangdong ¥5.1M vs. Jiangsu ¥3.6M
+
+Guangdong leads in every category, with the widest gap in Clothing (¥1.5M) and the narrowest in Home Appliances (¥0.6M).
+
+A few notes for your dashboard:
+- I used **百万元 (millions)** as the unit for the map and charts to keep the numbers clean and consistent with your ¥M figures.
+- The map only colors the five provinces you provided; other provinces will appear without data. If you&#x27;d like a fuller national picture, share the remaining province figures and I can update it.
+- If you&#x27;d prefer the product comparison to include Zhejiang, Shandong, or Beijing, just send those values and I&#x27;ll expand the grouped column chart.</pre><a href="../results/raw/selective-search-v1.1-development-20261031/cells/task235-middle-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details></main></html>
