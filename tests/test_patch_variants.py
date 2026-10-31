@@ -366,6 +366,94 @@ def weather_observation(stage="late"):
     }
 
 
+def media_catalog(stage="early"):
+    result = catalog(stage)
+    specs = [
+        ("@hugeicons/mcp-server", "search_icons"),
+        ("@hugeicons/mcp-server", "get_icon_glyph_by_style"),
+        ("plantuml-mcp-server", "generate_plantuml_diagram"),
+        ("other", "unrelated"),
+    ]
+    result["tools"] = [deepcopy(result["tools"][0]) for _ in specs]
+    for tool, (server, name) in zip(result["tools"], specs, strict=True):
+        tool.update(tool_id=f"{server}::{name}", server_id=server, name=name,
+                    routing={"server_id": server, "tool_name": name})
+        if name == "search_icons" and stage != "early":
+            tool["parameters"]["properties"]["style"] = {"type": "string"}
+        if name == "generate_plantuml_diagram" and stage == "late":
+            tool["parameters"]["properties"]["skip_fetch_check"] = {"type": "boolean"}
+    return result
+
+
+def media_observations(stage):
+    from pathlib import Path
+
+    path = Path(__file__).parents[1] / "experiments/native-media-contract-feedback-v1.json"
+    return [x for x in json.loads(path.read_text())["observations"] if x["stage"] == stage]
+
+
+@pytest.mark.parametrize("stage,count", [("middle", 2), ("late", 3)])
+def test_media_contract_changes_only_verified_rules_with_unchanged_contracts(stage, count):
+    from pathlib import Path
+
+    old, target = media_catalog(), media_catalog(stage)
+    before = deepcopy((old, target))
+    base, _, _ = adapt(old, target, "selective_patch")
+    candidate, changes, cost = adapt(
+        old, target, "native_media_contract", {"feedback": media_observations(stage)}
+    )
+    rules = json.loads((Path(__file__).parents[1] / "experiments/native-media-contract-v1.json")
+                      .read_text())["mechanism"]["frozen_rules"]
+    actual = 0
+    for a, b in zip(base["tools"], candidate["tools"], strict=True):
+        assert {k: v for k, v in a.items() if k != "usage_rules"} == {
+            k: v for k, v in b.items() if k != "usage_rules"}
+        suffix = b["usage_rules"][len(a["usage_rules"]):]
+        expected = a["server_id"] == "@hugeicons/mcp-server" or (
+            stage == "late" and a["server_id"] == "plantuml-mcp-server")
+        assert b["usage_rules"][:len(a["usage_rules"])] == a["usage_rules"]
+        assert suffix == ([rules[a["tool_id"]]] if expected else [])
+        actual += bool(suffix)
+    assert actual == count
+    assert len([c for c in changes if c["operation"] == "append_native_media_contract"]) == count
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+
+
+def test_media_contract_no_change_and_wrong_stage_have_no_intervention():
+    old, target = media_catalog(), media_catalog("middle")
+    same, _, _ = adapt(old, old, "native_media_contract", {"feedback": media_observations("late")})
+    assert same == old
+    base, _, _ = adapt(old, target, "selective_patch")
+    wrong, _, _ = adapt(old, target, "native_media_contract",
+                        {"feedback": media_observations("late")})
+    assert wrong == base
+
+
+def test_media_contract_rejects_unverified_evidence_and_missing_native_alternative():
+    old, target = media_catalog(), media_catalog("late")
+    evidence = media_observations("late")
+    evidence[0]["result"]["native_glyph_by_style_success"] = False
+    with pytest.raises(ValueError, match="media contract"):
+        adapt(old, target, "native_media_contract", {"feedback": evidence})
+    target["tools"] = [t for t in target["tools"] if t["name"] != "get_icon_glyph_by_style"]
+    with pytest.raises(ValueError, match="media contract"):
+        adapt(old, target, "native_media_contract", {"feedback": media_observations("late")})
+
+
+def test_media_contract_does_not_use_evidence_without_corresponding_change():
+    target = media_catalog("late")
+    old = deepcopy(target)
+    old["version"] = "early"
+    for tool in old["tools"]:
+        tool["version"] = "early"
+    target["tools"][-1]["description"] += " unrelated change"
+    base, _, _ = adapt(old, target, "selective_patch")
+    candidate, _, _ = adapt(old, target, "native_media_contract",
+                            {"feedback": media_observations("late")})
+    assert candidate == base
+
+
 @pytest.mark.parametrize("stage", ["middle", "late"])
 def test_weather_provenance_changes_only_new_advice_and_verified_forecast_dependency(stage):
     old, target = weather_catalog(), weather_catalog(stage)

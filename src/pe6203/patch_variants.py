@@ -10,6 +10,7 @@ from copy import deepcopy
 from time import perf_counter
 
 from .costs import provider_usd
+from .native_media_contract import native_media_notes
 from .selective import adapt_result as base_patch
 from .selective import validate_adaptation
 
@@ -30,6 +31,7 @@ VARIANTS = (
     "thinking_contract",
     "weather_provenance",
     "contract_reconcile",
+    "native_media_contract",
 )
 
 SUFFICIENCY_RULE = (
@@ -687,6 +689,7 @@ def adapt_result(old, target, strategy, context=None):
             "project_state_contract",
             "thinking_contract",
             "weather_provenance",
+            "native_media_contract",
         ):
             continue
         note = delta_note(tool, change)
@@ -718,7 +721,8 @@ def adapt_result(old, target, strategy, context=None):
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
     if strategy in (
-        "document_sequence", "project_state_contract", "thinking_contract", "weather_provenance"
+        "document_sequence", "project_state_contract", "thinking_contract", "weather_provenance",
+        "native_media_contract",
     ):
         by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
         for observation in feedback:
@@ -728,6 +732,7 @@ def adapt_result(old, target, strategy, context=None):
                 "project_state_contract": project_state_notes,
                 "thinking_contract": thinking_contract_notes,
                 "weather_provenance": weather_provenance_notes,
+                "native_media_contract": native_media_notes,
             }
             notes = builders[strategy](observation)
             if not notes.keys() <= by_id.keys():
@@ -747,6 +752,7 @@ def adapt_result(old, target, strategy, context=None):
                             "project_state_contract": "frozen_synthetic_project_state_views",
                             "thinking_contract": "frozen_synthetic_native_notebook_contract",
                             "weather_provenance": "frozen_native_weather_provenance",
+                            "native_media_contract": "frozen_native_media_contract",
                         }[strategy],
                     }
                 )
