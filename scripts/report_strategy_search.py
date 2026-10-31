@@ -398,7 +398,8 @@ def render(directories, destination):
         + "</main></html>"
     )
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(page)
+    # Normalize display-only whitespace; linked raw answers and traces remain byte-exact.
+    destination.write_text("\n".join(line.rstrip() for line in page.splitlines()) + "\n")
     print(destination)
 
 
