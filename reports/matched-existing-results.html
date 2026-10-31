@@ -1,0 +1,124 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PE6203 · 固定供应商补充对照</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#182437;background:#f5f7fa;margin:auto;max-width:1150px;padding:28px}main{background:white;padding:34px;border-radius:12px}h1{font-size:30px;line-height:1.3}h2{font-size:22px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;text-align:left;border-bottom:1px solid #d9e0e8;vertical-align:top}th{background:#eef3f8}a{color:#175da8}code,pre{font-size:13px;overflow-wrap:anywhere}pre{white-space:pre-wrap;background:#eef3f8;padding:12px}.note{border-left:4px solid #b57d13;padding:12px 16px;background:#fff8e7}.scroll{overflow-x:auto}summary{cursor:pointer;font-weight:600;margin-top:12px}.small{font-size:14px;color:#526074}@media(max-width:650px){body{padding:10px}main{padding:18px}}</style><main>
+<h1>补充对照：完成率与 TF 上升，质量检查仍未通过</h1>
+<p class="note"><strong>观察到了收益，尚不晋级。</strong>9 条新增轨迹与3条明确溯源的既有轨迹组成12格描述性分析。budget_feedback 完成6/6，原 Selective Patch 完成2/6；TF、PE均较高。但候选数学代码无效、部分汇总失实，不能宣称全面质量改善、稳定胜出或课程验证已完成。</p>
+<p>2026-10-31 · 用户最新授权取消总费用与总轨迹额度。每条执行仍固定同一模型、解码、12轮与4096输出tokens，以保持比较条件。此轮使用已有方法，没有开发新候选，没有修改旧评分、课程27条主结果、PDF或Slides，也没有外部部署。</p>
+<h2>独立复算</h2><div class="scroll"><table><tr><th>12格合并分析</th><th>原 Selective Patch</th><th>budget_feedback</th></tr>
+<tr><td>正常完成</td><td>2/6</td><td>6/6</td></tr>
+<tr><td>变化任务完成</td><td>0/4</td><td>4/4</td></tr>
+<tr><td>不变任务完成</td><td>2/2</td><td>2/2</td></tr>
+<tr><td>平均TF</td><td>9.4000</td><td>9.8000</td></tr>
+<tr><td>平均PE</td><td>8.3667</td><td>9.2667</td></tr>
+<tr><td>Agent+judge已知费用</td><td>0.104711220</td><td>0.091166448</td></tr>
+<tr><td>知识更新秒数</td><td>0.850</td><td>1.068</td></tr>
+<tr><td>更新模型tokens / 费用</td><td>0 / $0</td><td>0 / $0</td></tr>
+</table></div><p>只有 Middle/Late，<strong>不计算新ECS</strong>。变化任务恢复在这里表示变更后任务的实际完成表现，并非已测得相对Early的恢复差值；不变任务完成2/2也不等于答案无错误。费用比较不含共享预检，跨批次缓存/请求差异限制成本归因。</p>
+<div class="scroll"><table><tr><th>Task /阶段</th><th>方法</th><th>来源</th><th>执行状态</th><th>TF</th><th>PE</th></tr>
+<tr><td>133 / late</td><td>budget_feedback</td><td>本轮 cell-007</td><td>completed</td><td>9.8</td><td>7.2</td></tr>
+<tr><td>133 / late</td><td>selective_patch</td><td>本轮 cell-006</td><td>output_truncated</td><td>9.4</td><td>6.2</td></tr>
+<tr><td>133 / middle</td><td>budget_feedback</td><td>复用旧六条试验 cell-001</td><td>completed</td><td>10</td><td>10</td></tr>
+<tr><td>133 / middle</td><td>selective_patch</td><td>本轮 cell-002</td><td>output_truncated</td><td>9.6</td><td>6</td></tr>
+<tr><td>235 / late</td><td>budget_feedback</td><td>本轮 cell-003</td><td>completed</td><td>9.2</td><td>10</td></tr>
+<tr><td>235 / late</td><td>selective_patch</td><td>本轮 cell-004</td><td>completed</td><td>10</td><td>10</td></tr>
+<tr><td>235 / middle</td><td>budget_feedback</td><td>复用旧六条试验 cell-004</td><td>completed</td><td>10</td><td>10</td></tr>
+<tr><td>235 / middle</td><td>selective_patch</td><td>本轮 cell-008</td><td>completed</td><td>9.8</td><td>9.8</td></tr>
+<tr><td>283 / late</td><td>budget_feedback</td><td>复用旧六条试验 cell-003</td><td>completed</td><td>9.8</td><td>9.2</td></tr>
+<tr><td>283 / late</td><td>selective_patch</td><td>本轮 cell-001</td><td>max_rounds</td><td>10</td><td>9.2</td></tr>
+<tr><td>283 / middle</td><td>budget_feedback</td><td>本轮 cell-009</td><td>completed</td><td>10</td><td>9.2</td></tr>
+<tr><td>283 / middle</td><td>selective_patch</td><td>本轮 cell-005</td><td>max_rounds</td><td>7.6</td><td>9</td></tr>
+</table></div>
+<h2>最重要的成功与失败</h2><ul>
+<li><strong>真实产物改善：task283 Middle。</strong>候选保存36条记录=4个里程碑+32个具体叶任务；73/69/104/110小时合计356，与答案一致。它把两个过宽任务缩小范围，并新增四个具体任务承接工作；四个容器警告仍如实披露。同批次原Patch在M3分解期间耗尽轮数，M4–M8没有子任务。该配对支持本条件的完成与产物改善；不证明普遍因果效应。</li>
+<li><strong>候选完成≠代码有效：task133 Late。</strong>答案完整返回，但Python字典中<code>ast.Sub</code>缺少值，离线AST解析报SyntaxError；字符过滤还会拒绝其合法测试<code>sqrt(16)</code>。AST遍历不能检测原始括号层数。没有执行生成代码，也没有把安全性记为已验证。</li>
+<li><strong>保持任务的汇总错误。</strong>两组图表调用均保留原数字、顺序和金额单位，但候选Late年度合计24.2应为25.4，江苏服装4.5应为3.6；原Patch Middle合计23.4也错误。Late两组都误判最大地区差距。两组知识都是精确K0，不能归因于适应机制。没有归档图像，视觉质量仍未知。</li>
+<li><strong>旧成功轨迹的错误照样保留。</strong>复用的候选283 Late把M3的79小时说成67，并声称出现了轨迹中不存在的创建错误；复用的133 Middle示例安全完整性仍未知。不能因这些轨迹完成而忽略反证。</li>
+<li><strong>原Patch的执行失败。</strong>两个133条件输出截断，两个283条件耗尽轮数。283 Late即使无最终答复仍获TF10；283 Middle只完成部分任务拆分。其Late数学示例还引用不存在的<code>ast.Comprehension</code>。完成状态、judge分数和质量结论分别记录。</li></ul>
+<h2>公平性与解释边界</h2><p>两组新调用均为DeepSeek v4.1 Flash指定快照、DigitalOcean端点，无fallback；温度0、12轮、4096输出tokens、900秒执行与120秒请求超时，原任务及5个评分槽固定。9份新知识均与原12条研究归档精确相同；没有新增探测或updater模型调用。新执行使用不含方法名的工作目录。</p>
+<p><strong>这是两批次、部分回顾性的分析。</strong>候选133 Middle、235 Middle和283 Late复用前一轮；来源在新结果产生前已写入协议，但前一轮结果当时已可见。总协议哈希不同，因为本轮移除了费用/单价准入上限并换用了账本路径；不能称为所有设置逐字相同。原judge实现、评分规则、模型及解码设置不变。每格仅1次执行，温度0也不保证确定性；供应商内部权重和运行条件不可控。</p>
+<p>此前完整12条研究中两组均4/6完成，候选TF10、PE8.8，原PatchTF9.9667、PE9.0；那些结果仍有效。本轮不能覆盖旧结果，也不能把当前较好的候选批次作为无偏总体估计。全部候选/失败保留，不重跑低分。</p>
+<h2>Judge、运行问题与成本</h2><p>独立复算直接读取原始评分响应，逐槽核对TF/PE，再从stop、exceeded和finish_reason确定完成状态。发现的judge理由错误单列：例如图表年度合计错误仍被称为全部数字匹配；283 Middle空最终答案被描述为存在最终回答；候选133 Late独立探测被误称重复。<strong>原分数没有修改，也没有重评。</strong></p>
+<p>283 Middle原Patch触发的JSONRPC警告来自上游工具将迁移信息用console.log写入stdio。轨迹继续执行；另有一次虚构父ID导致工具拒绝。没有证据说明迁移警告造成轮数耗尽。完整控制台流未另存，原始工具观察及持久化状态已保存；此限制在运行观察文件中披露。</p>
+<p>本轮新增9轨迹、45有效评分、2预检，共<strong>103个API请求</strong>。新增已知费用<strong>US$0.151974408</strong>（预检$0.00001296），未知费用0；账本时长465.0秒，约7.75分钟。复用3条没有重复执行或收费。历史费用预估是估算，不是上限；实际按账本披露。</p>
+<h2>课程状态与下一步</h2><p>课程27条主实验仍是原正式结果；本研究尚无Early及匹配的No Update/Full Rewrite全阶段比较，不替代主表。Under-update受控案例是否合格、已确认的无关知识over-update证据、Full Rewrite解释等仍见HANDOVER中的TA问题草稿；没有发送消息。</p>
+<p><strong>本轮不晋级、不启动81/108条确认。</strong>已有完成率及TF正向信号，下一步应先围绕变化工具的“证据能支持什么结论”设计单一、可审计的修正，并检验完整回答是否含无效代码或无依据总结；保持任务错误需要作为相同K0下的波动记录，不能为修复它而偷改无关知识。继续研究不再以总额度为停止条件，但必须由具体假说和缺口驱动。</p>
+<h2>复现与证据</h2><p><a href="../results/evidence/matched-existing-20261031/trial-verification.json">独立复算</a> · <a href="../results/evidence/matched-existing-20261031/quality-review.json">逐属性审阅</a> · <a href="../results/evidence/matched-existing-20261031/artifact-checks.json">产物事实</a> · <a href="../results/evidence/matched-existing-20261031/judge-audit.json">Judge问题</a> · <a href="../results/evidence/matched-existing-20261031/runtime-observations.json">运行观察</a> · <a href="../results/evidence/matched-existing-20261031/raw-trial.tar.gz">382个原始文件</a> · <a href="../results/evidence/matched-existing-20261031/source-f896388.tar.gz">冻结源码</a> · <a href="../HANDOVER.md">交接</a></p>
+<pre><code>python3 results/evidence/matched-existing-20261031/verify_trial.py
+python3 results/evidence/matched-existing-20261031/check_artifacts.py</code></pre>
+<p class=small>原始归档SHA-256：6f1d6a5bbcf78f076793faf74f466d3050f133491793e8154a86a3936800e837。源码提交f896388；详细执行命令及环境信息见reproduction.json。离线复算不需API key，不启动模型。</p>
+<h2>逐格原始评分与质量审阅</h2>
+<details><summary>133 · late · budget_feedback · new_extension / cell-007</summary>
+<p>五个TF：[10, 9, 10, 10, 10]；五个PE：[5, 8, 5, 8, 10]</p><ol>
+<li><b>PASS</b> · Three distinct validator probes, one evaluator result3120 and the security-prompt output support the stated observations; no codebase audit was performed.</li>
+<li><b>FAIL</b> · AST traversal is offered as the fix for raw parentheses-depth enforcement, but parentheses are not preserved as AST nesting. Guidance overstates the demonstrated boundary.</li>
+<li><b>FAIL</b> · First Python block cannot parse: bare ast.Sub lacks a dictionary value. Independently, SAFE_CHARS rejects sqrt/variable names although the supplied valid-case tests require sqrt(16). Generated code was not executed.</li>
+</ol></details>
+<details><summary>133 · late · selective_patch · new_extension / cell-006</summary>
+<p>五个TF：[10, 9, 10, 9, 9]；五个PE：[7, 7, 7, 5, 5]</p><ol>
+<li><b>FAIL</b> · Rejecting ** does not prove absence of exponentiation: pinned grammar supports^. The resulting power-DoS impossibility claim is unsupported.</li>
+<li><b>FAIL</b> · Results from this tool are overgeneralized to Python parser security. A local Python3.12 parse of201 grouping levels raises catchable SyntaxError, contradicting the categorical crash-not-exception claim.</li>
+<li><b>FAIL</b> · A complete Python block references nonexistent ast.Comprehension. This independent initialization defect exists even before considering the later truncation.</li>
+</ol></details>
+<details><summary>133 · middle · budget_feedback · reused_prior_pilot / cell-001</summary>
+<p>五个TF：[10, 10, 10, 10, 10]；五个PE：[10, 10, 10, 10, 10]</p><ol>
+<li><b>PASS</b> · Two recorded grammar checks and the OWASP-related hardening prompt support the displayed observations. No codebase was supplied or audited.</li>
+<li><b>PASS</b> · The answer distinguishes syntax/AST validation and interpretation and separately recommends exponent/resource caps. No claim that syntax acceptance alone proves production security.</li>
+<li><b>UNKNOWN</b> · The example uses unbounded operator.pow; the prose calls for exponent caps and subprocess limits outside the snippet. Generated code was not executed. The After (safe) label is stronger than the demonstrated evidence; complete security/correctness is not established.</li>
+</ol></details>
+<details><summary>133 · middle · selective_patch · new_extension / cell-002</summary>
+<p>五个TF：[9, 10, 10, 9, 10]；五个PE：[7, 8, 5, 5, 5]</p><ol>
+<li><b>PASS</b> · Recorded probes support the shown validation/evaluation examples, including ^ and the allow_variables limitation; no actual user codebase was audited.</li>
+<li><b>PASS</b> · Partial answer distinguishes grammar restrictions from resource caps; full security remains unverified.</li>
+<li><b>UNKNOWN</b> · Output ends inside a Python function. Incomplete code cannot establish correctness; truncation is recorded independently.</li>
+</ol></details>
+<details><summary>235 · late · budget_feedback · new_extension / cell-003</summary>
+<p>五个TF：[10, 10, 10, 10, 6]；五个PE：[10, 10, 10, 10, 10]</p><ol>
+<li><b>PASS</b> · All three requested chart calls return successfully.</li>
+<li><b>PASS</b> · All source values, month order and monetary units match tool arguments.</li>
+<li><b>FAIL</b> · Answer gives24.2 instead of25.4 yearly total and4.5 instead of3.6 for Jiangsu clothing; widest gap is clothing1.5, not electronics1.4. Rendering remains unknown.</li>
+</ol></details>
+<details><summary>235 · late · selective_patch · new_extension / cell-004</summary>
+<p>五个TF：[10, 10, 10, 10, 10]；五个PE：[10, 10, 10, 10, 10]</p><ol>
+<li><b>PASS</b> · All three requested chart calls return successfully.</li>
+<li><b>PASS</b> · All source values, month order and monetary units match tool arguments.</li>
+<li><b>FAIL</b> · The widest-gap claim is wrong(clothing1.5 &gt;electronics1.4). August is a dip, not a plateau; the7M map threshold and seasonal cause are unsupported. Rendering remains unknown.</li>
+</ol></details>
+<details><summary>235 · middle · budget_feedback · reused_prior_pilot / cell-004</summary>
+<p>五个TF：[10, 10, 10, 10, 10]；五个PE：[10, 10, 10, 10, 10]</p><ol>
+<li><b>PASS</b> · All three chart specifications returned successfully.</li>
+<li><b>PASS</b> · All source data and month order are retained; the map and both chart axes specify 百万元.</li>
+<li><b>UNKNOWN</b> · Reported category gaps 1.5/1.4/0.6 and approximately threefold January-to-December ratio agree with data. Warm continuous-color/intensity and actual rendering are not independently evidenced by an archived image.</li>
+</ol></details>
+<details><summary>235 · middle · selective_patch · new_extension / cell-008</summary>
+<p>五个TF：[10, 9, 10, 10, 10]；五个PE：[10, 9, 10, 10, 10]</p><ol>
+<li><b>PASS</b> · All three requested chart calls return successfully.</li>
+<li><b>PASS</b> · Source values, month order and monetary units are preserved.</li>
+<li><b>FAIL</b> · Yearly total23.4 disagrees with25.4 from source values. Correct category gaps do not correct that error. Render appearance remains unknown.</li>
+</ol></details>
+<details><summary>283 · late · budget_feedback · reused_prior_pilot / cell-003</summary>
+<p>五个TF：[10, 9, 10, 10, 10]；五个PE：[9, 9, 9, 10, 9]</p><ol>
+<li><b>PASS</b> · Saved project has 30 tasks, four milestone containers and 26 concrete leaves spanning CSV, logs, API/UI, tests and rollout.</li>
+<li><b>PASS</b> · Parent and dependency references are valid and acyclic. The flagged combined log-ingestion task is narrowed and two distinct watermark/backfill tasks are added. Remaining four analyzer flags correspond to parent containers and are disclosed.</li>
+<li><b>FAIL</b> · Final M3 rollup is 67 hours, but its nine saved leaves total 79; all leaves total 233. The claimed earlier malformed-parameter creation failure is absent from the complete trace (41 tool results, zero structured errors; the named data-quality task is first called at round 8). Other counts and M1/M2/M4 rollups match.</li>
+<li><b>PASS</b> · Round 8 lowers and renames one task while transferring work into two new concrete leaves; this is actual scope splitting, not merely a numerical lowering to suppress the warning. No task deletion is recorded.</li>
+</ol></details>
+<details><summary>283 · late · selective_patch · new_extension / cell-001</summary>
+<p>五个TF：[10, 10, 10, 10, 10]；五个PE：[9, 10, 9, 9, 9]</p><ol>
+<li><b>PASS</b> · Five milestones and37 concrete leaves cover CSV, logs, metrics and visualization.</li>
+<li><b>UNKNOWN</b> · Dependencies are persisted but no final complexity check is reached. Declared complexity does not establish manageability.</li>
+<li><b>UNKNOWN</b> · No final answer; do not treat its absence as a second quality win/loss in addition to exhaustion.</li>
+<li><b>PASS</b> · No deletion or lowered complexity recorded; last rounds add dependencies.</li>
+</ol></details>
+<details><summary>283 · middle · budget_feedback · new_extension / cell-009</summary>
+<p>五个TF：[10, 10, 10, 10, 10]；五个PE：[9, 8, 10, 9, 10]</p><ol>
+<li><b>PASS</b> · 36 persisted records include4 milestone containers and32 concrete leaves covering CSV, logs, visualization and supporting platform work.</li>
+<li><b>PASS</b> · Parent references and present dependencies are valid and acyclic. Two broad leaves are narrowed with four concrete sibling tasks added. Four remaining analyzer warnings are disclosed as parent-container warnings; declared difficulty remains a proxy.</li>
+<li><b>PASS</b> · 36=4+32,356 total leaf hours and milestone rollups73/69/104/110 match storage. Two analyzer calls and reported32 below threshold plus4 remaining containers are recorded. Schedule weeks are explicitly rough sizing. No claim of encoded complete dependency graph is made.</li>
+<li><b>PASS</b> · Round9 transfers mapping-derived-attribute tests and business-key/upsert/change-detection responsibilities into new siblings. This is observable scope decomposition, not merely lowering numbers to silence warnings.</li>
+</ol></details>
+<details><summary>283 · middle · selective_patch · new_extension / cell-005</summary>
+<p>五个TF：[9, 8, 5, 8, 8]；五个PE：[9, 9, 9, 9, 9]</p><ol>
+<li><b>FAIL</b> · Eight milestone labels exist, but M4-M8 have no children when execution exhausts during M3. Concrete visualization work is not decomposed.</li>
+<li><b>FAIL</b> · The required breakdown remains incomplete; assigning low complexity to empty milestone containers does not establish manageable executable work.</li>
+<li><b>UNKNOWN</b> · No final answer; report execution exhaustion separately. Structural leaves include undecomposed milestone placeholders.</li>
+<li><b>PASS</b> · No removal or relabeling to hide warnings is recorded. A fabricated parent ID causes one create_subtask error; upstream migration logging is separately disclosed.</li>
+</ol></details>
+</main></html>

@@ -1,6 +1,6 @@
 # PE6203 · 工具变化下的 Harness 适应
 
-**当前目标：完成可复现、可辩护的课程项目。** 采用「最小实验 → 验证与交付 → 获批后才扩展」。策略搜索已暂停；任何新增实验、API 探测或重跑都先获用户批准。
+**课程主实验与交付已冻结；后续研究另行归档。** 用户现已授权以完成任务为先，不设研究总费用或轨迹额度；仍固定公平比较设置，记录费用和失败，不覆盖旧结果，不自动部署。
 
 | 当前选择 | 说明 |
 | --- | --- |
@@ -21,18 +21,19 @@
 - **冻结计划**：[课程完成计划](reports/course-completion-plan.html)，机器依据：`experiments/course-completion-plan.json`；这是原冻结计划；最新状态见 `HANDOVER.md` 与 `submission/handover-20261031/findings.json`。
 - **主实验**：[27 条结果、指标与案例](reports/course-v1.3-experiment.html)。
 - **历史研究**：[全部成功与失败记录](reports/selective-strategy-search.html)；108 条 R1 已完成，其中原三方法81条各有3次重复，可独立作附录。R2/R3 因连接失败停止，不再自动恢复。PE +0.5 等阈值仅为历史研究标准。
-- **完成率 / 质量后续试验**：[获批 12 条结果](reports/completion-quality-results.html)：两组均完成 4/6，候选未晋级；总费用 $0.157216447，无未知项。与课程主矩阵分开，新增执行须再次批准。 [六条预算规则试验](reports/budget-contract-results.html)也已获批完成：两组均完成3/3，新候选 TF/PE 更低，不晋级；费用 $0.089010216。已停止新增调用。
+- **完成率 / 质量后续试验**：[获批 12 条结果](reports/completion-quality-results.html)：两组均完成 4/6，候选未晋级；总费用 $0.157216447，无未知项。与课程主矩阵分开。 [六条预算规则试验](reports/budget-contract-results.html)也已获批完成：两组均完成3/3，新候选 TF/PE 更低，不晋级；费用 $0.089010216；以上均为历史轮次。
+- **最新补充对照**：[9条新增＋3条复用](reports/matched-existing-results.html)：候选完成6/6、TF9.8；原Patch完成2/6、TF9.4。新费用 $0.151974408；两批次且候选仍有代码/总结错误，未通过质量检查，不晋级。当前授权与下一步见 HANDOVER。
 - **旧课程试验**：[A/B 的 54 条记录](reports/experiment-readiness.html)，与 v1.3 分开，不回填或混算。
 
 ## 使用
 
-当前仅做离线检查，不调用模型：
+离线检查（不调用模型）：
 
 ```bash
 python3 submission/handover-20261031/verify.py
 ```
 
-复现时先用 `uv sync --frozen` 安装依赖。`./experiment` 是中文交互入口，自动加载本机 `.env`；勿提交密钥。**以下是真实实验的参考命令，需批准后使用，不要对已完成主实验再次执行：**
+复现时先用 `uv sync --frozen` 安装依赖。`./experiment` 是中文交互入口，自动加载本机 `.env`；勿提交密钥。**以下是真实实验的参考命令；不要对已完成主实验再次执行：**
 
 ```bash
 ./experiment prepare --suite experiments/benchmark-v1.3.json --repeats 1 --output results/raw/approved-new-run
