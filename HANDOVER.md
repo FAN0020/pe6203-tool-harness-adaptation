@@ -18,7 +18,17 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：contract_reconcile 六单元开发已淘汰
+### 当前最新断点：新增源码筛查完成；城市/车站过滤探测在原生启动处停止
+
+- 上一轮contract_reconcile已淘汰（下节），本轮没有agent/judge请求。新筛查记录`results/evidence/mechanism-screening-20261101/post-reconciliation-source-screen.json`含20组有边界的判断；不是穷尽性证明。PDF、QR、图书/Maven、Remotion、思考工具、新闻、博客、LeetCode、游戏卡、SwiftUI、Meme、HeroUI、Clojars、OpenTofu、whois、memory、12306及Pollinations均保留具体理由和未审范围。
+- 补查非JS运行时源码/资源：`non-js-runtime-change-index-v2.json`覆盖224个包/阶段行，在明确筛选范围内没有新增程序/模板差异。首次v1哈希扫描误纳入包自带data/memory JSON，只计算hash、未解析或展示内容；v2明确排除data/memory/log/cache，重新统计文件数量。1301项跨阶段状态文件差异不是工具实现变化，不能当作新机制。两个索引均保留。
+- 新假设：12306的城市代表码可能对应多个实际发到站；新增directOnly/stationExactMatch按原始车站码相等过滤，可能删掉有效城市间直达高铁。源码依据明确，但真实服务的城市展开/丢失行为尚未验证。`95de81f`冻结天津→济南、Early日期+3天、默认/精确过滤，最多11工具调用+3catalog，禁止换日期/路线或失败重试；没有基准路线/答案进入probe。
+- 首次在本地profile守卫处停止，0工具/0catalog/0原生启动。`fc08638`按包bin补上共用`12306-mcp: build/index.js`入口，并事前冻结v2原封不动的未执行日程；未改原生源码/SDK/行为或给子进程凭据。
+- v2 session14722已退出0；Early原生Node进程在顶层await getLCQueryPath()时退出，stderr为`Error: get station name js file failed.`，源码的`var lc_search_url`网页正则未匹配。按冻结规则停止所有余下调用：仍是0工具/0catalog/0模型请求，不能称过滤机制已复现。不要在外部状态不变时重试或启动agent对照；不能把修改原生初始化实现冒充知识策略改善。
+- 完整失败、协议和9个原生源码文件归档于`results/evidence/city-station-filter-probes-v2-20261101/`（23文件）；离线复核`python3 results/evidence/city-station-filter-probes-v2-20261101/verify_probes.py`，只证明归档/启动失败，不证明过滤行为或有效性。首次profile失败在`results/evidence/city-station-filter-probes-20261101/`保留。共用入口配置有效，当前没有运行中的本轮进程。
+- 下一步仍需不同且可检验的必需工作机制。未全面审完的部分包括Context7打包入口、Swiftipedia完整API调用、HeroUI/图标类接口；不必自动展开全矩阵。OpenTofu compact函数作用域错误是源码推断，但相关原题要求部署/公开发布，当前授权不覆盖；不以删掉发布步骤来降低任务门槛。Goal仍活动，未达到双重改善，不能以多次负结果或本次服务不可用宣称整体完成/穷尽。
+
+### 已结束的上一轮：contract_reconcile 六单元开发已淘汰
 
 - session88871退出0，6/6 evaluated、30/30 judge；六份盲化质量审阅在`738ac3f`提交后才揭示方法/分数。**不要重启此候选，不进入36条独立验证**。Goal仍活动，未找到可复现的完成率与任务质量双重改善。
 - 新干预与旧observed_contract不同：不在矛盾描述后追加观察，而是直接替换已证伪的工具/参数说明。Middle3处、Late6处，只涉及math-mcp::validate_syntax；所有类型/必填/默认/范围/路由/输出schema/已有规则/无关工具保留SP。235精确K0。复用旧16次合成probe与处理器源码，21个probe清单项及3个源码hash已核验，没有重跑探测。
