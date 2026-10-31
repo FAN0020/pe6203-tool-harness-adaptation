@@ -128,3 +128,10 @@ python3 results/evidence/budget-contract-20261031/verify_trial.py
 - **接手下一步：**先读报告与最终quality-review.json；设计一个针对变化工具证据边界的修正，避免把工具语言验证当成已验证的Python实现或安全保证，明确何时仅需建议而非生成完整实现。先冻结具体diff和质量检查，再做针对性配对验证；不修改相同K0来“修复”保持任务的随机错误，不重新包装旧成功为新验证。不设资金/轨迹总帽，也不盲目重复直到赢。候选全阶段验证、under/over案例适用性与TA问题仍未完成，原草稿未发送。
 
 本研究仍在`codex/completion-quality-study`本地分支；课程main、PDF与共享Slides不因探索结果自动改写。
+
+
+### 当前研究：evidence_scope 局部证据规则（执行前冻结）
+
+沿用最新无总额度授权。只在budget_feedback的变化/新增记录中追加一条固定证据边界usage rule，防止将工具观察扩展为未经验证的实现、可选汇总或虚构执行历史；保留原任务全部交付，不改模型/预算/评分。三个Late条件133/235/283 × 原budget_feedback/候选，各1次，6条同批次配对、30个原评分槽；预计$0.10–0.30、5–12分钟，均为估算。此阶段检查质量修复并保持完成率，不要求击败已经满完成率的budget_feedback；最终目标仍须对原Patch和课程基线完成三阶段验证。
+
+协议`experiments/evidence-scope-v1.json`，配置`configs/evidence-scope-v1.json`；精确规则和九个task-stage知识差异在`results/evidence/evidence-scope-pilot-20261031/offline-knowledge-checks.json`。五个Early/retention条件均为精确K0。Late133追加10条、283追加11条、235为0；其余字段逐项与budget_feedback一致。340项离线测试通过，尚未据此宣称行为改善。结果归档后以新结果节为准，不启动自动网格或108条确认。

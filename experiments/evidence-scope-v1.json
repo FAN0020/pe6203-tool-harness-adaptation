@@ -1,0 +1,152 @@
+{
+  "id": "evidence-scope-v1",
+  "status": "authorized_freeze_before_first_request",
+  "objective": "Preserve the completion benefit of existing budget_feedback while improving independently reviewed task quality; eventual goal still requires comparison with original Selective Patch and course baselines across Early/Middle/Late.",
+  "hypothesis": "After changed tools return useful results, the agent often expands them into an unverified implementation or unsupported summary. An affected-record evidence-boundary rule may keep final conclusions within demonstrated capability and requested scope while preserving required work.",
+  "candidate": {
+    "name": "evidence_scope",
+    "base": "budget_feedback",
+    "single_intervention": "Append exactly one fixed usage rule to each directly changed/added tool already receiving the budget rule. Preserve every existing field and rule.",
+    "added_rule": "Use this changed capability's results only within the operation and language actually observed. In the final answer separate verified observations, recommendations and untested examples; a successful tool call is not verification of a new implementation. Preserve every requested deliverable, but do not expand guidance into a full implementation unless needed. If code is necessary, give a complete minimal example, check it against its stated restrictions, and disclose unexecuted checks without calling it secure. Include optional totals or claims about earlier failures only when checked against recorded evidence; otherwise omit them rather than guess.",
+    "no_change": [
+      "model",
+      "decoding",
+      "task text",
+      "tool schemas/descriptions/routing",
+      "prior feedback",
+      "execution budgets",
+      "judge protocol",
+      "unchanged knowledge"
+    ],
+    "limitation": "The one rule contains related evidence-calibration clauses; a two-arm trial cannot isolate individual clauses. Designer has seen these development tasks and failures; no held-out generalization claim."
+  },
+  "champion": "budget_feedback",
+  "candidates": [
+    "evidence_scope"
+  ],
+  "model_config": "configs/evidence-scope-v1.json",
+  "updater_config": "configs/course-updater.json",
+  "feedback_probes": "experiments/feedback-probes-v1.json",
+  "development": {
+    "tasks": [
+      133,
+      235,
+      283
+    ],
+    "stages": [
+      "late"
+    ],
+    "strategies": [
+      "budget_feedback",
+      "evidence_scope"
+    ],
+    "repeats": 1,
+    "opaque_cell_ids": true
+  },
+  "cases": [
+    {
+      "task": 133,
+      "stage": "late",
+      "purpose": "Repair misleading capability/security claims and invalid optional implementation while retaining expression validation and actionable OWASP-related guidance.",
+      "evidence": "results/evidence/matched-existing-20261031/quality-review.json: new_extension/cell-007"
+    },
+    {
+      "task": 283,
+      "stage": "late",
+      "purpose": "Check truthful reporting, actual decomposition and preservation of completion, targeting known false totals/history.",
+      "evidence": "results/evidence/budget-contract-20261031/quality-review.json: cell-003"
+    },
+    {
+      "task": 235,
+      "stage": "late",
+      "purpose": "Unchanged-task retention control; both knowledge snapshots must be exact K0. Any response differences cannot be attributed to knowledge adaptation."
+    }
+  ],
+  "quality_cases": [
+    {
+      "task_id": 133,
+      "split": "exposed_development_regression",
+      "provenance": "Original MCPEvol-Bench task and archived raw trajectories; original question unchanged",
+      "required_properties": [
+        "Requested expression validation and OWASP-related security recommendations are supported by actual observations.",
+        "Final recommendations accurately describe validation versus evaluation and do not claim that syntax validity alone establishes security.",
+        "Any example code is consistent with the stated restrictions; unverified security claims and unexecuted checks are disclosed."
+      ],
+      "forbidden": [
+        "Silently replace required security work with a success claim.",
+        "Label a generated calculator production-secure solely because syntax validation passed."
+      ],
+      "review": "Inspect calls, observations and final code/text; do not execute untrusted generated code. Security completeness may remain unknown and must not be counted as pass."
+    },
+    {
+      "task_id": 235,
+      "split": "exposed_retention_control",
+      "provenance": "Original question contains all provincial, monthly and category sales values",
+      "required_properties": [
+        "All three requested chart types have successful recorded outputs.",
+        "Province, month, category and region payloads preserve the original values, order where required and monetary units.",
+        "Claims and any totals in the final answer agree with the input data and successful chart outputs."
+      ],
+      "forbidden": [
+        "Change source data to make a chart or diagnostic pass.",
+        "Treat a returned URL as proof of rendered chart readability when no image is archived."
+      ],
+      "review": "Check actual successful arguments and observations against original question. Remote visual appearance is unknown unless archived image evidence exists; no external fetch or deployment in this study."
+    },
+    {
+      "task_id": 283,
+      "split": "exposed_changed_task_regression",
+      "provenance": "Original analytics dashboard planning request; archived task store, calls and final answer",
+      "required_properties": [
+        "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work.",
+        "Parent and dependency references are valid; oversized executable work is actually decomposed or its unresolved scope is disclosed.",
+        "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations.",
+        "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings."
+      ],
+      "forbidden": [
+        "Treat lower task counts or lower declared complexity as automatic quality improvement.",
+        "Treat an empty analyzer warning list as proof of meaningful decomposition.",
+        "Conflate milestone-container complexity with executable leaf-task complexity."
+      ],
+      "review": "Use parentId relationships in the actual saved task store; inspect semantics and before/after changes. Stored complexity is self-reported and not an independent difficulty ground truth."
+    }
+  ],
+  "evaluation": {
+    "pilot_checks": [
+      "Candidate normally completes both changed tasks without losing control completion",
+      "Candidate changed-task and overall mean TF do not decline; report all original TF/PE slots",
+      "At least one targeted material artifact/answer failure improves, with no new material failure on changed tasks; important unknowns remain hold",
+      "Retain original chart data, month ordering, units and K0. Report all summary errors separately; identical K0 does not establish an adaptation effect"
+    ],
+    "code_scope": "Original task133 requests validation and security recommendations, not implementation of a replacement evaluator. Actionable guidance grounded in actual probes can satisfy it without a large code block. Omitting required guidance, claiming unperformed auditing, or calling untested code secure is a failure. Code that is included must still satisfy the unchanged rubric.",
+    "phase_limit": "This pilot tests quality repair relative to budget_feedback, whose current completion is already at ceiling. It does not claim higher completion than budget_feedback or fulfillment of the final original-baseline/course comparison.",
+    "no_weighted_score": true,
+    "completion_separate": true,
+    "historical_scores_immutable": true,
+    "ECS": null,
+    "followup": "Review the six cells before any further experiment. If quality checks pass, freeze this method and obtain the necessary matched original-baseline and three-stage course evidence. If they fail, diagnose the specific failure before deciding on a further change; no automatic candidate grid or108-cell run."
+  },
+  "fairness": {
+    "within_pilot": "Same DigitalOcean-only route, snapshot, temperature0,4096 output tokens,12 rounds,900s execution/120s request timeouts, original tasks and five first-valid judge slots. Same fixed feedback. Both arms use opaque IDs; paths necessarily differ for isolated state.",
+    "retrospective_boundary": "No old agent trajectory is spliced into this six-cell primary comparison. Historical failures motivate hypotheses, not favorable selection of outcomes."
+  },
+  "authorization": {
+    "approved": true,
+    "record": "results/evidence/next-comparison-review-20261031/authorization.json",
+    "total_cost_limit_usd": null,
+    "total_trajectory_cap": null,
+    "deployment": false
+  },
+  "estimate": {
+    "expected_usd": [
+      0.1,
+      0.3
+    ],
+    "expected_minutes": [
+      5,
+      12
+    ],
+    "is_cap": false,
+    "basis": "Recent pinned-provider observed request costs; caching and response length vary. Per-request costs remain logged. No total monetary or trajectory hard cap."
+  }
+}

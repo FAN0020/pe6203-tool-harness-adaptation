@@ -444,3 +444,47 @@ def test_budget_contract_replaces_only_the_existing_changed_tool_budget_rule():
     assert cost["calls"] == 0
     unchanged, _, _ = adapt(old, catalog("late"), "budget_contract")
     assert unchanged["tools"] == old["tools"]
+
+
+def test_evidence_scope_appends_only_one_rule_to_affected_records_without_model_calls(monkeypatch):
+    import integration.baselines as provider
+
+    monkeypatch.setattr(
+        provider, "_request_completion", lambda *_: pytest.fail("deterministic patch called model")
+    )
+    old, target = catalog(), changed()
+    added = deepcopy(target["tools"][0])
+    added.update(
+        tool_id="server::new_lookup",
+        name="new_lookup",
+        routing={"server_id": "server", "tool_name": "new_lookup"},
+    )
+    target["tools"].append(added)
+    originals = deepcopy((old, target))
+    feedback = [
+        {
+            "stage": "late",
+            "server": "server",
+            "tool": "lookup",
+            "args": {"mode": True},
+            "result": {"isError": True, "error": "MISSING_HANDLER"},
+        }
+    ]
+    control, _, _ = adapt(old, target, "budget_feedback", {"feedback": feedback})
+    candidate, log, cost = adapt(old, target, "evidence_scope", {"feedback": feedback})
+    from pe6203.patch_variants import EVIDENCE_RULE
+
+    for actual, before in zip(candidate["tools"], control["tools"], strict=True):
+        if actual["tool_id"] == "server::unrelated":
+            assert actual == before == old["tools"][1]
+        else:
+            assert actual["usage_rules"] == before["usage_rules"] + [EVIDENCE_RULE]
+            restored = deepcopy(actual)
+            restored["usage_rules"].pop()
+            assert restored == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+    assert sum(row.get("evidence") == "capability_evidence_boundary" for row in log) == 2
+    assert (old, target) == originals
+    for unchanged in (old, catalog("late")):
+        same, _, same_cost = adapt(old, unchanged, "evidence_scope", {"feedback": feedback})
+        assert same == old and same_cost["calls"] == 0

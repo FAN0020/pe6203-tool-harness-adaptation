@@ -22,6 +22,7 @@ VARIANTS = (
     "sufficiency_feedback",
     "budget_feedback",
     "budget_contract",
+    "evidence_scope",
 )
 
 SUFFICIENCY_RULE = (
@@ -47,6 +48,17 @@ BUDGET_CONTRACT_RULE = (
     "only code needed for the request. Group independent calls with known inputs; await "
     "dependencies. Never skip a safety check, remove required work, lower stored difficulty "
     "to hide warnings, or claim unverified success to meet this budget."
+)
+
+EVIDENCE_RULE = (
+    "Use this changed capability's results only within the operation and language actually "
+    "observed. In the final answer separate verified observations, recommendations and untested "
+    "examples; a successful tool call is not verification of a new implementation. Preserve "
+    "every requested deliverable, but do not expand guidance into a full implementation unless "
+    "needed. If code is necessary, give a complete minimal example, check it against its stated "
+    "restrictions, and disclose unexecuted checks without calling it secure. Include optional "
+    "totals or claims about earlier failures only when checked against recorded evidence; "
+    "otherwise omit them rather than guess."
 )
 
 WORKFLOW_PROMPT = """
@@ -368,6 +380,7 @@ def adapt_result(old, target, strategy, context=None):
             "sufficiency_feedback",
             "budget_feedback",
             "budget_contract",
+            "evidence_scope",
         ):
             note += " " + SUFFICIENCY_RULE
         tool["usage_rules"].append(note)
@@ -389,7 +402,7 @@ def adapt_result(old, target, strategy, context=None):
         ]
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
-    if strategy in ("sufficiency_feedback", "budget_feedback", "budget_contract"):
+    if strategy in ("sufficiency_feedback", "budget_feedback", "budget_contract", "evidence_scope"):
         by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
         for observation in feedback:
             tool_id = f"{observation['server']}::{observation['tool']}"
@@ -405,8 +418,8 @@ def adapt_result(old, target, strategy, context=None):
                     "evidence": "frozen_probe_observation",
                 }
             )
-    if strategy in ("budget_feedback", "budget_contract"):
-        budget_rule = BUDGET_RULE if strategy == "budget_feedback" else BUDGET_CONTRACT_RULE
+    if strategy in ("budget_feedback", "budget_contract", "evidence_scope"):
+        budget_rule = BUDGET_CONTRACT_RULE if strategy == "budget_contract" else BUDGET_RULE
         for tool in result["knowledge"]["tools"]:
             if tool["tool_id"] not in changes:
                 continue
@@ -421,6 +434,17 @@ def adapt_result(old, target, strategy, context=None):
                     "evidence": "existing_runtime_budget",
                 }
             )
+            if strategy == "evidence_scope":
+                tool["usage_rules"].append(EVIDENCE_RULE)
+                result["changes"].append(
+                    {
+                        "operation": "append_delta_note",
+                        "tool_id": tool["tool_id"],
+                        "basis": [changes[tool["tool_id"]]["change_id"]],
+                        "note": EVIDENCE_RULE,
+                        "evidence": "capability_evidence_boundary",
+                    }
+                )
     if strategy in ("linked_notes", "workflow_notes") or (
         strategy == "feedback_notes" and feedback
     ):
