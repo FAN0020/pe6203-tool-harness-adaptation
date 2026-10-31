@@ -7,7 +7,7 @@ from pathlib import Path
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("review_id")
-    parser.add_argument("section", choices=("overview", "memory", "docs", "charts", "call"))
+    parser.add_argument("section", choices=("overview", "memory", "docs", "docs-new", "charts", "call"))
     parser.add_argument("--index", type=int)
     args = parser.parse_args()
     folder = Path(__file__).resolve().parent
@@ -30,6 +30,30 @@ def main():
     elif args.section == "call":
         assert args.index is not None
         print(json.dumps(packet["calls"][args.index], ensure_ascii=False, indent=2))
+    elif args.section == "docs-new":
+        known = {}
+        separator = "--------------------------------"
+        for review in sorted((folder / "blind-reviews").glob("*.json")):
+            if review.stem == args.review_id:
+                continue
+            previous = json.loads((folder / "blind-inputs" / review.name).read_text())
+            for call in previous["calls"]:
+                if "query-docs" not in call["tool"]:
+                    continue
+                for block in call["result"].get("content", []):
+                    for part in block.get("text", "").split(separator):
+                        known.setdefault(part.strip(), review.stem)
+        for index, call in enumerate(packet["calls"]):
+            if "query-docs" not in call["tool"]:
+                continue
+            print("CALL", index, call["arguments"])
+            for block in call["result"].get("content", []):
+                for part in block.get("text", "").split(separator):
+                    part = part.strip()
+                    if part in known:
+                        print("[Exact previously reviewed passage:", known[part], part.splitlines()[0], "]")
+                    else:
+                        print(part)
     else:
         for index, call in enumerate(packet["calls"]):
             match = ("query_docs" in call["tool"] or "query-docs" in call["tool"])
