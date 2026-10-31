@@ -3,7 +3,8 @@
   "entrypoints": {
     "run": "run(task_id,version,strategy,seed,config) -> (raw_trace,result)",
     "adapt": "adapt(old_knowledge,new_metadata,strategy,context=None) -> (knowledge,diff_log,update_cost)",
-    "cli": "pe6203 adapt; pe6203 run --adaptation artifact.json (exclusive with --knowledge)"
+    "cli": "pe6203 adapt; pe6203 run --adaptation artifact.json (exclusive with --knowledge)",
+    "experiment": "./experiment: prepare freezes input/code hashes; run adapts and executes; report recomputes from five judge records"
   },
   "knowledge": {
     "schema": "schemas/tool-record.schema.json",
@@ -20,10 +21,10 @@
       "output_schema": null
     },
     "no_update": "Keep entire Early K0, schema and routing; never refresh from live metadata",
-    "selective_patch_planned": "Preserve unselected records canonical-equal including source version; envelope target version may differ from unchanged records",
     "serialization": "Append usage_rules/output_schema to description; actual schema becomes model parameters",
     "namespaced_alias": "sanitize name to [a-zA-Z0-9_-], first 50 chars + __ + first 12 SHA256(server_id::name); max 64; collisions rejected",
-    "native_unique": "Legacy policy; duplicates rejected, never drop tools"
+    "native_unique": "Legacy policy; duplicates rejected, never drop tools",
+    "selective_patch": "Preserve unselected records canonical-equal including source version; envelope target version may differ from unchanged records"
   },
   "adaptation": {
     "file": "adaptation.json",
@@ -36,7 +37,7 @@
     ],
     "runner_effect": "Loads knowledge and update cost; saves copied artifact/hash/method",
     "no_update": "Deep-copy Early; zero update cost; algorithm ignores target metadata; writer reads target for provenance",
-    "full_rewrite": "Deterministic complete target rebuild, Early reuses K0; formal_llm_rewrite=false",
+    "full_rewrite": "LLM rewrites all target tool descriptions; schemas/routes/rules fixed. Early reuses K0.",
     "failure": "Persist validation errors; no silent fallback; costs retained"
   },
   "execution": {
@@ -69,7 +70,8 @@
     "exit_codes": {
       "0": "five valid judge results; not necessarily task success",
       "2": "blocked/timeout/incomplete"
-    }
+    },
+    "task223": "Netlify/frozen-source runtime is explicit in config, separate variant; staged archived fetcher still executes against fixed local HTML replay. Source hint shared by all methods, original question unchanged."
   },
   "artifacts": {
     "knowledge.json": "Frozen model knowledge",

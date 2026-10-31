@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-30",
+  "branch": "codex/experiment-cli",
+  "upstream_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "checks": [
+    {
+      "name": "unit_contract_real_MCP_fixture_suite",
+      "status": "PASS",
+      "command": ".venv/bin/python -m pytest -q --tb=short",
+      "passed": 265,
+      "seconds": 20.25,
+      "scope": "fake model fixtures plus real released MCP; not model benchmark scores"
+    },
+    {
+      "name": "lint_format_diff",
+      "status": "PASS",
+      "commands": [
+        "ruff check src tests scripts integration",
+        "ruff format --check src tests scripts integration",
+        "git diff --check"
+      ]
+    },
+    {
+      "name": "interactive_CLI",
+      "status": "PASS",
+      "scope": "Real terminal menu: check environment, exit; no model calls"
+    },
+    {
+      "name": "agent_judge_API",
+      "status": "PASS",
+      "scope": "Two successful real API requests, credentials not exported"
+    },
+    {
+      "name": "selective_late_standalone",
+      "status": "PASS",
+      "execution_status": "completed",
+      "TF": 10,
+      "PE": 9.2,
+      "judge_runs": 5,
+      "changed_records": 14,
+      "preserved_records": 30,
+      "updater_calls": 0,
+      "evidence": "selective-live/"
+    },
+    {
+      "name": "nine_cell_real_matrix",
+      "status": "PARTIAL",
+      "planned": 9,
+      "attempted": 9,
+      "fully_scored": 8,
+      "matched_three_strategy_groups": 2,
+      "note": "Late Full Rewrite APIConnectionError after successful billed adaptation; retained, no automatic retry"
+    },
+    {
+      "name": "resume_without_new_attempts",
+      "status": "PASS",
+      "evidence": "resume-check.json"
+    },
+    {
+      "name": "real_Chromium_and_archived_fetcher",
+      "status": "PASS",
+      "stages": [
+        "early",
+        "middle",
+        "late"
+      ],
+      "same_response_hash": true,
+      "evidence": "browser-probe.json"
+    },
+    {
+      "name": "Netlify_CLI_install",
+      "status": "PASS",
+      "version": "23.15.1",
+      "node": "24.13.0"
+    },
+    {
+      "name": "Netlify_real_publication",
+      "status": "NOT VERIFIED",
+      "reason": "User login and dedicated site linking not completed; fake deploy tests are not live publication evidence"
+    }
+  ],
+  "failures": [
+    {
+      "cell_id": "task139-late-full_rewrite-r0",
+      "category": "infrastructure",
+      "agent_error_types": [
+        "APIConnectionError"
+      ],
+      "last_finish_reason": null,
+      "TF": null,
+      "PE": null,
+      "raw_run": "results/raw/task139-three-strategy-20261030/cells/task139-late-full_rewrite-r0/run",
+      "causal_under_or_over_update": false
+    },
+    {
+      "cell_id": "task139-middle-full_rewrite-r0",
+      "category": "output_truncation",
+      "agent_error_types": [],
+      "last_finish_reason": "length",
+      "TF": 5.2,
+      "PE": 8.8,
+      "raw_run": "results/raw/task139-three-strategy-20261030/cells/task139-middle-full_rewrite-r0/run",
+      "causal_under_or_over_update": false
+    }
+  ],
+  "interpretation": [
+    "Development subset with one repeat; not an independent full benchmark or a strategy superiority claim",
+    "Task139 catalog includes PARAM/DESC on required tools and added TOOL entries; task-level coverage and retention labels still need review",
+    "Task223 published own JS and tool catalogs unchanged across stages; dependencies not asserted identical; use as workflow/retention candidate",
+    "Full Rewrite Middle output reached token limit; no demonstrated causal over-update",
+    "Neither required under-update nor over-update causal case is claimed complete"
+  ],
+  "raw_results": "results/raw/task139-three-strategy-20261030",
+  "credential_policy": "Ignored .env and .netlify excluded; source HTML and raw run workspaces remain local"
+}

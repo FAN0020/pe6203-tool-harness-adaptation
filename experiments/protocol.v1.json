@@ -20,12 +20,12 @@
       "paper_retrieval_webpage"
     ],
     "development_target": 4,
-    "evaluation_target": 8,
+    "evaluation_target": 3,
     "coverage_targets": {
       "TOOL": 2,
       "PARAM": 2,
-      "DESC": 2,
-      "retention": 2
+      "DESC": 1,
+      "retention": 1
     },
     "coverage_labels_may_overlap": true,
     "counts_are_team_budget_targets": true,
@@ -33,7 +33,7 @@
       139,
       223
     ],
-    "split_unit": "task_family",
+    "split_unit": "documented task IDs; 283 family overlap with development 139 disclosed",
     "coverage_counting": {
       "evaluation_ids": "distinct",
       "mutation_quota": "distinct_changed_tasks_in_at_least_one_target_transition",
@@ -45,7 +45,7 @@
       "documents_diagrams"
     ],
     "main_optimization_task_id": 223,
-    "selection_note": "223 主优化；其余候选用于回归/保留能力。4+8 仍是未冻结预算目标。"
+    "selection_note": "course-v1 now freezes 133/235/283; previous 4+8 was an unfulfilled team budget target, not a course mandate. TOOL means optional relevant additions; required-tool PARAM/DESC and retention audited before scoring."
   },
   "strategies": [
     "no_update",
@@ -88,21 +88,22 @@
       "tool add/delete",
       "parameters",
       "description",
-      "usage_rules",
       "output_schema",
       "routing"
     ],
     "timestamps_alone_trigger": false,
     "structured_fields": "Use target public metadata; model must not invent names/schema/routing",
-    "semantic_fields": "Use shared fixed updater to rewrite descriptions/rules from metadata evidence only",
-    "shared_chunking_and_limits_for_rewriters": true,
+    "semantic_fields": "Full Rewrite: LLM descriptions only. Selective Patch: target descriptions copied for affected records; existing usage rules preserved unless dangling, unresolved dependencies recorded. Optional LLM rule updater disabled because cost/output handling is not validated.",
+    "shared_chunking_and_limits_for_rewriters": false,
     "unchanged_records": "Canonical equality including source version",
     "validation_failure": "Record adaptation_validation/cost/null scores; no agent execution or silent fallback",
     "implementation_status": {
       "no_update": "integrated",
-      "full_rewrite": "deterministic prototype integrated; formal LLM rewrite pending",
-      "selective_patch": "pending"
-    }
+      "full_rewrite": "LLM descriptions, metadata-constraints-v2, integrated",
+      "selective_patch": "deterministic Diff-guided Selective Patch integrated from HaoQI_V1"
+    },
+    "usage_rules_policy": "Harness-owned rules, absent in released metadata; empty target rules do not erase existing rules.",
+    "comparison_limitation": "Methods differ in both update scope and semantic generation; do not attribute every difference solely to scope without a matched-rewriter ablation."
   },
   "knowledge": {
     "scope": "complete_catalog_of_fixed_task_server_set",
@@ -113,17 +114,18 @@
     "early_run_each_strategy_label": true,
     "runtime_auto_refresh": false,
     "artifact_identity": [
+      "task_id",
       "server_group",
       "target_stage",
       "strategy",
       "repeat_id"
     ],
-    "reuse_across_tasks_with_same_server_group": true,
+    "reuse_across_tasks_with_same_server_group": false,
     "regenerate_for_each_repeat": true,
     "chunking_rule": {
-      "base_partition": "per_server",
-      "oversized_server_policy": null,
-      "status": "pilot_validation_required"
+      "base_partition": "complete fixed server catalog in one request",
+      "oversized_server_policy": "fail and retain billed attempt; no retry or truncation",
+      "status": "current implementation, subset size must fit model context"
     },
     "agent_serialization_rule": "namespaced; usage_rules/output_schema appended to description; see src/pe6203/.context/contracts.json",
     "K0_construction": "deterministic_mapping_from_complete_early_metadata"
@@ -136,18 +138,18 @@
       "resolved_model_id": "deepseek/deepseek-v4.1-flash-1017",
       "api_key_env": "AGENT_API_KEY",
       "temperature": 0.0,
-      "max_completion_tokens": 2048,
-      "selection_status": "task139_smoke_verified_not_formally_frozen"
+      "max_completion_tokens": 4096,
+      "selection_status": "frozen in course-v1 config and per-run plan"
     },
     "updater": {
       "provider": "OpenRouter",
       "base_url": "https://openrouter.ai/api/v1",
       "model": "deepseek/deepseek-v4.1-flash-1017",
-      "resolved_model_id": null,
-      "api_key_env": "UPDATER_API_KEY",
+      "resolved_model_id": "deepseek/deepseek-v4.1-flash-1017",
+      "api_key_env": "AGENT_API_KEY",
       "temperature": 0.0,
-      "max_completion_tokens": 4096,
-      "selection_status": "planned_not_implemented_credentials_unset"
+      "max_completion_tokens": 16384,
+      "selection_status": "frozen in course-v1 config and per-run plan"
     },
     "judge": {
       "provider": "OpenRouter",
@@ -157,10 +159,13 @@
       "api_key_env": "JUDGE_API_KEY",
       "temperature": 0.0,
       "max_completion_tokens": 4096,
-      "selection_status": "task139_smoke_verified_not_formally_frozen",
+      "selection_status": "frozen in course-v1 config and per-run plan",
       "extra_body": {
         "reasoning": {
           "enabled": false
+        },
+        "response_format": {
+          "type": "json_object"
         }
       }
     }
@@ -178,11 +183,13 @@
     "schedule_seed": 0,
     "strategy_order": "seeded_shuffle_with_recorded_schedule",
     "max_rounds": 12,
-    "request_timeout_seconds": 90,
+    "request_timeout_seconds": 120,
     "tool_timeout_seconds": 30,
-    "run_timeout_seconds": 600,
+    "run_timeout_seconds": 900,
     "isolated_workspace_per_attempt": true,
-    "limits_status": "verified_task139_early_only; formal_set_and_updater_chunking_pending"
+    "limits_status": "course-v1 config; same across all strategies",
+    "preflight": "Before running pending cells; bill and preserve separately",
+    "stop_after_infrastructure_failures": 2
   },
   "judge": {
     "attempts_per_trajectory": 5,
@@ -190,7 +197,10 @@
     "rubric": "pinned_upstream",
     "rubric_order": "seeded_permutation",
     "extra_attempts_for_invalid_json": 0,
-    "partial_scores_in_primary_table": false
+    "partial_scores_in_primary_table": false,
+    "response_format": {
+      "type": "json_object"
+    }
   },
   "analysis": {
     "score_range": [
@@ -226,19 +236,20 @@
     "missingness": "Report planned/valid/matched counts and exclusions; strategy-related missingness limits conclusions"
   },
   "retry": {
-    "implementation_status": "planned",
+    "implementation_status": "bounded identical API request retry before any tool dispatch",
     "max_extra_attempts": 1,
     "eligible": [
       "connection_failure",
       "http_429",
       "http_5xx"
     ],
-    "backoff_seconds": 10,
-    "respect_longer_retry_after": true,
-    "new_workspace": true,
-    "select": "first_complete_attempt_under_fixed_policy",
+    "backoff_seconds": 2,
+    "respect_retry_after_up_to_seconds": 60,
+    "retry_after_longer": "fail rather than retry early",
     "semantic_error_or_low_score_retry": false,
-    "keep_all_attempts_and_costs": true
+    "keep_all_attempts_and_costs": true,
+    "failed_request_usage": "unknown; retain successful response usage but do not claim known full total",
+    "trajectory_retry": false
   },
   "cost": {
     "units": [
@@ -264,13 +275,13 @@
     "currency_budget_usd": null
   },
   "budget": {
-    "task_count_assumption": 8,
+    "task_count_assumption": 3,
     "stage_count": 3,
     "strategy_count": 3,
-    "preferred_agent_runs": 216,
-    "preferred_judge_attempts_max": 1080,
-    "fallback_agent_runs": 72,
-    "fallback_judge_attempts_max": 360,
+    "preferred_agent_runs": 81,
+    "preferred_judge_attempts_max": 405,
+    "fallback_agent_runs": 27,
+    "fallback_judge_attempts_max": 135,
     "excludes": [
       "development",
       "updater",
@@ -279,21 +290,10 @@
     ]
   },
   "readiness": {
-    "frozen": false,
-    "status": "pending_validation",
-    "freeze_record": null,
-    "required_before_freeze": [
-      "real_model_end_to_end_evidence",
-      "reviewed_task_manifest",
-      "verified_three_stage_environments_and_fixtures",
-      "complete_K0_catalogs",
-      "agent_knowledge_serialization",
-      "validated_baselines_and_patch",
-      "pilot_limits_and_chunking",
-      "fixed_models_prompts_judge_and_code",
-      "recorded_usage_and_price_policy",
-      "reviewed_freeze_record"
-    ]
+    "frozen": true,
+    "status": "reviewed runnable suite; real outcome evidence and course report completion tracked separately",
+    "freeze_record": "experiments/benchmark-v1.json",
+    "review": "experiments/evaluation/benchmark-v1-review.json"
   },
   "overview": "README.md",
   "project_choices": "configs/.context/project.json",
@@ -318,10 +318,10 @@
     "unobserved": "Mark requirement unmet; controlled diagnostic separate"
   },
   "freeze_policy": {
-    "reviewers": "A/D tasks/environment; B/C method/prompts; D models/judge/pricing/metrics",
+    "reviewers": "Codex source/MCP audit within authorized task; not independent human review; no model-score-based task selection",
     "record": "experiments/templates/freeze-record.json",
     "after_change": "New experiment revision; rerun affected matched comparisons for all strategies; preserve old results",
-    "case223": "Freeze source URLs/fetch time/snapshots and publishing setup; disclose substitutes; exclude tuned case from independent evaluation",
+    "case223": "Netlify + frozen-source variant. Preserve question and stage metadata, record shared source hint and capture timestamp. Browser scripts/subresources disabled in replay; source relevance/latest-five need review; deployment metadata preserved.",
     "no_new_permission_gate": "Routine review within user-authorized scope"
   }
 }

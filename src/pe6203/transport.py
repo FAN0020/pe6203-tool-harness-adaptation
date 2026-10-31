@@ -52,7 +52,10 @@ def launch_parameters(root, stage, server, workspace, profile):
     home.mkdir(parents=True, exist_ok=True)
     env = {"PATH": os.environ.get("PATH", ""), "HOME": str(home), "TMPDIR": str(workspace)}
     env.update(
-        {k: v.replace("{workspace}", str(workspace)) for k, v in profile.get("env", {}).items()}
+        {
+            k: v.replace("{workspace}", str(workspace)).replace("{root}", str(Path(root).resolve()))
+            for k, v in profile.get("env", {}).items()
+        }
     )
     return StdioServerParameters(
         command=os.environ.get("MCPEVOL_NODE", "node"),

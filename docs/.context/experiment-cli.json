@@ -1,0 +1,112 @@
+{
+  "as_of": "2026-10-31",
+  "branch": "codex/experiment-cli",
+  "entrypoint": "./experiment (loads ignored .env)",
+  "contract": {
+    "prepare": "No model requests; fetches current pinned MCP metadata; freezes tasks, catalogs, config, source code and relevant locks. Save plan.json + plan.sha256.",
+    "run": "v1.3: shared agent; original rubric plus deterministic call counts; five first-valid judge slots, max two logical attempts/slot with one HTTP transport retry each. Immutable request/response/outcome files; no score-driven retries.",
+    "resume": "Verify frozen files. v1.3 completed execution checkpoint can resume missing judge slots without MCP/agent calls; preserve previous aggregate revisions. Persist attempt counts, never reset budgets. Terminal/ambiguous agent and tool execution is not blindly replayed.",
+    "report": "Development diagnostic tables; reviewed suites additionally export evaluation manifests/ledgers and matched TF/PE/ECS/recovery/retention/cost CSVs through existing evaluation.py. Truncation and provider filtering are execution failures, not completion.",
+    "request_retry": "Agent/judge/updater: one identical-request retry for connection failure/429/5xx, backoff 2s and Retry-After up to 60s. Record each retry with unknown usage. No trajectory/tool/semantic retries.",
+    "papers": "Show CLI identity, user confirms/switches account and selects dedicated site before freeze. New plans use v1.3 config. Draft deployment keyed by site+HTML within run workspace; existing deployment is only verified, unknown submission not repeated.",
+    "preflight": "Real low-token endpoint requests before new cells, separate costs in preflight/*.json; same plan controls across strategies. Stop after two consecutive model transport failures; untouched cells remain pending.",
+    "judge": "Original rubric retained verbatim; append concise-counts-v1 input statistics/output instruction. First development probe exposed miscounting; revised four-prompt denominator checks and one live task139 cell passed. Subjective judge/rubric ambiguity remains. Do not mix prior scores."
+  },
+  "lineage": {
+    "selective_patch": "Imported source and tests from origin/HaoQI_V1 at 4a16b56; retain contribution/provenance and prior live summary. Fixed duplicate native names across servers and incomplete candidate catalog validation.",
+    "full_rewrite": "Current main LLM implementation retained, including semantic constraints and failed-cost audit.",
+    "selective_llm_rule_mode": "Disabled at public adapt_result: original optional implementation does not reliably account usage or unresolved flags. Deterministic method is runnable; no hidden LLM calls."
+  },
+  "course_alignment": {
+    "source": "docs/.context/requirements.json, original DOCX re-read 2026-10-30",
+    "implemented": [
+      "fixed base agent and decoding across strategies",
+      "Early K0 separately adapts to Middle and Late",
+      "No Update / complete LLM description rewrite / selective metadata patch",
+      "same tasks, server set and judge protocol",
+      "Fixed reviewed subset 133/235/283; default 3 repeats, explicit 1 permitted; actual catalog hashes checked during prepare.",
+      "raw artifacts, TF/PE, both ECS definitions, updater/agent/judge costs",
+      "failed/partial attempts retained; unchanged records preserved",
+      "Reviewed transition labels and matched recovery/retention",
+      "Agent chooses tools, arguments and sequence in all three methods; patch scope selection is deterministic"
+    ],
+    "pending": [
+      "Causally supported over-update example remains unobserved; task133 Late under-update call failure documented in benchmark-finalization/failure-analysis.json",
+      "Report and presentation; interpretation of observed results",
+      "User Netlify login/site and real publication verification"
+    ],
+    "interpretation": "Runnable reviewed course benchmark suite; no independent task-family holdout claim, no full leaderboard claim. Report evidence remains separate from software readiness."
+  },
+  "netlify": {
+    "cli_version": "23.15.1",
+    "lock": "tools/netlify/package-lock.json",
+    "auth": "./experiment papers orchestrates installed CLI OAuth flow; user completes browser login. Credentials remain only in CLI.",
+    "site": "User chooses a dedicated site with netlify link or NETLIFY_SITE_ID.",
+    "deploy": "Draft URL; no --prod; only generated HTML in fresh directory. Anonymous HTTP check after deploy; record url/id/html hash.",
+    "variant": "Original task question and stage tool metadata retained; deployment backend replaced; all strategies get same research-source/as-of hint. Original stage fetcher executes against frozen HTML replay; no runtime tool knowledge refresh.",
+    "limits": [
+      "source single HTML listing, at most 4 MB; user reviews relevant top-five and time ordering",
+      "script/subresource loading blocked; invalid/unfrozen URLs fail rather than fetch different papers",
+      "deploy_folder_or_zip only accepts a workspace directory with index.html, not zip/other assets",
+      "not original EdgeOne environmental reproduction; do not combine with released-server scores"
+    ]
+  },
+  "resources": [
+    {
+      "url": "https://github.com/Octobrist/MCPEvol-Bench",
+      "pin": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701"
+    },
+    {
+      "url": "https://arxiv.org/html/2607.14642v1",
+      "purpose": "Paper and evaluation definitions"
+    },
+    {
+      "url": "https://docs.netlify.com/api-and-cli-guides/cli-guides/get-started-with-cli/",
+      "purpose": "Official OAuth/login, local CLI, draft deploy workflow"
+    },
+    {
+      "url": "https://cli.netlify.com/commands/deploy/",
+      "purpose": "--dir --site --no-build --json; no --prod"
+    },
+    {
+      "url": "https://cli.netlify.com/commands/login/",
+      "purpose": "User browser login"
+    },
+    {
+      "url": "https://huggingface.co/papers?q=Embodied+AI",
+      "purpose": "Accessible research listing candidate; source captured locally, date ordering still requires review"
+    },
+    {
+      "url": "https://arxiv.org/search/?query=embodied+ai&searchtype=all&abstracts=show&order=-announced_date_first&size=50",
+      "purpose": "Date-sorted source candidate; local 429 observed, not silently used as successful input"
+    }
+  ],
+  "verification": "results/evidence/finalized-trial-20261031/verification.json",
+  "task223_review": {
+    "catalog_changes": {
+      "early_to_middle": [],
+      "early_to_late": []
+    },
+    "package_own_js_review": [
+      {
+        "server": "fetcher-mcp",
+        "own_js_files": 17,
+        "middle_own_js_equal": true,
+        "late_own_js_equal": true,
+        "dependency_code_not_asserted_equal": true
+      },
+      {
+        "server": "edgeone-pages-mcp",
+        "own_js_files": 4,
+        "middle_own_js_equal": true,
+        "late_own_js_equal": true,
+        "dependency_code_not_asserted_equal": true
+      }
+    ],
+    "implication": "Current release is a webpage workflow/retention candidate; no harness-visible drift observed, cannot alone demonstrate adaptation recovery",
+    "source_order": "Hugging Face query results are not date-sorted; latest-five requires date sorting and relevance review, never first-five assumption"
+  },
+  "benchmark_suite": "experiments/benchmark-v1.json",
+  "latest_readiness": "27 attempts, 24 complete scores; no matched ECS triplet. Agent/judge connectivity recovered on recheck. No failed record replaced. See current verification for submission gaps.",
+  "active_suite": "experiments/benchmark-v1.3.json"
+}

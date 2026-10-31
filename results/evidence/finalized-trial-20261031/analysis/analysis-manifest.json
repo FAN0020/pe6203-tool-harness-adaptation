@@ -1,0 +1,131 @@
+{
+  "experiment_id": "ed9f7251d3b6d0f5b4710770641bcf697073f3882c4a3de6c530020318252521",
+  "suite_id": "course-v1.2",
+  "evidence_kind": "real_model_evaluation",
+  "frozen": true,
+  "comparison_config_path": "comparison-config.json",
+  "comparison_config_file_sha256": "a5babd0c1ec57f39d0814d3c6395499289a9bb315a1053696ee4027d96e77e55",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "dataset_revision": "162e3ffbea1717ac8a20fe9b26465e29117229e4",
+  "tasks": [
+    {
+      "task_id": 133,
+      "family": "mathematical_expression_security",
+      "review_evidence": "experiments/evaluation/benchmark-v1-review.json",
+      "fixture": "empty isolated workspace; no existing source code is requested",
+      "required_tools": [
+        "math-mcp::validate_syntax",
+        "math-mcp::evaluate",
+        "mcp-ai-agent-guidelines::security-hardening-prompt-builder"
+      ],
+      "transitions": {
+        "middle": {
+          "label": "changed",
+          "change_types": [
+            "PARAM"
+          ],
+          "reason": "Required validate_syntax gains optional detailed and allow_variables inputs; existing arithmetic calls remain compatible."
+        },
+        "late": {
+          "label": "changed",
+          "change_types": [
+            "PARAM",
+            "TOOL"
+          ],
+          "reason": "validate_syntax requires explicit allow_variables; batch_evaluate adds a relevant multi-expression evaluation capability. TOOL is an addition, not a required rename/removal."
+        }
+      },
+      "question_sha256": "2696530b363e56858c54c15f1ba48eb2bbf4264a7290629284fbbbc28c41b05b",
+      "servers": {
+        "math-mcp": [
+          "validate_syntax",
+          "evaluate"
+        ],
+        "mcp-ai-agent-guidelines": [
+          "security-hardening-prompt-builder"
+        ]
+      }
+    },
+    {
+      "task_id": 235,
+      "family": "supplied_sales_data_visualization",
+      "review_evidence": "experiments/evaluation/benchmark-v1-review.json",
+      "fixture": "all numeric inputs in original question; empty workspace",
+      "required_tools": [
+        "@umengfe/mcp-server-chart::generate_district_map",
+        "@umengfe/mcp-server-chart::generate_area_chart",
+        "@umengfe/mcp-server-chart::generate_column_chart"
+      ],
+      "transitions": {
+        "middle": {
+          "label": "unaffected",
+          "change_types": [],
+          "reason": "All 28 tool records canonically equal excluding stage tags; identical tool implementations; all three required tools return chart specifications in each stage."
+        },
+        "late": {
+          "label": "unaffected",
+          "change_types": [],
+          "reason": "All 28 tool records canonically equal excluding stage tags; identical tool implementations; all three required tools return chart specifications in each stage."
+        }
+      },
+      "question_sha256": "7c83997ef2d8579fccb662e104afbe045b79743aa9387a452edac87f00628bd5",
+      "servers": {
+        "@umengfe/mcp-server-chart": [
+          "generate_district_map",
+          "generate_area_chart",
+          "generate_column_chart"
+        ]
+      }
+    },
+    {
+      "task_id": 283,
+      "family": "project_planning",
+      "review_evidence": "experiments/evaluation/benchmark-v1-review.json",
+      "fixture": "empty workspace; task requests planning, not reading or analyzing actual CSV/log contents",
+      "required_tools": [
+        "@modelcontextprotocol/server-sequential-thinking::sequentialthinking",
+        "@pimzino/agentic-tools-mcp::create_project",
+        "@pimzino/agentic-tools-mcp::create_task",
+        "@pimzino/agentic-tools-mcp::analyze_task_complexity"
+      ],
+      "transitions": {
+        "middle": {
+          "label": "changed",
+          "change_types": [
+            "TOOL",
+            "PARAM",
+            "DESC"
+          ],
+          "reason": "Required create_project schema/description and sequentialthinking description change. Relevant parallel-thinking adds workstream planning; Late also adds convergent-synthesis and sequentialthinking parameters. Additions are optional paths, not necessary for task solvability."
+        },
+        "late": {
+          "label": "changed",
+          "change_types": [
+            "TOOL",
+            "PARAM",
+            "DESC"
+          ],
+          "reason": "Required create_project schema/description and sequentialthinking description change. Relevant parallel-thinking adds workstream planning; Late also adds convergent-synthesis and sequentialthinking parameters. Additions are optional paths, not necessary for task solvability."
+        }
+      },
+      "question_sha256": "d9f159e572391b35c938d344d5ea3eced987b5985995f2a4f54080d37fc6c80d",
+      "servers": {
+        "@modelcontextprotocol/server-sequential-thinking": [
+          "sequentialthinking"
+        ],
+        "@pimzino/agentic-tools-mcp": [
+          "create_project",
+          "create_task",
+          "analyze_task_complexity"
+        ]
+      }
+    }
+  ],
+  "repeat_ids": [
+    0
+  ],
+  "development_reserved_ids": [
+    139,
+    223
+  ]
+}

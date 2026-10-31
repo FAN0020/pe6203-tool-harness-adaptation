@@ -22,6 +22,7 @@ def updater_settings(context):
         "api_key_env",
         "base_url_env",
         "allow_metadata_api",
+        "request_retry",
     }
     if not isinstance(settings, dict) or set(settings) - allowed:
         raise ValueError("Updater requires supported settings and environment variable names only")
@@ -94,6 +95,10 @@ def build_knowledge(metadata):
 
 def adapt(old_knowledge, new_metadata, strategy, context=None):
     """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+    if strategy == "selective_patch":
+        from .selective import adapt as selective_adapt
+
+        return selective_adapt(old_knowledge, new_metadata, context)
     if strategy not in {"no_update", "full_rewrite"}:
         raise ValueError(f"Unsupported strategy: {strategy}")
     old = build_knowledge(old_knowledge)
@@ -144,6 +149,10 @@ def adapt(old_knowledge, new_metadata, strategy, context=None):
 
 def write_adaptation(old_path, metadata_path, strategy, output, context=None):
     """Persist the baseline output, provenance and costs without overwriting attempts."""
+    if strategy == "selective_patch":
+        from .selective import write_adaptation as selective_write
+
+        return selective_write(old_path, metadata_path, output, context)
     old_path, metadata_path, output = Path(old_path), Path(metadata_path), Path(output)
     output.mkdir(parents=True, exist_ok=False)
     artifact = {

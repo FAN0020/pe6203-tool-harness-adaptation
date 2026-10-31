@@ -24,7 +24,12 @@ class FakeMessage:
 
 class FakeCompletion:
     def __init__(self, payload):
-        self.choices = [SimpleNamespace(message=FakeMessage(payload))]
+        self.choices = [
+            SimpleNamespace(
+                message=FakeMessage(payload),
+                finish_reason="tool_calls" if payload.get("tool_calls") else "stop",
+            )
+        ]
         self.usage = SimpleNamespace(
             model_dump=lambda: {
                 "prompt_tokens": 7,

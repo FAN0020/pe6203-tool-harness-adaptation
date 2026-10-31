@@ -1,0 +1,159 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>PE6203 · 剩余计划与历史案例</title><style>
+:root{color-scheme:light;--ink:#192a35;--muted:#526672;--line:#d9e3e7;--blue:#195c80}*{box-sizing:border-box}body{margin:0;background:#f3f6f7;color:var(--ink);font:16px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}main{max-width:1080px;margin:auto;padding:44px 28px 64px}h1{font-size:32px;line-height:1.3;margin:9px 0 18px}h2{font-size:23px;margin:38px 0 14px}h3{font-size:18px;margin:0 0 10px}p{margin:10px 0;overflow-wrap:anywhere}a{color:var(--blue);text-underline-offset:3px}nav{display:flex;gap:20px;flex-wrap:wrap;margin:22px 0}.eyebrow{font-size:13px;letter-spacing:1px;color:var(--muted)}.muted{color:var(--muted);font-size:14px}.notice,article,details{background:white;border:1px solid var(--line);border-radius:10px;padding:18px 21px;margin:13px 0}.notice{border-left:4px solid var(--blue)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{padding:17px;background:white;border:1px solid var(--line);border-radius:10px}.stat strong{display:block;font-size:27px;color:var(--blue)}.stat span{font-size:14px;color:var(--muted)}summary{cursor:pointer;font-weight:600}summary::marker{color:var(--blue)}details>p:first-of-type{margin-top:16px}.badge{font-size:12px;display:inline-block;border-radius:12px;padding:1px 9px;background:#eaf0f4;margin-right:8px}.success{color:#215e47;background:#e3f1e9}.failure,.measurement,.infrastructure,.environment{color:#894932;background:#faeee7}.candidate{color:#745b16;background:#f8f0d5}.scroll{overflow-x:auto;margin:14px 0}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}th{background:#eaf0f3;white-space:nowrap}td{min-width:60px}td:first-child{min-width:95px}code{font-size:13px;overflow-wrap:anywhere;background:#eaf0f3;border-radius:3px;padding:2px 5px}ol{padding-left:24px}li{margin:7px 0}footer{margin-top:35px;border-top:1px solid var(--line);padding-top:18px}@media(max-width:640px){main{padding:24px 15px 40px}h1{font-size:26px}.stats{grid-template-columns:1fr}article,details,.notice{padding:15px}nav{gap:14px}}@media print{body{background:white}main{max-width:none;padding:0}nav{display:none}details{break-inside:avoid}.scroll{overflow:visible}a{color:inherit}}
+</style></head><body><main><div class="eyebrow">PE6203 · 2026-10-31 · 基于 f9517a9</div><h1>剩余计划与历史案例</h1><p>先解决测量缺失，再做一轮公平、可复算的比较。实验跑通、网页发布和课程提交分别验收。</p><nav aria-label="目录"><a href="#decision">决策</a><a href="#plan">执行计划</a><a href="#cases">成功与失败</a><a href="#ledger">完整历史记录</a></nav><div class="notice"><strong>此页保存执行前计划与历史案例。</strong><p>下面的状态是 5e76a64 时的快照。v1.3 现已完成 27 条正式实验及 6 条诊断；<a href="course-v1.3-experiment.html">查看当前结果与剩余要求</a>。旧成功、失败和缺失结果全部保留，不跨轮拼接。</p></div><div class="stats"><div class="stat"><strong>26 / 27</strong><span>试跑 A · 完整评分轨迹</span></div><div class="stat"><strong>24 / 27</strong><span>试跑 B · 完整评分轨迹</span></div><div class="stat"><strong>0 / 3</strong><span>试跑 B · 完整三阶段匹配任务</span></div></div>
+<section id="decision"><h2>已经确定的范围</h2>
+<ul><li>优先补齐测量与故障恢复：服务于 TF/PE/ECS、原始记录和可复现要求，不作为 Selective Patch 的性能贡献。</li><li>正式子集保持 133/283 变化任务 + 235 保持能力对照，三阶段、三策略；固定 DeepSeek 模型与全部共同推理设置。</li><li>223 论文网页是单列的 Netlify 环境替代实验。其三个阶段目录相同；此前把它称为主优化案例并不准确，现阶段仅作端到端流程验证。若将来注入变化，另立明确标注的受控扩展，不冒充原 benchmark。</li><li>Netlify 是 deploy_html / deploy_folder_or_zip 的执行后端。agent 选择工具、参数和时机；用户选择账号和专用站点，CLI 处理授权、检查与执行。</li></ul>
+<p class="">评分、故障恢复对应作业 3.1/3.2 的固定评估与 4.1/4.2 的复现及结果要求。三次重复为建议，明确披露的一次重复可以接受。Netlify 是团队选择，不是课程指定服务。</p>
+<details><summary>Netlify：谁决定什么，登录在哪一步？</summary>
+<div class="scroll"><table><thead><tr><th scope="col">事项</th><th scope="col">负责人</th></tr></thead><tbody><tr><td>账号、授权与专用站点</td><td>用户在实验准备阶段决定</td></tr><tr><td>依赖、权限校验、快照和部署执行</td><td>CLI / harness</td></tr><tr><td>使用哪个已提供工具、参数、调用顺序</td><td>三种方法共用的运行 agent</td></tr><tr><td>更新哪些工具知识</td><td>No Update / Full Rewrite / Selective Patch 各自更新策略</td></tr></tbody></table></div>
+<ol><li>检查固定依赖</li><li>读取 CLI 当前账号，显示身份与目标站点，提供复用/切换</li><li>用户在目标账号浏览器中完成 CLI OAuth 授权及必要的账户初始化</li><li>用户选择专用实验站点；CLI 验证访问权限</li><li>模型预检、冻结站点 ID/工具目录/论文来源快照/hash/时间</li><li>agent 自主选择抓取、筛选、HTML 生成和发布调用</li><li>验证 draft URL、页面内容和论文日期；保留部署与评分证据</li></ol>
+<p class="">./experiment papers 已有安装→登录→link→冻结→运行；--prepare-only 可停在运行前。只发布单个生成 HTML 的 draft。</p>
+<p class="">现有向导仅判断已有凭据有效，未显示账号供用户核对/切换。浏览器已登录不证明 CLI 使用同一账号。需补充身份确认与切换流程，再验证真实发布。</p>
+<p class="">最新指冻结来源及时间范围内可验证的最新 5 篇相关论文，不宣称全互联网最新。来源须包含题名、日期和链接；若不足则明确失败，不替换为旧论文。</p>
+<p>浏览器页面停留在 signup-questions 不能证明 CLI 授权或站点关联已经完成。CLI OAuth 会单独申请授权并保存本机凭据：<a href="https://docs.netlify.com/api-and-cli-guides/cli-guides/get-started-with-cli/">Netlify 官方说明</a>。登录和发布不在本页整理过程中执行。</p></details>
+<details><summary>拟定恢复规则与公平性边界</summary>
+<p class="">固定条件：三方法共用原始任务、标签、模型和推理设置。先保持 agent 4096 tokens / 12 轮；任何调整都须统一并另立版本。</p>
+<p class="">评分：原始 rubric 原文保留，只精简输出格式；先用开发材料验证。每条轨迹保留 5 个独立评分槽，每槽采用第一个有效结果，不能选最高分。JSON 有效不代表语义评分正确。</p>
+<p class="">恢复上限：每个评分槽最多 2 次逻辑尝试，每次请求最多重试 1 次可恢复的连接/429/5xx 错误；五槽合计至多 20 次 HTTP 尝试。次数跨 resume 累计，耗尽仍记缺失。</p>
+<p class="">断点：先保存提示、响应和 attempt ID 再前进。只恢复尚缺的评分，不重复已完成的 agent 或部署。连续两次请求重试后仍连接失败，暂停新工作；覆盖 agent、updater、judge。</p>
+<p class="">副作用：被中断的工具调用不能盲目重发。已有部署 ID 时先核验原 URL；无法确认的副作用保留为中断，只有明确的已保存边界允许继续。</p>
+<p class="">记账：保留每次尝试、原因、时间、已知费用与未知费用，分别列原始失败和恢复结果；预检、网页及诊断费用分开。</p>
+<p class="">历史：新规则不追溯修改 A/B；低分不重跑，缺失单元不择优替换，三方法设置一致。</p>
+<p class="muted">Full Rewrite 使用 LLM 重写全部描述，Selective Patch 用确定性差异规则复制受影响记录；比较同时包含范围与生成机制差异，不能宣称是纯更新范围消融。</p>
+</details></section><section id="plan"><h2>从当前状态到跑通的一轮</h2>
+<article><h3>P0 · 保留历史并冻结验收标准</h3><p class="">保留全部旧日志与评分；建立成功/失败案例索引，明确 v1.3 变更范围和预算。</p><p><strong>验收：</strong>历史 archive SHA256 未变；案例数字可追溯；主矩阵、网页和因果诊断分别记账。</p><p class="muted">负责：Codex；前置：无；状态：历史目录已整理；协议待冻结</p>
+</article>
+<article><h3>P1 · 实现评分与断点恢复</h3><p class="">实现上述 judge slots、持久化预算、跨阶段断路器、失败分类和幂等恢复；补充 Netlify 账号核对/切换与部署核验恢复；保留现有 agent 设置与原始 rubric。</p><p><strong>验收：</strong>离线注入截断 JSON、429/5xx、连接中断、评分途中退出和发布后退出；证明有限重试、无覆盖、无重复工具副作用、费用可追溯；现有测试通过。</p><p class="muted">负责：Codex；前置：P0；状态：待执行</p>
+</article>
+<article><h3>P2 · 开发预检并冻结新版本</h3><p class="">做最小真实 API 检查；在预先列出的开发轨迹验证精简 judge 契约和语义一致性，历史失败提示仅作为已暴露的开发回归材料。检查原始 rubric 不变，然后提交代码并冻结 v1.3。</p><p><strong>验收：</strong>有效结构输出且人工核对事实依据；列出验证样本、所有失败和费用。未通过则修复后重做整个开发检查，不启动正式矩阵。</p><p class="muted">负责：Codex；前置：P1；状态：待执行</p>
+</article>
+<article><h3>P3 · 完成 Netlify 账号与网页流程</h3><p class="">使用已实现的账号核对/切换流程，通过 papers --prepare-only 完成用户授权和来源冻结。先运行冻结计划的一条 smoke，再按同一计划继续 task223 的三阶段×三策略共 9 条；各条同源、同站点、独立 workspace/draft。</p><p><strong>验收：</strong>至少一条真实 agent 轨迹完成抓取→按日期筛选→生成→发布→HTTP 200及页面内容核验；全部 9 条结果/失败如实保留。五篇论文的题名、日期、链接能对回来源；每次发布可追溯。</p><p class="muted">负责：Codex + 用户一次性授权/选站点；前置：P2；状态：待执行；课程选做，团队网页验收必做</p>
+</article>
+<article><h3>P4 · 运行一轮完整正式 benchmark</h3><p class="">新输出目录，固定 3 tasks × 3 stages × 3 strategies × 1 repeat = 27 条，目标 135 个有效评分槽；使用冻结恢复策略。网页登录不阻塞主 benchmark。</p><p><strong>验收：</strong>27 条均有终态、27 组完整评分、9 个三策略匹配组、3 个完整三阶段匹配任务；TF/PE/ECS/recovery/retention/update cost 可算且独立复算一致。语义任务失败不妨碍测量验收。任何缺失均报告未通过，不追跑到高分。</p><p class="muted">负责：Codex；前置：P2；状态：待执行</p>
+<p class="muted">本轮单次为跑通验收，作业允许但必须披露。3 次正式重复是建议扩展；必须事先冻结为独立 81 条计划，不能看成绩决定保留哪轮。</p>
+</article>
+<article><h3>P5 · 完成失败归因与结果归档</h3><p class="">固定当前 task235 Late 候选，预注册 Full Rewrite 原知识 vs 仅回退无关描述两臂、每臂 3 次诊断；共 6 条，与主矩阵分开。检查调用行为、遗漏字段和评分分歧。整理 133 的陈旧参数证据，明确属于 No Update。</p><p><strong>验收：</strong>明确区分 harness 原因、模型输出预算、评分、网络与上游实现缺陷；under/over 各有可信轨迹和因果解释才算失败分析齐全。若未证明 over-update 或 Selective Patch 漏改，保留未满足项，不把诊断注入或偶然低分当成真实失败。</p><p class="muted">负责：Codex；前置：P4；状态：待执行</p>
+</article>
+<article><h3>P6 · 形成可提交材料</h3><p class="">输出主结果、成本、恢复/保持、局限与贡献说明；整理报告和 10 分钟展示/5 分钟问答；保存原始包、代码版本、配置、命令和校验值。</p><p><strong>验收：</strong>干净环境下可离线复算；真实 API/Netlify 结果不冒充 mock；逐项核对作业 4.1–4.3。实验跑通不等于所有提交要求已经完成。</p><p class="muted">负责：Codex + 小组审核；前置：P4, P5；状态：待执行</p>
+</article>
+<p class="muted">最小计划：正式矩阵 27 条 + 网页变体 9 条 + 预注册因果诊断 6 条；另有少量开发预检。网页版首条 smoke 计入同一个 9 条计划。有效评分需要真实模型调用；没有预设成功率，也不能保证候选 over-update 最后得到证实。</p>
+<details><summary>CLI 命令与待实现状态</summary>
+<p><code>./experiment papers --prepare-only</code><br>现有网页准备入口；账号显示/切换改进仍待实现。</p>
+<p><code>./experiment run --output &lt;冻结后的网页目录&gt; --limit 1</code><br>真实模型和 draft 发布 smoke；保存的这一条计入该网页计划。</p>
+<p><code>./experiment run --output &lt;同一网页目录&gt; --resume</code><br>现有命令可继续未运行单元；未来按新协议恢复缺失评分的能力尚未实现。</p>
+<p><code>./experiment prepare --suite experiments/benchmark-v1.3.json --repeats 1 --output results/raw/&lt;新实验ID&gt;</code><br>拟定命令：v1.3 文件尚未创建，仅在 P2 验收并冻结后执行。</p>
+<p><code>./experiment run --output results/raw/&lt;新实验ID&gt;</code><br>调用真实模型；恢复时加 --resume。</p>
+<p><code>./experiment report --output results/raw/&lt;新实验ID&gt;</code><br>生成逐条记录和匹配结果；缺失评分不可自动补成分数。</p>
+</details></section><section id="cases"><h2>代表性成功与失败</h2><p class="muted">展开查看预期、观察、原因和限制。下方为试跑 B 的 9 个案例；所有试跑的全部记录在后面保留。</p>
+<details id="C01"><summary><span class="badge success">成功</span>C01 · 成功恢复：更新新参数后调用被接受</summary><p class="muted">参数调用层面已确认</p>
+<p><strong>预期：</strong>Late validate_syntax 调用显式提供布尔 allow_variables，完成数学与安全建议任务。</p>
+<p><strong>实际：</strong>Full Rewrite TF 10 / PE 10；Selective Patch TF 9.8 / PE 6。两者执行完成，新参数调用均被接受。Selective Patch 仍有一次其他工具错误。</p>
+<p><strong>原因：</strong>适应后的知识提供了 Late 所需参数。</p>
+<p><strong>结论边界：</strong>单次样本；不能把整段 TF 差异都归因于这一参数，也不能证明 Selective Patch 总体优于 Full Rewrite。</p>
+<p>证据：<a href="../results/evidence/finalized-trial-20261031/failure-analysis.json">failure-analysis.json</a></p>
+<p class="muted">原始轨迹位于 <a href="../results/evidence/finalized-trial-20261031/raw-trial.tar.gz">试跑 B 原始包</a> 内：</p>
+<p><code>finalized-trial-20261031/cells/task133-late-full_rewrite-r0/run/events.jsonl</code></p>
+<p><code>finalized-trial-20261031/cells/task133-late-selective_patch-r0/run/events.jsonl</code></p>
+</details>
+<details id="C02"><summary><span class="badge success">成功</span>C02 · 成功保持：无需修改的图表任务</summary><p class="muted">工具轨迹与评分已确认</p>
+<p><strong>预期：</strong>保留未变化知识，生成原任务需要的图表规格。</p>
+<p><strong>实际：</strong>TF 10 / PE 10；3 次工具调用，0 个工具错误，执行完成。</p>
+<p><strong>原因：</strong>未变化记录保持原样，无 LLM 更新 token。</p>
+<p><strong>结论边界：</strong>验证对象是 vis-chart 规格；未验证浏览器渲染或托管网页。一次通过不证明跨任务普遍保持。</p>
+<p>证据：<a href="../results/evidence/finalized-trial-20261031/artifact-audit.json">artifact-audit.json</a></p>
+<p class="muted">原始轨迹位于 <a href="../results/evidence/finalized-trial-20261031/raw-trial.tar.gz">试跑 B 原始包</a> 内：</p>
+<p><code>finalized-trial-20261031/cells/task235-middle-selective_patch-r0/run/events.jsonl</code></p>
+</details>
+<details id="C03"><summary><span class="badge failure">失败</span>C03 · Under-update 证据：旧知识漏传必需参数</summary><p class="muted">No Update 的调用级原因已确认</p>
+<p><strong>预期：</strong>在 Late 环境中满足新参数契约。</p>
+<p><strong>实际：</strong>5 次 validate_syntax 缺少 allow_variables 被拒绝；TF 6 / PE 6.6；最终 output_truncated。</p>
+<p><strong>原因：</strong>Early 知识不含 Late 新必需参数；独立工具探测复现拒绝。</p>
+<p><strong>结论边界：</strong>此案例属于 No Update，不是已证明的 Selective Patch 漏改。最终任务同时受生成额度耗尽影响；作业要求的 patch 失败分析仍需谨慎补证。</p>
+<p>证据：<a href="../results/evidence/finalized-trial-20261031/failure-analysis.json">failure-analysis.json</a> · <a href="../results/evidence/finalized-trial-20261031/contracts-probes.json">contracts-probes.json</a></p>
+<p class="muted">原始轨迹位于 <a href="../results/evidence/finalized-trial-20261031/raw-trial.tar.gz">试跑 B 原始包</a> 内：</p>
+<p><code>finalized-trial-20261031/cells/task133-late-no_update-r0/run/events.jsonl</code></p>
+</details>
+<details id="C04"><summary><span class="badge candidate">待归因</span>C04 · Over-update 候选：无变化任务中重复生成地图</summary><p class="muted">退化已观察，因果未确认</p>
+<p><strong>预期：</strong>无关知识的重写不应损坏原本可完成的图表任务。</p>
+<p><strong>实际：</strong>Full Rewrite TF 8.8 / PE 4.2，调用地图 5 次，遗漏部分地图单位配置；另两方法均 TF 10 / PE 10。</p>
+<p><strong>原因：</strong>可能与描述重写有关，但重写文本及 schema 仍包含相关字段；还存在 agent 和 judge 的波动。</p>
+<p><strong>结论边界：</strong>TF 五个评分为 10/10/10/9/5，存在分歧。Early 相同知识也出现分数差异。不能凭低分认定 over-update；需预注册回退对照诊断。</p>
+<p>证据：<a href="../results/evidence/finalized-trial-20261031/candidate-over-update.json">candidate-over-update.json</a></p>
+<p class="muted">原始轨迹位于 <a href="../results/evidence/finalized-trial-20261031/raw-trial.tar.gz">试跑 B 原始包</a> 内：</p>
+<p><code>finalized-trial-20261031/cells/task235-late-full_rewrite-r0/run/events.jsonl</code></p>
+<p><code>finalized-trial-20261031/cells/task235-late-no_update-r0/run/events.jsonl</code></p>
+<p><code>finalized-trial-20261031/cells/task235-late-selective_patch-r0/run/events.jsonl</code></p>
+</details>
+<details id="C05"><summary><span class="badge failure">失败</span>C05 · 模型生成预算失败：参数修正成功但未完成任务</summary><p class="muted">截断原因已确认，非 harness 归因</p>
+<p><strong>预期：</strong>在共同的生成预算内完成任务。</p>
+<p><strong>实际：</strong>TF 3.2 / PE 4.2；新 validate_syntax 调用成功，但第 6 轮 finish_reason=length、4096 completion tokens，没有最终内容或工具调用。</p>
+<p><strong>原因：</strong>直接终止原因是生成额度耗尽。</p>
+<p><strong>结论边界：</strong>不据此认定 under-update 或 over-update；若调整额度，必须对三方法统一并冻结新版本。</p>
+<p>证据：<a href="../results/evidence/finalized-trial-20261031/measurement-failures.json">measurement-failures.json</a></p>
+<p class="muted">原始轨迹位于 <a href="../results/evidence/finalized-trial-20261031/raw-trial.tar.gz">试跑 B 原始包</a> 内：</p>
+<p><code>finalized-trial-20261031/cells/task133-middle-selective_patch-r0/run/events.jsonl</code></p>
+</details>
+<details id="C06"><summary><span class="badge measurement">评分故障</span>C06 · 评分失败：agent 完成但 judge JSON 被截断</summary><p class="muted">测量缺失已确认</p>
+<p><strong>预期：</strong>五个有效原始 rubric 评分。</p>
+<p><strong>实际：</strong>agent completed；judge 第 3 次 length/无效 JSON；仅 4/5 有效，正式 TF/PE 为空。</p>
+<p><strong>原因：</strong>judge 输出截断，不能解析为完整评分。</p>
+<p><strong>结论边界：</strong>不把其余四个评分的均值当成完整结果；旧协议不允许补判。A 中 133 Late No Update 也曾有此类缺失，原记录保留。</p>
+<p>证据：<a href="../results/evidence/finalized-trial-20261031/measurement-failures.json">measurement-failures.json</a> · <a href="../results/evidence/benchmark-finalization/verification.json">verification.json</a></p>
+<p class="muted">原始轨迹位于 <a href="../results/evidence/finalized-trial-20261031/raw-trial.tar.gz">试跑 B 原始包</a> 内：</p>
+<p><code>finalized-trial-20261031/cells/task133-middle-full_rewrite-r0/run/events.jsonl</code></p>
+</details>
+<details id="C07"><summary><span class="badge infrastructure">连接故障</span>C07 · 连接失败：执行与评分两个阶段都受影响</summary><p class="muted">边界异常已确认，网络根因未知</p>
+<p><strong>预期：</strong>请求可达；失败时保留状态、费用与剩余工作。</p>
+<p><strong>实际：</strong>235 的首次 agent 请求在重试后失败，未评分；283 的 judge 3/4/5 连接失败，仅 2/5 有效。随后独立 API 检查恢复成功。</p>
+<p><strong>原因：</strong>APIConnectionError；不能仅凭此确定是服务商、客户端或网络问题。</p>
+<p><strong>结论边界：</strong>后来连接恢复不替换历史失败；没有把两条重新跑成成功记录。</p>
+<p>证据：<a href="../results/evidence/finalized-trial-20261031/measurement-failures.json">measurement-failures.json</a> · <a href="../results/evidence/finalized-trial-20261031/connectivity-recheck.log">connectivity-recheck.log</a></p>
+<p class="muted">原始轨迹位于 <a href="../results/evidence/finalized-trial-20261031/raw-trial.tar.gz">试跑 B 原始包</a> 内：</p>
+<p><code>finalized-trial-20261031/cells/task235-middle-no_update-r0/run/events.jsonl</code></p>
+<p><code>finalized-trial-20261031/cells/task283-late-no_update-r0/run/events.jsonl</code></p>
+</details>
+<details id="C08"><summary><span class="badge environment">环境问题</span>C08 · 上游工具缺陷：健康检查调用不存在的方法</summary><p class="muted">独立工具探测已确认</p>
+<p><strong>预期：</strong>review_workspace_health 的默认参数可执行。</p>
+<p><strong>实际：</strong>includeMemories=true 报 memoryStorage.listMemories is not a function；false 成功。该轨迹最终 TF 6.8 / PE 7.8。</p>
+<p><strong>原因：</strong>发布包 server 调用不存在的存储方法。</p>
+<p><strong>结论边界：</strong>保留所有方法共同使用的原发布实现；不能归因为 harness 重写，也不能将绕过缺陷的独立诊断当成主实验修复。</p>
+<p>证据：<a href="../results/evidence/finalized-trial-20261031/workspace-health-diagnostic.json">workspace-health-diagnostic.json</a></p>
+<p class="muted">原始轨迹位于 <a href="../results/evidence/finalized-trial-20261031/raw-trial.tar.gz">试跑 B 原始包</a> 内：</p>
+<p><code>finalized-trial-20261031/cells/task283-late-full_rewrite-r0/run/events.jsonl</code></p>
+</details>
+<details id="C09"><summary><span class="badge environment">环境问题</span>C09 · 非致命协议警告与轮数耗尽分别记录</summary><p class="muted">源码与轨迹可查，原总控日志缺失</p>
+<p><strong>预期：</strong>MCP stdout 仅输出协议消息；独立记录执行是否完成。</p>
+<p><strong>实际：</strong>上游迁移提示输出到 stdout，引发 JSON-RPC 解析警告后继续；轨迹 max_rounds，TF 9.2 / PE 7.4，记录的工具结果无 isError。</p>
+<p><strong>原因：</strong>上游 console.log 污染协议输出；它是否导致轮数耗尽未证明。</p>
+<p><strong>结论边界：</strong>高 TF 不等于执行完成。警告曾被现场观察，原临时控制台日志缺失，不能声称完整保存了该警告输出。</p>
+<p>证据：<a href="../results/evidence/finalized-trial-20261031/runtime-warnings.json">runtime-warnings.json</a> · <a href="../results/evidence/finalized-trial-20261031/reproduction.json">reproduction.json</a></p>
+<p class="muted">原始轨迹位于 <a href="../results/evidence/finalized-trial-20261031/raw-trial.tar.gz">试跑 B 原始包</a> 内：</p>
+<p><code>finalized-trial-20261031/cells/task283-early-selective_patch-r0/run/events.jsonl</code></p>
+</details>
+</section><section id="ledger"><h2>完整历史记录</h2><p>评分完整不等于任务执行完成：例如 max_rounds 或 output_truncated 仍可得到有效低分。缺失评分以“—”显示，绝不当作 0 分。以下列表覆盖两轮正式试跑的 54 条记录及两个开发试跑的 10 条记录。</p>
+<details id="trial-A"><summary>课程试跑 A · 2026-10-30 · 26/27 完整评分</summary><p class="">26/27 完整评分；仅 235/283 两个完整匹配任务可进入三策略 ECS。包内同时保留 v1 评分格式失败、v1.1 全连接失败和对应实现快照。</p><p class="">agent 执行完成：18/27。</p>
+<p>来源：<a href="../results/evidence/benchmark-finalization/summary.json">原始 summary</a> · <a href="../results/evidence/benchmark-finalization/raw-experiments.tar.gz">完整原始包</a></p>
+<p class="muted">SHA256：<code>dc6e3d7f674d73058f7c2d53975309ba1a928161692a9c336798334dd289824c</code></p>
+<div class="scroll"><table><thead><tr><th scope="col">三策略匹配 ECS</th><th scope="col">主口径 population</th><th scope="col">完整任务数</th></tr></thead><tbody><tr><td>No Update</td><td>8.8623</td><td>2/3</td></tr><tr><td>Full Rewrite</td><td>8.3303</td><td>2/3</td></tr><tr><td>Selective Patch</td><td>8.9412</td><td>2/3</td></tr></tbody></table></div>
+<div class="scroll"><table><thead><tr><th scope="col">任务</th><th scope="col">阶段</th><th scope="col">方法</th><th scope="col">执行状态</th><th scope="col">评分状态</th><th scope="col">TF</th><th scope="col">PE</th><th scope="col">工具错误</th><th scope="col">记录 ID</th></tr></thead><tbody><tr><td>133</td><td>early</td><td>No Update</td><td>输出截断</td><td>评分完整</td><td>6.6</td><td>6.4</td><td>1</td><td><code>task133-early-no_update-r0</code></td></tr><tr><td>133</td><td>early</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>8.8</td><td>6.4</td><td>0</td><td><code>task133-early-full_rewrite-r0</code></td></tr><tr><td>133</td><td>early</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>9.8</td><td>7.2</td><td>0</td><td><code>task133-early-selective_patch-r0</code></td></tr><tr><td>133</td><td>middle</td><td>No Update</td><td>完成</td><td>评分完整</td><td>9.8</td><td>5.4</td><td>0</td><td><code>task133-middle-no_update-r0</code></td></tr><tr><td>133</td><td>middle</td><td>Full Rewrite</td><td>输出截断</td><td>评分完整</td><td>8</td><td>6.8</td><td>0</td><td><code>task133-middle-full_rewrite-r0</code></td></tr><tr><td>133</td><td>middle</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>10</td><td>8.2</td><td>0</td><td><code>task133-middle-selective_patch-r0</code></td></tr><tr><td>133</td><td>late</td><td>No Update</td><td>完成</td><td>评分不完整</td><td>—</td><td>—</td><td>10</td><td><code>task133-late-no_update-r0</code></td></tr><tr><td>133</td><td>late</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>9.8</td><td>7</td><td>1</td><td><code>task133-late-full_rewrite-r0</code></td></tr><tr><td>133</td><td>late</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>9.4</td><td>9</td><td>2</td><td><code>task133-late-selective_patch-r0</code></td></tr><tr><td>235</td><td>early</td><td>No Update</td><td>完成</td><td>评分完整</td><td>10</td><td>7</td><td>0</td><td><code>task235-early-no_update-r0</code></td></tr><tr><td>235</td><td>early</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-early-full_rewrite-r0</code></td></tr><tr><td>235</td><td>early</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-early-selective_patch-r0</code></td></tr><tr><td>235</td><td>middle</td><td>No Update</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-middle-no_update-r0</code></td></tr><tr><td>235</td><td>middle</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-middle-full_rewrite-r0</code></td></tr><tr><td>235</td><td>middle</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-middle-selective_patch-r0</code></td></tr><tr><td>235</td><td>late</td><td>No Update</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-late-no_update-r0</code></td></tr><tr><td>235</td><td>late</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-late-full_rewrite-r0</code></td></tr><tr><td>235</td><td>late</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-late-selective_patch-r0</code></td></tr><tr><td>283</td><td>early</td><td>No Update</td><td>完成</td><td>评分完整</td><td>7.2</td><td>8.8</td><td>0</td><td><code>task283-early-no_update-r0</code></td></tr><tr><td>283</td><td>early</td><td>Full Rewrite</td><td>轮数耗尽</td><td>评分完整</td><td>8</td><td>7.8</td><td>0</td><td><code>task283-early-full_rewrite-r0</code></td></tr><tr><td>283</td><td>early</td><td>Selective Patch</td><td>轮数耗尽</td><td>评分完整</td><td>7.6</td><td>8.2</td><td>0</td><td><code>task283-early-selective_patch-r0</code></td></tr><tr><td>283</td><td>middle</td><td>No Update</td><td>完成</td><td>评分完整</td><td>9.8</td><td>9.6</td><td>0</td><td><code>task283-middle-no_update-r0</code></td></tr><tr><td>283</td><td>middle</td><td>Full Rewrite</td><td>轮数耗尽</td><td>评分完整</td><td>10</td><td>7</td><td>0</td><td><code>task283-middle-full_rewrite-r0</code></td></tr><tr><td>283</td><td>middle</td><td>Selective Patch</td><td>轮数耗尽</td><td>评分完整</td><td>10</td><td>7</td><td>0</td><td><code>task283-middle-selective_patch-r0</code></td></tr><tr><td>283</td><td>late</td><td>No Update</td><td>轮数耗尽</td><td>评分完整</td><td>10</td><td>9.2</td><td>0</td><td><code>task283-late-no_update-r0</code></td></tr><tr><td>283</td><td>late</td><td>Full Rewrite</td><td>轮数耗尽</td><td>评分完整</td><td>6.4</td><td>8.6</td><td>4</td><td><code>task283-late-full_rewrite-r0</code></td></tr><tr><td>283</td><td>late</td><td>Selective Patch</td><td>轮数耗尽</td><td>评分完整</td><td>9</td><td>8.2</td><td>1</td><td><code>task283-late-selective_patch-r0</code></td></tr></tbody></table></div>
+</details>
+<details id="trial-B"><summary>课程试跑 B · 2026-10-31 · 24/27 完整评分</summary><p class="">24/27 完整评分；0 个完整匹配任务，三策略匹配 ECS 均为空。135 个计划 judge 槽，实际尝试 130 个，126 个有效。临时总控控制台日志缺失，逐单元证据仍在。</p><p class="">agent 执行完成：17/27。</p>
+<p>来源：<a href="../results/evidence/finalized-trial-20261031/summary.json">原始 summary</a> · <a href="../results/evidence/finalized-trial-20261031/raw-trial.tar.gz">完整原始包</a></p>
+<p class="muted">SHA256：<code>701b93f79d9da7981e0789eb9158d59b27f80b6f62832e3b20e0a856a141b8bd</code></p>
+<div class="scroll"><table><thead><tr><th scope="col">三策略匹配 ECS</th><th scope="col">主口径 population</th><th scope="col">完整任务数</th></tr></thead><tbody><tr><td>No Update</td><td>—</td><td>0/3</td></tr><tr><td>Full Rewrite</td><td>—</td><td>0/3</td></tr><tr><td>Selective Patch</td><td>—</td><td>0/3</td></tr></tbody></table></div>
+<div class="scroll"><table><thead><tr><th scope="col">任务</th><th scope="col">阶段</th><th scope="col">方法</th><th scope="col">执行状态</th><th scope="col">评分状态</th><th scope="col">TF</th><th scope="col">PE</th><th scope="col">工具错误</th><th scope="col">记录 ID</th></tr></thead><tbody><tr><td>133</td><td>early</td><td>No Update</td><td>完成</td><td>评分完整</td><td>9.6</td><td>6.8</td><td>0</td><td><code>task133-early-no_update-r0</code></td></tr><tr><td>133</td><td>early</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>10</td><td>7.8</td><td>0</td><td><code>task133-early-full_rewrite-r0</code></td></tr><tr><td>133</td><td>early</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>10</td><td>5</td><td>0</td><td><code>task133-early-selective_patch-r0</code></td></tr><tr><td>133</td><td>middle</td><td>No Update</td><td>完成</td><td>评分完整</td><td>10</td><td>6</td><td>2</td><td><code>task133-middle-no_update-r0</code></td></tr><tr><td>133</td><td>middle</td><td>Full Rewrite</td><td>完成</td><td>评分不完整</td><td>—</td><td>—</td><td>1</td><td><code>task133-middle-full_rewrite-r0</code></td></tr><tr><td>133</td><td>middle</td><td>Selective Patch</td><td>输出截断</td><td>评分完整</td><td>3.2</td><td>4.2</td><td>3</td><td><code>task133-middle-selective_patch-r0</code></td></tr><tr><td>133</td><td>late</td><td>No Update</td><td>输出截断</td><td>评分完整</td><td>6</td><td>6.6</td><td>9</td><td><code>task133-late-no_update-r0</code></td></tr><tr><td>133</td><td>late</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task133-late-full_rewrite-r0</code></td></tr><tr><td>133</td><td>late</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>9.8</td><td>6</td><td>1</td><td><code>task133-late-selective_patch-r0</code></td></tr><tr><td>235</td><td>early</td><td>No Update</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-early-no_update-r0</code></td></tr><tr><td>235</td><td>early</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-early-full_rewrite-r0</code></td></tr><tr><td>235</td><td>early</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>9</td><td>10</td><td>0</td><td><code>task235-early-selective_patch-r0</code></td></tr><tr><td>235</td><td>middle</td><td>No Update</td><td>失败</td><td>未能执行</td><td>—</td><td>—</td><td>0</td><td><code>task235-middle-no_update-r0</code></td></tr><tr><td>235</td><td>middle</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-middle-full_rewrite-r0</code></td></tr><tr><td>235</td><td>middle</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-middle-selective_patch-r0</code></td></tr><tr><td>235</td><td>late</td><td>No Update</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-late-no_update-r0</code></td></tr><tr><td>235</td><td>late</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>8.8</td><td>4.2</td><td>0</td><td><code>task235-late-full_rewrite-r0</code></td></tr><tr><td>235</td><td>late</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>0</td><td><code>task235-late-selective_patch-r0</code></td></tr><tr><td>283</td><td>early</td><td>No Update</td><td>轮数耗尽</td><td>评分完整</td><td>6.6</td><td>7.6</td><td>0</td><td><code>task283-early-no_update-r0</code></td></tr><tr><td>283</td><td>early</td><td>Full Rewrite</td><td>轮数耗尽</td><td>评分完整</td><td>7.6</td><td>9</td><td>0</td><td><code>task283-early-full_rewrite-r0</code></td></tr><tr><td>283</td><td>early</td><td>Selective Patch</td><td>轮数耗尽</td><td>评分完整</td><td>9.2</td><td>7.4</td><td>0</td><td><code>task283-early-selective_patch-r0</code></td></tr><tr><td>283</td><td>middle</td><td>No Update</td><td>轮数耗尽</td><td>评分完整</td><td>10</td><td>8.6</td><td>0</td><td><code>task283-middle-no_update-r0</code></td></tr><tr><td>283</td><td>middle</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>6.4</td><td>7.4</td><td>0</td><td><code>task283-middle-full_rewrite-r0</code></td></tr><tr><td>283</td><td>middle</td><td>Selective Patch</td><td>轮数耗尽</td><td>评分完整</td><td>10</td><td>9.2</td><td>0</td><td><code>task283-middle-selective_patch-r0</code></td></tr><tr><td>283</td><td>late</td><td>No Update</td><td>轮数耗尽</td><td>评分不完整</td><td>—</td><td>—</td><td>0</td><td><code>task283-late-no_update-r0</code></td></tr><tr><td>283</td><td>late</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>6.8</td><td>7.8</td><td>1</td><td><code>task283-late-full_rewrite-r0</code></td></tr><tr><td>283</td><td>late</td><td>Selective Patch</td><td>轮数耗尽</td><td>评分完整</td><td>9</td><td>7.4</td><td>3</td><td><code>task283-late-selective_patch-r0</code></td></tr></tbody></table></div>
+</details>
+<details id="trial-D1"><summary>开发任务 139 · 三策略试跑 · 8/9 完整评分</summary><p class="">8/9 评分完整，一条连接失败。开发结果不并入正式子集。</p><p class="">agent 执行完成：8/9。</p>
+<p>来源：<a href="../results/evidence/experiment-cli-20261030/summary.json">原始 summary</a></p>
+<div class="scroll"><table><thead><tr><th scope="col">任务</th><th scope="col">阶段</th><th scope="col">方法</th><th scope="col">执行状态</th><th scope="col">评分状态</th><th scope="col">TF</th><th scope="col">PE</th><th scope="col">工具错误</th><th scope="col">记录 ID</th></tr></thead><tbody><tr><td>139</td><td>early</td><td>No Update</td><td>完成</td><td>评分完整</td><td>9.4</td><td>9</td><td>1</td><td><code>task139-early-no_update-r0</code></td></tr><tr><td>139</td><td>early</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>9.8</td><td>8.8</td><td>0</td><td><code>task139-early-full_rewrite-r0</code></td></tr><tr><td>139</td><td>early</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>9.6</td><td>8</td><td>1</td><td><code>task139-early-selective_patch-r0</code></td></tr><tr><td>139</td><td>middle</td><td>No Update</td><td>完成</td><td>评分完整</td><td>10</td><td>9</td><td>1</td><td><code>task139-middle-no_update-r0</code></td></tr><tr><td>139</td><td>middle</td><td>Full Rewrite</td><td>完成</td><td>评分完整</td><td>5.2</td><td>8.8</td><td>0</td><td><code>task139-middle-full_rewrite-r0</code></td></tr><tr><td>139</td><td>middle</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>10</td><td>9.2</td><td>0</td><td><code>task139-middle-selective_patch-r0</code></td></tr><tr><td>139</td><td>late</td><td>No Update</td><td>完成</td><td>评分完整</td><td>10</td><td>8.2</td><td>0</td><td><code>task139-late-no_update-r0</code></td></tr><tr><td>139</td><td>late</td><td>Full Rewrite</td><td>失败</td><td>未能执行</td><td>—</td><td>—</td><td>0</td><td><code>task139-late-full_rewrite-r0</code></td></tr><tr><td>139</td><td>late</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>10</td><td>10</td><td>1</td><td><code>task139-late-selective_patch-r0</code></td></tr></tbody></table></div>
+</details>
+<details id="trial-D2"><summary>开发任务 139 · Selective Patch 单条 · 1/1 完整评分</summary><p class="">TF 10 / PE 9.2，仍有两次工具错误；单条开发 smoke，不是三策略比较。</p><p class="">agent 执行完成：1/1。</p>
+<p>来源：<a href="../results/evidence/experiment-cli-20261030/selective-live/summary.json">原始 summary</a></p>
+<div class="scroll"><table><thead><tr><th scope="col">任务</th><th scope="col">阶段</th><th scope="col">方法</th><th scope="col">执行状态</th><th scope="col">评分状态</th><th scope="col">TF</th><th scope="col">PE</th><th scope="col">工具错误</th><th scope="col">记录 ID</th></tr></thead><tbody><tr><td>139</td><td>late</td><td>Selective Patch</td><td>完成</td><td>评分完整</td><td>10</td><td>9.2</td><td>2</td><td><code>task139-late-selective_patch-r0</code></td></tr></tbody></table></div>
+</details>
+<details><summary>更早记录与局限</summary>
+<p><a href="../results/evaluation/fanziyu-pilot-audit-20261027/summary.json">summary.json</a> — 更早开发审计：含成功、无效 judge 和未归因工具错误；部分原始 judge 响应未保存，不具备完整三策略比较。</p>
+<p><a href="../reports/fanziyu-pilot-analysis-20261027.md">fanziyu-pilot-analysis-20261027.md</a> — 早期人工可读分析；属于当时版本，不覆盖当前协议。</p>
+<p><a href="../reports/vanilla-agent-task139-early-handoff.md">vanilla-agent-task139-early-handoff.md</a> — 原始 agent 接入与开发案例交接。</p>
+<p><a href="../results/evidence/full-rewrite-20261019/README.md">README.md</a> — Full Rewrite 早期实现与验证来源。</p>
+</details></section><footer><p>本页是证据导航和实施计划，不是新的实验结果或已完成的课程报告。</p><p>机器数据：<a href="../reports/.context/finalization-plan.json">实施计划 JSON</a> · <a href="../reports/.context/historical-cases.json">历史案例 JSON</a> · <a href="../README.md">项目说明</a></p></footer></main></body></html>

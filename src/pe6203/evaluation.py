@@ -58,6 +58,28 @@ def judge_scores(payload):
     rows = [x.get("result", {}) for x in runs]
     if any(run.get("error") is not None for run in runs):
         return None, "judge_record_contains_error"
+    if packed.get("protocol") == "durable-slots-v1":
+        attempts = packed.get("attempts")
+        if not isinstance(attempts, list) or not 5 <= len(attempts) <= 10:
+            return None, "invalid_judge_attempt_audit"
+        if any(
+            not isinstance(a, dict) or type(a.get("slot")) is not int or not 1 <= a["slot"] <= 5
+            for a in attempts
+        ):
+            return None, "invalid_judge_slot"
+        for slot, selected in enumerate(runs, 1):
+            history = [a for a in attempts if a["slot"] == slot]
+            if (
+                not history
+                or len(history) > 2
+                or [a.get("attempt") for a in history] != list(range(1, len(history) + 1))
+            ):
+                return None, "invalid_judge_attempt_sequence"
+            first = next(
+                (a for a in history if a.get("result") is not None and not a.get("error")), None
+            )
+            if first != selected:
+                return None, "judge_did_not_select_first_valid_attempt"
     if any(
         "error" in x or any(type(x.get(k)) is not int or not 1 <= x[k] <= 10 for k in SCORES)
         for x in rows
@@ -374,7 +396,14 @@ def summarize(m, selected, attempts):
                 "missing_selected_cells": sum(x["reason"] == "no_selected_result" for x in rows),
                 "noneligible_cell_fraction": sum(not x["eligible"] for x in rows) / len(rows),
                 "attempt_execution_failures": sum(
-                    x["execution_status"] in ("failed", "max_rounds", "empty_answer")
+                    x["execution_status"]
+                    in (
+                        "failed",
+                        "max_rounds",
+                        "empty_answer",
+                        "output_truncated",
+                        "content_filtered",
+                    )
                     for x in observed
                 ),
                 "attempt_not_started": sum(

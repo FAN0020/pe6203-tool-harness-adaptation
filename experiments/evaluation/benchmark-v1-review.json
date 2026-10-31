@@ -1,0 +1,164 @@
+{
+  "reviewed_at": "2026-10-30",
+  "review_type": "source and real MCP contract inspection before model evaluation",
+  "selection_basis": "Three tasks with self-contained question inputs, five locally available archived servers, no login or external credential dependency. Not selected by model scores. Retain observed environment defects.",
+  "not_required_by_assignment": "4 development + 8 evaluation is an old team budget target, replaced for course-v1 by this documented three-task subset.",
+  "source_requirement_sha256": "6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d",
+  "tasks": [
+    {
+      "task_id": 133,
+      "family": "mathematical_expression_security",
+      "review_evidence": "experiments/evaluation/benchmark-v1-review.json",
+      "fixture": "empty isolated workspace; no existing source code is requested",
+      "required_tools": [
+        "math-mcp::validate_syntax",
+        "math-mcp::evaluate",
+        "mcp-ai-agent-guidelines::security-hardening-prompt-builder"
+      ],
+      "transitions": {
+        "middle": {
+          "label": "changed",
+          "change_types": [
+            "PARAM"
+          ],
+          "reason": "Required validate_syntax gains optional detailed and allow_variables inputs; existing arithmetic calls remain compatible."
+        },
+        "late": {
+          "label": "changed",
+          "change_types": [
+            "PARAM",
+            "TOOL"
+          ],
+          "reason": "validate_syntax requires explicit allow_variables; batch_evaluate adds a relevant multi-expression evaluation capability. TOOL is an addition, not a required rename/removal."
+        }
+      },
+      "question_sha256": "2696530b363e56858c54c15f1ba48eb2bbf4264a7290629284fbbbc28c41b05b",
+      "servers": {
+        "math-mcp": [
+          "validate_syntax",
+          "evaluate"
+        ],
+        "mcp-ai-agent-guidelines": [
+          "security-hardening-prompt-builder"
+        ]
+      }
+    },
+    {
+      "task_id": 235,
+      "family": "supplied_sales_data_visualization",
+      "review_evidence": "experiments/evaluation/benchmark-v1-review.json",
+      "fixture": "all numeric inputs in original question; empty workspace",
+      "required_tools": [
+        "@umengfe/mcp-server-chart::generate_district_map",
+        "@umengfe/mcp-server-chart::generate_area_chart",
+        "@umengfe/mcp-server-chart::generate_column_chart"
+      ],
+      "transitions": {
+        "middle": {
+          "label": "unaffected",
+          "change_types": [],
+          "reason": "All 28 tool records canonically equal excluding stage tags; identical tool implementations; all three required tools return chart specifications in each stage."
+        },
+        "late": {
+          "label": "unaffected",
+          "change_types": [],
+          "reason": "All 28 tool records canonically equal excluding stage tags; identical tool implementations; all three required tools return chart specifications in each stage."
+        }
+      },
+      "question_sha256": "7c83997ef2d8579fccb662e104afbe045b79743aa9387a452edac87f00628bd5",
+      "servers": {
+        "@umengfe/mcp-server-chart": [
+          "generate_district_map",
+          "generate_area_chart",
+          "generate_column_chart"
+        ]
+      }
+    },
+    {
+      "task_id": 283,
+      "family": "project_planning",
+      "review_evidence": "experiments/evaluation/benchmark-v1-review.json",
+      "fixture": "empty workspace; task requests planning, not reading or analyzing actual CSV/log contents",
+      "required_tools": [
+        "@modelcontextprotocol/server-sequential-thinking::sequentialthinking",
+        "@pimzino/agentic-tools-mcp::create_project",
+        "@pimzino/agentic-tools-mcp::create_task",
+        "@pimzino/agentic-tools-mcp::analyze_task_complexity"
+      ],
+      "transitions": {
+        "middle": {
+          "label": "changed",
+          "change_types": [
+            "TOOL",
+            "PARAM",
+            "DESC"
+          ],
+          "reason": "Required create_project schema/description and sequentialthinking description change. Relevant parallel-thinking adds workstream planning; Late also adds convergent-synthesis and sequentialthinking parameters. Additions are optional paths, not necessary for task solvability."
+        },
+        "late": {
+          "label": "changed",
+          "change_types": [
+            "TOOL",
+            "PARAM",
+            "DESC"
+          ],
+          "reason": "Required create_project schema/description and sequentialthinking description change. Relevant parallel-thinking adds workstream planning; Late also adds convergent-synthesis and sequentialthinking parameters. Additions are optional paths, not necessary for task solvability."
+        }
+      },
+      "question_sha256": "d9f159e572391b35c938d344d5ea3eced987b5985995f2a4f54080d37fc6c80d",
+      "servers": {
+        "@modelcontextprotocol/server-sequential-thinking": [
+          "sequentialthinking"
+        ],
+        "@pimzino/agentic-tools-mcp": [
+          "create_project",
+          "create_task",
+          "analyze_task_complexity"
+        ]
+      }
+    }
+  ],
+  "known_environment_failures": [
+    {
+      "task": 133,
+      "stage": "late",
+      "tool": "validate_syntax",
+      "cause": "Old invocation omits new required allow_variables boolean; adding False restores arithmetic validation."
+    },
+    {
+      "task": 283,
+      "stage": "middle/late",
+      "tool": "parallel-thinking",
+      "cause": "Completed-path result contains synthesisReady/pathsSummary but outputSchema additionalProperties=false; SDK rejects it. No archived source or judge labels are patched."
+    },
+    {
+      "task": 133,
+      "stage": "late",
+      "tool": "batch_evaluate",
+      "cause": "Advertised tool calls absent handleBatchEvaluate handler. Preserved; not an adaptation defect."
+    },
+    {
+      "task": 283,
+      "stage": "late",
+      "tool": "sequentialthinking",
+      "cause": "Handler calls missing thinkingServer.getThoughtHistory method. Preserved; not an adaptation defect."
+    }
+  ],
+  "reviewer": "Codex repository audit; not an independent human review",
+  "analysis_policy": "All three methods must have five valid judge records for a matched cell. Missing attempts remain null. Equal weight tasks after averaging repeats. ECS only for matched three-stage triplets. Cost includes failed adaptations and all attempts; unknown amounts remain null.",
+  "reference_answers_or_scores_used_for_selection": false,
+  "protocol_revision": {
+    "suite_id": "course-v1.1",
+    "supersedes": "unscored course-v1 trial results/raw/course-v1-20261030",
+    "change": "judge response_format=json_object only; official rubric unchanged",
+    "evidence": "results/raw/judge-json-format-probe-20261030",
+    "result": "5/5 valid JSON with finish_reason=stop on the five prior prompts",
+    "selection_or_method_changes": false
+  },
+  "availability_revision": {
+    "suite_id": "course-v1.2",
+    "prior": "results/raw/course-v1.1-20261030",
+    "issue": "All model/updater first requests failed with APIConnectionError after one identical-request retry; no scored cells. Subsequent authenticated minimal requests succeeded.",
+    "resolution": "Preflight agent/judge endpoints before any new cell, bounded request retries, classify nested transport exceptions, stop after two consecutive transport failures. Fresh whole matrix, not replacement of low scores."
+  }
+}

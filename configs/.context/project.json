@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "runnable_config": false,
   "path_base": "repository_root",
-  "as_of": "2026-10-19",
+  "as_of": "2026-10-30",
   "course": "PE6203 Project 4: Tool Harness Adaptation under Environment Change",
   "objective": "在固定模型下，比较工具变化后局部更新对任务恢复、能力保持和更新成本的影响。",
   "main_case": {
@@ -10,8 +10,10 @@
     "name": "最新论文检索 → HTML 网页发布",
     "role": "development_optimization",
     "selection_basis": "用户提出的主优化方向；已核对官方 selected task",
-    "status": "selected_not_runnable",
-    "details_ref": "experiments/task-manifest.v1.json"
+    "status": "netlify_variant_requires_user_login_and_reviewed_source",
+    "details_ref": "experiments/task-manifest.v1.json",
+    "publishing": "Netlify CLI 23.15.1; user login + dedicated site; draft deployments",
+    "source": "Frozen research listing with timestamp/hash; all strategies share it; variant, not original EdgeOne environment"
   },
   "other_cases": {
     "smoke_task_id": 139,
@@ -22,8 +24,12 @@
       226,
       450
     ],
-    "formal_evaluation_ids": [],
-    "rule": "其余任务用于回归/保留能力验证；候选不等于冻结测试集。139 已用于调试，只能作为 development。223 主优化案例也不进入独立 evaluation。"
+    "formal_evaluation_ids": [
+      133,
+      235,
+      283
+    ],
+    "rule": "course-v1 fixed subset; 139/223 remain development. 283 shares a server family with 139; no independent-family holdout claim."
   },
   "models": {
     "general_model": "deepseek/deepseek-v4.1-flash-1017",
@@ -31,23 +37,28 @@
     "base_url": "https://openrouter.ai/api/v1",
     "agent": "configured_and_smoke_verified",
     "judge": "configured_and_smoke_verified",
-    "updater": "planned_same_model_not_implemented",
+    "updater": "LLM Full Rewrite integrated; same general model via OpenRouter",
     "local_config": "configs/local.smoke-no-reasoning.json",
-    "env": "ignored .env; explicit uv run --env-file .env",
-    "env_check": "agent/judge endpoint 与 key 存在；本轮仅检查配置，未重新调用 API"
+    "env": "ignored .env; ./experiment loads it through uv",
+    "env_check": "2026-10-30 agent/judge real API requests succeeded",
+    "benchmark_config": "configs/course-benchmark.json"
   },
   "settings": {
     "temperature": 0,
-    "agent_max_completion_tokens": 2048,
+    "agent_max_completion_tokens": 4096,
     "judge_max_completion_tokens": 4096,
     "judge_reasoning": false,
     "judge_runs": 5,
     "max_rounds": 12,
-    "request_timeout_seconds": 90,
+    "request_timeout_seconds": 120,
     "tool_timeout_seconds": 30,
-    "run_timeout_seconds": 600,
+    "run_timeout_seconds": 900,
     "send_model_seed": false,
-    "tool_name_policy": "namespaced"
+    "tool_name_policy": "namespaced",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    }
   },
   "experiment": {
     "stages": [
@@ -60,10 +71,12 @@
       "full_rewrite",
       "selective_patch"
     ],
-    "full_rewrite_now": "deterministic complete metadata rebuild",
-    "llm_full_rewrite": "pending",
-    "selective_patch": "pending",
-    "freeze_ref": "experiments/protocol.v1.json"
+    "full_rewrite_now": "LLM rewrites every target tool description; immutable schemas/routes/rules retained",
+    "llm_full_rewrite": "integrated with constraint validation and costs",
+    "selective_patch": "HaoQI_V1 deterministic diff integrated; preserved unchanged records; experimental LLM rule mode disabled",
+    "freeze_ref": "experiments/protocol.v1.json",
+    "cli": "./experiment menu 7 benchmark / 3 papers wizard; plan hashes freeze all actual settings",
+    "benchmark_suite": "experiments/benchmark-v1.json"
   },
   "verified": {
     "task_id": 139,
@@ -74,13 +87,14 @@
     "ECS": null,
     "judge_valid": 5,
     "tests_passed": 68,
-    "evidence": "results/evidence/baseline-integration/verification.json"
+    "evidence": "results/evidence/baseline-integration/verification.json",
+    "historical_only": true
   },
   "not_claimed": [
     "完整 201-task 评测",
-    "三策略效果比较",
-    "223 网页案例已可运行",
-    "正式 LLM updater 已实现"
+    "三策略优劣结论",
+    "Netlify 用户登录前的真实发布验证",
+    "独立任务族泛化与 under/over-update 因果分析已完成"
   ],
   "context_files": [
     "docs/.context/requirements.json",
@@ -96,5 +110,6 @@
     "results/evidence/.context/index.json",
     "reports/.context/report-template.json",
     "contributions/baselines/wu-muchu/sprint1/.context/provenance.json"
-  ]
+  ],
+  "current_verification": "results/evidence/finalized-trial-20261031/verification.json"
 }
