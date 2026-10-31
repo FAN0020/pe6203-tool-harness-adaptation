@@ -1,0 +1,71 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PE6203 · 工具迁移对照</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#182437;background:#f5f7fa;margin:auto;max-width:1150px;padding:28px}main{background:white;padding:34px;border-radius:12px}h1{font-size:30px;line-height:1.3}h2{font-size:22px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;text-align:left;border-bottom:1px solid #d9e0e8;vertical-align:top}th{background:#eef3f8}a{color:#175da8}code,pre{font-size:13px;overflow-wrap:anywhere}pre{white-space:pre-wrap;background:#eef3f8;padding:12px}.note{border-left:4px solid #b57d13;padding:12px 16px;background:#fff8e7}.scroll{overflow-x:auto}summary{cursor:pointer;font-weight:600;margin-top:12px}.small{font-size:14px;color:#526074}@media(max-width:650px){body{padding:10px}main{padding:18px}}</style><main>
+<h1>工具删除与迁移：task430 补充对照</h1>
+<p class="note">工具迁移机制得到实测支持，质量收益仍不一致：原Patch和budget_feedback均3/3正常完成，NU/FR各1/3；四组平均TF均9.9333。</p>
+<p>2026-10-31 · 官方task430：解释声明式编程并展示SwiftUI代码。Early/Middle/Late × No Update/Full Rewrite/原Selective Patch/budget_feedback ×1次，共12条新轨迹、60个原judge评分槽。没有新增策略，也没有替换原133/235/283或覆盖27条主实验。</p>
+<h2>为何增加这个案例</h2><p>选择依据是发布版变化覆盖，不是模型得分。对四份官方mutation记录的离线检查找到三类工具删除：filesystem.read_file（现有任务已用替代工具）、LeetCode每日题入口（时变数据和其他服务）、Swiftipedia.search_symbols。task430明确列出search_symbols且仅需两个公开只读服务，因此首先检查它。task72同样涉及删除，但需PDF本地材料。实际目录确认Late移除search_symbols，文本查询迁入browse_module的query参数；Wikipedia两工具的契约三阶段均不变。</p>
+<p>完整选择依据、三阶段目录和12次公开只读工具探测见coverage-audit-20261031。没有读取官方答案或评分来选择新案例。该案例在已有开发结果之后选入，不能称预先保护的测试集。所需工具列表表示官方意图；是否实际调用，仍由agent决定。</p>
+<h2>独立复算</h2><div class="scroll"><table><tr><th>方法</th><th>正常完成</th><th>变化后完成</th><th>TF</th><th>PE</th><th>ECS总体SD</th><th>ECS样本SD</th></tr>
+<tr><td>selective_patch</td><td>3/3</td><td>2/2</td><td>9.9333</td><td>7.4667</td><td>9.8391</td><td>9.8179</td></tr>
+<tr><td>no_update</td><td>1/3</td><td>1/2</td><td>9.9333</td><td>6.1333</td><td>9.8391</td><td>9.8179</td></tr>
+<tr><td>full_rewrite</td><td>1/3</td><td>1/2</td><td>9.9333</td><td>8.6667</td><td>9.8391</td><td>9.8179</td></tr>
+<tr><td>budget_feedback</td><td>3/3</td><td>2/2</td><td>9.9333</td><td>7.5333</td><td>9.8391</td><td>9.8179</td></tr>
+</table></div><p>ECS = 三阶段TF均值 − 标准差。总体SD分母n=3，对应发布代码；样本SD分母n−1=2，对应论文附录口径。5个judge槽不是5次agent执行；高TF不证明正常结束。</p>
+<table><tr><th>Cell /阶段</th><th>方法</th><th>实际终态</th><th>TF</th><th>PE</th><th>Late旧工具调用</th><th>browse+query</th></tr>
+<tr><td>cell-001 / late</td><td>selective_patch</td><td>completed</td><td>9.8</td><td>7.4</td><td>0</td><td>1</td></tr>
+<tr><td>cell-002 / late</td><td>no_update</td><td>output_truncated</td><td>9.8</td><td>4.4</td><td>7</td><td>0</td></tr>
+<tr><td>cell-003 / middle</td><td>full_rewrite</td><td>output_truncated</td><td>9.8</td><td>7.6</td><td>—</td><td>0</td></tr>
+<tr><td>cell-004 / early</td><td>no_update</td><td>output_truncated</td><td>10</td><td>7.4</td><td>—</td><td>0</td></tr>
+<tr><td>cell-005 / middle</td><td>selective_patch</td><td>completed</td><td>10</td><td>7.6</td><td>—</td><td>0</td></tr>
+<tr><td>cell-006 / early</td><td>selective_patch</td><td>completed</td><td>10</td><td>7.4</td><td>—</td><td>0</td></tr>
+<tr><td>cell-007 / late</td><td>full_rewrite</td><td>completed</td><td>10</td><td>10</td><td>0</td><td>0</td></tr>
+<tr><td>cell-008 / middle</td><td>budget_feedback</td><td>completed</td><td>9.8</td><td>9.8</td><td>—</td><td>0</td></tr>
+<tr><td>cell-009 / middle</td><td>no_update</td><td>completed</td><td>10</td><td>6.6</td><td>—</td><td>0</td></tr>
+<tr><td>cell-010 / early</td><td>budget_feedback</td><td>completed</td><td>10</td><td>6</td><td>—</td><td>0</td></tr>
+<tr><td>cell-011 / early</td><td>full_rewrite</td><td>output_truncated</td><td>10</td><td>8.4</td><td>—</td><td>0</td></tr>
+<tr><td>cell-012 / late</td><td>budget_feedback</td><td>completed</td><td>10</td><td>6.8</td><td>0</td><td>0</td></tr>
+</table><h2>恢复、保持与质量</h2>
+<p>恢复：LateNo Update对已删除search_symbols产生7次明确Unknown tool，其他三组0次。原Patch实际调用browse_module(query)，FR和budget_feedback改用现有文档路径/新增overview。后两组规避旧工具，不等于实测了query迁移分支。</p>
+<p>完成：原Patch/budget_feedback各3/3，NU/FR各1/3；Middle/Late各2/2、1/2、1/2。Early四组知识完全一致，完成差异不能归因于更新；不得将全部3阶段差异解释成适应因果效应。</p>
+<p>评分：四方法平均TF和ECS完全相同；候选平均PE7.5333略高于原Patch7.4667，但低于FR8.6667。Middle候选9.8高于原Patch7.6，Late候选6.8低于原Patch7.4。每格仅一次，不证明总体显著性或稳定胜出。</p>
+<p>保持：11/12条触达未变化Wikipedia并成功，合计23次调用；Middle No Update未使用Wikipedia。原Patch与候选各3条均调用search/readArticle各一次，且不修改其知识。这里测同任务内未变化能力，不能冒充独立unchanged-task retention。此前235保持证据仍单列。</p>
+<p>独立内容检查：12条均给出定义与具体SwiftUI状态示例，12个核心CounterView都通过加import SwiftUI后的本机Swift6.3.3类型检查；未运行app，也未验证全部片段。4条截断均已有主体内容，不能把高TF与截断共存一律写成judge错误。</p>
+<p>反证保留：Early候选的附加CardView从工具材料继承了类型错误；Late候选新增的List.onDelete写法也不正确。FR/SP还存在绝对化措辞和局部解释问题。没有证据支持“候选全面提高答案质量”或零缺陷；核心任务成功与附加错误分开陈述。</p>
+<p>随机与基础设施：Early候选browse_module一次超时；EarlyFR一次无效符号路径。无agent级网络终止、轮数耗尽或费用未知。工具超时影响PE但不是环境迁移造成的under/over-update。</p>
+<p>研究决定：保留budget_feedback作为已评估的选择性方法，记录其局部完成收益与质量反例；不按“每个片段完美/击败所有基线”自设课程门槛，也不宣布稳健双重改善或启动81/108确认。下一项只处理尚未解决的无关知识over-update证据边界。</p>
+<table><tr><th>方法</th><th>Middle−Early TF</th><th>Late−Early TF</th><th>更新tokens</th><th>更新秒</th><th>更新USD</th><th>Agent+judge USD</th></tr>
+<tr><td>selective_patch</td><td>+0.000</td><td>-0.200</td><td>0</td><td>0.022</td><td>0.00000000</td><td>0.028209156</td></tr>
+<tr><td>no_update</td><td>+0.000</td><td>-0.200</td><td>0</td><td>0.000</td><td>0.00000000</td><td>0.033217356</td></tr>
+<tr><td>full_rewrite</td><td>-0.200</td><td>+0.000</td><td>5546</td><td>7.080</td><td>0.00187308</td><td>0.036781716</td></tr>
+<tr><td>budget_feedback</td><td>-0.200</td><td>+0.000</td><td>0</td><td>0.030</td><td>0.00000000</td><td>0.028104312</td></tr>
+</table><p>所有Early知识精确K0；Early输出差异属于随机波动，不能解释为适应收益。变化后相对Early的差值也受这个波动影响。这里的Wikipedia保持是同一任务中的未变化能力；原task235保持任务仍在原独立cohort中，不拼成新的匹配样本。</p>
+<h2>方法、公平性和限制</h2><p>base模型和快照不变，DigitalOcean唯一后端，无fallback；agent温度0、4096输出tokens、12轮、900秒，judge同一原协议、5个首次有效槽。预算反馈方法仍是原实现：精确差异更新受影响记录，保留不变记录，再加入当前必需参数、必要工作/结果复用、预算规则和适用冻结探针观察。本案例没有适用的旧探针观察，因此没有把新探测或任务答案注入知识。</p>
+<p>Full Rewrite重新构建完整目标目录，模型改写全部15条Middle/Late描述；schemas、routing、output schema和usage rules取目标元数据。并非每个字段由LLM自由生成。本次补上可选updater供应商固定和统一记账；不使用这些新设置的历史默认行为仍受回归测试保护，旧结果不改。</p>
+<p>本轮每格单次、一个补充任务；不能宣称显著性、稳定胜出或泛化。原公开MCP服务访问实时Wikipedia/Swiftipedia，内容和响应时间可能变化；完整观察与时间均归档。Swift检查包含全部围栏片段语法解析及12个核心CounterView、两项疑点的本机类型检查；不执行生成代码，不证明全部片段、iOS SDK兼容或运行正确。省略类型/回调的教学片段、API签名不自动当成完整app的编译错误。</p>
+<p>全部请求已知费用US$0.128198580（updater$0.00187308，预检$0.00001296），未知费用0项；115个API请求，含更新的账本跨度548.3秒。总费用和轨迹额度未设置上限，记录仍完整。</p>
+<h2>课程失败分析缺口</h2><p>No Update调用旧工具是stale-knowledge局部失败，不能改称Selective Patch under-update。既有受控缺参案例保留；先前相关evaluate规则对照仍不足以确认over-update。新离线提案把真实Swiftipedia迁移时的无关Wikipedia路由误改作为受控故障，原scope/routing验证器会拒绝它，故若执行必须标注guard消融；目前只是方案，不冒充已运行的失败轨迹。TA问题草稿未发送。</p>
+<h2>逐格原评分与审阅</h2>
+<details><summary>cell-001 · late · selective_patch</summary><p>TF [10, 9, 10, 10, 10]；PE [8, 5, 6, 8, 10]</p><p>完整结束；先用browse_module的新query找到state/binding，再取overview/batch。无工具错误。一般定义、state驱动与imperative closures的限定均清楚；核心CounterView通过类型检查。其他含省略模型/回调的教学片段不按完整app验收。</p></details>
+<details><summary>cell-002 · late · no_update</summary><p>TF [10, 10, 10, 9, 10]；PE [5, 2, 5, 5, 5]</p><p>7次调用已删除search_symbols，4次在第1轮，3次在第2轮，其中只有2次参数完全重复。其后改用现有路径检索并给出大量有效内容；结尾在句中截断。局部stale-knowledge失败confirmed，不能把截断全部因果归于工具删除，也不是Selective Patch under-update。</p></details>
+<details><summary>cell-003 · middle · full_rewrite</summary><p>TF [10, 10, 10, 10, 9]；PE [8, 7, 7, 9, 7]</p><p>一般解释与具体代码主体已交付；在Sources链接中截断。正文称state→view never view→state，又说明Binding写回；此绝对措辞与后文冲突。纯度/不会有同步bug等保证过强。核心CounterView通过类型检查，不能把终态截断等同核心任务完全失败。</p></details>
+<details><summary>cell-004 · early · no_update</summary><p>TF [10, 10, 10, 10, 10]；PE [8, 8, 7, 6, 8]</p><p>Early精确K0，已有定义、Counter、列表删除、绑定等核心内容；ViewBuilder补充段句中截断。正常完成失败不是适应差异证据。原TF10保留；不能说没有任务产出。</p></details>
+<details><summary>cell-005 · middle · selective_patch</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 5, 7, 8, 8]</p><p>Middle原Patch完整结束，8次工具调用无错误。state/Binding/列表/修饰符示例足够；Celsius/Fahrenheit文字方向反了但代码关系正确。核心CounterView通过类型检查。PE9.8候选对7.6原Patch来自judge均值，不是已证明的语义质量差距。</p></details>
+<details><summary>cell-006 · early · selective_patch</summary><p>TF [10, 10, 10, 10, 10]；PE [8, 6, 6, 7, 10]</p><p>Early精确K0，完整结束。将Swift if/else称为不是runtime branching instruction不准确；前一个有@State的Counter又被文字称为无自身state，随后才给出let count版本。主体解释和状态示例仍存在，核心示例类型检查通过。不能把这些错误归于适应。</p></details>
+<details><summary>cell-007 · late · full_rewrite</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 10, 10, 10, 10]</p><p>LateFull Rewrite完整结束，无旧工具或工具错误，PE10。两个parse失败是明确展示的API declaration签名，不能当成完整代码语法错误。可编辑字符串例用可变self作为identity，后文又提醒该做法有问题；绝对无同步bug的说法过强。核心CounterView通过类型检查。</p></details>
+<details><summary>cell-008 · middle · budget_feedback</summary><p>TF [10, 10, 9, 10, 10]；PE [10, 10, 9, 10, 10]</p><p>Middle候选完整结束，6次调用均成功。定义、state/UI关系、VStack/Button/Counter/Binding/Form例覆盖原要求；UIKit片段明确标作illustrative。核心Counter通过类型检查。没有找到足以否定核心任务的错误；这不证明所有代码运行正确或与其他答案的质量差异显著。</p></details>
+<details><summary>cell-009 · middle · no_update</summary><p>TF [10, 10, 10, 10, 10]；PE [7, 6, 6, 5, 9]</p><p>MiddleNo Update完整结束，无工具错误，原TF10。正文与示例覆盖要求；var body含...是明显占位示意，parse失败不当成损坏完整实现。核心CounterView通过类型检查。</p></details>
+<details><summary>cell-010 · early · budget_feedback</summary><p>TF [10, 10, 10, 10, 10]；PE [4, 5, 5, 8, 8]</p><p>Early候选精确K0，browse_module一次TimeoutError后继续并正常完成。核心CounterView通过类型检查。附加CardView的()-&gt;some View存储属性无initializer，类型检查失败；该代码确实在取回的ViewBuilder材料中，属于来源错误传递，非候选更新规则造成。</p></details>
+<details><summary>cell-011 · early · full_rewrite</summary><p>TF [10, 10, 10, 10, 10]；PE [8, 10, 7, 9, 8]</p><p>EarlyFull Rewrite同为K0，猜测padding路径返回Symbol not found；仍给出定义和多项具体示例，最后在心理模型段句中截断。核心CounterView通过类型检查；不能将Early失败归于Full Rewrite重写。</p></details>
+<details><summary>cell-012 · late · budget_feedback</summary><p>TF [10, 10, 10, 10, 10]；PE [7, 5, 8, 7, 7]</p><p>Late候选完整结束，7次工具调用成功，直接取已知文档路径，未实际用browse.query。主体说明与Counter例有效；附加...伪代码将onDelete接在List上。补齐最小上下文后类型检查失败，移到ForEach后通过；原取回材料是在ForEach上，属生成时误改。保持原TF10，不能称零缺陷或全面优于原Patch。</p></details>
+<h2>证据与复现</h2><p>
+<a href="../results/evidence/tool-migration-pilot-20261031/trial-verification.json">trial-verification.json</a> ·
+<a href="../results/evidence/tool-migration-pilot-20261031/quality-review.json">quality-review.json</a> ·
+<a href="../results/evidence/tool-migration-pilot-20261031/artifact-checks.json">artifact-checks.json</a> ·
+<a href="../results/evidence/tool-migration-pilot-20261031/typecheck-examples.json">typecheck-examples.json</a> ·
+<a href="../results/evidence/tool-migration-pilot-20261031/judge-audit.json">judge-audit.json</a> ·
+<a href="../results/evidence/tool-migration-pilot-20261031/coverage-touch.json">coverage-touch.json</a> ·
+<a href="../results/evidence/tool-migration-pilot-20261031/runtime-environment.json">runtime-environment.json</a> ·
+<a href="../results/evidence/tool-migration-pilot-20261031/raw-trial.tar.gz">raw-trial.tar.gz</a> ·
+<a href="../results/evidence/tool-migration-pilot-20261031/reproduction.json">reproduction.json</a> ·
+<a href="../results/evidence/coverage-audit-20261031/selection-audit.json">覆盖选择依据</a> · <a href="../results/evidence/routing-fault-proposal-20261031/plan.json">未执行的诊断提案</a> · <a href="../HANDOVER.md">HANDOVER</a></p>
+<pre>python3 results/evidence/tool-migration-pilot-20261031/verify_trial.py</pre>
+<p>归档SHA-256：ea10b0d11d776670d79adf5f0c822d471788cd87c7850a7609c80fc22eddd32e。冻结源码eae035e；课程主报告/PDF/Slides保持原有快照，新结果作为独立附录。</p></main></html>

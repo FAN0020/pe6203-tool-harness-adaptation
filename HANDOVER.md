@@ -1,6 +1,6 @@
 # PE6203 交付交接 · 2026-10-31
 
-**最新授权：用户要求“请不要设置上限和额度限制，以完成任务为优先目标”。后续研究按证据继续，不设总费用/轨迹额度；保持逐条记账、公平执行设置及历史证据。下文各轮限额及等待批准的表述仅描述当时状态。最新已完成协议：`experiments/evidence-scope-v1.json`；不含部署授权。**
+**最新授权：用户要求“请不要设置上限和额度限制，以完成任务为优先目标”。后续研究按证据继续，不设总费用/轨迹额度；保持逐条记账、公平执行设置及历史证据。下文各轮限额及等待批准的表述仅描述当时状态。最新已完成协议：`experiments/tool-migration-v1.json`，12条均已归档；不含部署授权。**
 
 课程交付已冻结。四条获批诊断已经结束；PE +0.5 和历史 promotion gates 不属于课程要求。后续新增的完成率 / 任务质量研究另列在文末；文末获批的 12 条试验已执行并归档，总费用 US$0.1572164470；**授权已用完，不自动扩展实验或部署**。课程验收仍需组内审阅及 TA 澄清，不以策略胜出为条件。
 
@@ -147,3 +147,19 @@ python3 results/evidence/budget-contract-20261031/verify_trial.py
 - **后续先查原因：**规则重复/长度、参数契约落实、输出与轮次预算；不继续叠加同类泛化提示。课程27条/PDF/Slides仍冻结。TA问题及研究目标尚未解决；本轮阴性，不可写成已找到稳健策略。最新授权允许必要研究继续，无需按旧额度逐轮询问，仍不部署。
 
 离线复核：`python3 results/evidence/evidence-scope-pilot-20261031/verify_trial.py`。
+
+### 最新：真实工具删除覆盖补充（12条已完成，未证明全面质量胜出）
+
+这是按发布版mutation覆盖选择的task430，不是修改旧任务或按成绩挑成功；没有新增策略。`search_symbols`在Late删除，其查询功能迁到`browse_module.query`。仍用既有budget_feedback，与原Patch、No Update、Full Rewrite三阶段各一次对照。四组Early均精确K0；新任务在开发历史之后选入，不是受保护的独立测试集。
+
+- **结果：**原Patch/budget_feedback各3/3正常完成，NU/FR各1/3；四组TF均9.9333、ECS总体9.8391/样本9.8179。PE分别7.4667、7.5333、6.1333、8.6667。Late旧工具调用NU为7，其他为0；只有原Patch实际调用新query，候选/FR使用其他可用文档入口。完整逐格结果见`reports/tool-migration-results.html`。
+- **质量与限制：**12条核心CounterView都通过本机Swift类型检查；4条截断均已有主体答案，高TF不自动构成judge错误。候选Early从来源继承错误CardView，Late把onDelete放在List上；独立核查确认，原评分不改。Early差异不能归于适应；本轮单任务/单次且实时公开内容，不能宣称稳定双重改善、所有基线胜出或泛化。旧各轮负结果继续有效。
+- **费用和公平：**115请求=51 agent+60 judge+2 updater+2预检；实际全部DigitalOcean，同一model、decoding和judge。总$0.128198580，未知0；账本跨度548.25秒。FR更新5546tokens/$0.00187308/7.080秒；选择性方法0更新模型tokens/$0。本次只新增可选updater后端固定与统一记账，FR仍重建全目录、LLM改写全部15条描述，其他结构字段从目标元数据复制。新代码不能倒推旧实验已用相同设置。
+- **证据：**`results/evidence/tool-migration-pilot-20261031/`含490文件原始包、源码eae035e包、逐文件hash、独立verify_trial.py、quality-review、judge-audit、coverage-touch、类型检查与环境/复现信息。原始包SHA256 `ea10b0d11d776670d79adf5f0c822d471788cd87c7850a7609c80fc22eddd32e`；47冻结输入执行后无漂移。执行前341离线测试通过/13integration排除。新报告浏览器已核对；未部署、未修改主27/PDF/共享Slides。
+- **课程缺口状态：**Tool删除现在有补充实测，但不要把同任务Wikipedia保持当成独立retention或替换原235。No Update stale-tool失败不是Patch under-update。原受控缺参机制仍confirmed，课程适用性待TA；旧over-update对照仍相关，不能认定无关知识损害。
+- **最小下一项已有具体方案：**`results/evidence/routing-fault-proposal-20261031/plan.json`及两份knowledge，只把无关Wikipedia.readArticle的routing.tool_name改成read_article。原验证器明确拒绝该修改（scope-guard-check.json）；若执行，只能标为受控故障注入/guard消融，不是自然候选失败。拟2条agent、10个judge槽及2次同参数公开只读replay，预计$0.02–0.08、2–6分钟，均为估算而非上限。当前未运行此诊断；先明确此有限机制演示是否值得补入课程，不因研究未赢就启动81/108或继续追加通用提示规则。TA问题已写在plan中，未发送。
+- **验收解释：**课程不要求每个附加片段完美、显著胜出、PE+0.5或自然失败；也不能因不要求赢就声称研究双重改善已证实。可提交透明的混合结果。若目标仍是稳健提高完成与质量，当前证据尚不足，明确保留此未完成结论。
+
+本轮已无运行中的模型实验。当前研究仅在`codex/completion-quality-study`本地归档提交；没有新增main push。原课程main交付状态不变。
+
+零模型离线复算：`python3 results/evidence/tool-migration-pilot-20261031/verify_trial.py`。

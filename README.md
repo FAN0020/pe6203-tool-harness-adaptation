@@ -24,6 +24,7 @@
 - **完成率 / 质量后续试验**：[获批 12 条结果](reports/completion-quality-results.html)：两组均完成 4/6，候选未晋级；总费用 $0.157216447，无未知项。与课程主矩阵分开。 [六条预算规则试验](reports/budget-contract-results.html)也已获批完成：两组均完成3/3，新候选 TF/PE 更低，不晋级；费用 $0.089010216；以上均为历史轮次。
 - **最新补充对照**：[9条新增＋3条复用](reports/matched-existing-results.html)：候选完成6/6、TF9.8；原Patch完成2/6、TF9.4。新费用 $0.151974408；两批次且候选仍有代码/总结错误，未通过质量检查，不晋级。当前授权与下一步见 HANDOVER。
 - **最新规则试验**：[6条证据边界对照](reports/evidence-scope-results.html)：新候选完成1/3，对照2/3；TF9.6对9.8，不晋级。费用$0.107351724，历史结果保留。
+- **工具删除补充验证**：[task430 的12条三阶段对照](reports/tool-migration-results.html)：原Patch/budget_feedback均正常完成3/3，NU/FR各1/3，平均TF均9.9333。旧工具失败7次对0次；候选仍有附加代码错误，不能称全面提高质量。费用$0.128198580，未知0；独立复算和原始证据已归档，与27条主实验分开。
 - **旧课程试验**：[A/B 的 54 条记录](reports/experiment-readiness.html)，与 v1.3 分开，不回填或混算。
 
 ## 使用
