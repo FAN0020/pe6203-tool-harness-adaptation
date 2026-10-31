@@ -1,0 +1,25 @@
+{
+  "verified": true,
+  "prior_probe_calls": 24,
+  "reordered_probe_calls": 14,
+  "model_calls": 0,
+  "model_usd": 0,
+  "cause": "set_page wraps content in its ownfrontmatter. Multiplebodypages canpersist insideonerecord. apply_theme usesupdateSlideFrontmatter which splits thatrecord andretains onlyparts[1], droppingfollowingpages. load_slidev beforetheme separatesstoredrecords so themeupdatesonly firstpage.",
+  "verified_sequence": [
+    "Freshcreate_slidev withonecover",
+    "set_page(index0, layoutcover, content=firstpagebody then explicit per-slide frontmatter/body blocks); do not includea leadingwhole-documentfrontmatter incontent",
+    "load_slidev sameproject toseparaterecords",
+    "apply_theme dark",
+    "get_all_slides returns3 correctpages; subsequentload preservesfilebytes"
+  ],
+  "counterexample": "v1 immediateapply_theme leftonlyfirstbodycanary; full-documentcontent lostallcanaries. All24failedpathprobe calls retained.",
+  "stage_agreement": "Middle/Late finalfiles byte-identical. Both retainexact3canaries once androotdarktheme aftersecondload.",
+  "render_acceptance": "Samefile rendered3pages withvisiblecorrectcanaries,darkbackgroundrgb15,23,42; all3screenshots inspected. Noexternalassets intheseprobes.",
+  "scope_limits": [
+    "Freshone-coverproject only; doesnotclearotherpages inexistingdeck.",
+    "Onlythesmall3pageMarkdownformattested, notarbitraryMarkdownHTMLorlongdeck.",
+    "Thisisaboundedtool-serialization/ordering mechanism, notproof ofagentcompletion/qualityimprovement.",
+    "Inheritedwriterbehavior linkedtochangedbulkcustom-contentgap; notclaimnewwriterchange introducedbybenchmark."
+  ],
+  "next": "Freeze an independently defined document-sequence candidate andsamequalitygatesbeforemodelcomparison; no taskfacts inupdater andno lowerdeliverablerequirements."
+}

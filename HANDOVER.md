@@ -12,7 +12,16 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：artifact_contract 开发对照已结束并淘汰，Goal继续
+### 当前最新断点：文档写入顺序新机制已通过合成探测，待冻结新候选
+
+- 下节artifact_contract已淘汰，不能重跑。随后仅做新的本地序列化探测：`experiments/slidev-document-write-probes-v1.json`在`4cdb2c3`冻结24调用；其后按源码定位的丢页原因，在`9eb8b38`冻结v2的14调用。共38本地工具调用+4catalog、模型费0，两个正负路径全部保留。
+- 已证明：`set_page`会自动添加页frontmatter；把完整文档头放进content会制造空页。多页正文可以一次写入文件，但它暂时仍是内存中的单个记录；**紧接apply_theme会把后续页丢掉**，因为`updateSlideFrontmatter`仅保留split的parts[1]。
+- 正确的已实测路径仅限新建单封面项目：set_page(0, first-page正文+后续页显式frontmatter/正文) → **load_slidev拆分记录** → apply_theme(dark)。Middle/Late均得到恰好3页、3个canary各一次、根主题dark；再次load文件字节不变。两阶段最终文件hash一致，真实渲染3页均正确/深色/可读。
+- 可复核证据：`results/evidence/slidev-document-write-probes-v2-20261101/mechanism-review.json`、`state-checks.json`、`render-dom.json`、3截图与`probe-and-source.tar.gz`；v1负路径在`results/evidence/slidev-document-write-probes-20261101/`。归档hash已核验。**不要重跑这些probe**。
+- 下一步：基于这一具体写入/重载/主题顺序，先冻结不同的新候选及知识差异，再做一次6条开发对照。建议仍用457Middle/Late与235Late、同模型供应商/预算/5judge、同产物质量门槛；不能用合成3页成功冒充真实15分钟演示成功。知识只含工具行为和合成格式，不含论文事实。还未实现新updater、未启动新agent实验，Goal未完成。
+- 适用边界：只验证新项目及短3页Markdown；不保证清除既有其他页、任意HTML/长文档，不能声称writer行为是新增漂移。可将其作为变化bulk能力需要真实内容时的受影响写入路径，但必须明确这是继承限制/跨工具依赖。
+
+### 已结束的上一轮：artifact_contract 开发对照淘汰，Goal继续
 
 - 当前六条批次已正常结束，session48967退出0；30次评分齐全，PDF服务与渲染服务已关闭。**不要重启本候选或按旧运行中记录续跑**。6份盲化审阅在`554e7b4`冻结后才揭示方法/TF/PE。
 - task457变化任务：正常完成两组均0/2；必需产物全项均0/2。原SP TF4.0/PE6.6，候选TF2.0/PE6.0。235两组均完成/TF10/PE10，但摘要均有事实错误，全项均0/1。开发门槛失败，不进入36条验证。
