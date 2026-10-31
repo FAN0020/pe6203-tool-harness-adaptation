@@ -197,3 +197,10 @@ python3 results/evidence/budget-contract-20261031/verify_trial.py
 - **待外部确认：**TA是否接受受控under/over-update及保护结构的FR解释；团队姓名/分工、10分钟排练和正式提交记录仍需用户/团队确认。问题草稿未发送。旧main交付已经完成，当前研究分支的新增结果尚未要求推送。
 
 零API复算：`python3 results/evidence/daily-migration-pilot-20261031/verify_trial.py`；`check_artifacts.py`、`coverage_touch.py`、`audit_judge_context.py`均从归档读取，不触发模型或服务。
+
+
+### 当前：既有方法定点复核（执行前冻结）
+
+上一轮为progress：task90及judge可见性审计已归档。此次不开发新候选；按最新无总额度授权，固定budget_feedback与原SP，重复283Middle的既有完成/产物收益，同时保留133Late安全建议与235Late图表保持两个不利条件。协议`experiments/existing-method-recheck-v1.json`，配置`configs/existing-method-recheck-v1.json`，共6个预先指定格、30评分槽，预计$0.10–0.30/5–12分钟，均非上限。12轮/4096tokens等只作为两方法相同的执行条件。
+
+`results/evidence/existing-method-recheck-20261031/preexecution-review.json`确认六份知识与旧matched-existing对应快照逐字解析相同，235两份精确K0，无updater调用。此复核检验观察的可重复性，不把旧成功视为普遍胜出，也不要求每句附加内容完美；原质量rubric保留。结束后汇总所有正负cohort，再决定是否需要其他研究，不低分重跑直到赢。课程27/PDF/Slides和历史评分不改，不部署或push。
