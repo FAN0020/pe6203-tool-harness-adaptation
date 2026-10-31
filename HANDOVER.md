@@ -20,6 +20,7 @@
 
 ### 当前最新断点：discovery_contract 两批独立验证已淘汰；继续寻找不同机制
 
+- 闭环提交`32da2d3`后新增有边界源码复核：`results/evidence/mechanism-screening-20261101/post-discovery-required-path-screen.json`，27源码hash、8项判断，原生/agent/judge新增调用均0。Draw.io预设/复制、Smart Reviewer摘要、Bilibili未传递过滤、WHOIS raw、AIM邻域、Mermaid可选config、ntfy通知、Playwright代码生成均未建立新必需完成路径，具体理由保留。尚无新候选或实验进程；不是穷尽性证明。下一定向入口可查MagicUI过滤和Saleskit工作流与原题的必要联系。
 - 36/36 evaluated、180/180 judge完整，runner70532退出0；PDF HTTP27070及报告HTTP66095均已关闭，浏览器已关闭。全部36份逐属性盲审在`9a117d2`冻结提交后才揭示方法/分数。**不要重跑或调参本候选**；Goal仍活动，双重改善未成立。
 - A批变化任务候选完成6/6对SP5/6、core均0/6、TF7.4667对9.9333；保持完成均3/3、core候选0对SP1、TF均10。B批候选完成5/6对SP6/6、core均0/6、TF9.8对9.9333；保持完成3/3、core0/3、TF10相等。两批均未通过事前严格双改善门槛；不能用合并后均11/12或PE替代。
 - 机制确有行为触发差异：SP4/12变化单元调用故障`list-popular-libraries`，候选0/12；但这4条SP全部自行恢复并正常完成。避免故障不等于完成/质量改善。论文主问题为把相似开源工具错误写成RT-2直接实现、超出来源的能力/历史断言、未执行的DSML写入文本。图表原生值正确，最终文字仍有算术/排序错误或无依据归因。全部原判定/unknown保留；同K0保持差异没有适应因果解释。
