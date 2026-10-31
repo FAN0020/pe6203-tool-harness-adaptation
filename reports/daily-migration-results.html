@@ -1,0 +1,79 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PE6203 · 每日题工具迁移</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#182437;background:#f5f7fa;margin:auto;max-width:1150px;padding:28px}main{background:white;padding:34px;border-radius:12px}h1{font-size:30px;line-height:1.3}h2{font-size:22px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;text-align:left;border-bottom:1px solid #d9e0e8;vertical-align:top}th{background:#eef3f8}a{color:#175da8}code,pre{font-size:13px;overflow-wrap:anywhere}pre{white-space:pre-wrap;background:#eef3f8;padding:12px}.note{border-left:4px solid #b57d13;padding:12px 16px;background:#fff8e7}.scroll{overflow-x:auto}summary{cursor:pointer;font-weight:600;margin-top:12px}.small{font-size:14px;color:#526074}@media(max-width:650px){body{padding:10px}main{padding:18px}}</style><main>
+<h1>实时信息获取：task90 补充对照</h1>
+<p class="note">工具迁移恢复了实时题目获取；本轮四方法均正常结束，未观察到budget_feedback相对原Patch的完成率提升。</p>
+<p>2026-10-31 · 原任务要求查询青眼白龙的详情、取回图片，再告知当天LeetCode每日题。Early/Middle/Late × 四个已有方法 × 1次，共12条轨迹和60个原协议评分。没有开发新变体；原27条课程主实验及其他开发结果保持不变。</p>
+<h2>问题与设计</h2><p>这个案例要求取得实时每日题，减少凭模型已有知识完成回答的可能。Late删除get_daily_challenge，把入口迁入get_problem(daily=true)。选择来自官方变化记录与服务可用性核查，未根据本轮分数更换任务。该任务的公开历史答案曾在过宽读取中暴露，当前每日题也在服务探测中被读取；本轮明确为已暴露开发扩展，不能称保护测试。上述答案均未送入updater或agent。</p>
+<p>卡牌搜索在Middle/Late存在参数变化，不能把整个卡牌任务当作不变任务。get_card_by_id和get_card_image的契约三阶段不变，提供同任务内的保持证据；task235的不变任务实验仍单独报告。</p>
+<h2>原始评分独立复算</h2><div class="scroll"><table><tr><th>方法</th><th>正常结束</th><th>TF</th><th>PE</th><th>ECS 总体SD</th><th>ECS 样本SD</th></tr>
+<tr><td>selective_patch</td><td>3/3</td><td>10.0000</td><td>9.8000</td><td>10.0000</td><td>10.0000</td></tr>
+<tr><td>no_update</td><td>3/3</td><td>8.9333</td><td>8.6667</td><td>7.4248</td><td>7.0858</td></tr>
+<tr><td>full_rewrite</td><td>3/3</td><td>9.9333</td><td>9.6000</td><td>9.8391</td><td>9.8179</td></tr>
+<tr><td>budget_feedback</td><td>3/3</td><td>10.0000</td><td>9.3333</td><td>10.0000</td><td>10.0000</td></tr>
+</table></div><p>ECS＝三阶段TF均值−标准差。总体SD使用n＝3，样本SD使用n−1＝2，分别展示发布代码与论文附录口径。正常结束不等于所有用户要求都已满足；5份judge评分也不等于5次agent执行。</p>
+<table><tr><th>Cell / 阶段</th><th>方法</th><th>终态</th><th>TF</th><th>PE</th><th>Late旧入口调用</th><th>daily=true调用</th></tr>
+<tr><td>cell-001 / late</td><td>selective_patch</td><td>completed</td><td>10</td><td>10</td><td>0</td><td>1</td></tr>
+<tr><td>cell-002 / late</td><td>no_update</td><td>completed</td><td>6.8</td><td>6.6</td><td>2</td><td>0</td></tr>
+<tr><td>cell-003 / middle</td><td>full_rewrite</td><td>completed</td><td>9.8</td><td>8.8</td><td>—</td><td>0</td></tr>
+<tr><td>cell-004 / early</td><td>no_update</td><td>completed</td><td>10</td><td>9.4</td><td>—</td><td>0</td></tr>
+<tr><td>cell-005 / middle</td><td>selective_patch</td><td>completed</td><td>10</td><td>10</td><td>—</td><td>0</td></tr>
+<tr><td>cell-006 / early</td><td>selective_patch</td><td>completed</td><td>10</td><td>9.4</td><td>—</td><td>0</td></tr>
+<tr><td>cell-007 / late</td><td>full_rewrite</td><td>completed</td><td>10</td><td>10</td><td>0</td><td>1</td></tr>
+<tr><td>cell-008 / middle</td><td>budget_feedback</td><td>completed</td><td>10</td><td>8.8</td><td>—</td><td>0</td></tr>
+<tr><td>cell-009 / middle</td><td>no_update</td><td>completed</td><td>10</td><td>10</td><td>—</td><td>0</td></tr>
+<tr><td>cell-010 / early</td><td>budget_feedback</td><td>completed</td><td>10</td><td>9.4</td><td>—</td><td>0</td></tr>
+<tr><td>cell-011 / early</td><td>full_rewrite</td><td>completed</td><td>10</td><td>10</td><td>—</td><td>0</td></tr>
+<tr><td>cell-012 / late</td><td>budget_feedback</td><td>completed</td><td>10</td><td>9.8</td><td>0</td><td>1</td></tr>
+</table><h2>任务事实、恢复与保持</h2>
+<p>12/12条均正常结束、都取得正确卡牌记录和ID89631139的JPEG（64,036bytes，全部SHA相同）。这确认抓取保持，不证明图片在原CLI或浏览器中已经展示。</p>
+<p>11/12条取得并准确写出2026-10-31每日题3665 / Twisted Mirror Path Count。唯一缺失是No Update Late：旧工具两次not found，一次为重试，最终诚实披露。三种更新方法均用daily=true成功；实际所需事实恢复可以从原始返回核对。</p>
+<p>SP与budget_feedback三阶段TF均10、ECS均10；NU均TF8.9333、总体ECS7.4248。所有方法正常结束均3/3。因此这是实时内容恢复证据，不是本轮正常结束率收益。</p>
+<p>原SP平均PE9.8、FR9.6、budget_feedback9.3333、NU8.6667。FR Late只用三次调用；其余正常条件多为四次。judge对于search后再get_card_by_id究竟必要还是冗余意见不一致，不应把细小PE差值作强策略排名。</p>
+<p>budget_feedback Middle误把setcode221写为卡片密码，原始卡牌ID为89631139；核心ID/ATK/DEF仍正确。SP Middle给题目额外加了起始向右方向。其他方法也有未获返回支持的趣闻或图片展示断言，不隐藏这些反例，也不要求每句附加内容完美才承认实时检索恢复。</p>
+<p>官方judge对每条工具消息只保留前1000字符。完整返回中的difficulty、stats、hints均位于其后，judge因此看不到。缺少judge可见证据与agent没有检索证据是不同问题；原始评分不改。</p>
+<table><tr><th>方法</th><th>Middle−Early TF</th><th>Late−Early TF</th><th>更新tokens</th><th>更新秒</th><th>更新USD</th><th>Agent＋judge USD</th></tr>
+<tr><td>selective_patch</td><td>+0.000</td><td>+0.000</td><td>0</td><td>0.049</td><td>0.00000000</td><td>0.051026112</td></tr>
+<tr><td>no_update</td><td>+0.000</td><td>-3.200</td><td>0</td><td>0.000</td><td>0.00000000</td><td>0.048857856</td></tr>
+<tr><td>full_rewrite</td><td>-0.200</td><td>+0.000</td><td>11842</td><td>13.270</td><td>0.00392868</td><td>0.049285752</td></tr>
+<tr><td>budget_feedback</td><td>+0.000</td><td>+0.000</td><td>0</td><td>0.061</td><td>0.00000000</td><td>0.049101228</td></tr>
+</table><p>所有Early条件均精确K0；其输出差异不能归因于适应方法。恢复差值还受单次Early随机波动影响。此处指标不与其他cohort混算。</p>
+<h2>公平性与限制</h2><p>模型固定为deepseek/deepseek-v4.1-flash-1017，实际供应商固定DigitalOcean，无fallback；agent温度0、4096输出tokens、12轮、900秒。所有方法同任务、执行器和原judge协议。没有总费用/轨迹额度，但单次执行条件保持一致。调用中断、未知费用或评分错误不会被替换成成功结果。</p>
+<p>Selective Patch保留不变记录，只更新差异与依赖影响范围；budget_feedback继续使用已有的必要工作、证据复用和预算规则，没有加入本任务答案。Full Rewrite重建全部目标记录并用模型改写26条描述，schema、routing、output schema和usage rules取目标目录。Middle描述被改写为中文，Late保留混合语言；这是已披露的生成差异，不能把比较解释为纯更新范围消融。</p>
+<p>执行器原样保存MCP图片块，但把base64序列化为JSON文本传入模型；没有视觉理解或自动浏览器渲染。独立检查图片字节、卡牌ID、原始题目日期与最终事实，不能宣称已验证所有客户端里的展示。公网数据及每日题会变，未来重跑不保证返回完全相同内容。</p>
+<p>本轮请求100次，已知费用US$0.202212588，未知0项；其中更新$0.00392868、预检$0.00001296。账本首尾跨度309.3秒，包含更新与人工审查间隔，不等于纯API计算时间。费用来自响应，未另核账户账单。</p>
+<h2>失败分析与研究结论</h2>
+<p>相对No Update，本轮观察到明确的任务内容恢复，且未损害卡牌详情/图片获取。此结论仅限该已暴露任务的一次三阶段对照，不能宣称普遍或统计显著优势。</p>
+<p>没有证据把budget_feedback晋级为全面优于原Selective Patch：本轮两者正常结束与TF相同，预算规则未消除额外细节误标，平均PE反而较低。旧匹配开发对照中的完成/TF收益和后续反例同时保留。</p>
+<p>与task430的正常结束改善证据互补，但两个cohort不混算、不替换133/235/283或27条课程主实验。它们支持选择性适应能在特定工具迁移中恢复能力；不支持新规则必然改善所有任务质量。</p>
+<p>No Update旧工具失败不是Selective Patch under-update。局部机制与课程方法失败类型仍分开；受控缺参与无关路由消融、旧负例继续作为明确分类的失败分析材料。</p>
+<p>本次12条与原协议评分已经结束。下一步优先整合现有结果和评分可见性说明，不因未赢所有baseline而自动扩展或修改原评分。</p>
+<p>课程失败案例仍需区分：<a href="routing-fault-results.html">无关路由受控诊断</a>确认局部损害，原受控缺参案例确认参数拒绝；均不是正常updater自然失误。课程是否接受guard消融和局部损害仍待TA确认。旧提示性案例与负结果完整保留。</p>
+<h2>逐格审阅与原始评分</h2>
+<details><summary>cell-001 · late · selective_patch</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 10, 10, 10, 10]</p><p>正确取回卡牌详情、匹配ID的JPEG及当日题目；四次调用无错误。难度、统计和hints均在完整返回中。图片已在上方显示的说法没有本执行器渲染证据；额外英文卡文/人物背景不由本次返回支持。</p></details>
+<details><summary>cell-002 · late · no_update</summary><p>TF [6, 7, 7, 8, 6]；PE [8, 7, 8, 5, 5]</p><p>卡牌详情和图片成功。旧get_daily_challenge总共调用两次（一次初始、一次重试），均Tool not found；最终诚实说明无法取得当日题目，未猜答案。正常结束不能掩盖这项请求未完成。附加牌组限额说明没有返回依据。</p></details>
+<details><summary>cell-003 · middle · full_rewrite</summary><p>TF [10, 10, 10, 9, 10]；PE [7, 10, 10, 7, 10]</p><p>卡牌与每日题核心事实成功；四次调用。Red-Eyes...er,Blue-Eyes为自我纠正的玩笑，实际ID/名称正确。TF9.8来自一个judge给9，不能据此证明Full Rewrite产生了实际检索退化。</p></details>
+<details><summary>cell-004 · early · no_update</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 10, 7, 10, 10]</p><p>核心卡牌、图片和每日题均成功。额外“只需一次Tribute”等卡牌规则未在返回中给出，本审阅不借未经核查的常识把它判为已验证。Early精确K0，不能归因方法。</p></details>
+<details><summary>cell-005 · middle · selective_patch</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 10, 10, 10, 10]</p><p>卡牌和每日题核心事实正确；图片实际取回。题目总结增加“starts...heading right”，原题仅允许向右或向下，后续又列两个DP分支；属于不受原文支持的附加限定。用户仅问每日题是什么，不能将此附加表述混作每日题未取回。</p></details>
+<details><summary>cell-006 · early · selective_patch</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 7, 10, 10, 10]</p><p>核心卡牌详情与每日题事实一致，完整图片取回。日期用了非ASCII连字符，但含义一致，不能因字符串检测未命中判失败。Early方法知识相同。</p></details>
+<details><summary>cell-007 · late · full_rewrite</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 10, 10, 10, 10]</p><p>Full Rewrite Late用search_cards返回的完整记录满足详情要求，随后获取图片与daily题目，共三次调用；省略get_card_by_id不构成缺失。称图片高分辨率并已展示未由执行器验证。</p></details>
+<details><summary>cell-008 · middle · budget_feedback</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 7, 7, 10, 10]</p><p>核心ID、属性、攻击/守备值和每日题正确，图片成功；但把setcode221标为卡片密码，而实际卡牌ID为89631139，造成额外细节误标。未显示具体日期但Today标题对应实际同日返回，不判为没取得每日题。其他最高攻击力/图像外观趣闻没有本次返回依据。</p></details>
+<details><summary>cell-009 · middle · no_update</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 10, 10, 10, 10]</p><p>卡牌和当天题目核心事实成功，原始记录含难度、统计、hints；四次调用。图片附件已展示的表述未获执行器验证。</p></details>
+<details><summary>cell-010 · early · budget_feedback</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 10, 7, 10, 10]</p><p>核心卡牌和每日题信息均与返回一致，图片真实取回；这里只声称已获取图片，没有声称浏览器已显示。Early精确K0，不能视作预算规则改善。</p></details>
+<details><summary>cell-011 · early · full_rewrite</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 10, 10, 10, 10]</p><p>核心事实成功、原始图片取回、题目完整链接与日期正确；简洁总结。图片已出现在上方的说法未验证。Early属于同知识随机输出。</p></details>
+<details><summary>cell-012 · late · budget_feedback</summary><p>TF [10, 10, 10, 10, 10]；PE [10, 10, 9, 10, 10]</p><p>核心卡牌、正确图片、当日题目与链接成功，四次调用。Medium/统计/hints都有完整返回支持；原始judge只看部分返回。已作为附件显示的表述未获执行器证据。</p></details>
+<h2>证据与复现</h2><p>
+<a href="../results/evidence/daily-migration-pilot-20261031/trial-verification.json">trial-verification.json</a> · 
+<a href="../results/evidence/daily-migration-pilot-20261031/quality-review.json">quality-review.json</a> · 
+<a href="../results/evidence/daily-migration-pilot-20261031/artifact-checks.json">artifact-checks.json</a> · 
+<a href="../results/evidence/daily-migration-pilot-20261031/judge-audit.json">judge-audit.json</a> · 
+<a href="../results/evidence/daily-migration-pilot-20261031/judge-context-audit.json">judge-context-audit.json</a> · 
+<a href="../results/evidence/daily-migration-pilot-20261031/coverage-touch.json">coverage-touch.json</a> · 
+<a href="../results/evidence/daily-migration-pilot-20261031/postrun-freeze.json">postrun-freeze.json</a> · 
+<a href="../results/evidence/daily-migration-pilot-20261031/raw-trial.tar.gz">raw-trial.tar.gz</a> · 
+<a href="../results/evidence/daily-migration-pilot-20261031/raw-manifest.json">raw-manifest.json</a> · 
+<a href="../results/evidence/daily-migration-pilot-20261031/source-manifest.json">source-manifest.json</a> · 
+<a href="../results/evidence/daily-migration-pilot-20261031/reproduction.json">reproduction.json</a> · 
+<a href="../results/evidence/daily-migration-readiness-20261031/readiness.json">服务核查</a> · <a href="../HANDOVER.md">HANDOVER</a></p>
+<pre>python3 results/evidence/daily-migration-pilot-20261031/verify_trial.py</pre>
+<p>原始归档SHA-256：11484dcaf903b5601c02fbb5b26d40e6c5c0ec661411783654e24d3d40d5b5e1。源码52abbcf；本附录未替换课程PDF和共享Slides。</p></main></html>

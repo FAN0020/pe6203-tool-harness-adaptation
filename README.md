@@ -26,6 +26,7 @@
 - **最新规则试验**：[6条证据边界对照](reports/evidence-scope-results.html)：新候选完成1/3，对照2/3；TF9.6对9.8，不晋级。费用$0.107351724，历史结果保留。
 - **工具删除补充验证**：[task430 的12条三阶段对照](reports/tool-migration-results.html)：原Patch/budget_feedback均正常完成3/3，NU/FR各1/3，平均TF均9.9333。旧工具失败7次对0次；候选仍有附加代码错误，不能称全面提高质量。费用$0.128198580，未知0；独立复算和原始证据已归档，与27条主实验分开。
 - **无关知识故障补充**：[两条路由受控诊断](reports/routing-fault-results.html)：仅改错未变化的Wikipedia路由，直接重放与agent均证实读取损害；两组仍完成任务。正常验证器能拒绝该故障，不能称自然方法失败。$0.021366768、未知0，课程是否接受仍待TA确认。
+- **实时信息恢复补充**：[task90 的12条三阶段对照](reports/daily-migration-results.html)：四方法均正常结束3/3；原Patch/预算反馈TF均10，No Update为8.9333（Late漏取每日题），全部图片抓取成功。$0.202212588、未知0；未证明预算反馈胜过原Patch。新增审计区分官方1000字符截断与judge误判，原评分不变。
 - **旧课程试验**：[A/B 的 54 条记录](reports/experiment-readiness.html)，与 v1.3 分开，不回填或混算。
 
 ## 使用

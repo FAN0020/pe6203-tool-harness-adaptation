@@ -1,6 +1,6 @@
 # PE6203 交付交接 · 2026-10-31
 
-**最新授权：用户要求“请不要设置上限和额度限制，以完成任务为优先目标”。后续研究按证据继续，不设总费用/轨迹额度；保持逐条记账、公平执行设置及历史证据。下文各轮限额及等待批准的表述仅描述当时状态。最新已完成主对照：`experiments/tool-migration-v1.json`，12条已归档；另完成2条无关路由受控诊断（文末）。不含部署授权。**
+**最新授权：用户要求“请不要设置上限和额度限制，以完成任务为优先目标”。后续研究按证据继续，不设总费用/轨迹额度；保持逐条记账、公平执行设置及历史证据。下文各轮限额及等待批准的表述仅描述当时状态。最新已完成：`experiments/daily-migration-v1.json` 的12条实时信息对照；另有12条Swift工具迁移和2条无关路由诊断（文末）。不含部署授权。**
 
 课程交付已冻结。四条获批诊断已经结束；PE +0.5 和历史 promotion gates 不属于课程要求。后续新增的完成率 / 任务质量研究另列在文末；文末获批的 12 条试验已执行并归档，总费用 US$0.1572164470；**授权已用完，不自动扩展实验或部署**。课程验收仍需组内审阅及 TA 澄清，不以策略胜出为条件。
 
@@ -178,3 +178,22 @@ python3 results/evidence/budget-contract-20261031/verify_trial.py
 - **数据边界提醒：**一次过宽的官方任务打印暴露了9/24/72/90的原答案/轨迹（未送入updater、agent或judge，也未因此选择/执行新实验）。今后这些只能标为已暴露开发案例；选任务时只读取idx/question/servers/tool_calls字段，勿再整条打印。潜在下一项是先离线评估90的真实每日题工具删除及其公开服务依赖，保留现有133/235/283/430；若不可运行或无法辨别恢复，不执行。不要为更容易得到阳性而丢弃旧任务或失败。
 
 独立离线复核：`python3 results/evidence/routing-fault-check-20261031/verify_trial.py`。
+
+
+### 最新：task90 实时信息迁移对照与评分可见性审计
+
+本目标回合为 **progress**：先完成无关路由诊断归档（51136de），再以官方删除记录为依据核查并执行task90。没有新增策略，没有因费用额度停止，也没有启动81/108确认矩阵。当前所有进程均已正常结束，无待执行模型请求。
+
+- **冻结方案：**`experiments/daily-migration-v1.json`。原任务/完整server set，Early/Middle/Late × NU/FR/原SP/budget_feedback ×1，共12条、60个评分。源码52abbcf（44ecdb2加入两个公开服务启动profile）；没有改策略、执行器、评分器。实际模型/供应商、解码、预算相同；源配置47项执行后核验。全部费用经同一不限额账本记录。
+- **结果：**四方法正常结束均3/3。SP TF10/PE9.8/ECS总体10；BF 10/9.3333/10；FR 9.9333/9.6/9.8391；NU 8.9333/8.6667/7.4248。样本SD口径同时披露。所有Early精确K0；不能把其差异解释成更新收益。Late NU两次调用已删除get_daily_challenge（仅一次重试）并最终披露无法取得；另外三方法用get_problem(daily=true)成功。
+- **独立事实：**12/12均取得正确卡牌详情及相同64,036-byte JPEG；11/12取得并正确标识2026-10-31每日题3665/Twisted Mirror Path Count。这里是实时内容恢复，而不是正常结束率改善。图片只被执行器保存并作为base64 JSON文本供模型/评分器处理，没有自动展示或视觉理解的验证。BF Middle把setcode221误标为卡片密码，原SP Middle有附加方向限定；趣闻和“图片已经显示”等未支持说法均保留。
+- **成本：**100请求＝36agent＋60judge＋2updater＋2preflight，全部DigitalOcean；$0.202212588，未知0。更新FR11,842 tokens/$0.00392868/13.270s，SP/BF零更新tokens/API费用。账本首尾309.34s包含审查间隔；另有5次公开只读服务探测、零模型费用。无账户账单复核。
+- **评分解释更正：**官方`truncate_tool_content(...,max_length=1000)`截断每条工具观察；daily的difficulty/stats/hints被截掉。独立重建每条观察，与保存的judge-original-prompt逐字匹配。此前routing故障中Form/Section/Picker/Slider/NavigationStack/onDelete也在截断区外。因此旧“judge遗漏已返回资料”必须进一步区分为**评分协议没有展示这些资料**；不能据此指责judge漏读已见文本。旧raw/评分/evidence-review快照均未改，routing HTML加入显式解释更正。计数错误（两次总调用说成两次重试）仍是独立可确认问题。
+- **覆盖：**新`coverage-touch.json`逐项区分环境变化、任务相关、实际调用。Late同时触达Tool删除及Parameter/Description迁移；不能分离三者的独立因果。Middle hints新增未触达，get_problem描述变化不是该阶段完成任务的必要步骤。卡牌搜索有参数变化，仅详情/图片两个契约作为不变能力保持；原task235独立保持任务不混入此cohort。
+- **证据：**`results/evidence/daily-migration-pilot-20261031/`含492文件原始包、42文件源码包、独立复算、产物事实、12份答案审阅、60份TF/PE理由审阅、coverage、judge可见性重建及复现说明。raw SHA256 `11484dcaf903b5601c02fbb5b26d40e6c5c0ec661411783654e24d3d40d5b5e1`。服务核查在`results/evidence/daily-migration-readiness-20261031/`。首次临时离线检查漏载dotenv，CLI因缺少审查记录拒绝执行，未产生agent/judge调用；修复加载后继续，拒绝日志保留。
+- **可读入口：**`reports/daily-migration-results.html`；原routing报告增加解释更正。当前仅在`codex/completion-quality-study`本地提交，未推送main、部署、修改课程PDF/共享Slides或发送TA问题。
+- **仍不能宣称：**BF全面优于原SP、统计显著、广泛泛化或自然updater失败。task90曾暴露原答案/轨迹，当前事实也做过公开可用性探测，明确为开发扩展；这些答案没有进入updater/agent。FR Middle将描述译成中文，也已在执行前审阅中披露。与task430证据互补，不能静默混算或替换原133/235/283与27条主实验。
+- **优先下一步：**汇总已有方法的收益与反例，并把两个迁移附录、无关路由受控机制及评分可见性限制整合进交付材料；先处理这些离线工作，再判断是否确有新实验必要。无需为“未在每个指标胜过所有baseline”继续扩展。课程未要求统计晋级、每句附加内容完美或自然失败；也不能只凭满分把用户的完成率/质量研究目标标成达成。是否采用BF作为最终方法，应依据跨cohort证据和明确的适用范围，而非择优展示本轮。
+- **待外部确认：**TA是否接受受控under/over-update及保护结构的FR解释；团队姓名/分工、10分钟排练和正式提交记录仍需用户/团队确认。问题草稿未发送。旧main交付已经完成，当前研究分支的新增结果尚未要求推送。
+
+零API复算：`python3 results/evidence/daily-migration-pilot-20261031/verify_trial.py`；`check_artifacts.py`、`coverage_touch.py`、`audit_judge_context.py`均从归档读取，不触发模型或服务。
