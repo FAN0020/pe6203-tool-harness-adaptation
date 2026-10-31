@@ -27,6 +27,7 @@
 - 四个生成图像URL按冻结协议事后只取一次，均HTTP403；图像可读性unknown，不计pass，也不等于原生生成失败；没有换客户端/重试/改URL或重画图回填。SP Middle示例缺状态变量/导入且图像Markdown漏右括号；候选Late错报11种样式（实际10种）；其他Card示例正确。全部原判定及限制保留。
 - 235均完成1/1、core0/1、PE10；候选TF9.4对SP10。两份图表数值均正确，摘要遗漏月度下降；知识同K0，不作适应因果解释。候选同时未满足保持TF门槛。
 - 报告`reports/native-media-contract-pilot.html`；离线`python3 results/evidence/native-media-contract-pilot-20261101/verify_trial.py`。257原始文件、121源码文件与全部冻结hash已核验；52请求（20agent+30judge+2preflight）$0.049647696，未知0，188.31851秒；更新模型calls/tokens/USD0，ECS不适用。当前无本轮模型/MCP进程。
+- 后续只读筛查已保存`results/evidence/mechanism-screening-20261101/post-media-source-screen.json`与`required-tool-registration-screen.json`。注册名正则只找到已实测task90旧每日题删除；会漏掉Swiftipedia条件过滤，不能称穷尽。复用了原task430/90报告，没有重跑。VoltAgent入口完整diff未建立新必需阻塞机制，没有新增原生/模型日程。
 - 下一步找**必需工作**的不同机制，优先检查工具删除/重命名及必要语义迁移；不要继续改此候选或重复task57到赢。图像证据路径需要未来独立合成验证，不能回填本轮unknown。Context7/Swiftipedia/HeroUI等尚未完整审完，筛选不穷尽。保留原分支所有文件，无push/部署/外发消息。
 
 ### 已归档前置：图标样式过滤缺陷和原生替代接口已复现
