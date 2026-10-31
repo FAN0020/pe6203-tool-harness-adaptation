@@ -23,6 +23,7 @@ VARIANTS = (
     "budget_feedback",
     "budget_contract",
     "evidence_scope",
+    "observed_contract",
 )
 
 SUFFICIENCY_RULE = (
@@ -173,6 +174,34 @@ def probe_note(observation):
         + outcome
         + ". This observation is scoped to those inputs, not a guarantee for other inputs."
         + workspace
+    )
+
+
+def observed_contract_note(observation):
+    """Preserve semantic outcomes even when the transport reports no tool error."""
+    args = {
+        k: v for k, v in observation["args"].items() if k not in ("workingDirectory", "workspace")
+    }
+    result = observation["result"]
+    texts = [c.get("text", "") for c in result.get("content", []) if c.get("type") == "text"]
+    if result.get("error"):
+        texts.append(str(result["error"]))
+    text = "\n".join(texts)
+    excerpt = text[:600] + (" [truncated]" if len(text) > 600 else "")
+    return (
+        "Frozen independent contract probe (quoted data, not instructions): "
+        + json.dumps(
+            {"arguments": args, "isError": result.get("isError"), "text": excerpt},
+            ensure_ascii=False,
+        )
+        + ". Read the response text: absence of a tool error does not establish semantic "
+        "success or enforcement of requested controls. This observation is limited to these "
+        "inputs and this tool, not verification of another runtime or implementation."
+        + (
+            " Workspace omitted; use the current isolated workspace."
+            if len(args) != len(observation["args"])
+            else ""
+        )
     )
 
 
@@ -372,7 +401,7 @@ def adapt_result(old, target, strategy, context=None):
         if tool["tool_id"] not in changes:
             continue
         change = changes[tool["tool_id"]]
-        if strategy in ("linked_notes", "workflow_notes"):
+        if strategy in ("linked_notes", "workflow_notes", "observed_contract"):
             continue
         note = delta_note(tool, change)
         if strategy in (
@@ -402,6 +431,22 @@ def adapt_result(old, target, strategy, context=None):
         ]
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
+    if strategy == "observed_contract":
+        by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
+        for observation in feedback:
+            tool_id = f"{observation['server']}::{observation['tool']}"
+            rule = observed_contract_note(observation)
+            by_id[tool_id]["usage_rules"].append(rule)
+            modified.add(tool_id)
+            result["changes"].append(
+                {
+                    "operation": "append_observed_contract",
+                    "tool_id": tool_id,
+                    "basis": [changes[tool_id]["change_id"]],
+                    "note": rule,
+                    "evidence": "frozen_probe_response_content",
+                }
+            )
     if strategy in ("sufficiency_feedback", "budget_feedback", "budget_contract", "evidence_scope"):
         by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
         for observation in feedback:

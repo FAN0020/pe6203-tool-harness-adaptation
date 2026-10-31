@@ -1,0 +1,133 @@
+{
+  "id": "observed-contract-v1",
+  "status": "mechanism_and_acceptance_frozen_before_implementation_and_agent_execution",
+  "objective": "Test whether preserving semantic tool outcomes in selective knowledge updates improves normal completion and required artifact correctness compared with original Selective Patch.",
+  "champion": "selective_patch",
+  "candidates": [
+    "observed_contract"
+  ],
+  "model_config": "configs/observed-contract-v1.json",
+  "updater_config": "configs/daily-migration-updater-v1.json",
+  "feedback_probes": "experiments/observed-contract-probes-v1.json",
+  "mechanism": {
+    "cause": "Metadata advertises validation controls which the released handler does not enforce. Existing probe_note discards successful response content, including semantic errors with isError=false.",
+    "intervention": "Base selective patch plus verbatim bounded input/output probe observations only on changed tools with observations. No generic budget, sufficiency, task decomposition, security implementation or score advice; metadata/routing unchanged.",
+    "updater_inputs": "Only stage-specific tool metadata and frozen independent safe probes; no task/question/answer/judge input.",
+    "scope": "133 Middle/Late affected validate_syntax. 235 unchanged. 283 persistence APIs do not have a relevant changed contract for recent failure modes; keep its prior negative evidence, no purported fix.",
+    "uncertainty": "Evidence supports a knowledge omission, not that correcting it will improve completion. LLM behavior must be measured."
+  },
+  "development": {
+    "tasks": [
+      133,
+      235
+    ],
+    "stages": [
+      "middle",
+      "late"
+    ],
+    "task_stage_pairs": [
+      [
+        133,
+        "middle"
+      ],
+      [
+        133,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "observed_contract"
+    ],
+    "repeats": 1,
+    "opaque_cell_ids": true
+  },
+  "validation_schedule": {
+    "split": "Fresh executions on a predeclared already-exposed task subset; independent from pilot outcomes; not unseen-task generalization.",
+    "blocks": 2,
+    "repeats_per_block_per_condition": 3,
+    "task_stage_pairs": [
+      [
+        133,
+        "middle"
+      ],
+      [
+        133,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "observed_contract"
+    ],
+    "knowledge": "Freeze exact candidate from pilot, byte-identical in validation. No tuning, selection or low-score reruns.",
+    "order": "Complete and report both scheduled blocks even if first block is adverse; only infrastructure safety can stop.",
+    "total_validation_trajectories": 36
+  },
+  "quality_cases": [
+    {
+      "task_id": 133,
+      "properties": [
+        {
+          "id": "validation",
+          "required": "Provide meaningful expression validation, correctly interpret returned text, and distinguish syntax validity from actual evaluation and Python runtime/security verification."
+        },
+        {
+          "id": "guidance",
+          "required": "Provide usable Python-focused OWASP-related security recommendations: restricted inputs/allowed operations, avoid executing untrusted text as Python, and bound resource use. Do not claim that ignored tool flags establish these controls."
+        },
+        {
+          "id": "implementation_consistency",
+          "required": "Any code recommended as the solution must handle stated benign arithmetic and enforce its declared restrictions; do not use tool checks as proof that generated code was run. No code is required by the task if actionable recommendations suffice."
+        }
+      ],
+      "review": "Use actual calls/observations/final answer. Static AST inspection of generated Python; never execute untrusted generated code. Any unestablished required property is unknown, not pass. Additional nonessential prose is not a new requirement."
+    },
+    {
+      "task_id": 235,
+      "properties": [
+        {
+          "id": "charts",
+          "required": "Three requested chart types returned successfully with source values, ordering, provinces/categories and monetary units preserved."
+        },
+        {
+          "id": "summary",
+          "required": "Any substantive final claim about these data matches the inputs; source totals if stated are exact."
+        }
+      ],
+      "review": "Frozen question and actual chart payloads; rendering remains unknown for both arms and is not added as a requirement."
+    }
+  ],
+  "evaluation": {
+    "normal_completion": "Runner execution_status==completed; truncation/max_rounds/error are not normal even if TF high.",
+    "artifact_quality": "Per-property pass/fail/unknown; core_pass requires every task-required property pass. Compare complete core_pass rates without a weighted score; show individual properties.",
+    "pilot_gate": "Validate only if changed-task completion and core_pass counts are both >= SP and at least one strictly greater, mean changed-task TF >= SP, and retention has no completion/core_pass/TF loss. Else reject this candidate without rerunning it until it wins.",
+    "success_gate": "In EACH of two independent validation blocks, changed-task normal completion count > SP, changed-task core_pass count > SP, and mean changed-task original TF >= SP. Retention completion/core_pass counts and mean TF >= SP in each block. Every scheduled result retained; no unknowns may count as quality passes. No requirement to win every cell or baseline.",
+    "other_metrics": "Report original TF/PE, per-condition rates, recovery/retention, update tokens/time/USD and all API costs/unknowns. ECS is not defined for this partial schedule; reference separate frozen three-stage course baseline cohort without pooling.",
+    "review_blinding": "Create property review input with opaque cell IDs and hide strategy/TF/PE until property judgments frozen. Same rubric in pilot and validation. Five judges are ratings, not executions.",
+    "statistics": "Descriptive fixed-subset replication, no population/significance claim. Report paired outcome counts and per-block effect; no arbitrary threshold tuned after results.",
+    "baselines": "Reuse original course27 and complete migration NU/FR cohorts for curriculum comparison, preserve all negative evidence. Do not substitute those scores as concurrent pilot controls."
+  },
+  "fairness": {
+    "model_provider": "Unchanged pinned DigitalOcean and model from existing-method-recheck-v1",
+    "decode": "temperature0,4096 output tokens,12rounds,900s; unchanged five first-valid judge slots with original1000-character observation truncation",
+    "other": "Same task/server set, opaque fresh workspace paths and order randomized in complete repeat blocks. Only tool knowledge differs."
+  },
+  "authorization": {
+    "approved": true,
+    "source": "Current user /goal and HANDOVER New Goal text",
+    "total_cost_limit_usd": null,
+    "total_trajectory_cap": null,
+    "deployment": false,
+    "push": false
+  },
+  "stop_rule": "One fixed pilot; failed candidate rejected. Research goal remains active until dual reproducible improvement. New mechanisms require separate preregistration."
+}

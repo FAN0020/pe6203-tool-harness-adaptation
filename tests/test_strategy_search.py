@@ -8,6 +8,42 @@ import pytest
 from pe6203.benchmark import write_json
 
 
+def test_prepare_freezes_the_specified_probe_evidence_not_the_historical_default(
+    tmp_path, monkeypatch
+):
+    from pe6203 import strategy_search
+
+    def prepare_without_live_catalogs(root, output, *args):
+        output.mkdir()
+        return {"files": {}}
+
+    # Catalog collection starts real subprocesses; test the subsequent evidence boundary.
+    monkeypatch.setattr(strategy_search, "prepare", prepare_without_live_catalogs)
+    spec = {
+        "model_config": "config.json",
+        "updater_config": "updater.json",
+        "feedback_probes": "new-probes.json",
+        "development": {
+            "tasks": [133],
+            "stages": ["late"],
+            "strategies": ["selective_patch"],
+            "repeats": 1,
+        },
+    }
+    new = {"observations": [{"frozen": "new semantic response evidence"}]}
+    for name, data in [
+        ("spec.json", spec),
+        ("config.json", {}),
+        ("updater.json", {}),
+        ("new-probes.json", new),
+        ("experiments/feedback-probes-v1.json", {"observations": []}),
+    ]:
+        write_json(tmp_path / name, data)
+    plan = strategy_search.prepare_search(tmp_path, tmp_path / "out", "spec.json", "development")
+    assert json.loads((tmp_path / "out/feedback.json").read_text()) == new
+    assert "new-probes.json" in plan["files"]
+
+
 def test_search_matrix_uses_real_strategy_ids_and_complete_repeat_blocks():
     from pe6203.strategy_search import cells_for
 

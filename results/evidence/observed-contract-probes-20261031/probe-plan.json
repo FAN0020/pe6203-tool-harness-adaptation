@@ -1,0 +1,86 @@
+{
+  "id": "observed-contract-probes-v1",
+  "status": "frozen_before_probe",
+  "mechanism": "New validation controls are accepted by the dispatcher, while handleValidateSyntax reads only expression. Existing probe_note hides successful content and treats isError=false as generic success, losing semantic refusals and absent advertised detail.",
+  "scope": "Only math-mcp validate_syntax, safe syntax parsing; no evaluation, no generated Python, no model calls, no task answers or judge feedback.",
+  "cases": [
+    {
+      "id": "ordinary",
+      "args": {
+        "expression": "7+5",
+        "allow_variables": false
+      }
+    },
+    {
+      "id": "malformed",
+      "args": {
+        "expression": "7+",
+        "allow_variables": false
+      }
+    },
+    {
+      "id": "variable_denied",
+      "args": {
+        "expression": "q+1",
+        "allow_variables": false
+      }
+    },
+    {
+      "id": "variable_allowed",
+      "args": {
+        "expression": "q+1",
+        "allow_variables": true
+      }
+    },
+    {
+      "id": "detail",
+      "args": {
+        "expression": "7+5",
+        "allow_variables": false,
+        "detailed": true
+      }
+    },
+    {
+      "id": "power_caret",
+      "args": {
+        "expression": "2^3",
+        "allow_variables": false
+      }
+    },
+    {
+      "id": "power_python",
+      "args": {
+        "expression": "2**3",
+        "allow_variables": false
+      }
+    },
+    {
+      "id": "depth_one",
+      "stages": [
+        "late"
+      ],
+      "args": {
+        "expression": "sin(sin(1))",
+        "allow_variables": false,
+        "max_depth": 1
+      }
+    },
+    {
+      "id": "ast_requested",
+      "stages": [
+        "late"
+      ],
+      "args": {
+        "expression": "7+5",
+        "allow_variables": false,
+        "show_ast": true
+      }
+    }
+  ],
+  "stages": [
+    "middle",
+    "late"
+  ],
+  "acceptance": "Preserve all outputs; compare positive/negative content and control toggles; never treat a small safe syntax probe as safety proof. No edits to upstream service.",
+  "planned_calls": 16
+}

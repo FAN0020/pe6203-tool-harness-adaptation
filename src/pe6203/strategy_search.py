@@ -96,7 +96,8 @@ def prepare_search(root, output, spec_path, phase, candidate=None, round_number=
         f"{c['task_id']}-{c['version']}-{c['strategy']}": f"adaptations/{c['task_id']}-{c['version']}-{c['strategy']}/adaptation.json"
         for c in cells
     }
-    write_json(output / "feedback.json", read_json(root / "experiments/feedback-probes-v1.json"))
+    feedback_path = root / spec.get("feedback_probes", "experiments/feedback-probes-v1.json")
+    write_json(output / "feedback.json", read_json(feedback_path))
     plan["files"].update(
         freeze_files(
             root,
@@ -104,7 +105,7 @@ def prepare_search(root, output, spec_path, phase, candidate=None, round_number=
                 root / spec_path,
                 root / spec["model_config"],
                 root / spec["updater_config"],
-                root / "experiments/feedback-probes-v1.json",
+                feedback_path,
                 output / "feedback.json",
             ],
         )

@@ -38,6 +38,64 @@ def changed():
     return target
 
 
+def test_observed_contract_preserves_semantic_error_text_even_without_tool_error():
+    # Losing content here turns a semantic rejection into a false success cue.
+    observations = [
+        {
+            "stage": "late",
+            "server": "server",
+            "tool": "lookup",
+            "args": {"query": "7+", "mode": False},
+            "result": {
+                "isError": False,
+                "content": [{"type": "text", "text": "Syntax errors: Expected expression"}],
+            },
+        },
+        {
+            "stage": "late",
+            "server": "server",
+            "tool": "lookup",
+            "args": {"query": "q+1", "mode": False},
+            "result": {
+                "isError": False,
+                "content": [{"type": "text", "text": "Expression is syntactically valid."}],
+            },
+        },
+    ]
+    knowledge, changes, cost = adapt(
+        catalog(), changed(), "observed_contract", {"feedback": observations}
+    )
+    rules = "\n".join(knowledge["tools"][0]["usage_rules"])
+    assert "Syntax errors: Expected expression" in rules
+    assert "Expression is syntactically valid." in rules
+    assert '"mode": false' in rules and '"query": "q+1"' in rules
+    assert knowledge["tools"][0]["parameters"] == changed()["tools"][0]["parameters"]
+    assert knowledge["tools"][1] == catalog()["tools"][1]
+    assert cost["calls"] == 0
+    assert len([c for c in changes if c["operation"] == "append_observed_contract"]) == 2
+
+
+def test_observed_contract_ignores_other_stages_and_unchanged_tool_feedback():
+    observations = [
+        {
+            "stage": stage,
+            "server": "server",
+            "tool": name,
+            "args": {"query": "sentinel"},
+            "result": {
+                "isError": False,
+                "content": [{"type": "text", "text": "Do not import this observation"}],
+            },
+        }
+        for stage, name in [("middle", "lookup"), ("late", "unrelated")]
+    ]
+    knowledge, _, _ = adapt(catalog(), changed(), "observed_contract", {"feedback": observations})
+    original, _, _ = adapt(catalog(), changed(), "selective_patch")
+    assert knowledge == original
+    early, _, cost = adapt(catalog(), catalog(), "observed_contract", {"feedback": observations})
+    assert early == catalog() and cost["calls"] == 0
+
+
 def test_delta_notes_surface_new_required_contract_and_preserve_unrelated_record():
     old, target = catalog(), changed()
     old_copy, target_copy = deepcopy(old), deepcopy(target)
