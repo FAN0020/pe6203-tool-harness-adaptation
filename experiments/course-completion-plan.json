@@ -1,0 +1,114 @@
+{
+  "schema_version": "course-completion-plan-1",
+  "as_of": "2026-10-31",
+  "runnable_config": false,
+  "status": "awaiting_user_approval_before_any_new_experiment",
+  "objective": "完成可复现、可辩护的课程项目；最低可行实验 → 离线验证与交付 → 有理由且获批才扩展。",
+  "authority": "用户最新请求优先。原 brief 是要求来源，论文是方法与指标来源；历史优化计划不再驱动执行。",
+  "sources": {
+    "brief": "/Users/fanysmacpro/Documents/Graduate_learning/PE6203-BoAn/group_project/PE6203 Group Project 4 - Tool Harness Adaptation under Environment Change.docx",
+    "brief_sha256": "6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d",
+    "paper": "https://arxiv.org/html/2607.14642v1",
+    "paper_sections": ["6.1: TF/PE/ECS", "6.3: error taxonomy and optional agent modules", "D.1: five ratings and ECS convention"],
+    "pause_audit": "results/evidence/course-completion-20261031/pause-audit.json",
+    "reuse_audit": "results/evidence/course-completion-20261031/reuse-audit.json"
+  },
+  "execution_policy": {
+    "new_experiments_authorized": false,
+    "automatic_search": false,
+    "automatic_confirmation_108": false,
+    "automatic_expansion": false,
+    "new_patch_variants": false,
+    "default_course_repeats": 1,
+    "cli_note": "CLI retains configurable repeat counts; its existing prepare default is 3, so reproduction commands must explicitly pass --repeats 1. This document does not launch or alter a frozen plan.",
+    "approval_scope": "任何新增模型调用、补评分、连接探测、诊断、重跑、任务或重复数扩展，先列具体单元、时间、费用和证据增益，再获用户批准。",
+    "vpn": "用户已关闭此前启用的 VPN。它可能影响连接，但未证明是根因；不因此作废有效轨迹或自动重跑。",
+    "preservation": "原轨迹、评分、失败、未知费用和冻结配置不可覆盖。新的审计/说明另存；失败请求费用未知不能填零。"
+  },
+  "minimum_matrix": {
+    "source": "results/raw/course-v1.3-final-20261031",
+    "suite": "experiments/benchmark-v1.3.json",
+    "stages": ["early", "middle", "late"],
+    "strategies": ["no_update", "full_rewrite", "selective_patch"],
+    "repeats": 1,
+    "tasks": [
+      {"id": 133, "purpose": "数学表达式验证与安全建议；变化任务", "coverage": "Middle PARAM；Late PARAM + TOOL 新增；allow_variables 在 Late 成为必填。"},
+      {"id": 283, "purpose": "分析看板项目拆解；变化任务", "coverage": "Middle/Late TOOL + PARAM + DESC；必需 create_project / sequentialthinking 变化。"},
+      {"id": 235, "purpose": "销售图表；未变化任务", "coverage": "三个阶段 28 条工具记录和相关行为不变；用于 retention。"}
+    ],
+    "planned": 27,
+    "existing_scored": 27,
+    "existing_rating_slots": 135,
+    "execution_status": {"completed": 20, "max_rounds": 5, "output_truncated": 2},
+    "new_main_trajectories_needed": 0,
+    "coverage_limit": "TOOL 是相关的可选新增，不覆盖必需工具重命名/删除，也不保证每条轨迹用了新增工具。brief 要求三类变化，不要求所有 11 种 mutation。保留限制即可，无须因此加任务。"
+  },
+  "freeze": {
+    "config": "configs/course-benchmark-v1.3.json",
+    "updater_config": "configs/course-updater.json",
+    "model_all_roles": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "OpenRouter",
+    "temperature": 0,
+    "agent_max_output_tokens": 4096,
+    "agent_max_rounds": 12,
+    "agent_runtime_seconds": 900,
+    "request_timeout_seconds": 120,
+    "tool_timeout_seconds": 30,
+    "http_retries": 1,
+    "updater_max_tokens": 16384,
+    "judge": "原 rubric，4096 输出 tokens、关闭 reasoning、JSON 输出、每条 5 个首次有效槽；每槽最多 2 次逻辑尝试，所有失败和费用保留。",
+    "provider_seed": false,
+    "task_and_catalog_hashes": "沿用已完成 v1.3 plan.json / plan.sha256，不重新挑选任务。",
+    "tool_selection": "三种方法均由同一 agent 选择工具、参数、下一步；只改变 harness 知识。候选 servers 沿用原任务。",
+    "method_limit": "Full Rewrite 重建结构并用 LLM 重写全部目标描述；Selective Patch 确定性更新受影响记录。范围与描述生成机制同时不同，不声称纯 scope 消融。"
+  },
+  "requirements": [
+    {"ref": "Problem / 4.1", "requirement": "可运行 adaptation pipeline、自研 Selective Patch", "status": "已满足", "evidence": "元数据差异与依赖闭包实现，真实 MCP/agent/judge 轨迹；v1.3 artifact-audit.json", "remaining": "报告解释方法和设计边界，无需新策略。"},
+    {"ref": "4.1", "requirement": "No Update 与 Full Rewrite 两个基线", "status": "已满足", "evidence": "No Update=K0；Full Rewrite 全部目标描述重写；27 条已有三方法对照", "remaining": "保留真实定义，不能宣称所有字段都由 LLM 生成。"},
+    {"ref": "Problem / 3.2", "requirement": "固定模型、解码、任务、judge；无微调或改标签", "status": "已满足", "evidence": "冻结 plan、原始任务与 rubric hash；artifact-audit.json；三方法共用 runtime", "remaining": "v1.2/v1.3/R1 分 cohort 展示，不混合成一次实验。"},
+    {"ref": "3.2", "requirement": "MCPEvol-Bench 固定且有说明的任务子集", "status": "已满足", "evidence": "133/235/283；benchmark-v1.3.json 记录选择理由、来源和 task hash", "remaining": "说明只有 3 个任务，283 与开发任务139共享服务，不宣称 leaderboard 或独立任务族泛化。"},
+    {"ref": "3.2", "requirement": "Early / Middle / Late 和 TOOL / PARAM / DESC", "status": "已满足（有限覆盖）", "evidence": "9 个 task-stage 单元，各比较三方法；catalog diff 与契约探针", "remaining": "明确 TOOL 只覆盖可选新增，不需要补满全部 mutation。"},
+    {"ref": "3.2", "requirement": "三次优先，计算受限可一次并披露", "status": "已满足", "evidence": "主实验每 cell 一次；每轨迹 5 次 judge 不是 5 次执行；R1 另有原三臂各3重复", "remaining": "正文披露一次和不确定性；不再自动补81/108条。"},
+    {"ref": "3.1 / 4.2", "requirement": "TF、PE、ECS 主结果", "status": "已满足", "evidence": "27/27、135/135；独立复算；ECS 同时保留发布代码 population 与论文附录 sample 口径", "remaining": "以 population 为主并附 sample，不能把高分写成全部执行正常完成。"},
+    {"ref": "4.2", "requirement": "Changed-task recovery", "status": "已满足（增益很小）", "evidence": "133/283 对同阶段 No Update；Selective Patch Middle ΔTF=0，Late +0.1", "remaining": "报告观察到的恢复及无增益，不要求正增益，更不要求赢全部基线。"},
+    {"ref": "4.2", "requirement": "Unchanged-task retention", "status": "已满足（单任务）", "evidence": "235 各阶段 TF=10；Selective 保留 K0；与 Early/同阶段对照 ΔTF=0", "remaining": "仍展示 PE 波动；不能宣称所有任务/浏览器图表渲染均无退化。"},
+    {"ref": "4.2", "requirement": "Update tokens / time / API cost", "status": "已满足", "evidence": "Full Rewrite 177974 tokens / 203.508秒 / $0.049176；Selective 0 tokens / 1.145秒 / $0；No Update 0", "remaining": "执行、judge、preflight、诊断单列；主实验另有一次未知费用请求。"},
+    {"ref": "4.2 / 4.3", "requirement": "至少一条 under-update 轨迹及分析", "status": "部分满足，严格 patch 例证仍缺", "evidence": "133 Late No Update 缺 allow_variables 被拒，补参后恢复；Selective 已正确更新。", "remaining": "可作为陈旧知识机制例证；不能冒充已观察到 Selective Patch 漏改。严格定义仍标缺口。"},
+    {"ref": "4.2 / 4.3", "requirement": "至少一条 over-update 轨迹及分析", "status": "未满足", "evidence": "历史235 Late Full Rewrite TF8.8/PE4.2是候选；6条回退诊断两臂均10/10，未证实无关重写造成伤害。", "remaining": "保留候选、反证和归因限制；不重跑相同6条来追求想要的结果。新的自然案例须有具体错误diff/轨迹链才提出定向诊断。"},
+    {"ref": "4.2", "requirement": "讨论何时帮助、何时失败、困难变化", "status": "素材齐全，需整合", "evidence": "参数修复、执行预算耗尽、冗余调用、judge漏检、上游缺陷、负诊断与成本结果", "remaining": "按证据强弱分级；模型/网络/发布包故障不自动归因到补丁。"},
+    {"ref": "4.1", "requirement": "配置、命令、原始日志可复现", "status": "实验材料已满足", "evidence": "已归档 raw-trial.tar.gz、冻结源码；断网/去凭据离线重算与终态恢复审计通过", "remaining": "最终提交前检查包的链接、来源、贡献与密钥排除；本次不上传。"},
+    {"ref": "4.3", "requirement": "10分钟展示 + 5分钟Q&A", "status": "未完成", "evidence": "已有结果网页和讲述提纲，无最终组内审阅和排练证据", "remaining": "制作/确认最终幻灯片、两类失败的诚实表述、10分钟排练及Q&A。"},
+    {"ref": "4", "requirement": "GitHub repo 或 Google Drive 提交", "status": "待最终打包与提交", "evidence": "本地仓库与归档可用", "remaining": "组内审核并由授权流程提交；不把计划完成等同已经提交。"}
+  ],
+  "reuse": [
+    {"cohort": "course-v1.3-final-20261031", "evidence": "27条 / 135评分", "use": "课程主结果，不重跑；20完成/5轮数耗尽/2截断都保留。"},
+    {"cohort": "course-v1.3 retention diagnostic", "evidence": "6条 / 30评分，两臂各3次", "use": "over-update 假设未证实的有效负结果；不能再把历史低分当作已证因果。"},
+    {"cohort": "selective-search-confirmation-r1-20261031", "evidence": "108条 / 540评分；其中原三方法81条已各有3次重复", "use": "独立的稳定性/敏感性附录，展示第四臂及负结果；无需新81/108条。模型、judge、任务一致；共享更新构建和源码版本不同，Full Rewrite 是另一组冻结描述，不与主实验拼表。"},
+    {"cohort": "research development v1.1 / v2.1 / v3", "evidence": "24 + 18 + 18 = 60条", "use": "方法探索与失败史、成功/失败例证；没有Early，不能补主实验ECS或当独立确认。"},
+    {"cohort": "historical course A / B", "evidence": "54条计划，26/27和24/27完整评分", "use": "旧测量协议和环境调试证据，保持原始缺失与分数，禁止补写/混算。"},
+    {"cohort": "confirmation R2 / R3", "evidence": "分别6/5已评分，各2连接失败，100/101未开始", "use": "部分轨迹和基础设施/费用证据；不计算完整确认结论，不自动恢复。"},
+    {"cohort": "generation rejections / frozen MCP probes / task139 pilots", "evidence": "生成拒绝原始响应、12个共享探针、历史smoke日志", "use": "工程与更新边界验证，费用独立；不冒充正式任务执行。"}
+  ],
+  "remaining_experiment_options": [
+    {"option": "推荐：现有主矩阵 + 离线交付", "new_trajectories": 0, "new_api_usd": 0, "runtime": "新增模型运行0分钟；预计离线整合/核验30–60分钟，展示制作和组内排练另约1–2小时", "gain": "完成结果、覆盖、成本、限制与复现材料；失败案例缺口仍诚实列出。", "approval": "离线审计/计划已授权；任何新增实验尚未获批。"},
+    {"option": "仅在缺口确需新实证时：两类错误各一组两臂诊断", "new_trajectories_upper_bound": 4, "new_judge_slots_upper_bound": 20, "matrix": "Under-update：1个具体遗漏的harness vs只修复该遗漏，1 task×1 stage×2 arms×1次；Over-update：1个具体无关损伤的harness vs只回退该改动，同样2条。若已有可严格复用的同协议控制臂可再减。", "precondition": "目前没有足够的自然 Selective under/over-update 证据来冻结这4条；不能现在启动。先提供具体字段diff、输入、预期可观测错误及来源，再请求批准。已做的235描述回退不重复。", "injection_boundary": "若只能人工遗漏参数/改动无关知识，必须明确标为受控故障注入诊断，与主benchmark隔离；需先确认这种案例是否可用于课程失败分析，不能假称自然失败或保证满足brief。此处未生成任何变体。", "estimated_usd": [0.03, 0.10], "proposed_review_ceiling_usd": 0.25, "runtime_minutes_expected": [5, 15], "runtime_review_threshold_minutes": 30, "cost_basis": "由已保存133/235的agent+5judge费用和时长外推，加诊断冗余余量；不是服务商报价或硬计费保证。若改用283需重新估计。", "gain": "检验一个具体知识改动与可观测错误的机制关系，不估计总体发生率或方法胜率。", "stop": "最多4条；无证据也停止，不为获得失败而追跑。连续两条连接失败、出现未知费用、或预计超预算/时间则暂停并报告；扩展再批准。", "approval": "必须另行批准具体可执行诊断，不因批准总体计划自动启动。"}
+  ],
+  "priority_plan": [
+    {"priority": 0, "action": "停止策略搜索并封存", "status": "已完成", "stop": "旧目标paused；无benchmark进程；诊断在请求间停止；R3/诊断归档及201个终态文件hash确认。"},
+    {"priority": 1, "action": "复用27条，离线验证全套指标和证据", "status": "已完成本次审计", "stop": "三任务×三阶段×三方法27个唯一cell；135评分可复算；恢复/保持/成本/终态分开，覆盖和限制明确。7个cohort共206条、1030评分、7714个终态文件已核验。"},
+    {"priority": 2, "action": "整合课程报告与案例证据表", "status": "计划待继续", "stop": "每个结论指向diff、调用、输出与终态；正负结果和unknown费用不遗漏；未证实原因显式保留。不给PE增益或获胜设置交付门槛。"},
+    {"priority": 3, "action": "关闭失败案例缺口", "status": "仍有缺口；新增实验待批准", "stop": "每类至少一条符合brief定义的有证据轨迹；若现有自然数据不足则报告未满足，先确定是否采用透明诊断/向TA确认，不自动扩大搜索。4条诊断也不保证成功，负结果照样归档。"},
+    {"priority": 4, "action": "最终复现包、展示和提交", "status": "待完成", "stop": "配置/命令/日志可离线重算、提交不含密钥；报告含全部要求与局限；完成10分钟展示和5分钟Q&A准备。失败案例未关闭时不宣称课程全部完成。"}
+  ],
+  "historical_research_criteria": {
+    "status": "paused_and_not_course_requirements",
+    "preserve": ["PE +0.5", "TF/ECS drop tolerances", "completion non-degradation", "paired tests and sequential alpha", "108-run confirmation"],
+    "source": "experiments/selective-search-v2.1.json, selective-search-v3.json, selective-search-v3.1.json",
+    "rule": "保留当时阈值和未晋级结论；不能事后改写为获胜，也不再作为课程完成条件。"
+  },
+  "optional_only": [
+    "新patch策略、更多论文方法、新模型、补满全部mutation或201-task leaderboard",
+    "增加重复或任务：必须先说明现有R1三重复还不能解决什么问题，以及增量时间、费用和证据，再获批",
+    "任务223 / Netlify 实际发布：自定义环境演示，brief不要求；三阶段发布目录相同，不能替代恢复证据；不阻塞课程主实验。若以后恢复，由用户在CLI准备/冻结前完成登录和选站点，agent在运行时选工具。"
+  ]
+}

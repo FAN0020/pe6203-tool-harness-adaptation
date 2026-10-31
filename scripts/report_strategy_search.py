@@ -157,8 +157,9 @@ def analyze(directory):
 def render(directories, destination):
     destination = Path(destination).resolve()
     sections = [
-        "<h1>Selective Patch 策略研究</h1>",
-        "<p>研究目标：在不明显损伤 TF、ECS、完成率及逐任务表现的前提下，提高环境变化后的 PE。报告同时保留 recovery、retention 和更新成本；效率改善不自动等于恢复能力改善。</p>",
+        "<h1>Selective Patch 策略研究（已暂停）</h1>",
+        "<p><strong>当前优先完成课程 brief；不再自动搜索、重跑或扩展。</strong>复用既有27条主实验，按 <a href=\"course-completion-plan.html\">课程完成计划</a> 验证与交付。下文保留历史阈值、当时决定和全部正负结果，不代表新的执行授权。R2/R3已停止，连接诊断已封存；任何新增实验先获用户批准。</p>",
+        "<p>历史研究目标：在不明显损伤 TF、ECS、完成率及逐任务表现的前提下，提高环境变化后的 PE。报告同时保留 recovery、retention 和更新成本；效率改善不自动等于恢复能力改善。</p>",
         "<p>依据课程 brief 与 <a href=\"https://arxiv.org/html/2607.14642v1\">MCPEvol 论文</a>，分别报告指标，不合成任意加权总分。课程核心是变化任务能否恢复、原本可用的任务是否受损；本小子集 TF 接近上限，故候选搜索以受约束的 PE 改善为目标。</p>",
         table(
             ["评价层次", "指标与比较", "判断范围"],
@@ -170,7 +171,7 @@ def render(directories, destination):
                 ["补充运行证据", "完成率、截断、轮数耗尽、工具错误及完整轨迹", "补充解释 TF/PE；不改原 benchmark 的评分"],
             ],
         ),
-        "<p>本项目预设筛选门槛：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定；均值容差也不是统计意义上的无退化证明。开发集结果只用于选候选，不能作为独立确认结果。</p>",
+        "<p>历史研究预设筛选门槛（保留，不作为课程完成条件）：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定；均值容差也不是统计意义上的无退化证明。开发集结果只用于选候选，不能作为独立确认结果。</p>",
         "<p>所有 agent 自行选择工具及参数。固定模型、任务、judge 与执行预算；updater 只接收元数据和冻结探针，不接收题目、答案或评分。设计者参考了已披露轨迹与运行限制来修改通用规则；三阶段 Early 共用 K0。开发结果用于筛选，确认结果才用于晋级；既有任务上的新重复不代表未见任务泛化。</p>",
         "<p>原有结果："
         + link(ROOT / "reports/course-v1.3-experiment.html", "v1.3 与六条诊断", destination)
@@ -242,11 +243,16 @@ def render(directories, destination):
         termination = directory / "round-termination.json"
         if termination.exists():
             stopped = read_json(termination)
+            next_step = (
+                f"原候选保持不变，另建完整第 {stopped['next_round']} 轮，α＝{stopped['next_alpha']}。"
+                if stopped.get("next_round")
+                else "停止后先诊断连接；该记录未作晋级判断，也未补跑失败轨迹。"
+            )
             sections.append(
                 "<p><strong>本轮因模型连接故障提前结束，未晋级。</strong>"
                 + f"已评分 {stopped['scored']} 条，失败 {stopped['failed_executions']} 条，"
                 + f"未运行 {stopped['not_started']} 条。失败轨迹未重跑或替换；"
-                + f"原候选保持不变，另建完整第 {stopped['next_round']} 轮，α＝{stopped['next_alpha']}。"
+                + next_step
                 + link(termination, "停止原因、恢复预检与原始错误", destination)
                 + "。失败记录的 judge 未启动，其原始费用字段为空不代表发生了未知收费调用。</p>"
             )

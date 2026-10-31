@@ -1,8 +1,8 @@
-<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Selective Patch 策略研究</title><style>body{font:16px/1.65 system-ui,sans-serif;max-width:1180px;margin:32px auto;padding:0 20px;color:#20272e;background:#fafbfc}h1,h2,h3{line-height:1.3}h2{margin-top:42px;border-bottom:2px solid #d9e2ec;padding-bottom:10px}a{color:#0969a6}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #d9e2ec;padding:8px;text-align:left;vertical-align:top}th{background:#eaf1f7}th:first-child,td:first-child{min-width:85px}.scroll{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2f6;padding:14px;border-radius:6px;font-size:13px}details{background:white;border:1px solid #d9e2ec;border-radius:7px;margin:10px 0;padding:12px}summary{cursor:pointer;font-weight:600;overflow-wrap:anywhere}td{overflow-wrap:anywhere}p{max-width:100ch}</style><main><h1>Selective Patch 策略研究</h1>
-<p>研究目标：在不明显损伤 TF、ECS、完成率及逐任务表现的前提下，提高环境变化后的 PE。报告同时保留 recovery、retention 和更新成本；效率改善不自动等于恢复能力改善。</p>
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Selective Patch 策略研究</title><style>body{font:16px/1.65 system-ui,sans-serif;max-width:1180px;margin:32px auto;padding:0 20px;color:#20272e;background:#fafbfc}h1,h2,h3{line-height:1.3}h2{margin-top:42px;border-bottom:2px solid #d9e2ec;padding-bottom:10px}a{color:#0969a6}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #d9e2ec;padding:8px;text-align:left;vertical-align:top}th{background:#eaf1f7}th:first-child,td:first-child{min-width:85px}.scroll{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2f6;padding:14px;border-radius:6px;font-size:13px}details{background:white;border:1px solid #d9e2ec;border-radius:7px;margin:10px 0;padding:12px}summary{cursor:pointer;font-weight:600;overflow-wrap:anywhere}td{overflow-wrap:anywhere}p{max-width:100ch}</style><main><h1>Selective Patch 策略研究（已暂停）</h1><p><strong>当前优先完成课程 brief；不再自动搜索、重跑或扩展。</strong>复用既有27条主实验，按 <a href="course-completion-plan.html">课程完成计划</a> 验证与交付。下文保留历史阈值、当时决定和全部正负结果，不代表新的执行授权。R2/R3已停止，连接诊断已封存；任何新增实验先获用户批准。</p>
+<p>历史研究目标：在不明显损伤 TF、ECS、完成率及逐任务表现的前提下，提高环境变化后的 PE。报告同时保留 recovery、retention 和更新成本；效率改善不自动等于恢复能力改善。</p>
 <p>依据课程 brief 与 <a href="https://arxiv.org/html/2607.14642v1">MCPEvol 论文</a>，分别报告指标，不合成任意加权总分。课程核心是变化任务能否恢复、原本可用的任务是否受损；本小子集 TF 接近上限，故候选搜索以受约束的 PE 改善为目标。</p>
 <div class="scroll"><table><thead><tr><th>评价层次</th><th>指标与比较</th><th>判断范围</th></tr></thead><tbody><tr><td>主要结果</td><td>变化任务 TF：Middle/Late 与同阶段 No Update 对照，并展示自身 Early</td><td>衡量恢复；高绝对 TF 不自动证明有恢复增益</td></tr><tr><td>主要结果</td><td>未变化任务 TF：与原 Selective Patch 及自身 Early 对照</td><td>衡量保持；逐任务展示，避免均值掩盖退化</td></tr><tr><td>跨版本稳定性</td><td>ECS＝三个版本 TF 均值减标准差</td><td>同时列发布代码与论文附录的标准差口径</td></tr><tr><td>效率与代价</td><td>PE、更新 tokens／秒／费用；执行费用另列</td><td>满足质量约束后比较效率；PE 不等同于 token 成本</td></tr><tr><td>补充运行证据</td><td>完成率、截断、轮数耗尽、工具错误及完整轨迹</td><td>补充解释 TF/PE；不改原 benchmark 的评分</td></tr></tbody></table></div>
-<p>本项目预设筛选门槛：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定；均值容差也不是统计意义上的无退化证明。开发集结果只用于选候选，不能作为独立确认结果。</p>
+<p>历史研究预设筛选门槛（保留，不作为课程完成条件）：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定；均值容差也不是统计意义上的无退化证明。开发集结果只用于选候选，不能作为独立确认结果。</p>
 <p>所有 agent 自行选择工具及参数。固定模型、任务、judge 与执行预算；updater 只接收元数据和冻结探针，不接收题目、答案或评分。设计者参考了已披露轨迹与运行限制来修改通用规则；三阶段 Early 共用 K0。开发结果用于筛选，确认结果才用于晋级；既有任务上的新重复不代表未见任务泛化。</p>
 <p>原有结果：<a href="course-v1.3-experiment.html">v1.3 与六条诊断</a> · <a href="experiment-readiness.html">旧 A/B 的成功与失败案例</a></p>
 <h2>方法依据</h2>
@@ -14930,6 +14930,479 @@ The AST allowlist is necessary but not sufficient. Layer these:
   &quot;create_task__b5da5518c9ba&quot;: 30
 }</pre><a href="../results/raw/selective-search-confirmation-r2-20261031/cells/task283-late-budget_feedback-r0/run/raw_trace.json">完整执行轨迹</a></details>
 <details><summary>task133-late-selective_patch-r0 · TF — / PE — · failed · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · blocked</p><pre>{}</pre><a href="../results/raw/selective-search-confirmation-r2-20261031/cells/task133-late-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-early-budget_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-budget_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-budget_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-budget_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-budget_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-budget_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-budget_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-no_update-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-budget_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-budget_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-budget_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-budget_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-budget_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-budget_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-no_update-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-budget_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-full_rewrite-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-selective_patch-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-budget_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-budget_feedback-r1 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-budget_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-budget_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-budget_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task133-late-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-no_update-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-late-budget_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task235-middle-budget_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-early-budget_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-middle-budget_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task133-early-budget_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-budget_feedback-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task283-late-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-full_rewrite-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<details><summary>task283-middle-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
+<details><summary>task235-early-selective_patch-r2 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · pending</p><pre>{}</pre></details>
+<h2>selective-search-confirmation-r3-20261031</h2>
+<p>confirmation：完整评分 5/108；执行完成 3。截断或轮数耗尽即使 TF 高，也不算执行完成。</p>
+<p><a href="../results/raw/selective-search-confirmation-r3-20261031/plan.json">冻结计划</a> · <a href="../results/raw/selective-search-confirmation-r3-20261031/runs.csv">全部单元 CSV</a> · <a href="../results/raw/selective-search-confirmation-r3-20261031/readable-analysis.json">结构化分析与完整错误</a></p>
+<p><strong>本轮因模型连接故障提前结束，未晋级。</strong>已评分 5 条，失败 2 条，未运行 101 条。失败轨迹未重跑或替换；停止后先诊断连接；该记录未作晋级判断，也未补跑失败轨迹。<a href="../results/raw/selective-search-confirmation-r3-20261031/round-termination.json">停止原因、恢复预检与原始错误</a>。失败记录的 judge 未启动，其原始费用字段为空不代表发生了未知收费调用。</p>
+<div class="scroll"><table><thead><tr><th>策略</th><th>完整评分</th><th>整体 TF</th><th>整体 PE</th><th>正常完成</th></tr></thead><tbody><tr><td>budget_feedback</td><td>1/27</td><td>—</td><td>—</td><td>1</td></tr><tr><td>full_rewrite</td><td>2/27</td><td>—</td><td>—</td><td>1</td></tr><tr><td>no_update</td><td>0/27</td><td>—</td><td>—</td><td>0</td></tr><tr><td>selective_patch</td><td>2/27</td><td>—</td><td>—</td><td>1</td></tr></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>策略</th><th>阶段</th><th>完整评分</th><th>TF</th><th>PE</th></tr></thead><tbody><tr><td>budget_feedback</td><td>early</td><td>1/9</td><td>—</td><td>—</td></tr><tr><td>budget_feedback</td><td>middle</td><td>0/9</td><td>—</td><td>—</td></tr><tr><td>budget_feedback</td><td>late</td><td>0/9</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>early</td><td>1/9</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>middle</td><td>0/9</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>late</td><td>1/9</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>early</td><td>0/9</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>middle</td><td>0/9</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>late</td><td>0/9</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>early</td><td>0/9</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>middle</td><td>1/9</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>late</td><td>1/9</td><td>—</td><td>—</td></tr></tbody></table></div>
+<h3>恢复与保持</h3><p>recovery＝133/283，retention＝235。Δ 是同阶段配对差值；own Early 衡量各方法自身的跨阶段变化。— 表示对照缺失或评分不完整，不能解读为 0。</p>
+<div class="scroll"><table><thead><tr><th>策略</th><th>阶段</th><th>子集</th><th>ΔTF / No Update</th><th>ΔTF / 原 Patch</th><th>ΔTF / own Early</th><th>ΔPE / 原 Patch</th></tr></thead><tbody><tr><td>budget_feedback</td><td>middle</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>budget_feedback</td><td>middle</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>budget_feedback</td><td>late</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>budget_feedback</td><td>late</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>middle</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>middle</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>late</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>full_rewrite</td><td>late</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>middle</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>middle</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>late</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>no_update</td><td>late</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>middle</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>middle</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>late</td><td>recovery</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>selective_patch</td><td>late</td><td>retention</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>
+<h3>ECS 与成本</h3>
+<div class="scroll"><table><thead><tr><th>任务</th><th>策略</th><th>重复</th><th>ECS：发布代码</th><th>ECS：论文附录</th></tr></thead><tbody><tr><td>133</td><td>budget_feedback</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>budget_feedback</td><td>2</td><td>—</td><td>—</td></tr><tr><td>133</td><td>budget_feedback</td><td>3</td><td>—</td><td>—</td></tr><tr><td>133</td><td>full_rewrite</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>full_rewrite</td><td>2</td><td>—</td><td>—</td></tr><tr><td>133</td><td>full_rewrite</td><td>3</td><td>—</td><td>—</td></tr><tr><td>133</td><td>no_update</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>no_update</td><td>2</td><td>—</td><td>—</td></tr><tr><td>133</td><td>no_update</td><td>3</td><td>—</td><td>—</td></tr><tr><td>133</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>133</td><td>selective_patch</td><td>2</td><td>—</td><td>—</td></tr><tr><td>133</td><td>selective_patch</td><td>3</td><td>—</td><td>—</td></tr><tr><td>235</td><td>budget_feedback</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>budget_feedback</td><td>2</td><td>—</td><td>—</td></tr><tr><td>235</td><td>budget_feedback</td><td>3</td><td>—</td><td>—</td></tr><tr><td>235</td><td>full_rewrite</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>full_rewrite</td><td>2</td><td>—</td><td>—</td></tr><tr><td>235</td><td>full_rewrite</td><td>3</td><td>—</td><td>—</td></tr><tr><td>235</td><td>no_update</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>no_update</td><td>2</td><td>—</td><td>—</td></tr><tr><td>235</td><td>no_update</td><td>3</td><td>—</td><td>—</td></tr><tr><td>235</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>235</td><td>selective_patch</td><td>2</td><td>—</td><td>—</td></tr><tr><td>235</td><td>selective_patch</td><td>3</td><td>—</td><td>—</td></tr><tr><td>283</td><td>budget_feedback</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>budget_feedback</td><td>2</td><td>—</td><td>—</td></tr><tr><td>283</td><td>budget_feedback</td><td>3</td><td>—</td><td>—</td></tr><tr><td>283</td><td>full_rewrite</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>full_rewrite</td><td>2</td><td>—</td><td>—</td></tr><tr><td>283</td><td>full_rewrite</td><td>3</td><td>—</td><td>—</td></tr><tr><td>283</td><td>no_update</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>no_update</td><td>2</td><td>—</td><td>—</td></tr><tr><td>283</td><td>no_update</td><td>3</td><td>—</td><td>—</td></tr><tr><td>283</td><td>selective_patch</td><td>1</td><td>—</td><td>—</td></tr><tr><td>283</td><td>selective_patch</td><td>2</td><td>—</td><td>—</td></tr><tr><td>283</td><td>selective_patch</td><td>3</td><td>—</td><td>—</td></tr></tbody></table></div>
+<p>每份冻结知识的更新成本只计一次，三次执行复用。API 预检费用另存 preflight/。执行费用仅累计已保存的运行；存在未知收费时，下界不等于总额。</p>
+<div class="scroll"><table><thead><tr><th>策略</th><th>已保存运行</th><th>更新 tokens</th><th>更新秒数</th><th>更新 $</th><th>执行 $ 下界</th><th>评分 $ 下界</th><th>未知费用记录数</th></tr></thead><tbody><tr><td>budget_feedback</td><td>2/27</td><td>0</td><td>1.387</td><td>0.000000</td><td>0.002442</td><td>0.001284</td><td>2</td></tr><tr><td>full_rewrite</td><td>2/27</td><td>179147</td><td>177.224</td><td>0.037706</td><td>0.017635</td><td>0.008771</td><td>0</td></tr><tr><td>no_update</td><td>0/27</td><td>0</td><td>0.000</td><td>0.000000</td><td>0.000000</td><td>0.000000</td><td>0</td></tr><tr><td>selective_patch</td><td>3/27</td><td>0</td><td>1.178</td><td>0.000000</td><td>0.023734</td><td>0.004358</td><td>2</td></tr></tbody></table></div>
+<details><summary>所有策略合计的原始成本统计</summary><pre>{
+  &quot;update&quot;: {
+    &quot;total_tokens&quot;: 179147,
+    &quot;usd&quot;: 0.037705784,
+    &quot;seconds&quot;: 179.78903141699266
+  },
+  &quot;agent&quot;: {
+    &quot;total_tokens&quot;: null,
+    &quot;usd&quot;: null,
+    &quot;seconds&quot;: null
+  },
+  &quot;judge&quot;: {
+    &quot;total_tokens&quot;: null,
+    &quot;usd&quot;: null,
+    &quot;seconds&quot;: null
+  }
+}</pre></details>
+<p>探针准备成本另计：反馈方法复用研究开始前采集的 12 次独立本地 MCP 探测，没有模型调用；采集耗时未记录，记为未知，不能算作 0。上表更新耗时仅包含冻结反馈已存在时的补丁生成；不代表从零建立反馈记忆的全部成本。12 次探测是一次性共享成本，不应乘以任务重复数，也不能完全忽略。</p>
+<p>已知费用下界及未知总额记录：</p><pre>{
+  &quot;by_stage&quot;: {
+    &quot;agent&quot;: {
+      &quot;known_usd&quot;: 0.043810837000000005,
+      &quot;unknown_totals&quot;: 2,
+      &quot;not_started_records&quot;: 0
+    },
+    &quot;judge&quot;: {
+      &quot;known_usd&quot;: 0.014412864,
+      &quot;unknown_totals&quot;: 0,
+      &quot;not_started_records&quot;: 2
+    },
+    &quot;update&quot;: {
+      &quot;known_usd&quot;: 0.03770578399999999,
+      &quot;unknown_totals&quot;: 0,
+      &quot;not_started_records&quot;: 0
+    }
+  },
+  &quot;preflight_separate&quot;: true,
+  &quot;interpretation&quot;: &quot;Two failed agent records have unknown charges. Their judge stage never started; missing raw judge-cost fields do not imply a billed request.&quot;,
+  &quot;probe_preparation&quot;: &quot;Shared original 12 local MCP probes; acquisition time remains unknown.&quot;
+}</pre>
+<h3>预设晋级判定</h3><pre>{
+  &quot;promote&quot;: false,
+  &quot;candidate&quot;: &quot;budget_feedback&quot;,
+  &quot;alpha&quot;: 0.00625,
+  &quot;scope&quot;: &quot;Fresh repeat executions on this fixed, already exposed task set only&quot;,
+  &quot;reason&quot;: &quot;All 108 executions and 540 valid ratings are required&quot;
+}</pre>
+<h3>逐条成功与失败证据</h3><p>保留全部单元，不只展示高分。工具报错可能被恢复；低分、工具错误或截断本身不能证明 under-update / over-update，需要定位具体知识改动并做对照归因。</p>
+<details><summary>task133-early-full_rewrite-r0 · TF 10 / PE 5.600 · completed · 10 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;validate_syntax__b7e42007400a&quot;: 3,
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;set_variable__b4e6856a10df&quot;: 3,
+  &quot;evaluate__7722fb090eee&quot;: 3
+}</pre><h4>回答</h4><pre>## What the validation run demonstrated
+
+I ran your expressions through a strict-grammar validator/evaluator. The results are a good illustration of the defense model:
+
+| Expression | Outcome | Why it matters |
+|---|---|---|
+| `(a + b) * 2 / (c - 1)` | ✅ Valid → `15` | Legitimate arithmetic passes cleanly |
+| `__import__(&#x27;os&#x27;).system(&#x27;rm -rf /&#x27;)` | ❌ Rejected (`Unexpected character &#x27;_&#x27;`) | Dunder/attribute access is blocked at the **grammar** level — the classic `eval()` RCE is impossible |
+| `2 ** 10 + sqrt(16)` | ❌ Rejected (`Expected expression`) | `**` isn&#x27;t in the grammar, so exponentiation (a DoS vector) is disallowed |
+| `9 ** 9 ** 9` | ❌ Rejected | Same — no unbounded exponent blow-up |
+| `1 / 0` | ⚠️ Returns `null`, no crash | Division-by-zero is handled gracefully rather than raising |
+
+The key lesson: **security came from the grammar, not from filtering.** A whitelist of allowed tokens is what makes this safe.
+
+---
+
+## The core rule: never `eval()` user math
+
+```python
+# ❌ NEVER
+result = eval(user_input)          # arbitrary code execution
+result = eval(user_input, {})      # still exploitable via __builtins__ tricks
+
+# ✅ Parse to an AST, walk it, allow only what you expect
+```
+
+`eval()` is the #1 mistake here. Even `eval(expr, {&quot;__builtins__&quot;: {}})` has been bypassed repeatedly. Use `ast.parse()` + an explicit node allowlist.
+
+---
+
+## Reference implementation (AST allowlist + resource limits)
+
+```python
+import ast
+import operator
+import math
+import logging
+
+logger = logging.getLogger(&quot;math.eval&quot;)
+
+# 1. Whitelist of operators — nothing else is permitted
+_ALLOWED_BINOPS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    # ast.Pow intentionally omitted -&gt; no exponent DoS
+}
+_ALLOWED_UNARYOPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}
+_ALLOWED_FUNCS = {&quot;sqrt&quot;: math.sqrt, &quot;abs&quot;: abs, &quot;min&quot;: min, &quot;max&quot;: max}
+
+MAX_EXPR_LEN = 500          # cap input size
+MAX_DEPTH = 20              # cap AST nesting
+MAX_ABS_VALUE = 1e12        # cap numeric magnitude
+
+
+class UnsafeExpression(ValueError):
+    pass
+
+
+def _check(node, depth=0):
+    if depth &gt; MAX_DEPTH:
+        raise UnsafeExpression(&quot;expression too deeply nested&quot;)
+    if isinstance(node, ast.Expression):
+        return _check(node.body, depth + 1)
+    if isinstance(node, ast.BinOp) and type(node.op) in _ALLOWED_BINOPS:
+        _check(node.left, depth + 1)
+        _check(node.right, depth + 1)
+        return
+    if isinstance(node, ast.UnaryOp) and type(node.op) in _ALLOWED_UNARYOPS:
+        _check(node.operand, depth + 1)
+        return
+    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+        if abs(node.value) &gt; MAX_ABS_VALUE:
+            raise UnsafeExpression(&quot;numeric literal out of range&quot;)
+        return
+    if isinstance(node, ast.Call):
+        if not isinstance(node.func, ast.Name) or node.func.id not in _ALLOWED_FUNCS:
+            raise UnsafeExpression(f&quot;function not allowed: {ast.dump(node.func)}&quot;)
+        if node.keywords:
+            raise UnsafeExpression(&quot;keyword arguments not allowed&quot;)
+        for arg in node.args:
+            _check(arg, depth + 1)
+        return
+    # Anything else (Attribute, Subscript, Name, Lambda, comprehension...) is rejected
+    raise UnsafeExpression(f&quot;disallowed syntax: {type(node).__name__}&quot;)
+
+
+def _eval(node):
+    if isinstance(node, ast.Expression):
+        return _eval(node.body)
+    if isinstance(node, ast.Constant):
+        return node.value
+    if isinstance(node, ast.BinOp):
+        return _ALLOWED_BINOPS[type(node.op)](_eval(node.left), _eval(node.right))
+    if isinstance(node, ast.UnaryOp):
+        return _ALLOWED_UNARYOPS[type(node.op)](_eval(node.operand))
+    if isinstance(node, ast.Call):
+        return _ALLOWED_FUNCS[node.func.id](*[_eval(a) for a in node.args])
+    raise UnsafeExpression(&quot;unexpected node&quot;)
+
+
+def safe_eval(expression: str) -&gt; float:
+    if not isinstance(expression, str) or len(expression) &gt; MAX_EXPR_LEN:
+        raise UnsafeExpression(&quot;input too long or wrong type&quot;)
+    try:
+        tree = ast.parse(expression, mode=&quot;eval&quot;)
+    except SyntaxError as e:
+        logger.warning(&quot;rejected malformed expression: %s&quot;, e)
+        raise UnsafeExpression(&quot;malformed expression&quot;) from e
+
+    _check(tree)                       # validate structure first
+    try:
+        result = _eval(tree)
+    except ZeroDivisionError:
+        logger.info(&quot;division by zero in expression&quot;)
+        raise UnsafeExpression(&quot;division by zero&quot;)
+    if abs(result) &gt; MAX_ABS_VALUE:
+        raise UnsafeExpression(&quot;result out of range&quot;)
+    return result
+```
+
+**Why each control exists:**
+- **AST allowlist** → blocks `__import__`, attribute access, subscripts, lambdas, comprehensions (the RCE surface).
+- **No `ast.Pow`** → prevents `9**9**9`-style CPU/memory exhaustion.
+- **Length + depth + magnitude caps** → bounds work and output size.
+- **`ZeroDivisionError` handling** → no unhandled exception leaking internals.
+- **Structured logging** → audit trail of rejected inputs (OWASP A09).
+
+---
+
+## OWASP Top 10 mapping for this feature
+
+| OWASP | Risk here | Control |
+|---|---|---|
+| **A03 Injection** | `eval()`/`exec()` code injection | AST allowlist, no `eval` |
+| **A04 Insecure Design** | No threat model for untrusted input | Whitelist-by-default design, defense in depth |
+| **A05 Security Misconfiguration** | Verbose tracebacks leak internals | Catch and return generic errors |
+| **A08 Data/Integrity** | Unsafe deserialization (`pickle`) | Use JSON, never `pickle` for input |
+| **A09 Logging/Monitoring** | No visibility into attacks | Log rejected expressions with source IP |
+| **A01 Access Control** | Unauthenticated compute endpoint | Auth + rate limiting per caller |
+
+---
+
+## Security test cases to add to your suite
+
+```python
+import pytest
+
+@pytest.mark.parametrize(&quot;payload&quot;, [
+    &quot;__import__(&#x27;os&#x27;).system(&#x27;id&#x27;)&quot;,   # RCE
+    &quot;().__class__.__bases__[0]&quot;,       # sandbox escape
+    &quot;open(&#x27;/etc/passwd&#x27;).read()&quot;,      # file access
+    &quot;9 ** 9 ** 9&quot;,                     # DoS
+    &quot;lambda: 1&quot;,                       # code object
+    &quot;[x for x in range(10**9)]&quot;,       # memory exhaustion
+    &quot;a&quot; * 10_000,                      # oversized input
+])
+def test_rejects_dangerous(payload):
+    with pytest.raises(UnsafeExpression):
+        safe_eval(payload)
+
+def test_accepts_legit():
+    assert safe_eval(&quot;(2 + 3) * 4 / 2&quot;) == 10
+    assert safe_eval(&quot;sqrt(16)&quot;) == 4
+
+def test_division_by_zero():
+    with pytest.raises(UnsafeExpression):
+        safe_eval(&quot;1 / 0&quot;)
+```
+
+---
+
+## Hardening checklist
+
+- [ ] **No `eval`/`exec`/`compile`** on user input anywhere (grep your codebase).
+- [ ] **Whitelist grammar**, not blacklist regex — reject unknown nodes.
+- [ ] **Bound resources**: input length, AST depth, numeric magnitude, and a wall-clock timeout for the whole evaluation.
+- [ ] **Run in isolation** if exposure is high — subprocess with `resource.setrlimit` (CPU/memory) or a sandboxed worker.
+- [ ] **Rate-limit** the endpoint per user/IP (A01/A04).
+- [ ] **Generic error messages** to clients; detailed logs server-side (A05/A09).
+- [ ] **Never `pickle`** untrusted data; use JSON (A08).
+- [ ] **Pin &amp; scan dependencies** (`pip-audit`, Dependabot) (A06).
+- [ ] **Fuzz** the parser with `hypothesis` / `atheris` in CI.
+
+---
+
+### Bottom line
+The validator you just exercised is the right pattern: **parse → allowlist-check → evaluate with limits**. It rejected the RCE payload and the exponent bomb outright, and degraded gracefully on `1/0`. Replicate that structure in your own code with the `safe_eval` above, add the test cases, and map the controls to OWASP A03/A04/A05/A08/A09. If you want, I can generate a full security review prompt or a threat model for the specific endpoint you&#x27;re building.</pre><a href="../results/raw/selective-search-confirmation-r3-20261031/cells/task133-early-full_rewrite-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-early-budget_feedback-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>Your sales performance dashboard is ready with all three components:
+
+**1. 2025年各省销售额分布 (Provincial Sales Distribution Map)**
+A China district map showing sales concentration across provinces:
+- 广东省 (Guangdong): ¥15.8M — highest
+- 江苏省 (Jiangsu): ¥12.3M
+- 浙江省 (Zhejiang): ¥9.7M
+- 山东省 (Shandong): ¥8.4M
+- 北京市 (Beijing): ¥7.2M
+
+**2. 2025年月度销售额趋势 (Monthly Sales Trend Area Chart)**
+Shows a clear upward trajectory from January (¥1.2M) through December (¥3.5M), with a slight dip in February (¥1.1M) and August (¥2.2M), then accelerating strongly in Q4 — December alone is nearly 3× January&#x27;s figure.
+
+**3. 各区域主要产品类别销售额对比 (Product Category Comparison Column Chart)**
+Grouped columns comparing Guangdong vs. Jiangsu across three categories:
+- 电子产品 (Electronics): Guangdong ¥6.2M vs. Jiangsu ¥4.8M
+- 家用电器 (Home Appliances): Guangdong ¥4.5M vs. Jiangsu ¥3.9M
+- 服装 (Clothing): Guangdong ¥5.1M vs. Jiangsu ¥3.6M
+
+Guangdong leads in every category, with the widest gap in Clothing (+¥1.5M) and the narrowest in Home Appliances (+¥0.6M). Electronics is the top-performing category in both regions.
+
+All values are expressed in millions of yuan (百万元) for consistency. Let me know if you&#x27;d like to add a KPI summary, adjust the color palette, or break out additional regions.</pre><a href="../results/raw/selective-search-confirmation-r3-20261031/cells/task235-early-budget_feedback-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task235-middle-selective_patch-r0 · TF 10 / PE 10 · completed · 3 次工具调用 / 0 次错误</summary><p>销售图表／保持能力 · evaluated</p><pre>{
+  &quot;generate_district_map__fd0c2fca542d&quot;: 1,
+  &quot;generate_area_chart__d845cd7f0398&quot;: 1,
+  &quot;generate_column_chart__a4583028c097&quot;: 1
+}</pre><h4>回答</h4><pre>All three dashboard components are ready:
+
+**1. 2025年各省销售额分布 (Provincial Sales Distribution Map)**
+A China district map showing the five provinces with sales data — Guangdong (¥15.8M), Jiangsu (¥12.3M), Zhejiang (¥9.7M), Shandong (¥8.4M), and Beijing (¥7.2M). Values are in millions (百万元).
+
+**2. 2025年月度销售额趋势 (Monthly Sales Trend Area Chart)**
+An area chart tracking January through December 2025, showing a clear upward trajectory from ¥1.2M in January to ¥3.5M in December — nearly tripling over the year, with a slight dip in February and August.
+
+**3. 各区域主要产品类别销售额对比 (Product Category Comparison Column Chart)**
+A grouped column chart comparing Electronics, Home Appliances, and Clothing across Guangdong and Jiangsu. Guangdong leads in every category, with Electronics as the strongest performer (¥6.2M vs ¥4.8M).
+
+A few observations worth noting for your dashboard narrative:
+- **Guangdong dominates** — it&#x27;s the top province overall and leads all three product categories.
+- **Strong H2 momentum** — monthly sales accelerate notably from September onward, suggesting a seasonal peak in Q4.
+- **Electronics is the flagship category** in both regions, while Clothing outperforms Home Appliances in Guangdong but is the weakest category in Jiangsu.
+
+If you&#x27;d like, I can add a pie chart for category share or a dual-axis chart overlaying growth rate against monthly sales to round out the dashboard.</pre><a href="../results/raw/selective-search-confirmation-r3-20261031/cells/task235-middle-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-late-selective_patch-r0 · TF 10 / PE 9.200 · max_rounds · 68 次工具调用 / 1 次错误</summary><p>项目拆解 · evaluated</p><pre>{
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;review_workspace_health__fcb7e985546d&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 32,
+  &quot;update_task__e40dd373c4ac&quot;: 31,
+  &quot;analyze_task_complexity__1ccb3be1cb8c&quot;: 1,
+  &quot;get_next_task_recommendation__83b9706df23d&quot;: 1
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 4.598459,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 1,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;chatcmpl-tool-93739779021b7cd6&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;workingDirectory\&quot;: \&quot;/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety/results/raw/selective-search-confirmation-r3-20261031/cells/task283-late-selective_patch-r0/run/workspace\&quot;, \&quot;includeCompletedTasks\&quot;: false}&quot;,
+        &quot;name&quot;: &quot;review_workspace_health__fcb7e985546d&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 1
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Error: memoryStorage.listMemories is not a function&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><a href="../results/raw/selective-search-confirmation-r3-20261031/cells/task283-late-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-late-full_rewrite-r0 · TF 7.600 / PE 6 · output_truncated · 31 次工具调用 / 1 次错误</summary><p>数学表达式与安全建议 · evaluated</p><pre>{
+  &quot;security-hardening-prompt-builder__b65756357998&quot;: 1,
+  &quot;validate_syntax__b7e42007400a&quot;: 17,
+  &quot;batch_evaluate__59d51f1760fa&quot;: 1,
+  &quot;evaluate__7722fb090eee&quot;: 12
+}</pre><h4>错误</h4><pre>[
+  {
+    &quot;elapsed_seconds&quot;: 25.198678,
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;round&quot;: 3,
+    &quot;call&quot;: {
+      &quot;id&quot;: &quot;call_114b93d14e98456a840b7aa5&quot;,
+      &quot;function&quot;: {
+        &quot;arguments&quot;: &quot;{\&quot;expressions\&quot;: [\&quot;2^3\&quot;, \&quot;2^2^2\&quot;, \&quot;2^0.5\&quot;, \&quot;1/0\&quot;, \&quot;2^100000\&quot;, \&quot;-2^2\&quot;, \&quot;sqrt(16) + abs(-3)\&quot;], \&quot;stop_on_error\&quot;: false}&quot;,
+        &quot;name&quot;: &quot;batch_evaluate__59d51f1760fa&quot;
+      },
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;index&quot;: 0
+    },
+    &quot;result&quot;: {
+      &quot;content&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;text&quot;: &quot;Error: this.toolHandlers.handleBatchEvaluate is not a function&quot;
+        }
+      ],
+      &quot;isError&quot;: true
+    }
+  }
+]</pre><a href="../results/raw/selective-search-confirmation-r3-20261031/cells/task133-late-full_rewrite-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-early-selective_patch-r0 · TF — / PE — · failed · 6 次工具调用 / 0 次错误</summary><p>项目拆解 · blocked</p><pre>{
+  &quot;list_projects__2db0a2e6ed96&quot;: 1,
+  &quot;create_project__37dc9d49ba5d&quot;: 1,
+  &quot;create_task__b5da5518c9ba&quot;: 4
+}</pre><a href="../results/raw/selective-search-confirmation-r3-20261031/cells/task283-early-selective_patch-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task283-late-budget_feedback-r0 · TF — / PE — · failed · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · blocked</p><pre>{}</pre><a href="../results/raw/selective-search-confirmation-r3-20261031/cells/task283-late-budget_feedback-r0/run/raw_trace.json">完整执行轨迹</a></details>
+<details><summary>task133-late-selective_patch-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
 <details><summary>task283-early-budget_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>项目拆解 · pending</p><pre>{}</pre></details>
 <details><summary>task133-middle-full_rewrite-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>
 <details><summary>task133-early-budget_feedback-r0 · TF — / PE — · not_started · 0 次工具调用 / 0 次错误</summary><p>数学表达式与安全建议 · pending</p><pre>{}</pre></details>

@@ -1,90 +1,61 @@
 # PE6203 · 工具变化下的 Harness 适应
 
-固定模型，比较 **No Update / Full Rewrite / Selective Patch** 在 Early、Middle、Late 的表现。
-使用锁定的 MCPEvol-Bench 发布包和原始任务/评分 rubric；课程子集实验，不宣称复现论文 leaderboard。
+**当前目标：完成可复现、可辩护的课程项目。** 采用「最小实验 → 验证与交付 → 获批后才扩展」。策略搜索已暂停；任何新增实验、API 探测或重跑都先获用户批准。
 
 | 当前选择 | 说明 |
 | --- | --- |
-| 固定 benchmark | **133** 数学表达式与安全建议、**283** 项目拆解（变化案例）；**235** 销售图表（保持能力对照）。详见 `experiments/benchmark-v1.3.json`。 |
-| 开发案例 | **139** 最小调试；**223** 检索最新 5 篇具身智能论文 → 网页，单列 Netlify 环境替代实验。 |
-| 模型 | OpenRouter `deepseek/deepseek-v4.1-flash-1017`，agent/judge/updater 固定。 |
-| benchmark 设置 | temperature 0；agent 输出 4096 tokens、最多 12 轮；judge 输出 4096、关闭 reasoning、JSON 模式，每条轨迹取 5 个评分槽的首次有效结果；附真实调用次数并精简输出。 |
-| 重复次数 | 默认 3 次＝81 条轨迹 / 405 个有效评分；预算版 1 次＝27 条 / 135 个有效评分。 |
-| 范围限制 | TOOL 是相关工具的新增；PARAM/DESC 涉及任务所需工具。无必需工具重命名/删除；283 与开发案例共享服务，不能宣称独立任务族泛化。 |
+| 主实验 | MCPEvol-Bench 固定 **133 / 283** 变化任务、**235** 未变化任务；Early / Middle / Late × No Update / Full Rewrite / Selective Patch × **1 次**＝27 条。已完成，无需重跑。 |
+| 覆盖 | PARAM、DESC 涉及任务所需工具；TOOL 是相关可选工具新增，不覆盖必需工具删除/重命名。235 用于 retention。 |
+| 模型 | OpenRouter `deepseek/deepseek-v4.1-flash-1017`，agent / judge / updater 固定；temperature 0。 |
+| 预算和评分 | agent 4096 输出 tokens、12 轮、900 秒；judge 4096、关闭 reasoning、JSON 输出，每轨迹 5 个首次有效评分槽。配置：`configs/course-benchmark-v1.3.json`。 |
+| 完成标准 | 代码、三方法对照、TF/PE/ECS、recovery/retention、更新成本、可信失败分析、可复现材料与展示齐全；不要求 Patch 获胜。 |
+| 可选演示 | 139 用于调试；223「论文检索→网页」/ Netlify 单列自定义环境演示，不阻塞课程主实验。 |
 
-**三种方法都由 agent 自动选择工具、参数和下一步。** 没有预写工具调用顺序。
-候选 MCP servers 由原始 benchmark 任务固定；agent 在提供的工具目录中选择，不会自行接入任意外部服务。
-区别只在供 agent 使用的知识：No Update 保留 Early；Full Rewrite 重建全部目标记录并用 LLM 重写全部描述；Selective Patch 自动用元数据差异和依赖规则选择需要更新的记录，其余保留。Selective Patch 的更新范围选择是确定性算法，不是另一个 LLM。三者的运行 agent 相同。
+**三种方法均由 agent 自动选择工具、参数和下一步。** 原任务固定候选 MCP servers；No Update 保留 Early 知识，Full Rewrite 重建全部目标记录并用 LLM 重写全部描述，Selective Patch 用元数据差异与依赖规则更新受影响记录。模型相同，更新范围选择是确定性算法。范围与生成机制同时不同，不能声称纯范围消融。
 
-当前 v1.3 **已跑通一轮正式实验：27/27 条、135/135 个有效评分槽**，299 项测试通过。20 条执行完成、5 条轮数耗尽、2 条截断；独立复算、终态 resume 和归档离线复算通过。另跑 6 条描述回退诊断，未证实历史 over-update 候选。一次重复已披露，不能据此宣称方法普遍优越。
+当前主实验 **27/27 轨迹有评分、135/135 评分槽有效**，其中 **20 正常完成、5 轮数耗尽、2 输出截断**。一次执行符合 brief 的计算预算例外；5 个 judge 评分不等于5次执行。独立复算、终态恢复和归档离线复现已通过。主要缺口是严格的 patch under-update / over-update 例证和最终展示；6 条回退诊断未证实 over-update，负结果保留。
 
-## 直接跑 benchmark
+- **当前计划与逐项缺口**：[课程完成计划](reports/course-completion-plan.html)，机器依据：`experiments/course-completion-plan.json`。
+- **主实验**：[27 条结果、指标与案例](reports/course-v1.3-experiment.html)。
+- **历史研究**：[全部成功与失败记录](reports/selective-strategy-search.html)；108 条 R1 已完成，其中原三方法81条各有3次重复，可独立作附录。R2/R3 因连接失败停止，不再自动恢复。PE +0.5 等阈值仅为历史研究标准。
+- **旧课程试验**：[A/B 的 54 条记录](reports/experiment-readiness.html)，与 v1.3 分开，不回填或混算。
 
-`.env` 自动加载，只保存本机 key/endpoint，不提交。
+## 使用
 
-```bash
-uv sync --frozen
-./experiment                              # 中文菜单：7 准备 benchmark，4 运行，5 结果
-./experiment check --api                   # 最小真实 API 检查，会计费
-./experiment prepare --suite experiments/benchmark-v1.3.json --repeats 1
-./experiment run                          # 调用真实模型
-./experiment report
-```
-
-省略 `--repeats 1` 即按建议重复 3 次。新机器先运行 `uv run pe6203 bootstrap --scope all`，固定 Node 安装见 `configs/.context/runtime.json`。
-
-- 只先执行一条：`./experiment run --limit 1`；继续：`./experiment run --resume`。
-- 指定历史实验：run/report 加 `--output results/raw/目录名`。
-- 临时调试：`./experiment prepare --tasks 139`；不计入固定子集结果。
-- run 自动做真实 API 预检，费用单列在 `preflight/`；连续两条连接失败即停止，后续单元保持未运行。
-- 模型连接错误、429/5xx：同一请求最多重试 1 次。v1.3 的每个 judge 槽最多 2 次逻辑尝试，取首次有效评分；所有尝试与未知费用保留。低分和 agent 轨迹不重跑。
-- v1.3 评分中断可用 `--resume` 只补缺失评分，不重复 agent 或部署；次数不重置。代码/配置变化必须新建实验。
-
-`analysis/` 自动输出三策略匹配的 TF/PE/ECS、recovery/retention、费用、失败和缺失记录。五个有效评分槽才计分；ECS 要三阶段三策略齐全。`summary.json` / `runs.csv` 保留逐条结果；截断、超时、轮数耗尽与完成分开显示。
-
-可读入口：[`当前实验结果、案例与剩余要求`](reports/course-v1.3-experiment.html)。原始包、审计和机器说明在 `results/evidence/course-v1.3-20261031/`。
-
-策略研究另见 [`候选方法、全部成功与失败记录`](reports/selective-strategy-search.html)：参考 ACE、A-MEM、Reflexion。首轮 24 条无候选晋级；第二轮筛出 `sufficiency_feedback`，随后完成 108 条、540 评分的独立确认：变化后 PE 8.54→9.46，TF/ECS 均值相同；完成数 14/27 低于 17/27，**未通过晋级门槛**。完成差异来自共同 K0 的 Early，不能直接归因为补丁；第三轮预算规则 `budget_feedback` 开发结果为完成 6/6（原 Patch 5/6）、PE 仅 +0.03，第二次确认因连接故障停止（6 条评分、2 条失败）；原记录保留，同一候选正在进行全新的第三次确认，尚未晋级。所有开发负结果、生成失败与费用均保留。课程主结论看 TF 恢复/保持和 ECS；当前搜索在 TF/ECS/完成率约束下优化 PE，并报告成本，开发高分不能当确认结果。
+当前仅做离线检查，不调用模型：
 
 ```bash
-./experiment search prepare --spec experiments/selective-search-v3.1.json --output results/raw/my-search
-./experiment search build --output results/raw/my-search    # 调用 updater，保存原始响应及费用
-./experiment search review --output results/raw/my-search --note '填写对生成规则依据的审查结论'
-./experiment search run --output results/raw/my-search      # 固定知识后执行；再次运行只恢复允许的缺失步骤
-./experiment search report --output results/raw/my-search
+python3 results/evidence/course-completion-20261031/audit_reuse.py
 ```
 
-`review` 前检查 `adaptations/*/updater-audit.json`；自动结构校验不能证明所有自然语言规则都有依据。确认阶段 prepare 另加 `--phase confirmation --candidate <候选名称>`，运行 108 个单元，保留两基线和原 Selective Patch。
-
-[`历史计划及成功/失败案例`](reports/experiment-readiness.html) 保留全部 54 条旧课程记录：A 为 26/27 完整评分，B 为 24/27；未用新结果回填。当前课程缺口是可靠的 patch under-update / over-update 因果案例及最终展示。Netlify 仍待用户选定专用站点后做真实发布。
-
-已确认的发布包缺陷保留在所有方法中：Late `batch_evaluate` / `sequentialthinking` / `review_workspace_health` 缺失内部方法，以及新增 `parallel-thinking` 的输出 schema 不匹配。不能把这些直接归因为 under/over-update。**课程报告仍需基于真实轨迹完成两类错误的因果分析**；低分不自动证明原因。
-
-## 论文网页与 Netlify
+复现时先用 `uv sync --frozen` 安装依赖。`./experiment` 是中文交互入口，自动加载本机 `.env`；勿提交密钥。**以下是真实实验的参考命令，需批准后使用，不要对已完成主实验再次执行：**
 
 ```bash
-./experiment papers                       # 或菜单 3：检查/安装→登录→关联站点→来源→运行
-./experiment papers --prepare-only        # 完成准备后，用 run 启动
+./experiment prepare --suite experiments/benchmark-v1.3.json --repeats 1 --output results/raw/approved-new-run
+./experiment run --output results/raw/approved-new-run
+./experiment report --output results/raw/approved-new-run
 ```
 
-向导显示当前账号供你核对或切换；需要授权时由你在浏览器完成，并在终端选择已有专用站点。仅上传生成的单个 HTML 到 draft URL，不覆盖生产站点。可用 `--source-url 'HTTPS论文列表地址'` 指定来源。推荐 arXiv 日期倒序检索（见结果报告）；默认 Hugging Face 列表按相关性排列，不能直接取前五条。
+框架仍可配置；现有 CLI 省略 `--repeats` 默认3次，当前课程方案必须显式写1。冻结源码/配置变化后应使用新实验ID，不恢复旧冻结运行。历史数据的离线复算使用归档内源码，命令见 `results/evidence/course-v1.3-20261031/reproduction.json`。
 
-所有方法共用带时间/hash 的来源快照；agent 自动抓取、按发布日期选择相关的最新 5 篇并发布。检索结果前五条不一定最新，不能用旧论文掩盖抓取失败。快照回放禁用脚本/子资源，只允许固定来源。223 三阶段工具目录相同，用于网页流程与保持能力验证，不能独自证明恢复能力；结果不与原发布环境混算。真实发布需完成账号/站点选择后验证。相同 HTML 在同一 workspace 复用部署；只补网址核验：`./experiment netlify verify --workspace <run/workspace>`。
+执行记录与 judge 分数分开。低分、截断和失败不能被重跑覆盖；缺失评分仅在原次数预算内恢复，连接失败费用未知不能填零。`analysis/` 保存 TF/PE/ECS、恢复/保持、成本和缺失表。已确认的发布包缺陷与连接故障单列，不自动算成补丁错误。
+
+## 可选 Netlify 流程
+
+如以后批准网页演示，使用 `./experiment papers`。CLI 在准备/冻结前显示账号、引导用户浏览器登录和选择专用站点；agent 在运行时决定是否调用部署工具。只发布 draft。223 三阶段目录相同，不能独自证明恢复能力，结果不与原发布环境混算。具体流程在 `docs/.context/experiment-cli.json`。
 
 ## 文件放在哪里
 
 | Folder | 用途 |
 | --- | --- |
-| `src/pe6203/` | CLI、Selective Patch、MCP/agent/judge、重试、统计、Netlify 适配。 |
-| `integration/` | LLM Full Rewrite、模型接口及描述约束检查。 |
-| `configs/` | 固定模型、服务配置；`.context/` 是简短机器说明。 |
-| `experiments/` | 固定子集、覆盖标签、选择依据、协议和评估模板。 |
-| `examples/catalogs/`、`fixtures/` | 开发工具目录、已有输入；固定子集无需外部文件 fixture。 |
-| `results/raw/` | 本机 plan、知识、完整轨迹、评分、分析结果；不提交。 |
-| `results/evidence/`、`results/evaluation/` | 可审计验证证据和已整理结果。 |
-| `tests/`、`scripts/` | 自动测试与真实 MCP 探测；`verify_benchmark.py` 不调用模型。 |
-| `tools/netlify/` | Netlify CLI 版本和依赖锁。 |
-| `contributions/`、`docs/`、`reports/` | 贡献、机器说明、历史与报告材料；当前说明以此 README 为准。 |
-| `.cache/`、`.venv/`、`.netlify/` | 本机发布包、环境和站点关联，不提交。 |
-
-机器入口：`docs/.context/experiment-cli.json`。历史证据代表当时版本，不覆盖当前协议。
+| `src/pe6203/`、`integration/` | CLI、三种方法、MCP/agent/judge、统计与外部集成。 |
+| `configs/` | 固定模型、服务与预算；`.context/` 是机器说明。 |
+| `experiments/` | 当前完成计划、冻结子集/协议、历史研究计划和评估模板。 |
+| `examples/catalogs/`、`fixtures/` | 开发工具目录和输入。 |
+| `results/raw/` | 本机冻结计划、知识、原始轨迹、评分、费用；不提交。 |
+| `results/evidence/`、`results/evaluation/` | 可分享归档、hash、离线审计和整理结果。 |
+| `tests/`、`scripts/` | 测试、核验与报告工具；先核对命令是否调用真实服务。 |
+| `reports/` | 可读计划、主结果与完整成功/失败案例；历史结果不覆盖。 |
+| `docs/`、`contributions/` | 机器说明、来源与成员贡献记录。 |
+| `tools/netlify/` | 可选 Netlify CLI 的版本与依赖锁。 |
+| `.cache/`、`.venv/`、`.netlify/` | 本机依赖、环境、登录关联，不提交。 |
