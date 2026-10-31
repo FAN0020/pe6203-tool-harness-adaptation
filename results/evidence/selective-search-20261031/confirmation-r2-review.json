@@ -1,0 +1,120 @@
+{
+  "phase": "confirmation",
+  "round": 2,
+  "decision": "incomplete_transport_failure_no_promotion",
+  "termination": {
+    "status": "terminated_incomplete_due_to_model_transport",
+    "round": 2,
+    "planned": 108,
+    "scored": 6,
+    "valid_rating_slots": 30,
+    "failed_executions": 2,
+    "not_started": 100,
+    "process_exit_code": 2,
+    "frozen_files_and_terminal_hashes_verified": 238,
+    "failed_cells": [
+      {
+        "id": "task283-late-budget_feedback-r0",
+        "execution_status": "failed",
+        "failure_category": "model_transport",
+        "causes": [
+          "APIConnectionError"
+        ],
+        "events": [
+          {
+            "elapsed_seconds": 208.02925,
+            "type": "request_retry",
+            "round": 9,
+            "error_type": "APITimeoutError",
+            "http_status": null,
+            "failed_attempt": 1,
+            "usage": null
+          },
+          {
+            "elapsed_seconds": 240.046144,
+            "type": "agent_error",
+            "round": 9,
+            "error_type": "APIConnectionError"
+          }
+        ]
+      },
+      {
+        "id": "task133-late-selective_patch-r0",
+        "execution_status": "failed",
+        "failure_category": "model_transport",
+        "causes": [
+          "APIConnectionError"
+        ],
+        "events": [
+          {
+            "elapsed_seconds": 30.418985,
+            "type": "request_retry",
+            "round": 1,
+            "error_type": "APIConnectionError",
+            "http_status": null,
+            "failed_attempt": 1,
+            "usage": null
+          },
+          {
+            "elapsed_seconds": 62.431406,
+            "type": "agent_error",
+            "round": 1,
+            "error_type": "APIConnectionError"
+          }
+        ]
+      }
+    ],
+    "network_diagnosis": "Recorded agent events show APITimeoutError/APIConnectionError without HTTP status; exact lower-level network cause was not recorded. Separate public endpoint check later returned HTTP 200. Do not infer authentication or a particular service-side outage.",
+    "recovery_preflight": "preflight/20261031T074427478003.json",
+    "recovery_preflight_status": "same frozen agent/judge model reachable",
+    "local_diagnostic_note": "One initial manual preflight invocation omitted uv --env-file and stopped before any request. Corrected invocation loaded the existing local .env; no credentials were changed.",
+    "decision": "No promotion and no replacement of failed trajectories. Preserve entire incomplete round. Same candidate requires fresh full four-arm confirmation.",
+    "next_round": 3,
+    "next_alpha": 0.00625,
+    "sequential_policy": "Conservatively count this incomplete confirmation as round 2; no alpha reset.",
+    "candidate_frozen": "budget_feedback remains unchanged from selected v3 development; no new candidate tuning based on this partial trial.",
+    "created_at": "2026-10-31T07:47:17.126017+00:00"
+  },
+  "verification": {
+    "status": "partial_verified",
+    "planned": 108,
+    "verified": 6,
+    "valid_rating_slots": 30,
+    "checks": [
+      "frozen sources and artifacts",
+      "schema/routing/description boundaries",
+      "exact K0 where required",
+      "identical agent/judge protocol",
+      "raw five judge scores",
+      "every executed tool call was agent-selected"
+    ]
+  },
+  "billing": {
+    "by_stage": {
+      "agent": {
+        "known_usd": 0.0616288896,
+        "unknown_totals": 2
+      },
+      "judge": {
+        "known_usd": 0.018142422000000002,
+        "unknown_totals": 0,
+        "not_started_records": 2,
+        "raw_unreported_cost_records": 2
+      },
+      "update": {
+        "known_usd": 0.034105505999999994,
+        "unknown_totals": 0
+      }
+    },
+    "preflight_separate": true,
+    "unknown_charges": "Failed model requests have unknown usage/fees; known totals are lower bounds.",
+    "probe_preparation": "Existing shared 12 local MCP calls; acquisition time remains unknown.",
+    "interpretation": "Two failed agent records have unknown actual model charges. Their judge stage was not started and no judge-attempt request files exist, so no benchmark judge calls were billed for those records. Generic raw tables may count their missing judge-cost fields as unreported, not as evidence of a charged request."
+  },
+  "source_commit": "275bb6c",
+  "source_archive": "implementation-v3.tar.gz",
+  "sha256": {
+    "confirmation-r2-incomplete.tar.gz": "b25dee4efe180127e3592512f4fdd534c352b373402c35bdc2102c9e2e33603a",
+    "implementation-v3.tar.gz": "96b7ca4b6f7abe078494f4d55f3757c9c14e018ff9b4add2ae70bfcc1ad20a68"
+  }
+}

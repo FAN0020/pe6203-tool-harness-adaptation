@@ -239,6 +239,17 @@ def render(directories, destination):
             + link(directory / "readable-analysis.json", "结构化分析与完整错误", destination)
             + "</p>",
         ]
+        termination = directory / "round-termination.json"
+        if termination.exists():
+            stopped = read_json(termination)
+            sections.append(
+                "<p><strong>本轮因模型连接故障提前结束，未晋级。</strong>"
+                + f"已评分 {stopped['scored']} 条，失败 {stopped['failed_executions']} 条，"
+                + f"未运行 {stopped['not_started']} 条。失败轨迹未重跑或替换；"
+                + f"原候选保持不变，另建完整第 {stopped['next_round']} 轮，α＝{stopped['next_alpha']}。"
+                + link(termination, "停止原因、恢复预检与原始错误", destination)
+                + "。失败记录的 judge 未启动，其原始费用字段为空不代表发生了未知收费调用。</p>"
+            )
         overall = []
         for arm in sorted({row["strategy"] for row in s["rows"]}):
             group = [row for row in s["rows"] if row["strategy"] == arm]

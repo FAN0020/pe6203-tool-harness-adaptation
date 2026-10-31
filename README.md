@@ -44,10 +44,10 @@ uv sync --frozen
 
 可读入口：[`当前实验结果、案例与剩余要求`](reports/course-v1.3-experiment.html)。原始包、审计和机器说明在 `results/evidence/course-v1.3-20261031/`。
 
-策略研究另见 [`候选方法、全部成功与失败记录`](reports/selective-strategy-search.html)：参考 ACE、A-MEM、Reflexion。首轮 24 条无候选晋级；第二轮筛出 `sufficiency_feedback`，随后完成 108 条、540 评分的独立确认：变化后 PE 8.54→9.46，TF/ECS 均值相同；完成数 14/27 低于 17/27，**未通过晋级门槛**。完成差异来自共同 K0 的 Early，不能直接归因为补丁；第三轮预算规则 `budget_feedback` 开发结果为完成 6/6（原 Patch 5/6）、PE 仅 +0.03，选入新的确认轮，尚未晋级。所有开发负结果、生成失败与费用均保留。课程主结论看 TF 恢复/保持和 ECS；当前搜索在 TF/ECS/完成率约束下优化 PE，并报告成本，开发高分不能当确认结果。
+策略研究另见 [`候选方法、全部成功与失败记录`](reports/selective-strategy-search.html)：参考 ACE、A-MEM、Reflexion。首轮 24 条无候选晋级；第二轮筛出 `sufficiency_feedback`，随后完成 108 条、540 评分的独立确认：变化后 PE 8.54→9.46，TF/ECS 均值相同；完成数 14/27 低于 17/27，**未通过晋级门槛**。完成差异来自共同 K0 的 Early，不能直接归因为补丁；第三轮预算规则 `budget_feedback` 开发结果为完成 6/6（原 Patch 5/6）、PE 仅 +0.03，第二次确认因连接故障停止（6 条评分、2 条失败）；原记录保留，同一候选将进行全新的第三次确认，尚未晋级。所有开发负结果、生成失败与费用均保留。课程主结论看 TF 恢复/保持和 ECS；当前搜索在 TF/ECS/完成率约束下优化 PE，并报告成本，开发高分不能当确认结果。
 
 ```bash
-./experiment search prepare --spec experiments/selective-search-v3.json --output results/raw/my-search
+./experiment search prepare --spec experiments/selective-search-v3.1.json --output results/raw/my-search
 ./experiment search build --output results/raw/my-search    # 调用 updater，保存原始响应及费用
 ./experiment search review --output results/raw/my-search --note '填写对生成规则依据的审查结论'
 ./experiment search run --output results/raw/my-search      # 固定知识后执行；再次运行只恢复允许的缺失步骤
