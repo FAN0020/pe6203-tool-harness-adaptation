@@ -57,13 +57,96 @@ def artifact_observation(stage="late", name="lookup"):
     }
 
 
+def slidev_catalog(stage="early"):
+    original = catalog(stage)
+    names = ["create_bulk_slides", "set_page", "load_slidev", "apply_theme", "unrelated"]
+    tools = []
+    for name in names:
+        tool = deepcopy(original["tools"][0])
+        tool.update(
+            tool_id=f"slidev-mcp::{name}",
+            server_id="slidev-mcp",
+            name=name,
+            routing={"server_id": "slidev-mcp", "tool_name": name},
+        )
+        tools.append(tool)
+    original["tools"] = tools
+    return original
+
+
+def document_observation(stage="late"):
+    return {
+        "stage": stage,
+        "server": "slidev-mcp",
+        "tool": "create_bulk_slides",
+        "args": {"probe": "fresh_project_write_reload_theme"},
+        "result": {
+            "kind": "document_sequence_v1",
+            "body_example": "# A\n\nVALUE_A=17",
+            "verified_pages": 3,
+            "fresh_project": True,
+            "direct_theme_result": "first_page_only",
+            "reload_theme_result": "three_pages_preserved",
+        },
+    }
+
+
+def test_document_sequence_updates_only_proven_dependencies_of_changed_bulk():
+    old, target = slidev_catalog(), slidev_catalog("late")
+    target["tools"][0]["description"] += " New bulk contract."
+    knowledge, changes, cost = adapt(
+        old, target, "document_sequence", {"feedback": [document_observation()]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    for index, (a, b) in enumerate(zip(base["tools"], knowledge["tools"], strict=True)):
+        assert {k: v for k, v in a.items() if k != "usage_rules"} == {
+            k: v for k, v in b.items() if k != "usage_rules"
+        }
+        assert b["usage_rules"][: len(a["usage_rules"])] == a["usage_rules"]
+        assert len(b["usage_rules"]) - len(a["usage_rules"]) == (1 if index < 4 else 0)
+    writer_rule = knowledge["tools"][1]["usage_rules"][-1]
+    assert "VALUE_A=17" in writer_rule and "fresh" in writer_rule
+    assert "load_slidev" in writer_rule and "apply_theme" in writer_rule
+    notes = [c for c in changes if c["operation"] == "append_document_sequence"]
+    assert len(notes) == 4 and len({tuple(n["basis"]) for n in notes}) == 1
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+
+
+def test_document_sequence_does_not_change_unaffected_catalog_or_wrong_stage():
+    old, target = slidev_catalog(), slidev_catalog("late")
+    target["tools"][-1]["description"] += " Unrelated change."
+    candidate, _, _ = adapt(
+        old, target, "document_sequence", {"feedback": [document_observation()]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    assert candidate == base
+    target["tools"][0]["description"] += " New bulk contract."
+    candidate, _, _ = adapt(
+        old, target, "document_sequence", {"feedback": [document_observation("middle")]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    assert candidate == base
+    candidate, _, _ = adapt(old, old, "document_sequence", {"feedback": [document_observation()]})
+    assert candidate == old
+
+
+def test_document_sequence_rejects_unproven_claims_and_missing_dependency():
+    old, target = slidev_catalog(), slidev_catalog("late")
+    target["tools"][0]["description"] += " New bulk contract."
+    evidence = document_observation()
+    evidence["result"]["fresh_project"] = False
+    with pytest.raises(ValueError, match="document sequence"):
+        adapt(old, target, "document_sequence", {"feedback": [evidence]})
+    target["tools"] = [t for t in target["tools"] if t["name"] != "load_slidev"]
+    with pytest.raises(ValueError, match="document sequence"):
+        adapt(old, target, "document_sequence", {"feedback": [document_observation()]})
+
+
 def test_artifact_contract_distinguishes_persisted_state_without_rewriting_metadata():
     old, target = catalog(), changed()
     before = deepcopy((old, target))
     observation = artifact_observation()
-    knowledge, changes, cost = adapt(
-        old, target, "artifact_contract", {"feedback": [observation]}
-    )
+    knowledge, changes, cost = adapt(old, target, "artifact_contract", {"feedback": [observation]})
     original, _, _ = adapt(old, target, "selective_patch")
     rules = knowledge["tools"][0]["usage_rules"]
     assert rules[:-1] == original["tools"][0]["usage_rules"]

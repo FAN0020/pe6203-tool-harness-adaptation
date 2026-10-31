@@ -25,6 +25,7 @@ VARIANTS = (
     "evidence_scope",
     "observed_contract",
     "artifact_contract",
+    "document_sequence",
 )
 
 SUFFICIENCY_RULE = (
@@ -176,6 +177,67 @@ def probe_note(observation):
         + ". This observation is scoped to those inputs, not a guarantee for other inputs."
         + workspace
     )
+
+
+def document_sequence_notes(observation):
+    """Encode the tested writer/loader/theme dependency, never task content."""
+    result = observation["result"]
+    expected = {
+        "kind": "document_sequence_v1",
+        "verified_pages": 3,
+        "fresh_project": True,
+        "direct_theme_result": "first_page_only",
+        "reload_theme_result": "three_pages_preserved",
+    }
+    if (
+        observation["server"] != "slidev-mcp"
+        or observation["tool"] != "create_bulk_slides"
+        or not isinstance(result, dict)
+        or set(result) != {*expected, "body_example"}
+        or any(result.get(k) != v for k, v in expected.items())
+        or type(result.get("verified_pages")) is not int
+        or result.get("fresh_project") is not True
+        or not isinstance(result.get("body_example"), str)
+        or not 1 <= len(result["body_example"]) <= 1200
+    ):
+        raise ValueError("Invalid verified document sequence evidence")
+    example = json.dumps({"index": 0, "layout": "cover", "content": result["body_example"]})
+    return {
+        "slidev-mcp::create_bulk_slides": (
+            "Verified custom-content limitation: bulk emits topic templates and does not use "
+            "customInstructions as supplied content. For a fresh one-cover project, a complete "
+            "Markdown page sequence can instead be persisted through set_page(index=0), then "
+            "load_slidev on the same project, then apply_theme. The writer rule gives the tested "
+            "format. This alternative does not clear an already populated deck."
+        ),
+        "slidev-mcp::set_page": (
+            "This tool wraps content in page frontmatter. Do not put a leading whole-document "
+            "frontmatter block in content: that creates an extra page. In a fresh one-cover "
+            "project, index=0 can accept the first page's Markdown body followed by explicit "
+            "frontmatter/body blocks for subsequent pages. Exact tested three-page arguments "
+            "(synthetic data; substitute required content, not these facts): "
+            + example
+            + ". After this write, load_slidev on the same project BEFORE apply_theme or page "
+            "edits, so the persisted pages become separate records. Immediate apply_theme "
+            "otherwise drops later pages. Replacing index=0 replaces one stored record only; "
+            "it does not remove other existing pages."
+        ),
+        "slidev-mcp::load_slidev": (
+            "After set_page writes a multi-page Markdown sequence in one record, load this "
+            "same project before apply_theme. The loader splits persisted pages into separate "
+            "records; without this step theme updates can discard later pages. get_all_slides "
+            "after loading reports the separated records. Reloading does not verify source "
+            "facts or rendered design."
+        ),
+        "slidev-mcp::apply_theme": (
+            "This updates the first in-memory record's frontmatter. set_page(index=0) replaces "
+            "that frontmatter, so a theme applied earlier can be lost. If that record contains "
+            "multiple Markdown pages, applying a theme before load_slidev discards later "
+            "pages. The verified fresh-project sequence is set_page, load_slidev, apply_theme; "
+            "all three synthetic pages then persisted through another reload. Theme success "
+            "alone does not establish an artifact's rendered quality."
+        ),
+    }
 
 
 def artifact_contract_note(observation):
@@ -433,7 +495,13 @@ def adapt_result(old, target, strategy, context=None):
         if tool["tool_id"] not in changes:
             continue
         change = changes[tool["tool_id"]]
-        if strategy in ("linked_notes", "workflow_notes", "observed_contract", "artifact_contract"):
+        if strategy in (
+            "linked_notes",
+            "workflow_notes",
+            "observed_contract",
+            "artifact_contract",
+            "document_sequence",
+        ):
             continue
         note = delta_note(tool, change)
         if strategy in (
@@ -463,6 +531,25 @@ def adapt_result(old, target, strategy, context=None):
         ]
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
+    if strategy == "document_sequence":
+        by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
+        for observation in feedback:
+            source_id = f"{observation['server']}::{observation['tool']}"
+            notes = document_sequence_notes(observation)
+            if not notes.keys() <= by_id.keys():
+                raise ValueError("Missing tool required by verified document sequence")
+            for tool_id, rule in notes.items():
+                by_id[tool_id]["usage_rules"].append(rule)
+                modified.add(tool_id)
+                result["changes"].append(
+                    {
+                        "operation": "append_document_sequence",
+                        "tool_id": tool_id,
+                        "basis": [changes[source_id]["change_id"]],
+                        "note": rule,
+                        "evidence": "frozen_synthetic_write_reload_theme_sequence",
+                    }
+                )
     if strategy in ("observed_contract", "artifact_contract"):
         by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
         for observation in feedback:
