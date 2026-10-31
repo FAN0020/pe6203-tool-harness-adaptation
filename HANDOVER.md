@@ -18,7 +18,15 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：MagicUI 参数路由机制已预注册，待原生证据
+### 当前最新断点：MagicUI 原生机制已证实，原题依赖尚不满足
+
+- `7c5f0af`预注册的9工具调用/3catalog已全部完成，执行器session95656已退出；0模型/0评分/USD0。独立离线核验56归档文件与34冻结源码输入通过，见`results/evidence/magicui-argument-routing-probes-20261101/verification.json`；不要重跑。
+- Late三个新增精确工具均暴露空参数schema：单项查询报Component undefined、批量报No valid component names（均isError=true），搜索丢失query/category，返回78项且isError=false。三阶段原有getTextAnimations均返回逐字相同的14个真实实现，canary含9476字符代码。确认了原生参数路由缺陷和通用替代，尚未测agent改善。
+- `results/evidence/mechanism-screening-20261101/magicui-task-readiness-screen.json`记录定向依赖筛查：377原始logs/ableton文件未在公开附件找到；171所需mcp-mermaid包三阶段缺失且不属选定201题；246原CSV无购买字段；217虽有XLSX但原工具集无文件读取能力。106名片图片亦未提供。不得补造数据、把其他Mermaid包当别名或修原生源码后计作知识收益。
+- 当前没有新的agent候选/日程或运行服务。Goal继续，双重改善仍未成立；下一步寻找另一条原题必需且依赖可用的具体机制。本轮有实质进展（原生探针闭环与依赖核验），不是连续阻塞声明。全部旧文件/负结果保留，无push/外发。
+
+### 已归档前置：MagicUI 参数路由机制预注册
+
 
 - 上一轮`discovery_contract`已淘汰且不可重跑（下节）。本轮定向源码核对发现不同机制：MagicUI Late三个新精确查询工具用普通JSON对象注册，当前SDK把它们当annotations，可能导出空参数schema并把request context传给handler，丢失真实用户参数。目录不一定失败，原有无参分类接口可能仍可用；目前仅源码假设。
 - `experiments/magicui-argument-routing-probes-v1.json`冻结固定canary=text-animate、9次工具调用/3catalog/0模型；collector在`results/evidence/magicui-argument-routing-probes-20261101/run_probes.py`。先检查Early目录/真实分类代码，再Middle索引/分类，最后Late三条故障及分类替代。意外错误/缺少canary立即停止，不重试/换查询/修原生源码。共用profile仅按三阶段原包bin补入dist/server.js，不传凭据。

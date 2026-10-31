@@ -1,0 +1,123 @@
+{
+  "id": "magicui-task-readiness-screen-v1",
+  "scope": "Only original question/server projection, inventory and published attachment filenames; no reference answers, credentials, old trajectories or model requests.",
+  "native_probe": "results/evidence/magicui-argument-routing-probes-20261101/verification.json",
+  "source": [
+    {
+      "path": "results/evidence/benchmark-inventory.json",
+      "sha256": "25b725f09df65210dbef1f5afc37f059635f700c2fd35763d0f521d4ab4d2b54"
+    },
+    {
+      "path": ".cache/mcpevol/upstream/src/custom/data/test_cases/test_cases.json",
+      "sha256": "b51d09d93afa94b08a67281a95ee8b4c7d69953816adf6769a996e26274bb023"
+    },
+    {
+      "path": ".cache/mcpevol/upstream/src/custom/data/test_cases/server_file_mapping.json",
+      "sha256": "084d8df504aec622f9ebc2c85de226caccb11723c9b0e48f8263190363b7c0bf"
+    },
+    {
+      "path": ".cache/mcpevol/original/node_modules/mcp-server-code-runner/package.json",
+      "sha256": "f85239d5d18b960c1227f82ceef699468b3a6f10f8a75fa2221c45ede02b5c00"
+    },
+    {
+      "path": ".cache/mcpevol/original/node_modules/mcp-server-code-runner/dist/server.js",
+      "sha256": "a31a8d17389468dd6be100cabf07c6800c6032550565a32bee9d06e09d8736ce"
+    }
+  ],
+  "questions": [
+    {
+      "idx": 171,
+      "question": "I'm preparing a presentation and want to include both interactive UI components and visual diagrams. Can you help me find details on which UI components from Magic UI I can use, especially those with animations? After that, I'd like to generate a visual diagram that maps out how these components interact within the presentation.",
+      "servers": {
+        "@magicuidesign/mcp": [
+          "getUIComponents",
+          "getAnimations"
+        ],
+        "mcp-mermaid": [
+          "generate_mermaid_diagram"
+        ]
+      }
+    },
+    {
+      "idx": 217,
+      "question": "I need to visualize the electronic sales trends over the past year using the data from the \"Local_Electronic_Sales.xlsx\" file. Please generate a column chart with labeled axes and titles. After creating the chart, apply the animated gradient text to the chart's title to enhance visual appeal.",
+      "servers": {
+        "@umengfe/mcp-server-chart": [
+          "generate_column_chart"
+        ],
+        "@magicuidesign/mcp": [
+          "getTextAnimations"
+        ]
+      }
+    },
+    {
+      "idx": 246,
+      "question": "I need to create a customer dashboard for our sales team. We have customer data in the CSV files, and I want to show key metrics like customer distribution by country and purchase frequency patterns. Can you help me create some visual charts for this data, and then suggest some modern UI components that would make these charts look engaging in a web dashboard? I'd like the dashboard to have animated elements that draw attention to important metrics.",
+      "servers": {
+        "@umengfe/mcp-server-chart": [
+          "generate_pie_chart",
+          "generate_bar_chart"
+        ],
+        "@magicuidesign/mcp": [
+          "getUIComponents",
+          "getSpecialEffects",
+          "getTextAnimations"
+        ]
+      }
+    },
+    {
+      "idx": 377,
+      "question": "I have some application error logs in the logs folder from early February (like ableton-error-2026-02-02.log). I want to write a quick script to parse them and count how many errors occurred per day. Then, I need to display the results on a simple dashboard webpage with a dynamic title and some highlighted stats cards. Can you help me set this up?",
+      "servers": {
+        "mcp-server-code-runner": [
+          "run-code"
+        ],
+        "@magicuidesign/mcp": [
+          "getTextAnimations",
+          "getSpecialEffects"
+        ]
+      }
+    }
+  ],
+  "published_attachment_names": [
+    "code/.gitkeep",
+    "code/log_analysis.py",
+    "code/new_aggregator.py",
+    "csv/customers-100.csv",
+    "csv/products-100.csv",
+    "excel/Local_Electronic_Sales.xlsx",
+    "excel/goods.xlsx",
+    "excel/people_data.xlsx",
+    "figs/.gitkeep",
+    "files/.gitkeep",
+    "html/.gitkeep",
+    "html/time.html",
+    "llms-full.txt",
+    "markdown/.gitkeep",
+    "markdown/work.md",
+    "music/mixkit-retro-game-emergency-alarm-1000.wav",
+    "pdf/WebArena.pdf",
+    "pdf/embodied_ai_papers/PaLM-E, An Embodied Multimodal Language Model, Danny Driess et al., 2023, v1_compressed.pdf",
+    "pdf/embodied_ai_papers/RT-2, Vision-Language-Action Models Transfer Web Knowledge to Robotic Control, Anthony Brohan et al., 2023, v1_compressed.pdf",
+    "pdf/embodied_ai_papers/Voyager, An Open-Ended Embodied Agent with Large Language Models, Guanzhi Wang et al., 2023, v2_compressed.pdf",
+    "picture/clock.png",
+    "ppt/build_effective_agents.pptx",
+    "txt/Android.txt",
+    "txt/log_today.txt",
+    "txt/log_yesterday.txt",
+    "txt/paper_list.bib",
+    "word/CV.docx",
+    "word/Report_Card.docx",
+    "word/exchange.docx"
+  ],
+  "findings": {
+    "377": "Required logs folder and ableton-error-2026-02-02.log absent from extracted published attachments. Code-runner package bin exists, but no native call needed until real input prerequisite is met. Do not replace with unrelated log_today/log_yesterday or synthetic data.",
+    "171": "Original task references mcp-mermaid::generate_mermaid_diagram; native package absent in all three stages, confirmed by inventory and filesystem. Different mermaid-mcp-server package is not an authorized alias. Task also not in selected201 inventory.",
+    "246": "Original published customer CSV lacks purchase-frequency fields (previous readiness evidence); chart-only tool set supplies no file reader. Do not invent purchase records.",
+    "217": "Original XLSX exists, but listed tools comprise chart generation plus MagicUI only, with no file reader. No complete native path established. Do not preload computed task answers into updater.",
+    "106": "Saleskit original named picture/image_01.jpg absent; only clock.png exists. Optional OCR rules not required by single-card request; external OCR/upload not called."
+  },
+  "decision": "Native routing defect confirmed but no complete eligible benchmark path established for current MagicUI candidates. No new updater/model schedule. Preserve evidence; no probe rerun or native source repair. Continue distinct required-path screening.",
+  "new_model_calls": 0,
+  "goal_complete": false
+}
