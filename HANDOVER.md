@@ -12,7 +12,14 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：文档写入顺序新机制已通过合成探测，待冻结新候选
+### 当前最新断点：document_sequence 六单元开发对照已冻结，准备执行
+
+- 新候选在`2dd0efb`冻结，实施与355项离线测试在`03a2574`提交。协议`experiments/document-sequence-v1.json`；仅为变化bulk及直接相关set_page/load_slidev/apply_theme追加4条实测工具顺序/合成格式知识；没有论文事实、通用预算指令或元数据修改。235保持任务两组精确K0。
+- 仍用457 Middle/Late与235 Late各两方法、共6条新执行；原模型/供应商/预算/5judge与五项457产物门槛不变。开发门槛通过才进入两批共36条独立验证；负结果不重跑。
+- 输出`results/raw/document-sequence-pilot-20261101`，证据`results/evidence/document-sequence-pilot-20261101`。知识审查accepted，模型前计划/知识/运行时hash与匿名映射已冻结；公共只读PDF服务器session96132。先核对experiment.json和进程，不启动重复批次。
+- 使用collect_blind.py采集本轮匿名实际产物，全部6份逐属性/渲染审阅冻结后才揭示方法与分数。同一协调者不等于独立审阅者。Goal仍活动，尚无真实agent改善结论。
+
+### 已完成的前置机制探测：文档写入顺序
 
 - 下节artifact_contract已淘汰，不能重跑。随后仅做新的本地序列化探测：`experiments/slidev-document-write-probes-v1.json`在`4cdb2c3`冻结24调用；其后按源码定位的丢页原因，在`9eb8b38`冻结v2的14调用。共38本地工具调用+4catalog、模型费0，两个正负路径全部保留。
 - 已证明：`set_page`会自动添加页frontmatter；把完整文档头放进content会制造空页。多页正文可以一次写入文件，但它暂时仍是内存中的单个记录；**紧接apply_theme会把后续页丢掉**，因为`updateSlideFrontmatter`仅保留split的parts[1]。
