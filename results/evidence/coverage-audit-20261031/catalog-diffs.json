@@ -1,0 +1,591 @@
+{
+  "middle": {
+    "schema_version": "1.0",
+    "old_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+    "new_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+    "old_version": "early",
+    "new_version": "middle",
+    "old_tool_count": 6,
+    "new_tool_count": 7,
+    "removed": [],
+    "added": [
+      {
+        "change_id": "a1",
+        "tool_id": "swiftipedia-mcp-server::get_related_symbols",
+        "new": {
+          "tool_id": "swiftipedia-mcp-server::get_related_symbols",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "middle",
+          "name": "get_related_symbols",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Symbol path (e.g. '/documentation/swiftui/view')"
+              },
+              "relationship_type": {
+                "type": "string",
+                "enum": [
+                  "all",
+                  "inherits",
+                  "conforms",
+                  "uses",
+                  "used_by"
+                ],
+                "description": "Optional: filter by relationship type (default: 'all')",
+                "default": "all"
+              },
+              "limit": {
+                "type": "number",
+                "description": "Maximum number of results (default: 20)",
+                "default": 20
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "description": "Discover symbols related to a given symbol through inheritance, protocol conformance, and usage relationships. Useful for exploring the API graph and understanding how components connect.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "get_related_symbols"
+          }
+        }
+      }
+    ],
+    "changed": [
+      {
+        "change_id": "c1",
+        "tool_id": "swiftipedia-mcp-server::get_symbol_details",
+        "changed_fields": [
+          "description"
+        ],
+        "old": {
+          "tool_id": "swiftipedia-mcp-server::get_symbol_details",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "early",
+          "name": "get_symbol_details",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "description": "Get complete documentation for a symbol including description, parameters, return type, availability, code examples, and related symbols.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "get_symbol_details"
+          }
+        },
+        "new": {
+          "tool_id": "swiftipedia-mcp-server::get_symbol_details",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "middle",
+          "name": "get_symbol_details",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "description": "Get complete documentation for a specific symbol including description, parameters, return type, availability, code examples, and a list of related symbols. For detailed exploration of relationships (protocols, inheritance, usage), use get_related_symbols.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "get_symbol_details"
+          }
+        }
+      },
+      {
+        "change_id": "c2",
+        "tool_id": "swiftipedia-mcp-server::search_symbols",
+        "changed_fields": [
+          "description"
+        ],
+        "old": {
+          "tool_id": "swiftipedia-mcp-server::search_symbols",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "early",
+          "name": "search_symbols",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "Search query (e.g. 'Button', 'VStack alignment', 'List selection')"
+              },
+              "module": {
+                "type": "string",
+                "enum": [
+                  "swiftui",
+                  "unionchat",
+                  "uniontabview",
+                  "unionkeychain"
+                ],
+                "description": "Optional: filter by module"
+              },
+              "limit": {
+                "type": "number",
+                "description": "Maximum number of results (default: 10)",
+                "default": 10
+              }
+            },
+            "required": [
+              "query"
+            ]
+          },
+          "description": "Search for SwiftUI/Swift API symbols. Returns matching symbols with name, type, module, description, and URL. Supports fuzzy matching on symbol names and searches in descriptions.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "search_symbols"
+          }
+        },
+        "new": {
+          "tool_id": "swiftipedia-mcp-server::search_symbols",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "middle",
+          "name": "search_symbols",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "Search query (e.g. 'Button', 'VStack alignment', 'List selection')"
+              },
+              "module": {
+                "type": "string",
+                "enum": [
+                  "swiftui",
+                  "unionchat",
+                  "uniontabview",
+                  "unionkeychain"
+                ],
+                "description": "Optional: filter by module"
+              },
+              "limit": {
+                "type": "number",
+                "description": "Maximum number of results (default: 10)",
+                "default": 10
+              }
+            },
+            "required": [
+              "query"
+            ]
+          },
+          "description": "Search for SwiftUI/Swift API symbols using text-based queries. Returns matching symbols with name, type, module, description, and URL. Supports fuzzy matching on symbol names and searches in descriptions. For relationship-based discovery (inheritance, conformance), use get_related_symbols instead.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "search_symbols"
+          }
+        }
+      }
+    ],
+    "unchanged_tool_ids": [
+      "swiftipedia-mcp-server::browse_module",
+      "swiftipedia-mcp-server::get_examples",
+      "wikipedia-mcp::readArticle",
+      "wikipedia-mcp::search"
+    ],
+    "unchanged_count": 4
+  },
+  "late": {
+    "schema_version": "1.0",
+    "old_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+    "new_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+    "old_version": "early",
+    "new_version": "late",
+    "old_tool_count": 6,
+    "new_tool_count": 8,
+    "removed": [
+      {
+        "change_id": "r1",
+        "tool_id": "swiftipedia-mcp-server::search_symbols",
+        "old": {
+          "tool_id": "swiftipedia-mcp-server::search_symbols",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "early",
+          "name": "search_symbols",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "Search query (e.g. 'Button', 'VStack alignment', 'List selection')"
+              },
+              "module": {
+                "type": "string",
+                "enum": [
+                  "swiftui",
+                  "unionchat",
+                  "uniontabview",
+                  "unionkeychain"
+                ],
+                "description": "Optional: filter by module"
+              },
+              "limit": {
+                "type": "number",
+                "description": "Maximum number of results (default: 10)",
+                "default": 10
+              }
+            },
+            "required": [
+              "query"
+            ]
+          },
+          "description": "Search for SwiftUI/Swift API symbols. Returns matching symbols with name, type, module, description, and URL. Supports fuzzy matching on symbol names and searches in descriptions.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "search_symbols"
+          }
+        },
+        "rename_evidence": null
+      }
+    ],
+    "added": [
+      {
+        "change_id": "a1",
+        "tool_id": "swiftipedia-mcp-server::get_related_symbols",
+        "new": {
+          "tool_id": "swiftipedia-mcp-server::get_related_symbols",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "late",
+          "name": "get_related_symbols",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Symbol path (e.g. '/documentation/swiftui/view')"
+              },
+              "relationship_type": {
+                "type": "string",
+                "enum": [
+                  "all",
+                  "inherits",
+                  "conforms",
+                  "uses",
+                  "used_by"
+                ],
+                "description": "Optional: filter by relationship type (default: 'all')",
+                "default": "all"
+              },
+              "limit": {
+                "type": "number",
+                "description": "Maximum number of results (default: 20)",
+                "default": 20
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "description": "Discover symbols related to a given symbol through inheritance, protocol conformance, and usage relationships. Best for relationship-only exploration of the API graph; if you want details, examples, and relationships together in one response, use get_symbol_overview.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "get_related_symbols"
+          }
+        }
+      },
+      {
+        "change_id": "a2",
+        "tool_id": "swiftipedia-mcp-server::get_symbol_overview",
+        "new": {
+          "tool_id": "swiftipedia-mcp-server::get_symbol_overview",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "late",
+          "name": "get_symbol_overview",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "description": "Get a consolidated overview for a specific symbol by combining the core details, code examples, and related symbols into one response. Use this for fast single-symbol exploration when you want a balanced summary without making multiple tool calls.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "get_symbol_overview"
+          }
+        }
+      },
+      {
+        "change_id": "a3",
+        "tool_id": "swiftipedia-mcp-server::get_symbols_batch",
+        "new": {
+          "tool_id": "swiftipedia-mcp-server::get_symbols_batch",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "late",
+          "name": "get_symbols_batch",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Array of symbol paths (e.g. ['/documentation/swiftui/button', '/documentation/swiftui/text'])"
+              }
+            },
+            "required": [
+              "paths"
+            ]
+          },
+          "description": "Get complete documentation for multiple symbols in a single call. Accepts an array of symbol paths and returns their full details (description, parameters, return type, availability, code examples, and related symbols) in one response. Use this for bulk retrieval when you already know several paths; for a single-symbol combined summary, use get_symbol_overview.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "get_symbols_batch"
+          }
+        }
+      }
+    ],
+    "changed": [
+      {
+        "change_id": "c1",
+        "tool_id": "swiftipedia-mcp-server::browse_module",
+        "changed_fields": [
+          "parameters",
+          "description"
+        ],
+        "old": {
+          "tool_id": "swiftipedia-mcp-server::browse_module",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "early",
+          "name": "browse_module",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "module": {
+                "type": "string",
+                "enum": [
+                  "swiftui",
+                  "unionchat",
+                  "uniontabview",
+                  "unionkeychain"
+                ],
+                "description": "Module name"
+              },
+              "category": {
+                "type": "string",
+                "description": "Optional: filter by category (e.g. 'struct', 'protocol', 'method')"
+              },
+              "limit": {
+                "type": "number",
+                "description": "Maximum number of results (default: 50)",
+                "default": 50
+              }
+            },
+            "required": [
+              "module"
+            ]
+          },
+          "description": "List all symbols in a module or category. Useful for discovering available APIs.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "browse_module"
+          }
+        },
+        "new": {
+          "tool_id": "swiftipedia-mcp-server::browse_module",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "late",
+          "name": "browse_module",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "module": {
+                "type": "string",
+                "enum": [
+                  "swiftui",
+                  "unionchat",
+                  "uniontabview",
+                  "unionkeychain"
+                ],
+                "description": "Module name. Required for module browsing and also used to scope text-based symbol search when query is provided."
+              },
+              "category": {
+                "type": "string",
+                "description": "Optional: filter by category (e.g. 'struct', 'protocol', 'method')"
+              },
+              "query": {
+                "type": "string",
+                "description": "Optional: text search query (e.g. 'Button', 'VStack alignment', 'List selection'). When provided, this tool returns symbol search results scoped to the selected module instead of a plain module listing."
+              },
+              "limit": {
+                "type": "number",
+                "description": "Maximum number of results (default: 50 for browsing, also used for query-based search)",
+                "default": 50
+              }
+            },
+            "required": [
+              "module"
+            ]
+          },
+          "description": "List symbols in a module or category, or perform text-based symbol discovery within a module. Useful for discovering available APIs before drilling into details, examples, relationships, or using the combined get_symbol_overview workflow. When query is provided, this tool also performs the former symbol search behavior and returns matching symbols using fuzzy name/description search.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "browse_module"
+          }
+        }
+      },
+      {
+        "change_id": "c2",
+        "tool_id": "swiftipedia-mcp-server::get_examples",
+        "changed_fields": [
+          "description"
+        ],
+        "old": {
+          "tool_id": "swiftipedia-mcp-server::get_examples",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "early",
+          "name": "get_examples",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "description": "Get all code examples for a symbol. Returns Swift code snippets extracted from the documentation.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "get_examples"
+          }
+        },
+        "new": {
+          "tool_id": "swiftipedia-mcp-server::get_examples",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "late",
+          "name": "get_examples",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "description": "Get all code examples for a symbol. Returns Swift code snippets extracted from the documentation. Use this when you only need examples; for a single-call overview that also includes details and relationships, use get_symbol_overview.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "get_examples"
+          }
+        }
+      },
+      {
+        "change_id": "c3",
+        "tool_id": "swiftipedia-mcp-server::get_symbol_details",
+        "changed_fields": [
+          "description"
+        ],
+        "old": {
+          "tool_id": "swiftipedia-mcp-server::get_symbol_details",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "early",
+          "name": "get_symbol_details",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "description": "Get complete documentation for a symbol including description, parameters, return type, availability, code examples, and related symbols.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "get_symbol_details"
+          }
+        },
+        "new": {
+          "tool_id": "swiftipedia-mcp-server::get_symbol_details",
+          "server_id": "swiftipedia-mcp-server",
+          "version": "late",
+          "name": "get_symbol_details",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "description": "Get complete documentation for a specific symbol including description, parameters, return type, availability, and other canonical metadata. Use this when you want the authoritative symbol record; for a quicker combined summary that also bundles examples and relationships, use get_symbol_overview. For detailed exploration of relationships (protocols, inheritance, usage), use get_related_symbols. For resolving multiple symbols at once, use get_symbols_batch instead.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "swiftipedia-mcp-server",
+            "tool_name": "get_symbol_details"
+          }
+        }
+      }
+    ],
+    "unchanged_tool_ids": [
+      "wikipedia-mcp::readArticle",
+      "wikipedia-mcp::search"
+    ],
+    "unchanged_count": 2
+  }
+}

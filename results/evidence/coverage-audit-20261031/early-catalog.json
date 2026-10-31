@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "version": "early",
+  "source": "live_released_mcp_servers",
+  "tools": [
+    {
+      "tool_id": "swiftipedia-mcp-server::search_symbols",
+      "server_id": "swiftipedia-mcp-server",
+      "version": "early",
+      "name": "search_symbols",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query (e.g. 'Button', 'VStack alignment', 'List selection')"
+          },
+          "module": {
+            "type": "string",
+            "enum": [
+              "swiftui",
+              "unionchat",
+              "uniontabview",
+              "unionkeychain"
+            ],
+            "description": "Optional: filter by module"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results (default: 10)",
+            "default": 10
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "description": "Search for SwiftUI/Swift API symbols. Returns matching symbols with name, type, module, description, and URL. Supports fuzzy matching on symbol names and searches in descriptions.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "swiftipedia-mcp-server",
+        "tool_name": "search_symbols"
+      }
+    },
+    {
+      "tool_id": "swiftipedia-mcp-server::get_symbol_details",
+      "server_id": "swiftipedia-mcp-server",
+      "version": "early",
+      "name": "get_symbol_details",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "description": "Get complete documentation for a symbol including description, parameters, return type, availability, code examples, and related symbols.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "swiftipedia-mcp-server",
+        "tool_name": "get_symbol_details"
+      }
+    },
+    {
+      "tool_id": "swiftipedia-mcp-server::get_examples",
+      "server_id": "swiftipedia-mcp-server",
+      "version": "early",
+      "name": "get_examples",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "description": "Get all code examples for a symbol. Returns Swift code snippets extracted from the documentation.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "swiftipedia-mcp-server",
+        "tool_name": "get_examples"
+      }
+    },
+    {
+      "tool_id": "swiftipedia-mcp-server::browse_module",
+      "server_id": "swiftipedia-mcp-server",
+      "version": "early",
+      "name": "browse_module",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "enum": [
+              "swiftui",
+              "unionchat",
+              "uniontabview",
+              "unionkeychain"
+            ],
+            "description": "Module name"
+          },
+          "category": {
+            "type": "string",
+            "description": "Optional: filter by category (e.g. 'struct', 'protocol', 'method')"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results (default: 50)",
+            "default": 50
+          }
+        },
+        "required": [
+          "module"
+        ]
+      },
+      "description": "List all symbols in a module or category. Useful for discovering available APIs.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "swiftipedia-mcp-server",
+        "tool_name": "browse_module"
+      }
+    },
+    {
+      "tool_id": "wikipedia-mcp::search",
+      "server_id": "wikipedia-mcp",
+      "version": "early",
+      "name": "search",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search term for Wikipedia"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "wikipedia-mcp",
+        "tool_name": "search"
+      }
+    },
+    {
+      "tool_id": "wikipedia-mcp::readArticle",
+      "server_id": "wikipedia-mcp",
+      "version": "early",
+      "name": "readArticle",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the Wikipedia article to read"
+          },
+          "pageId": {
+            "type": "number",
+            "description": "The page ID of the Wikipedia article to read"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "wikipedia-mcp",
+        "tool_name": "readArticle"
+      }
+    }
+  ]
+}
