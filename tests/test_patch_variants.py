@@ -335,6 +335,89 @@ def test_thinking_contract_rejects_unverified_facts_or_missing_fallback():
         adapt(old, target, "thinking_contract", {"feedback": [thinking_observation()]})
 
 
+def weather_catalog(stage="early"):
+    result = catalog(stage)
+    names = ["get-forecast", "unrelated"]
+    if stage != "early":
+        names.append("get-weather-advice")
+    tools = []
+    for name in names:
+        tool = deepcopy(result["tools"][0])
+        tool.update(
+            tool_id=f"mcp-weather-demo::{name}", server_id="mcp-weather-demo", name=name,
+            routing={"server_id": "mcp-weather-demo", "tool_name": name},
+        )
+        tools.append(tool)
+    result["tools"] = tools
+    return result
+
+
+def weather_observation(stage="late"):
+    return {
+        "stage": stage, "server": "mcp-weather-demo", "tool": "get-weather-advice",
+        "args": {"probe": "synthetic_latitude_provenance"},
+        "result": {
+            "kind": "weather_provenance_v1", "latitude_only_temperature": True,
+            "formula": "clamp(round(30 - abs(latitude)/3), -10, 35)",
+            "synthetic_latitude": 12, "synthetic_longitudes": [-20, 140],
+            "synthetic_temperature_c": 26, "same_advice_except_coordinates": True,
+            "native_real_forecast_available": True,
+        },
+    }
+
+
+@pytest.mark.parametrize("stage", ["middle", "late"])
+def test_weather_provenance_changes_only_new_advice_and_verified_forecast_dependency(stage):
+    old, target = weather_catalog(), weather_catalog(stage)
+    before = deepcopy((old, target))
+    knowledge, changes, cost = adapt(
+        old, target, "weather_provenance", {"feedback": [weather_observation(stage)]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    for a, b in zip(base["tools"], knowledge["tools"], strict=True):
+        assert {k: v for k, v in a.items() if k != "usage_rules"} == {
+            k: v for k, v in b.items() if k != "usage_rules"
+        }
+        assert b["usage_rules"][:len(a["usage_rules"])] == a["usage_rules"]
+        assert len(b["usage_rules"]) - len(a["usage_rules"]) == (a["name"] != "unrelated")
+    notes = [c for c in changes if c["operation"] == "append_weather_provenance"]
+    assert len(notes) == 2 and len({tuple(n["basis"]) for n in notes}) == 1
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+
+
+def test_weather_provenance_requires_matching_stage_and_actual_changed_basis():
+    old, target = weather_catalog(), weather_catalog("late")
+    base, _, _ = adapt(old, target, "selective_patch")
+    candidate, _, _ = adapt(
+        old, target, "weather_provenance", {"feedback": [weather_observation("middle")]}
+    )
+    assert candidate == base
+    candidate, _, _ = adapt(old, old, "weather_provenance", {"feedback": [weather_observation()]})
+    assert candidate == old
+    unchanged_advice = deepcopy(target)
+    unchanged_advice["version"] = "early"
+    for tool in unchanged_advice["tools"]:
+        tool["version"] = "early"
+    target["tools"][1]["description"] += " unrelated change"
+    candidate, _, _ = adapt(
+        unchanged_advice, target, "weather_provenance", {"feedback": [weather_observation()]}
+    )
+    base, _, _ = adapt(unchanged_advice, target, "selective_patch")
+    assert candidate == base
+
+
+def test_weather_provenance_rejects_unverified_facts_and_missing_alternative():
+    old, target = weather_catalog(), weather_catalog("late")
+    evidence = weather_observation()
+    evidence["result"]["native_real_forecast_available"] = False
+    with pytest.raises(ValueError, match="weather provenance"):
+        adapt(old, target, "weather_provenance", {"feedback": [evidence]})
+    target["tools"] = [t for t in target["tools"] if t["name"] != "get-forecast"]
+    with pytest.raises(ValueError, match="weather provenance"):
+        adapt(old, target, "weather_provenance", {"feedback": [weather_observation()]})
+
+
 def test_artifact_contract_distinguishes_persisted_state_without_rewriting_metadata():
     old, target = catalog(), changed()
     before = deepcopy((old, target))

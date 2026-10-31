@@ -28,6 +28,7 @@ VARIANTS = (
     "document_sequence",
     "project_state_contract",
     "thinking_contract",
+    "weather_provenance",
 )
 
 SUFFICIENCY_RULE = (
@@ -287,6 +288,44 @@ def thinking_contract_notes(observation):
             'task result. Consolidate the available actual observations and disclose unresolved '
             'facts in the user-facing response; obtaining this broken wrapper receipt is not a '
             'prerequisite for that consolidation.'
+        ),
+    }
+
+
+def weather_provenance_notes(observation):
+    """Limit weather claims to independently verified native data provenance."""
+    expected = {
+        "kind": "weather_provenance_v1", "latitude_only_temperature": True,
+        "formula": "clamp(round(30 - abs(latitude)/3), -10, 35)",
+        "synthetic_latitude": 12, "synthetic_longitudes": [-20, 140],
+        "synthetic_temperature_c": 26, "same_advice_except_coordinates": True,
+        "native_real_forecast_available": True,
+    }
+    if (
+        observation["stage"] not in ("middle", "late")
+        or observation["server"] != "mcp-weather-demo"
+        or observation["tool"] != "get-weather-advice"
+        or json.dumps(observation["result"], sort_keys=True) != json.dumps(expected, sort_keys=True)
+    ):
+        raise ValueError("Invalid verified weather provenance evidence")
+    return {
+        "mcp-weather-demo::get-weather-advice": (
+            "Verified Middle/Late provenance: this tool computes its estimated temperature "
+            "from latitude alone (round(30 - abs(latitude)/3), clamped to -10..35 C) and emits "
+            "fixed activity advice. It does not read weather observations, forecasts or time; "
+            "its estimated feels-like wording is not measured or forecast weather. Do not use "
+            "it as evidence of current or future local conditions. For a weather-dependent "
+            "decision, obtain the actual forecast through get-forecast and base the decision "
+            "on those returned conditions."
+        ),
+        "mcp-weather-demo::get-forecast": (
+            "Verified alternative to the synthetic get-weather-advice: this tool queries the "
+            "NWS points and forecast services and returns named forecast periods with "
+            "temperature, wind and short forecast text. Use the returned periods as the weather "
+            "evidence for the requested place and time range; a period may be a day or a night, "
+            "not a whole day. If the response is unavailable or an error, the latitude-based "
+            "advice does not supply the missing forecast. Keep recommendations tied to actual "
+            "returned conditions and distinguish missing evidence."
         ),
     }
 
@@ -631,6 +670,7 @@ def adapt_result(old, target, strategy, context=None):
             "document_sequence",
             "project_state_contract",
             "thinking_contract",
+            "weather_provenance",
         ):
             continue
         note = delta_note(tool, change)
@@ -661,7 +701,9 @@ def adapt_result(old, target, strategy, context=None):
         ]
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
-    if strategy in ("document_sequence", "project_state_contract", "thinking_contract"):
+    if strategy in (
+        "document_sequence", "project_state_contract", "thinking_contract", "weather_provenance"
+    ):
         by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
         for observation in feedback:
             source_id = f"{observation['server']}::{observation['tool']}"
@@ -669,6 +711,7 @@ def adapt_result(old, target, strategy, context=None):
                 "document_sequence": document_sequence_notes,
                 "project_state_contract": project_state_notes,
                 "thinking_contract": thinking_contract_notes,
+                "weather_provenance": weather_provenance_notes,
             }
             notes = builders[strategy](observation)
             if not notes.keys() <= by_id.keys():
@@ -687,6 +730,7 @@ def adapt_result(old, target, strategy, context=None):
                             "document_sequence": "frozen_synthetic_write_reload_theme_sequence",
                             "project_state_contract": "frozen_synthetic_project_state_views",
                             "thinking_contract": "frozen_synthetic_native_notebook_contract",
+                            "weather_provenance": "frozen_native_weather_provenance",
                         }[strategy],
                     }
                 )
