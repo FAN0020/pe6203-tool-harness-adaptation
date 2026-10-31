@@ -142,6 +142,102 @@ def test_document_sequence_rejects_unproven_claims_and_missing_dependency():
         adapt(old, target, "document_sequence", {"feedback": [document_observation()]})
 
 
+def project_state_catalog(stage="early"):
+    result = catalog(stage)
+    names = ["list_tasks", "analyze_task_complexity", "unrelated"]
+    if stage == "late":
+        names.append("review_project_status")
+    tools = []
+    for name in names:
+        tool = deepcopy(result["tools"][0])
+        server = "@pimzino/agentic-tools-mcp"
+        tool.update(
+            tool_id=f"{server}::{name}",
+            server_id=server,
+            name=name,
+            routing={"server_id": server, "tool_name": name},
+        )
+        tools.append(tool)
+    result["tools"] = tools
+    return result
+
+
+def project_state_observation(stage="late"):
+    return {
+        "stage": stage,
+        "server": "@pimzino/agentic-tools-mcp",
+        "tool": "review_project_status",
+        "args": {"probe": "synthetic_state_views"},
+        "result": {
+            "kind": "project_state_contract_v1",
+            "status_error": "storage.getTasksByProject is not a function",
+            "persisted_valid_records": 3,
+            "hierarchy_occurrences": 5,
+            "flat_unique_records": 3,
+            "parent_scores": [9, 9],
+            "child_scores": [3, 3],
+            "final_auto_records": 9,
+            "final_auto_empty_ids": 6,
+        },
+    }
+
+
+def test_project_state_contract_keeps_metadata_and_unrelated_rules_unchanged():
+    old, target = project_state_catalog(), project_state_catalog("late")
+    before = deepcopy((old, target))
+    knowledge, changes, cost = adapt(
+        old, target, "project_state_contract", {"feedback": [project_state_observation()]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    for a, b in zip(base["tools"], knowledge["tools"], strict=True):
+        assert {k: v for k, v in a.items() if k != "usage_rules"} == {
+            k: v for k, v in b.items() if k != "usage_rules"
+        }
+        assert b["usage_rules"][: len(a["usage_rules"])] == a["usage_rules"]
+        assert len(b["usage_rules"]) - len(a["usage_rules"]) == (a["name"] != "unrelated")
+    notes = [c for c in changes if c["operation"] == "append_project_state_contract"]
+    assert len(notes) == 3 and len({tuple(n["basis"]) for n in notes}) == 1
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+
+
+def test_project_state_contract_requires_matching_stage_and_actual_changed_basis():
+    old, target = project_state_catalog(), project_state_catalog("late")
+    candidate, _, _ = adapt(
+        old, target, "project_state_contract", {"feedback": [project_state_observation("middle")]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    assert candidate == base
+    candidate, _, _ = adapt(
+        old, old, "project_state_contract", {"feedback": [project_state_observation()]}
+    )
+    assert candidate == old
+    unchanged_status = deepcopy(target)
+    unchanged_status["version"] = "early"
+    for tool in unchanged_status["tools"]:
+        tool["version"] = "early"
+    target["tools"][0]["description"] += " unrelated view metadata change"
+    candidate, _, _ = adapt(
+        unchanged_status,
+        target,
+        "project_state_contract",
+        {"feedback": [project_state_observation()]},
+    )
+    base, _, _ = adapt(unchanged_status, target, "selective_patch")
+    assert candidate == base
+
+
+def test_project_state_contract_rejects_unverified_facts_or_missing_fallback():
+    old, target = project_state_catalog(), project_state_catalog("late")
+    evidence = project_state_observation()
+    evidence["result"]["final_auto_empty_ids"] = 0
+    with pytest.raises(ValueError, match="project state"):
+        adapt(old, target, "project_state_contract", {"feedback": [evidence]})
+    target["tools"] = [t for t in target["tools"] if t["name"] != "list_tasks"]
+    with pytest.raises(ValueError, match="project state"):
+        adapt(old, target, "project_state_contract", {"feedback": [project_state_observation()]})
+
+
 def test_artifact_contract_distinguishes_persisted_state_without_rewriting_metadata():
     old, target = catalog(), changed()
     before = deepcopy((old, target))

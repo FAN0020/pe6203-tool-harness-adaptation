@@ -26,6 +26,7 @@ VARIANTS = (
     "observed_contract",
     "artifact_contract",
     "document_sequence",
+    "project_state_contract",
 )
 
 SUFFICIENCY_RULE = (
@@ -237,6 +238,83 @@ def document_sequence_notes(observation):
             "all three synthetic pages then persisted through another reload. Theme success "
             "alone does not establish an artifact's rendered quality."
         ),
+    }
+
+
+def project_state_notes(observation):
+    """Use only the frozen Late status/record contract and verified local alternatives."""
+    expected = {
+        "kind": "project_state_contract_v1",
+        "status_error": "storage.getTasksByProject is not a function",
+        "persisted_valid_records": 3,
+        "hierarchy_occurrences": 5,
+        "flat_unique_records": 3,
+        "parent_scores": [9, 9],
+        "child_scores": [3, 3],
+        "final_auto_records": 9,
+        "final_auto_empty_ids": 6,
+    }
+    if (
+        observation["stage"] != "late"
+        or observation["server"] != "@pimzino/agentic-tools-mcp"
+        or observation["tool"] != "review_project_status"
+        or json.dumps(observation["result"], sort_keys=True) != json.dumps(expected, sort_keys=True)
+    ):
+        raise ValueError("Invalid verified project state evidence")
+    return {
+        "@pimzino/agentic-tools-mcp::review_project_status": "Verified Late failure: this tool "
+        'returns "storage.getTasksByProject is '
+        'not a function" even for an existing '
+        "project. The observed read-only "
+        "alternative is list_tasks with the same "
+        "workingDirectory and projectId, "
+        "showHierarchy=false, and parentId "
+        "omitted. It returns persisted task "
+        "records including children. Inspect "
+        "those records and existing project "
+        "creation evidence for the required "
+        "state; do not treat this broken status "
+        "receipt as a review or repeatedly call "
+        "it with the same inputs.",
+        "@pimzino/agentic-tools-mcp::list_tasks": "Verified state-view limitation: a project "
+        "containing one parent and two children was "
+        "displayed as five tasks by the default hierarchy "
+        "because descendants also appeared as roots. With "
+        "showHierarchy=false and parentId omitted, all "
+        "three distinct records appeared once, including "
+        'the children, despite the misleading "top level" '
+        "heading. Use the actual IDs and parentId "
+        "relationships to distinguish records and "
+        "executable leaves; do not use the inflated "
+        "hierarchy count as a persisted total.",
+        "@pimzino/agentic-tools-mcp::analyze_task_complexity": "Verified diagnostic boundary for "
+        "project-state review: the score is "
+        "computed from each stored record and "
+        "does not check whether child tasks "
+        "already cover its scope. A parent "
+        "stayed at9 after two concrete "
+        "children were added; each child "
+        "scored3. Preserve the parent and its "
+        "fields, inspect actual child coverage "
+        "and executable leaf scope, and report "
+        "residual parent warnings accurately; "
+        "neither a warning nor its absence "
+        "establishes real task difficulty. Do "
+        "not lower fields, rename away "
+        "requirements, or omit unresolved "
+        "executable work to hide warnings. The "
+        "observed autoCreateSubtasks=true path "
+        "wrote empty-ID legacy rows; the next "
+        "call migrated them and repeating it "
+        "duplicated those rows without "
+        "resolving the parent warning. Keep "
+        "automatic creation disabled. If "
+        "decomposition is actually needed, "
+        "create_task with a real returned "
+        "parentId was verified to persist "
+        "distinct valid child IDs. Generic "
+        "generated suggestions do not prove "
+        "that required work is decomposed.",
     }
 
 
@@ -501,6 +579,7 @@ def adapt_result(old, target, strategy, context=None):
             "observed_contract",
             "artifact_contract",
             "document_sequence",
+            "project_state_contract",
         ):
             continue
         note = delta_note(tool, change)
@@ -531,23 +610,34 @@ def adapt_result(old, target, strategy, context=None):
         ]
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
-    if strategy == "document_sequence":
+    if strategy in ("document_sequence", "project_state_contract"):
         by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
         for observation in feedback:
             source_id = f"{observation['server']}::{observation['tool']}"
-            notes = document_sequence_notes(observation)
+            notes = (
+                document_sequence_notes(observation)
+                if strategy == "document_sequence"
+                else project_state_notes(observation)
+            )
             if not notes.keys() <= by_id.keys():
-                raise ValueError("Missing tool required by verified document sequence")
+                contract = (
+                    "document sequence" if strategy == "document_sequence" else "project state"
+                )
+                raise ValueError(f"Missing tool required by verified {contract}")
             for tool_id, rule in notes.items():
                 by_id[tool_id]["usage_rules"].append(rule)
                 modified.add(tool_id)
                 result["changes"].append(
                     {
-                        "operation": "append_document_sequence",
+                        "operation": "append_" + strategy,
                         "tool_id": tool_id,
                         "basis": [changes[source_id]["change_id"]],
                         "note": rule,
-                        "evidence": "frozen_synthetic_write_reload_theme_sequence",
+                        "evidence": (
+                            "frozen_synthetic_write_reload_theme_sequence"
+                            if strategy == "document_sequence"
+                            else "frozen_synthetic_project_state_views"
+                        ),
                     }
                 )
     if strategy in ("observed_contract", "artifact_contract"):
