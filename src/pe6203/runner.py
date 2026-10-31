@@ -24,6 +24,7 @@ from .judge import (
     save_once,
 )
 from .report import write_report
+from .spend_guard import complete_async
 from .transport import check_arguments, server_profiles, sessions, snapshot
 
 
@@ -187,7 +188,9 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
 
         try:
             response = await request_async(
-                lambda: client.chat.completions.create(messages=messages, tools=tools, **settings),
+                lambda: complete_async(
+                    client, config.get("spend_guard"), messages=messages, tools=tools, **settings
+                ),
                 config.get("request_retry"),
                 on_retry,
             )
@@ -497,7 +500,9 @@ async def run_async(task_id, version, strategy, seed, config):
                                 from .request_retry import request_async
 
                                 response = await request_async(
-                                    lambda: judge.chat.completions.create(
+                                    lambda: complete_async(
+                                        judge,
+                                        config.get("spend_guard"),
                                         messages=[{"role": "user", "content": prompt}],
                                         **{
                                             k: config["judge"][k]

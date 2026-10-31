@@ -1,6 +1,6 @@
 # PE6203 交付交接 · 2026-10-31
 
-当前范围：完成课程交付与离线核查。**不新增模型调用、评分、策略、实验或部署。** 四条获批诊断已经结束；PE +0.5 和历史 promotion gates 不属于课程要求。下一步先做组内审阅及 TA 澄清，不以策略胜出为结束条件。
+课程交付已冻结。四条获批诊断已经结束；PE +0.5 和历史 promotion gates 不属于课程要求。后续新增的完成率 / 任务质量研究另列在文末；现已单独获批文末限定的 12 条试验、原协议评分和预检，合计上限 US$1；**不自动扩展实验或部署**。课程验收仍需组内审阅及 TA 澄清，不以策略胜出为条件。
 
 ## 当前可交付内容
 
@@ -58,3 +58,17 @@ python3 submission/handover-20261031/verify.py
 ## Git 交付回执
 
 主交付已通过非 force push 合并到 main：`e95b51a3601a5966d06f05ae1e729f8e8bad60f9`。远端 ref 已核对，GitHub Adapter checks 成功；核查内容提交为 `61a3cf3`。本节和 [`delivery.json`](submission/handover-20261031/delivery.json) 的后续记录提交仅补交付回执。当前未解决项仍以上表为准，没有宣称课程验收已完成。
+
+## 后续研究：完成率与任务质量（独立，12 条已批准）
+
+用户新增目标是找到完成率和任务质量更好的策略。工作位于 `codex/completion-quality-study`，基于已推送的 main `ef96d08`；此研究尚未合并或推送，不修改冻结课程报告、Slides 或历史评分。
+
+- 先验证已有 `budget_feedback`，没有新增策略实现。18 个 task/stage/arm 知识条件完成离线检查；12 个 Middle/Late 条件与历史归档相同，Early 和 task235 保持精确 K0。
+- 已新增只读提取器 `scripts/audit_completion_quality.py` 与测试。它读取归档中的原评分、实际完成状态、调用、费用与持久化任务，不产生新 judge 分数。事实包位于 `results/evidence/completion-quality-20261031/development-v3/facts.json`，知识检查为同目录上一级 `freeze-audit.json`。
+- 历史开发结果：budget_feedback 6/6 正常结束、TF 10；原 Patch 5/6、TF 10。候选 task283 Middle 的最终复杂度概述与三个里程碑数据不一致，故没有宣布质量改善或策略胜出。低任务数、低自报复杂度和高 judge 分数均不能单独证明质量。
+- 已批准协议：`experiments/completion-quality-v1.json`；人读版 `reports/completion-quality-plan.html`。提议 3 tasks × Middle/Late × 2 arms × 1 repeat = 12 条，60 个原协议评分槽；不定义自动确认阶段。预计 US$0.12–0.30、10–20 分钟，已批准上限 US$1，费用与时间预估基于旧账单。
+- **批准记录：**用户回复“批准这 12 条，费用上限 US$1”；见 `results/evidence/completion-quality-20261031/approval.json`。`configs/completion-quality-v1.json` 复制原模型/预算协议，仅新增相同的价格路由限制及 `spend_guard`。每个请求在发出前保守预留全上下文 + 最大输出费用，费用未知或不足时停止；SDK 内部重试禁用。公开价格依据在 `pricing.json`，未修改账户设置。
+- **下一步：**完成冻结输入核对后执行这一轮，保留所有中断及费用；不得超过 12 条或自动重新运行低分轨迹。费用保护覆盖 agent、judge 和预检，受供应商公开上下文与 max_price 合同约束。
+- 判定要求：变化任务完成数增加；原 TF 均值不降低；有独立于完成状态的产物/答案正确性改善，且无实质性质量退化。若质量持平或证据不足则 hold。不能用 PE +0.5、任意加权分、删除网络失败或重新标记历史实验得到赢家。
+- 后续 Early/ECS、No Update/Full Rewrite 的新同期比较、重复或新任务均须另行提出成本与证据收益并获批。本轮没有 Early，不拼接旧 Early 冒充新 ECS。已有课程完整矩阵只作为注明时间与实现版本的历史参照。
+- 上文 TA 问题与 over-update 证据缺口未关闭。性能研究不自动满足这些课程验收事项。

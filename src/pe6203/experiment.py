@@ -19,6 +19,8 @@ from .benchmark import load_task, read_json, source, write_json
 from .evaluation import judge_scores
 from .judge import ecs
 from .runner import credentials, resume_judging, run
+from .spend_guard import complete_sync
+from .spend_guard import stopped as spend_stopped
 from .transport import sessions, snapshot
 
 STAGES = ("early", "middle", "late")
@@ -360,6 +362,8 @@ def _run_experiment(root, output, resume=False, limit=None):
     if ledger_path.exists() and not resume:
         raise ValueError("Experiment already started; use run --resume")
     ledger = read_json(ledger_path) if ledger_path.exists() else {"cells": {}}
+    if spend_stopped(plan["config"].get("spend_guard")):
+        raise ValueError("Spend ledger stopped; no preflight or new cell is permitted")
     if plan.get("availability_preflight") and any(
         ledger["cells"].get(c["id"], {}).get("status") in (None, "running")
         or pending_judging(output / "cells" / c["id"] / "run", plan["config"])
@@ -444,6 +448,11 @@ def _run_experiment(root, output, resume=False, limit=None):
         temporary.replace(ledger_path)
         summarize(output)
         print(f"  {item['status']}", flush=True)
+        if spend_stopped(plan["config"].get("spend_guard")):
+            ledger["stop_reason"] = "spend_guard"
+            write_json(ledger_path, ledger)
+            print("费用保护已停止后续单元；保留请求、未知费用与现有结果。", flush=True)
+            break
         if result_path.exists() and read_json(result_path).get("judge_recovery", {}).get("paused"):
             ledger["stop_reason"] = "judge_transport_outage"
             write_json(ledger_path, ledger)
@@ -506,7 +515,9 @@ def availability_preflight(plan, output):
         try:
             with OpenAI(api_key=key, base_url=url, timeout=30, max_retries=0) as client:
                 response = request_sync(
-                    lambda: client.chat.completions.create(
+                    lambda: complete_sync(
+                        client,
+                        plan["config"].get("spend_guard"),
                         model=resolved,
                         messages=[{"role": "user", "content": 'Return JSON: {"ok":true}'}],
                         temperature=0,

@@ -1,0 +1,165 @@
+{
+  "id": "completion-quality-v1",
+  "status": "approved_freeze_before_first_request",
+  "objective": "Find a selective tool-knowledge adaptation with higher observed completion and independently supported task quality; do not substitute a PE-only improvement.",
+  "base_commit": "ef96d08faf5d59839e86a2912733df9197917b25",
+  "champion": "selective_patch",
+  "candidates": [
+    "budget_feedback"
+  ],
+  "candidate_policy": "Validate the existing candidate first. No new variant is introduced. Its exact implementation and all previous wins, failures and incomplete confirmations remain unchanged.",
+  "model_config": "configs/completion-quality-v1.json",
+  "updater_config": "configs/course-updater.json",
+  "feedback_probes": "experiments/feedback-probes-v1.json",
+  "development": {
+    "tasks": [
+      133,
+      235,
+      283
+    ],
+    "stages": [
+      "middle",
+      "late"
+    ],
+    "strategies": [
+      "selective_patch",
+      "budget_feedback"
+    ],
+    "repeats": 1,
+    "cells": 12,
+    "scope": "Prospective paired screening on already exposed tasks. Four changed-task pairs and two unchanged-task retention pairs. Not a full course matrix, unseen-task test or statistical confirmation."
+  },
+  "hypothesis": "Frozen local sufficiency, probe and budget notes may reduce unnecessary expansion and round exhaustion while preserving required deliverables. Their combined effect is tested; this two-arm comparison cannot isolate the budget note alone.",
+  "input_boundary": "Updater receives only target metadata and previously frozen generic probes, never task answers, judge scores or scored trajectories. The designer has inspected all development tasks and discloses that exposure.",
+  "fairness": {
+    "fixed": [
+      "base model",
+      "temperature 0",
+      "4096 agent output tokens",
+      "12 agent rounds",
+      "900-second agent timeout",
+      "120-second request timeout",
+      "one transport retry",
+      "original task text",
+      "released MCP implementations",
+      "judge rubric",
+      "five valid judge slots with existing recovery limits"
+    ],
+    "changes": "Only the frozen tool-knowledge artifact differs between arms. Tool selection remains agent controlled; no prescribed tool order, task-answer hints, larger budgets or new probes.",
+    "retention": "Task235 catalogs are unchanged; both arms must have exact K0 records. Any execution difference there is not evidence of an adaptation effect.",
+    "early": "All three tasks retain exact K0. No Early execution is proposed in this first screen; do not compute new ECS from two stages or borrow historical Early scores as if contemporaneous.",
+    "order": "Existing cells_for development schedule, seed 1729; this shuffles execution order and is not a provider model seed.",
+    "freeze": "Before the first request, hash code, configuration, task text, catalogs, feedback, knowledge and review rubric. Stop on unexpected drift. Never edit this protocol after seeing new outcomes.",
+    "price_routing": "Both arms receive identical provider max_price caps (prompt $0.3/M, completion $1.2/M, per-request fee $0) and shared budget admission. This is an operational change relative to historical runs; no task, model, temperature, output/round budget or rubric change."
+  },
+  "evaluation": {
+    "completion": "Actual execution_status == completed, reported separately for changed tasks, retention tasks and all six pairs. Preserve truncation, max_rounds, transport failures and missing results.",
+    "official": "TF and PE per cell and arm from the original five-slot judge. Report individual judgments and disagreements; never alter old scores. ECS population/sample remains available only for complete three-stage cohorts.",
+    "supplemental_quality": "Evaluate the frozen properties below independently of terminal status. Record pass/fail/unknown plus exact evidence for each property; no weighted quality score. Missing answers are unavailable for paired answer accuracy and cannot alone count as an independent quality gain. Semantic judgments require a named reviewer and are not claimed to be blinded.",
+    "cost": "Separate agent, judge, unique update, probe and preflight costs; unknown charges stay unknown. Report tokens, wall time and tool errors."
+  },
+  "quality_cases": [
+    {
+      "task_id": 133,
+      "split": "exposed_development_regression",
+      "provenance": "Original MCPEvol-Bench task and archived raw trajectories; original question unchanged",
+      "required_properties": [
+        "Requested expression validation and OWASP-related security recommendations are supported by actual observations.",
+        "Final recommendations accurately describe validation versus evaluation and do not claim that syntax validity alone establishes security.",
+        "Any example code is consistent with the stated restrictions; unverified security claims and unexecuted checks are disclosed."
+      ],
+      "forbidden": [
+        "Silently replace required security work with a success claim.",
+        "Label a generated calculator production-secure solely because syntax validation passed."
+      ],
+      "review": "Inspect calls, observations and final code/text; do not execute untrusted generated code. Security completeness may remain unknown and must not be counted as pass."
+    },
+    {
+      "task_id": 235,
+      "split": "exposed_retention_control",
+      "provenance": "Original question contains all provincial, monthly and category sales values",
+      "required_properties": [
+        "All three requested chart types have successful recorded outputs.",
+        "Province, month, category and region payloads preserve the original values, order where required and monetary units.",
+        "Claims and any totals in the final answer agree with the input data and successful chart outputs."
+      ],
+      "forbidden": [
+        "Change source data to make a chart or diagnostic pass.",
+        "Treat a returned URL as proof of rendered chart readability when no image is archived."
+      ],
+      "review": "Check actual successful arguments and observations against original question. Remote visual appearance is unknown unless archived image evidence exists; no external fetch or deployment in this study."
+    },
+    {
+      "task_id": 283,
+      "split": "exposed_changed_task_regression",
+      "provenance": "Original analytics dashboard planning request; archived task store, calls and final answer",
+      "required_properties": [
+        "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work.",
+        "Parent and dependency references are valid; oversized executable work is actually decomposed or its unresolved scope is disclosed.",
+        "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations.",
+        "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings."
+      ],
+      "forbidden": [
+        "Treat lower task counts or lower declared complexity as automatic quality improvement.",
+        "Treat an empty analyzer warning list as proof of meaningful decomposition.",
+        "Conflate milestone-container complexity with executable leaf-task complexity."
+      ],
+      "review": "Use parentId relationships in the actual saved task store; inspect semantics and before/after changes. Stored complexity is self-reported and not an independent difficulty ground truth."
+    }
+  ],
+  "decision": {
+    "screen_positive_requires_all": [
+      "All 12 planned trajectories are retained and have enough evidence for comparison; outages or unknown material quality make the decision hold, not a win.",
+      "Candidate completes more of the four changed-task cells than the control; unchanged-task completion does not regress.",
+      "Candidate official mean TF is not lower, and every per-cell TF/PE difference is disclosed.",
+      "At least one paired artifact-property improvement or accuracy improvement where both final answers exist is supported independently of completion; no new material property failure is introduced.",
+      "Retention properties do not regress and unchanged knowledge remains exact K0."
+    ],
+    "limitations": "A positive one-repeat screen supports only an observed advantage on these cases. No generalization, statistical superiority, sole-mechanism causality or automatic promotion claim.",
+    "quality_ceiling": "If all meaningful properties tie or remain unknown, explicitly report that higher task quality has not been demonstrated. Do not invent a score to produce a winner.",
+    "not_required": [
+      "PE +0.5",
+      "beating every baseline on every metric",
+      "historical 108-run promotion test"
+    ],
+    "next_after_positive": "Present the complete evidence and remaining uncertainty. Repetitions, new tasks and Early/No Update/Full Rewrite expansion need a separate costed proposal and approval. No automatic confirmation phase is defined.",
+    "next_after_negative": "Preserve failures, review one evidenced mechanism offline, and propose at most one revised candidate. No automatic model retry, low-score replacement or strategy sweep."
+  },
+  "authorization": {
+    "approved": true,
+    "new_model_calls_permitted_now": "Only this 12-trajectory cohort, its original judge protocol and guarded availability preflight",
+    "proposed_agent_trajectories_max": 12,
+    "proposed_valid_judge_slots": 60,
+    "preflight": "Any API availability preflight counts as a new model call and is included only after explicit approval.",
+    "deployment": false,
+    "budget_usd_proposed": 1.0,
+    "execution_guard": "Implemented shared request reservation: reserve $0.319488 at the 4096 output limit, release only against a reported charge; fail closed on unknown/over-bound charges or insufficient reserve. SDK retries disabled, explicit retries pass through the same guard. No account settings changed.",
+    "approval_text": "批准这 12 条，费用上限 US$1",
+    "approval_record": "results/evidence/completion-quality-20261031/approval.json"
+  },
+  "estimate": {
+    "basis": "The same two arms in archived v3 development cost $0.11474742 across 12 trajectories and 60 ratings; recorded cell elapsed times total 453.537087 seconds. Update generation had zero model calls. These are historical observations, not a current price quote.",
+    "expected_usd_range": [
+      0.12,
+      0.3
+    ],
+    "expected_minutes_range": [
+      10,
+      20
+    ],
+    "uncertainty": "Provider routing, caching, prices, retries and network conditions can change these estimates. Setup/preflight time and costs are additional; approval budget and current price must be checked before execution."
+  },
+  "course_alignment": {
+    "sections_2_and_4_1": "Selective changes remain local and protected tool contracts remain intact. The candidate is the already implemented budget_feedback combination, not a new base model or agent runtime.",
+    "section_3_2": "All three change levels exist in the subset; actual task-relevant contact is audited, not presumed. Task235 provides retention. One execution is permitted under compute limits.",
+    "section_4_2": "Keep TF/PE/ECS, recovery, retention, costs and failure analysis separate. The new screen supplements the frozen course benchmark; it does not replace it.",
+    "still_unresolved": [
+      "TA acceptance of the controlled under-update example",
+      "Confirmed unrelated-knowledge over-update causal evidence",
+      "TA interpretation of the protected-structure Full Rewrite baseline",
+      "Broader tool-removal/rename coverage"
+    ]
+  },
+  "offline_evidence": "results/evidence/completion-quality-20261031/",
+  "historical_course_delivery": "HANDOVER.md; submission/PE6203-final-report.pdf"
+}
