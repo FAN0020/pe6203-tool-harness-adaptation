@@ -1,0 +1,192 @@
+{
+  "_meta": null,
+  "nextCursor": null,
+  "tools": [
+    {
+      "name": "generate_plantuml_diagram",
+      "title": null,
+      "description": "Generate a PlantUML diagram with automatic syntax validation and error reporting for auto-fix workflows. Returns embeddable image URLs for valid diagrams or structured error details for invalid syntax that can be automatically corrected. Optionally saves the diagram to a local file.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "plantuml_code": {
+            "type": "string",
+            "description": "PlantUML diagram code. Will be automatically validated for syntax errors before generating the diagram URL."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "svg",
+              "png"
+            ],
+            "default": "svg",
+            "description": "Output image format (SVG or PNG)"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "Optional. Path to save diagram locally. Automatically creates all necessary parent directories. Restricted to current working directory by default. Set PLANTUML_ALLOWED_DIRS env var (colon-separated paths, or \"*\" for unrestricted) to allow additional directories. Only .svg and .png extensions permitted."
+          },
+          "diagram_name": {
+            "type": "string",
+            "description": "Optional. Base filename to use when output_path is omitted or refers to a directory-like path. The selected format extension is applied automatically."
+          },
+          "validate_syntax": {
+            "type": "boolean",
+            "default": true,
+            "description": "Optional. Whether to validate PlantUML syntax before generating the diagram. Defaults to true."
+          },
+          "return_markdown_embed": {
+            "type": "boolean",
+            "default": true,
+            "description": "Optional. Whether to include markdown_embed in successful responses. Defaults to true."
+          },
+          "image_alt_text": {
+            "type": "string",
+            "description": "Optional. Custom alt text to use in markdown_embed. Defaults to \"PlantUML Diagram\"."
+          },
+          "fetch_timeout_ms": {
+            "type": "number",
+            "default": 30000,
+            "description": "Optional. Timeout in milliseconds for PlantUML server requests. Defaults to 30000."
+          },
+          "plantuml_server_url": {
+            "type": "string",
+            "description": "Optional. Override the PlantUML server base URL for this request only. Defaults to the server configuration or the built-in public PlantUML endpoint."
+          },
+          "skip_fetch_check": {
+            "type": "boolean",
+            "default": false,
+            "description": "Optional. Whether to skip the diagram URL fetch check after generation. Defaults to false."
+          },
+          "output_mode": {
+            "type": "string",
+            "enum": [
+              "full",
+              "url_only",
+              "markdown_only"
+            ],
+            "default": "full",
+            "description": "Optional. Controls response payload shape: full includes url and optional markdown embed, url_only includes url only, markdown_only includes markdown embed only."
+          }
+        },
+        "required": [
+          "plantuml_code"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "encode_plantuml",
+      "title": null,
+      "description": "Encode PlantUML code for URL usage",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "plantuml_code": {
+            "type": "string",
+            "description": "PlantUML diagram code to encode"
+          }
+        },
+        "required": [
+          "plantuml_code"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "decode_plantuml",
+      "title": null,
+      "description": "Decode encoded PlantUML string back to PlantUML code",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "encoded_string": {
+            "type": "string",
+            "description": "Encoded PlantUML string to decode"
+          }
+        },
+        "required": [
+          "encoded_string"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "batch_generate_plantuml_diagrams",
+      "title": null,
+      "description": "Generate multiple PlantUML diagrams in a single call. Each entry can have its own code, format, and optional output path. Returns per-diagram results including URLs, markdown embeds, and any validation errors.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "diagrams": {
+            "type": "array",
+            "description": "List of diagrams to generate.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Optional identifier for this diagram entry, returned in the result for correlation."
+                },
+                "plantuml_code": {
+                  "type": "string",
+                  "description": "PlantUML diagram code."
+                },
+                "format": {
+                  "type": "string",
+                  "enum": [
+                    "svg",
+                    "png"
+                  ],
+                  "default": "svg",
+                  "description": "Output image format."
+                },
+                "output_path": {
+                  "type": "string",
+                  "description": "Optional local file path to save this diagram."
+                },
+                "diagram_name": {
+                  "type": "string",
+                  "description": "Optional base filename used when output_path is a directory-like path."
+                },
+                "validate_syntax": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Whether to validate syntax before generating."
+                }
+              },
+              "required": [
+                "plantuml_code"
+              ]
+            }
+          },
+          "return_markdown_embed": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to include markdown_embed in each successful result."
+          }
+        },
+        "required": [
+          "diagrams"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    }
+  ]
+}
