@@ -12,14 +12,16 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：artifact_contract 六条开发对照已启动，尚无改善结论
+### 当前最新断点：artifact_contract 共用环境已修正，六条开发对照运行中
 
 - 在`0d49e0a`先冻结新策略机制、五项实际产物质量检查、开发门槛和两批独立验证规则。`artifact_contract`仅向变化的`create_bulk_slides`加入一条经合成probe核实的持久化效果/精确内容写入知识；无任务事实/答案/预算指令。352离线测试通过，13integration排除。
 - 新任务457必须读取三份原始PDF并生成有事实内容的15分钟dark Slidev deck；保持任务235。独立验证仍要求每批完成数与完整产物通过数均严格高于SP、TF不降，且235保持不降；不是只改善工具调用或主题参数。
 - 共用环境在模型前修复：固定原生canvas依赖；PDF本地路径分支传Buffer导致错误，因此三份逐字相同的原始PDF经只读`127.0.0.1:4783`URL供应，两组获同一文件清单。3阶段均成功读取3篇的1–3页，失败启动/本地路径尝试也归档。原生代码、上游工具未改。
 - 共用渲染器固定Slidev53.0.0、默认主题0.25.0；本地dark主题导入默认基础排版与发布工具原有dark CSS。未经改写的合成deck真实呈现dark/default差异与内容canary；同一非致命FloatingVue错误记录保留。不能宣称任意产物已通过或官方独立部署兼容。证据`results/evidence/slidev-readiness-20261031/`。
 - 第一份build在任何模型请求前因read_pdf旧式exclusiveMinimum布尔schema失败，原目录`results/raw/artifact-contract-pilot-20261031`保留。`fd12f0c`加入针对该已核实位置的两组共用等价格式转换，记录原/新值，不改变接受页码集合。新协议`experiments/artifact-contract-ready-v1.json`只增加环境说明，策略/质量门槛不变。
-- 当前执行目录：`results/raw/artifact-contract-pilot-ready-20261031`；证据目录：`results/evidence/artifact-contract-pilot-20261031`。6条日程/6份知识均已冻结；457每阶段仅bulk一条规则不同，235两组逐字K0。主执行session7284、PDF只读服务session10459，日志`run.log`。先查现有进程/experiment.json，**不要启动第二份或重跑已完成cell**。
+- 第一次模型批次因原始`check_environment`未在PATH找到本地CLI而尝试全局npm安装，已安全中止session7284：2条已评分、第三条执行已落盘而评分未完；已知$0.040542072+1笔未知费用（预留$0.319488不能当实付）。全局npm现报告CLI53.0.0；没有运行前清单，不能完全重建主机副作用，未卸载或回滚用户全局包。711原始文件归档`aborted-attempts.tar.gz`，5390依赖缓存文件本机原样保留并列hash；不据此判定候选/合并为正式样本。
+- 在`74b22ca`固定共用PATH：Node24.13.0与本地CLI53.0.0优先，npm prefix/cache进一步限制在每个workspace。三个阶段各一次原始check_environment均成功返回53.0.0，未创建npm安装缓存。新协议`experiments/artifact-contract-runtime-v1.json`仅补基础环境；**6份知识与中止批逐字相同，原质量门槛不变**，不是调参或重复直到赢。
+- **当前执行目录**：`results/raw/artifact-contract-pilot-runtime-20261031`；证据目录：`results/evidence/artifact-contract-runtime-pilot-20261031`。主执行session48967、PDF只读服务session10459，日志`run.log`。先查现有进程/experiment.json，**不要启动第二份或重跑已完成cell**。
 - 用`collect_blind.py`采集本轮已完成的匿名答案/调用和实际slides.md/theme.css。属性审阅存`blind-reviews/`，在全部冻结前不揭示方法/TF/PE；同一协调者不等于独立人类审阅。必须渲染真实deck检查全部页面，不能按schema或文件存在代替设计质量。
 - 原负结果全部保留；Goal仍活动。开发结束按事前门槛判定是否进入两批共36条独立验证，失败则淘汰，不能重复直到赢。
 
