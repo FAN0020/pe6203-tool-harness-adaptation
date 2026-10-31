@@ -29,6 +29,7 @@ VARIANTS = (
     "project_state_contract",
     "thinking_contract",
     "weather_provenance",
+    "contract_reconcile",
 )
 
 SUFFICIENCY_RULE = (
@@ -655,6 +656,21 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "contract_reconcile":
+        from .contract_reconcile import expected_reconciliation, validate_reconciliation
+
+        feedback = context.get("feedback", [])
+        result["knowledge"], annotations = expected_reconciliation(base, target, feedback)
+        result["changes"].extend(annotations)
+        result["validation"] = validate_reconciliation(
+            result["knowledge"], old, target, base, feedback
+        )
+        if result["validation"]["errors"]:
+            raise ValueError("Annotation reconciliation changed a protected contract")
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
         return result
     changes = {c["tool_id"]: c for c in base["diff"]["changed"] + base["diff"]["added"]}
     modified = set()
