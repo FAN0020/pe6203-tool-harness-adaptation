@@ -24,8 +24,9 @@
 - Late三个新增精确工具均暴露空参数schema：单项查询报Component undefined、批量报No valid component names（均isError=true），搜索丢失query/category，返回78项且isError=false。三阶段原有getTextAnimations均返回逐字相同的14个真实实现，canary含9476字符代码。确认了原生参数路由缺陷和通用替代，尚未测agent改善。
 - `results/evidence/mechanism-screening-20261101/magicui-task-readiness-screen.json`记录定向依赖筛查：377原始logs/ableton文件未在公开附件找到；171所需mcp-mermaid包三阶段缺失且不属选定201题；246原CSV无购买字段；217虽有XLSX但原工具集无文件读取能力。106名片图片亦未提供。不得补造数据、把其他Mermaid包当别名或修原生源码后计作知识收益。
 - 补充原始附件核对：固定HF revision仅README与三份server归档，三个ZIP中央目录均无ableton-error或image_01.jpg；结果在mechanism-screening目录的published-dataset-root-listing及magicui-published-archive-filename-check。已异步询问用户是否另有原日志本机路径，尚无答复。
-- `experiments/magicui-artifact-dependencies-v1.json`另冻结两个从未执行的依赖检查：Late code-runner本地读写canary与MagicUI getSpecialEffects代码。仅合成工具就绪检测，不能替代正式日志；0模型。新增共用dist/cli.js入口来自三阶段原包bin。下一步执行一次并归档，不重复前9调用。
-- 当前没有新的agent候选/评分日程。Goal继续，双重改善仍未成立；下一步寻找另一条原题必需且依赖可用的具体机制。本轮有实质进展（原生探针闭环与依赖核验），不是连续阻塞声明。全部旧文件/负结果保留，无push/外发。
+- `f7763cb`预注册的两个新依赖调用也已完成，session74220退出0：Late code-runner准确读写隔离canary/JSON/HTML，getSpecialEffects返回9个实现（magic-card代码6314字符）。39文件/22源码归档与独立离线复核在`results/evidence/magicui-artifact-dependencies-20261101/`。原code-runner三条stdout调试信息触发非致命JSONRPC告警，日志保留且未修源码。仅就绪检测，不能替代正式日志；不要重跑。
+- 具体条件设计在`experiments/magicui-conditional-next-protocol.json`：只修正这三个空参数工具及分类路由的知识；真实日志/逐日统计oracle/可运行网页和脚本验收须先冻结。拟4单元开发、仅晋级后两批各12独立验证，沿用每批严格完成+core双提升、TF与保持不降。该文件**不是生效预注册**，没有新agent日程；不得拿合成canary开跑。
+- `post-magicui-required-path-screen.json`记录黄历与两种记忆图的追加必需路径核对，仍未找到新的可检验替代。当前没有运行服务，也没有已建立的其他就绪候选；未宣称方法空间穷尽。Goal继续，双重改善未成立。本轮有实质进展（两套原生探针闭环与原附件核验），连续阻塞计数尚未成立。下一步优先处理用户的原日志路径答复；否则只在新具体机制/新来源证据出现时继续，不重复无效实验。全部旧文件/负结果保留，无push/外发。
 
 ### 已归档前置：MagicUI 参数路由机制预注册
 

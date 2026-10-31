@@ -1,0 +1,1 @@
+const fs = require('node:fs'); const input = fs.readFileSync('probe-input.txt', 'utf8'); fs.writeFileSync('probe-output.json', JSON.stringify({received: input})); fs.writeFileSync('probe-page.html', "<!doctype html><meta charset=\"utf-8\"><title>Canary</title><p>Isolated file output</p>\n"); console.log(JSON.stringify({input, cwd: process.cwd()}));
