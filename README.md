@@ -44,7 +44,7 @@ uv sync --frozen
 
 可读入口：[`当前实验结果、案例与剩余要求`](reports/course-v1.3-experiment.html)。原始包、审计和机器说明在 `results/evidence/course-v1.3-20261031/`。
 
-策略研究另见 [`候选方法、全部成功与失败记录`](reports/selective-strategy-search.html)：参考 ACE、A-MEM、Reflexion。首轮三个候选共 24 条轨迹已完成，未达到预设 PE 改善门槛；第二轮比较 `sufficiency_notes`、`sufficiency_feedback` 与原 Selective Patch（生成式 workflow 候选因语义问题在执行前被拒绝）。课程主结论看 TF 恢复/保持和 ECS；当前搜索在 TF/ECS/完成率约束下优化 PE，并报告成本。开发筛选与三次重复确认分开，不能把开发高分当确认结果。
+策略研究另见 [`候选方法、全部成功与失败记录`](reports/selective-strategy-search.html)：参考 ACE、A-MEM、Reflexion。首轮 24 条无候选晋级；第二轮 18 条中 `sufficiency_feedback` 的 PE 比原 Patch 高 1.2，选入三次重复、108 条新轨迹的确认实验，**尚未证实更优**。所有开发负结果、生成失败与费用均保留。课程主结论看 TF 恢复/保持和 ECS；当前搜索在 TF/ECS/完成率约束下优化 PE，并报告成本，开发高分不能当确认结果。
 
 ```bash
 ./experiment search prepare --spec experiments/selective-search-v2.1.json --output results/raw/my-search

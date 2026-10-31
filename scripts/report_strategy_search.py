@@ -121,6 +121,18 @@ def render(directories, destination):
     sections = [
         "<h1>Selective Patch 策略研究</h1>",
         "<p>研究目标：在不明显损伤 TF、ECS、完成率及逐任务表现的前提下，提高环境变化后的 PE。报告同时保留 recovery、retention 和更新成本；效率改善不自动等于恢复能力改善。</p>",
+        "<p>依据课程 brief 与 <a href=\"https://arxiv.org/html/2607.14642v1\">MCPEvol 论文</a>，分别报告指标，不合成任意加权总分。课程核心是变化任务能否恢复、原本可用的任务是否受损；本小子集 TF 接近上限，故候选搜索以受约束的 PE 改善为目标。</p>",
+        table(
+            ["评价层次", "指标与比较", "判断范围"],
+            [
+                ["主要结果", "变化任务 TF：Middle/Late 与同阶段 No Update 对照，并展示自身 Early", "衡量恢复；高绝对 TF 不自动证明有恢复增益"],
+                ["主要结果", "未变化任务 TF：与原 Selective Patch 及自身 Early 对照", "衡量保持；逐任务展示，避免均值掩盖退化"],
+                ["跨版本稳定性", "ECS＝三个版本 TF 均值减标准差", "同时列发布代码与论文附录的标准差口径"],
+                ["效率与代价", "PE、更新 tokens／秒／费用；执行费用另列", "满足质量约束后比较效率；PE 不等同于 token 成本"],
+                ["补充运行证据", "完成率、截断、轮数耗尽、工具错误及完整轨迹", "补充解释 TF/PE；不改原 benchmark 的评分"],
+            ],
+        ),
+        "<p>本项目预设筛选门槛：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定。开发集结果只用于选候选，不能作为独立确认结果。</p>",
         "<p>所有 agent 自行选择工具及参数。固定模型、任务、judge 与执行预算；新规则只来自工具元数据和独立小型探针。三阶段 Early 共用 K0。开发结果用于筛选，确认结果才用于晋级；既有任务上的新重复不代表未见任务泛化。</p>",
         "<p>原有结果："
         + link(ROOT / "reports/course-v1.3-experiment.html", "v1.3 与六条诊断", destination)
@@ -152,6 +164,17 @@ def render(directories, destination):
             + link(failure, "完整记录", destination)
             + f"；已知更新费用 ${f['known_update_usd']:.6f}。</p>",
         ]
+    rejected = ROOT / "results/evidence/selective-search-20261031/generation-v2-rejection.json"
+    if rejected.exists():
+        rejected_data = read_json(rejected)
+        sections.append(
+            "<p>v2 的 workflow 候选在执行前被语义审查拒绝：建议使用已知失败的工具作为替代路径，并把使用条件写得过窄。0 条任务执行，原响应和费用保留。"
+            + link(rejected, "拒绝记录", destination)
+            + f"；已知更新费用 ${rejected_data['known_update_usd']:.6f}。</p>"
+        )
+    sections.append(
+        "<p>第二轮：<strong>sufficiency_notes</strong> 在变化工具上添加结果复用、完成条件和保留必要检查的规则；<strong>sufficiency_feedback</strong> 再加入冻结探针的局部结果记忆，直接记录观察而不生成替代方案。两者更新都不调用 LLM。</p>"
+    )
     for directory in directories:
         directory = Path(directory).resolve()
         a = analyze(directory)
@@ -168,6 +191,26 @@ def render(directories, destination):
             + link(directory / "readable-analysis.json", "结构化分析与完整错误", destination)
             + "</p>",
         ]
+        overall = []
+        for arm in sorted({row["strategy"] for row in s["rows"]}):
+            group = [row for row in s["rows"] if row["strategy"] == arm]
+            overall.append(
+                [
+                    esc(arm),
+                    f"{sum(row['TF'] is not None for row in group)}/{len(group)}",
+                    fmt(average(row["TF"] for row in group)),
+                    fmt(average(row["PE"] for row in group)),
+                    str(sum(row["execution_status"] == "completed" for row in group)),
+                ]
+            )
+        sections.append(table(["策略", "完整评分", "整体 TF", "整体 PE", "正常完成"], overall))
+        selection_path = directory / "candidate-selection.json"
+        if selection_path.exists():
+            sections.append(
+                "<details><summary>开发筛选决定及限制（尚未晋级）</summary><pre>"
+                + esc(json.dumps(read_json(selection_path), ensure_ascii=False, indent=2))
+                + "</pre></details>"
+            )
         sections.append(
             table(
                 ["策略", "阶段", "完整评分", "TF", "PE"],
@@ -232,6 +275,13 @@ def render(directories, destination):
             + esc(json.dumps(s["cost"], ensure_ascii=False, indent=2))
             + "</pre>"
         )
+        billing = directory / "billing-audit.json"
+        if billing.exists():
+            sections.append(
+                "<p>已知费用下界及未知总额记录：</p><pre>"
+                + esc(json.dumps(read_json(billing), ensure_ascii=False, indent=2))
+                + "</pre>"
+            )
         search_summary = directory / "search-summary.json"
         if search_summary.exists() and read_json(search_summary).get("decision"):
             sections.append(
