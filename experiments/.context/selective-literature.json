@@ -1,0 +1,48 @@
+{
+  "kind": "primary_source_method_review",
+  "read_on": "2026-10-31",
+  "not_claimed": "These are three inspired harness designs, not official implementations or reproductions of the papers.",
+  "papers": [
+    {
+      "id": "ACE",
+      "title": "Agentic Context Engineering: Evolving Contexts for Self-Improving Language Models",
+      "authors": "Qizheng Zhang et al.",
+      "year": 2025,
+      "url": "https://arxiv.org/html/2510.04618v1",
+      "sections": [
+        "3.1 Incremental Delta Updates",
+        "3.2 Grow-and-Refine"
+      ],
+      "mechanism_zh": "将上下文组织为带标识的知识条目，用局部增量合并保留既有内容，并去除重复。",
+      "adaptation_zh": "delta_notes：先应用元数据差异补丁，再只向变化/新增工具追加当前必需参数与使用边界提示。",
+      "difference_zh": "首版采用确定性编译，没有复现 ACE 的 Generator/Reflector/Curator 训练循环或 helpful/harmful 计数。"
+    },
+    {
+      "id": "A-MEM",
+      "title": "A-MEM: Agentic Memory for LLM Agents",
+      "authors": "Wujiang Xu et al.",
+      "year": 2025,
+      "url": "https://arxiv.org/html/2502.12110v1",
+      "sections": [
+        "3.2 Link Generation",
+        "3.3 Memory Evolution"
+      ],
+      "mechanism_zh": "检索相关记忆，经语言模型判断关联，再局部更新相关旧记忆的上下文。",
+      "adaptation_zh": "linked_notes：从变化工具出发检索少量同服务候选邻居，LLM 根据元数据为相关工具生成局部使用规则。",
+      "difference_zh": "工具知识替代对话记忆；首版用词项相似度候选过滤而非额外 embedding 模型，并锁定 schema/routing/description。"
+    },
+    {
+      "id": "Reflexion",
+      "title": "Reflexion: Language Agents with Verbal Reinforcement Learning",
+      "authors": "Noah Shinn et al.",
+      "year": 2023,
+      "url": "https://proceedings.neurips.cc/paper_files/paper/2023/file/1b44b878bb782e6954cd888628510e90-Paper-Conference.pdf",
+      "sections": [
+        "2 Reflexion"
+      ],
+      "mechanism_zh": "将执行反馈转成可读经验，存入记忆供后续执行参考，保持模型权重不变。",
+      "adaptation_zh": "feedback_notes：只使用冻结的安全工具探测反馈，生成针对变化工具的错误规避规则；正式运行中不从 judge 学习。",
+      "difference_zh": "经验在执行前冻结；不重试已评分任务，不增加 agent 轮数，不复现论文的整任务多次试错。"
+    }
+  ]
+}

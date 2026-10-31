@@ -54,7 +54,13 @@ def verify_files(root, hashes):
 
 
 def make_cells(tasks, stages, strategies, repeats):
-    for values, allowed in [(tasks, None), (stages, STAGES), (strategies, STRATEGIES)]:
+    from .patch_variants import VARIANTS
+
+    for values, allowed in [
+        (tasks, None),
+        (stages, STAGES),
+        (strategies, (*STRATEGIES, *VARIANTS)),
+    ]:
         if (
             not values
             or len(values) != len(set(values))
@@ -271,6 +277,10 @@ def check_plan(root, output, plan):
     if sha(output / "plan.json") != (output / "plan.sha256").read_text().strip():
         raise ValueError("Frozen plan changed; prepare a new experiment")
     verify_files(root, plan["files"])
+    if plan.get("shared_adaptations") and (output / "experiment.json").exists():
+        from .strategy_search import check_knowledge
+
+        check_knowledge(output)
     source(root)
     roles = {
         "agent": plan["config"]["agent"],
@@ -279,7 +289,9 @@ def check_plan(root, output, plan):
     }
     for role, settings in roles.items():
         if role == "updater" and not any(
-            c["strategy"] == "full_rewrite" and c["version"] != "early" for c in plan["cells"]
+            c["strategy"] in ("full_rewrite", "linked_notes", "feedback_notes")
+            and c["version"] != "early"
+            for c in plan["cells"]
         ):
             continue
         _, endpoint = credentials(settings)
@@ -340,6 +352,10 @@ def _run_experiment(root, output, resume=False, limit=None):
     configure_runtime(root)
     plan = read_json(output / "plan.json")
     check_plan(root, output, plan)
+    if plan.get("shared_adaptations"):
+        from .strategy_search import check_knowledge
+
+        check_knowledge(output)
     ledger_path = output / "experiment.json"
     if ledger_path.exists() and not resume:
         raise ValueError("Experiment already started; use run --resume")
@@ -363,10 +379,8 @@ def _run_experiment(root, output, resume=False, limit=None):
             continue
         if limit is not None and executed >= limit:
             break
-        adaptation, result_path = (
-            directory / "adaptation/adaptation.json",
-            directory / "run/result.json",
-        )
+        adaptation = adaptation_path(output, plan, cell)
+        result_path = directory / "run/result.json"
         if recovering:
             print(f"[{executed + 1}] {cell['id']}：仅恢复缺失评分，保留原执行", flush=True)
             _, result = resume_judging(directory / "run")
@@ -382,6 +396,8 @@ def _run_experiment(root, output, resume=False, limit=None):
             write_json(ledger_path, ledger)
             print(f"[{executed + 1}] {cell['id']}：更新知识 → 执行 → 5 次评分", flush=True)
             if not adaptation.exists() and not adaptation.parent.exists():
+                if plan.get("shared_adaptations"):
+                    raise ValueError("Frozen shared adaptation missing")
                 try:
                     write_adaptation(
                         output / "catalogs" / str(cell["task_id"]) / "early.json",
@@ -526,6 +542,7 @@ def summarize(output):
     ).read_text().strip():
         raise ValueError("Frozen plan changed")
     rows, costs = [], {role: [] for role in ("update", "agent", "judge")}
+    seen_updates = set()
     for cell in plan["cells"]:
         directory = output / "cells" / cell["id"]
         result = (
@@ -533,11 +550,8 @@ def summarize(output):
             if (directory / "run/result.json").exists()
             else {}
         )
-        adaptation = (
-            read_json(directory / "adaptation/adaptation.json")
-            if (directory / "adaptation/adaptation.json").exists()
-            else {}
-        )
+        artifact_path = adaptation_path(output, plan, cell)
+        adaptation = read_json(artifact_path) if artifact_path.exists() else {}
         eval_path = directory / "run/EVAL" / f"{cell['task_id']}.json"
         values, issue = (
             judge_scores(read_json(eval_path))
@@ -567,6 +581,10 @@ def summarize(output):
             )
         rows.append(row)
         for role in costs:
+            if role == "update":
+                if artifact_path in seen_updates:
+                    continue
+                seen_updates.add(artifact_path)
             cost = adaptation.get("cost") if role == "update" else result.get("cost", {}).get(role)
             if cost is not None:
                 costs[role].append(cost)
@@ -592,7 +610,9 @@ def summarize(output):
         group = [
             r for r in rows if (r["task_id"], r["version"], r["seed"]) == (task, stage, repeat)
         ]
-        if {r["strategy"] for r in group if r["TF"] is not None} == set(STRATEGIES):
+        if {r["strategy"] for r in group if r["TF"] is not None} == {
+            c["strategy"] for c in plan["cells"]
+        }:
             matched += 1
     summary = {
         "kind": plan.get("kind", "development"),
@@ -602,6 +622,7 @@ def summarize(output):
         "scored": sum(r["TF"] is not None for r in rows),
         "completed_execution": sum(r["execution_status"] == "completed" for r in rows),
         "matched_three_strategy_groups": matched,
+        "matched_all_strategy_groups": matched,
         "rows": rows,
         "ecs": ecs_rows,
         "cost": aggregate_cost,
@@ -623,6 +644,13 @@ def summarize(output):
         writer.writeheader()
         writer.writerows(rows)
     return summary
+
+
+def adaptation_path(output, plan, cell):
+    key = f"{cell['task_id']}-{cell['version']}-{cell['strategy']}"
+    if plan.get("shared_adaptations"):
+        return Path(output) / plan["shared_adaptations"][key]
+    return Path(output) / "cells" / cell["id"] / "adaptation/adaptation.json"
 
 
 def report(output):
@@ -783,11 +811,16 @@ def menu(root):
 
 
 def main(root, arguments):
+    if arguments and arguments[0] == "search":
+        from .strategy_search import main as search_main
+
+        return search_main(root, arguments[1:])
     parser = argparse.ArgumentParser(
         prog="pe6203 experiment",
         description="三策略开发实验；prepare 不调用模型，run 会调用模型并保留全部结果",
     )
     sub = parser.add_subparsers(dest="action")
+    sub.add_parser("search", help="文献补丁研究：prepare → build → review → run → report")
     p = sub.add_parser("check", help="检查依赖；--api 额外调用真实模型")
     p.add_argument("--api", action="store_true")
     p = sub.add_parser("prepare", help="固定任务、配置、工具目录与源码 hashes")

@@ -95,11 +95,14 @@ def protocol_hash(config, endpoints):
 
 
 def prepare_tools(records, strategy, name_policy="native_unique"):
+    from .patch_variants import VARIANTS
+
     if strategy not in (
         "no_update",
         "full_rewrite",
         "selective_patch",
         "current_metadata_smoke",
+        *VARIANTS,
     ):
         raise ValueError(f"Unknown strategy label: {strategy}")
     tools, routes = [], {}

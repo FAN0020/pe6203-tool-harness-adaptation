@@ -95,6 +95,11 @@ def build_knowledge(metadata):
 
 def adapt(old_knowledge, new_metadata, strategy, context=None):
     """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+    from .patch_variants import VARIANTS
+    from .patch_variants import adapt as variant_adapt
+
+    if strategy in VARIANTS:
+        return variant_adapt(old_knowledge, new_metadata, strategy, context)
     if strategy == "selective_patch":
         from .selective import adapt as selective_adapt
 
@@ -149,6 +154,10 @@ def adapt(old_knowledge, new_metadata, strategy, context=None):
 
 def write_adaptation(old_path, metadata_path, strategy, output, context=None):
     """Persist the baseline output, provenance and costs without overwriting attempts."""
+    from .patch_variants import VARIANTS, NoteError, context_settings
+
+    if strategy in VARIANTS:
+        context_settings(context)
     if strategy == "selective_patch":
         from .selective import write_adaptation as selective_write
 
@@ -168,6 +177,8 @@ def write_adaptation(old_path, metadata_path, strategy, output, context=None):
             "updater": updater_settings(context),
             "audit_path": str(output / "updater-audit.json"),
         }
+        if strategy in VARIANTS and "feedback" in (context or {}):
+            safe_context["feedback"] = context["feedback"]
         knowledge, log, cost = adapt(old, target, strategy, safe_context)
         write_json(output / "knowledge.json", knowledge)
         artifact.update(
@@ -192,9 +203,15 @@ def write_adaptation(old_path, metadata_path, strategy, output, context=None):
         )
         if artifact["formal_llm_rewrite"]:
             artifact["updater_audit_path"] = "updater-audit.json"
+        if strategy in VARIANTS and cost["calls"]:
+            artifact.update(
+                updater_audit_path="updater-audit.json", semantic_grounding="requires_human_review"
+            )
     except (ValueError, KeyError, OSError, TypeError) as exc:
         audit = getattr(exc, "audit", None)
-        if audit is not None:
+        if isinstance(exc, NoteError):
+            artifact.update(cost=audit["cost"], updater_audit_path="updater-audit.json")
+        elif audit is not None:
             artifact.update(
                 formal_llm_rewrite=True,
                 cost=runner_cost(audit["update_cost"]),
