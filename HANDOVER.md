@@ -18,7 +18,18 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：图标样式过滤缺陷和原生替代接口已复现
+### 当前最新断点：native_media_contract 六单元开发未晋级
+
+- session37884退出0，6/6 evaluated、30/30 judge。全部六份盲审在`9c50dc2`冻结后才揭示方法/分数。**不要重跑此候选，不进入36条独立验证**；Goal仍活动，双重改善未成立。
+- 新机制：Middle/Late图标style筛选读取helper已移除字段，导致假空；Late PlantUML保存引用块外response，报not defined。8次图标+10次依赖/URL替代原生调用、10catalog、模型费0；`69badd6`与`9d09faa`完整归档。依赖Early/Middle保存PNG并视觉检查，Late单独冻结URL替代成功。不要重复探针。
+- `056b00c`事前冻结策略/验收，`15fd01c`实现，`53d0b58`模型前冻结全部知识、盲审映射、54计划输入/120额外路径/121源码输入文件。Middle2规则、Late3规则，其他字段逐字等于原SP，235精确K0；无任务事实/通用预算或原生修补。5新测试先红后绿，57相关及379离线测试通过（13integration排除）。
+- 任务57两组正常完成均2/2，完整产物通过均0/2；候选TF10/PE7.2，SP9.1/6.2。**四条都没传style或output_path，目标故障没有在agent中触发**。SP Late一次图表语法错自行恢复；候选13工具调用对SP18，不是完成率改善证据。
+- 四个生成图像URL按冻结协议事后只取一次，均HTTP403；图像可读性unknown，不计pass，也不等于原生生成失败；没有换客户端/重试/改URL或重画图回填。SP Middle示例缺状态变量/导入且图像Markdown漏右括号；候选Late错报11种样式（实际10种）；其他Card示例正确。全部原判定及限制保留。
+- 235均完成1/1、core0/1、PE10；候选TF9.4对SP10。两份图表数值均正确，摘要遗漏月度下降；知识同K0，不作适应因果解释。候选同时未满足保持TF门槛。
+- 报告`reports/native-media-contract-pilot.html`；离线`python3 results/evidence/native-media-contract-pilot-20261101/verify_trial.py`。257原始文件、121源码文件与全部冻结hash已核验；52请求（20agent+30judge+2preflight）$0.049647696，未知0，188.31851秒；更新模型calls/tokens/USD0，ECS不适用。当前无本轮模型/MCP进程。
+- 下一步找**必需工作**的不同机制，优先检查工具删除/重命名及必要语义迁移；不要继续改此候选或重复task57到赢。图像证据路径需要未来独立合成验证，不能回填本轮unknown。Context7/Swiftipedia/HeroUI等尚未完整审完，筛选不穷尽。保留原分支所有文件，无push/部署/外发消息。
+
+### 已归档前置：图标样式过滤缺陷和原生替代接口已复现
 
 - `8f018f9`事前冻结合成query=calendar/style=stroke-rounded、8调用+3catalog；全部执行结束，模型/评分请求0、费用0。三阶段默认搜索均返回完全相同66项；Middle/Late加style均为空；三阶段对首项名称的get_icon_glyph_by_style均返回相同有效字形。
 - 原生search helper只投影id/name/tags/category/featured/version；新增style筛选读取不存在style/variant/stroke，造成假空。只证明这一固定合成查询的过滤缺陷与原生替代路径，不证明agent收益。原task57没有明确样式要求，策略触发率/完成率空间仍未知。
