@@ -1,0 +1,419 @@
+{
+  "tools": [
+    {
+      "name": "get_slidev_usage",
+      "description": "Get comprehensive usage documentation of Slidev including layouts, animations, and components",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "check_environment",
+      "description": "Check if Node.js and slidev-cli is ready",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "create_slidev",
+      "description": "Create a new Slidev project. You need to ask user for title and author to continue the task.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The path where to create the Slidev project"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the presentation"
+          },
+          "author": {
+            "type": "string",
+            "description": "The author of the presentation"
+          }
+        },
+        "required": [
+          "path",
+          "title",
+          "author"
+        ]
+      }
+    },
+    {
+      "name": "load_slidev",
+      "description": "Load existing Slidev project and get the current Slidev markdown content",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The path to the existing Slidev project"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    },
+    {
+      "name": "make_cover",
+      "description": "Create or update Slidev cover page",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the presentation"
+          },
+          "subtitle": {
+            "type": "string",
+            "description": "The subtitle of the presentation"
+          },
+          "author": {
+            "type": "string",
+            "description": "The author of the presentation"
+          },
+          "background": {
+            "type": "string",
+            "description": "The background image URL"
+          },
+          "pythonStringTemplate": {
+            "type": "string",
+            "description": "Python string template for custom cover layout"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      }
+    },
+    {
+      "name": "add_page",
+      "description": "Add new page to the presentation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Markdown format text to describe page content"
+          },
+          "layout": {
+            "type": "string",
+            "description": "Slidev layout name (default: \"default\")",
+            "default": "default"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      }
+    },
+    {
+      "name": "set_page",
+      "description": "Set the content of a specific page",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number",
+            "description": "The index of the page to set (0 is cover)"
+          },
+          "content": {
+            "type": "string",
+            "description": "The markdown content to set"
+          },
+          "layout": {
+            "type": "string",
+            "description": "The layout of the page",
+            "default": "default"
+          }
+        },
+        "required": [
+          "index",
+          "content"
+        ]
+      }
+    },
+    {
+      "name": "get_page",
+      "description": "Get the content of a specific page",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number",
+            "description": "The index of the page to get"
+          }
+        },
+        "required": [
+          "index"
+        ]
+      }
+    },
+    {
+      "name": "get_all_slides",
+      "description": "Get all slides with their content, layout, and metadata",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "create_bulk_slides",
+      "description": "Create a complete presentation with multiple slides at once based on topic",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "The main topic of the presentation"
+          },
+          "slideCount": {
+            "type": "number",
+            "description": "Number of slides to generate (default: 10)",
+            "default": 10
+          },
+          "style": {
+            "type": "string",
+            "enum": [
+              "minimal",
+              "detailed",
+              "visual",
+              "academic"
+            ],
+            "description": "Presentation style",
+            "default": "detailed"
+          },
+          "includeAnimations": {
+            "type": "boolean",
+            "description": "Include animations in slides",
+            "default": true
+          },
+          "includeCode": {
+            "type": "boolean",
+            "description": "Include code examples",
+            "default": false
+          },
+          "includeImages": {
+            "type": "boolean",
+            "description": "Include images in slides",
+            "default": true
+          },
+          "theme": {
+            "type": "string",
+            "description": "Theme to apply",
+            "default": "default"
+          },
+          "customInstructions": {
+            "type": "string",
+            "description": "Additional custom instructions for slide generation"
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional custom title for the cover slide"
+          },
+          "subtitle": {
+            "type": "string",
+            "description": "Optional custom subtitle for the cover slide"
+          },
+          "preserveCover": {
+            "type": "boolean",
+            "description": "Keep the existing cover slide unchanged",
+            "default": false
+          }
+        },
+        "required": [
+          "topic"
+        ]
+      }
+    },
+    {
+      "name": "apply_theme",
+      "description": "Apply a theme to the presentation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "themeName": {
+            "type": "string",
+            "enum": [
+              "corporate",
+              "creative",
+              "minimal",
+              "dark",
+              "custom"
+            ],
+            "description": "Predefined theme name or \"custom\""
+          },
+          "customTheme": {
+            "type": "object",
+            "description": "Custom theme configuration (if themeName is \"custom\")",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "primaryColor": {
+                "type": "string"
+              },
+              "secondaryColor": {
+                "type": "string"
+              },
+              "backgroundColor": {
+                "type": "string"
+              },
+              "fontFamily": {
+                "type": "string"
+              },
+              "fontSize": {
+                "type": "string"
+              },
+              "transition": {
+                "type": "string"
+              },
+              "customCSS": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "themeName"
+        ]
+      }
+    },
+    {
+      "name": "add_animation",
+      "description": "Add animation to a specific slide",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "slideIndex": {
+            "type": "number",
+            "description": "Index of the slide to add animation to"
+          },
+          "animationType": {
+            "type": "string",
+            "enum": [
+              "v-click",
+              "v-after",
+              "v-click-hide",
+              "v-motion",
+              "transition"
+            ],
+            "description": "Type of animation"
+          },
+          "target": {
+            "type": "string",
+            "description": "Target element or text to animate"
+          },
+          "options": {
+            "type": "object",
+            "description": "Animation options"
+          }
+        },
+        "required": [
+          "slideIndex",
+          "animationType"
+        ]
+      }
+    },
+    {
+      "name": "add_component",
+      "description": "Add a component (Tweet, Youtube, Video, etc.) to a slide",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "slideIndex": {
+            "type": "number",
+            "description": "Index of the slide to add component to"
+          },
+          "componentType": {
+            "type": "string",
+            "enum": [
+              "Tweet",
+              "Youtube",
+              "SlidevVideo",
+              "Arrow",
+              "Toc",
+              "Link",
+              "LightOrDark",
+              "Transform",
+              "AutoFitText"
+            ],
+            "description": "Type of component to add"
+          },
+          "props": {
+            "type": "object",
+            "description": "Component properties"
+          },
+          "children": {
+            "type": "string",
+            "description": "Component children content"
+          }
+        },
+        "required": [
+          "slideIndex",
+          "componentType"
+        ]
+      }
+    },
+    {
+      "name": "review_slides",
+      "description": "Review and get suggestions for the current presentation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "websearch",
+      "description": "Extract content from a URL for presentation material. If the user provides a URL, ask them to search the web themselves and provide the relevant text content.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL to fetch content from"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    },
+    {
+      "name": "start_slidev",
+      "description": "Return the command to start Slidev HTTP server",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "search_npm_packages",
+      "description": "Search for npm packages by query",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query for npm packages"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "search_slidev_themes",
+      "description": "Search for available Slidev themes on npm",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ]
+}

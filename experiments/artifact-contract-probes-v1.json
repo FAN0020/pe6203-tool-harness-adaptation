@@ -1,0 +1,51 @@
+{
+  "status": "frozen_before_implementation_and_agent_calls",
+  "evidence": "results/evidence/slidev-artifact-probes-20261031/mechanism-review.json",
+  "provenance": "36synthetic MCPcalls plus archived source at2c6eb74; counts/canaries crosschecked before summary; no task answers.",
+  "observations": [
+    {
+      "stage": "middle",
+      "server": "slidev-mcp",
+      "tool": "create_bulk_slides",
+      "args": {
+        "synthetic_cases": [
+          "default_cover",
+          "preserve_cover"
+        ],
+        "requested_generated_count": 6
+      },
+      "result": {
+        "kind": "artifact_effects_v1",
+        "contract": {
+          "reported_output": "Bulk returned6 generated template slides. This is not the final persisted deck or custom source content.",
+          "persisted_state": "Starting from2pages, bulk6 left7pages; repetition left12. Old-page canary survived. No clearExistingSlides parameter exists in this stage.",
+          "instruction_effect": "customInstructions content canary was absent. Source handler does not use customInstructions; generated text is topic-based template boilerplate.",
+          "cover_effect": "Default bulk call rewrote cover and reset dark to default; preserveCover=true kept the existing dark cover.",
+          "verified_alternatives": "add_page(content=...) persisted a supplied page; set_page(index=1,content=...) saved the exact replacement body. get_all_slides reflected persisted state. Use explicit content writes when custom content is required; repeating bulk is not content refinement or deck clearing."
+        }
+      }
+    },
+    {
+      "stage": "late",
+      "server": "slidev-mcp",
+      "tool": "create_bulk_slides",
+      "args": {
+        "synthetic_cases": [
+          "default_cover",
+          "preserve_cover"
+        ],
+        "requested_generated_count": 6
+      },
+      "result": {
+        "kind": "artifact_effects_v1",
+        "contract": {
+          "reported_output": "Bulk returned6 generated template slides. This is not the final persisted deck or custom source content.",
+          "persisted_state": "Starting from2pages, bulk6 left7pages; repetition left12. Old-page canary survived. clearExistingSlides=true did not clear stored pages.",
+          "instruction_effect": "customInstructions content canary was absent. Source handler does not use customInstructions; generated text is topic-based template boilerplate.",
+          "cover_effect": "Default bulk call rewrote cover and reset dark to default; preserveCover=true kept the existing dark cover.",
+          "verified_alternatives": "add_page(content=...) persisted a supplied page; set_page(index=1,content=...) saved the exact replacement body. get_all_slides reflected persisted state. Use explicit content writes when custom content is required; repeating bulk is not content refinement or deck clearing."
+        }
+      }
+    }
+  ]
+}

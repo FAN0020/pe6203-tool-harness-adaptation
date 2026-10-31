@@ -1,0 +1,255 @@
+                                                                     PaLM-E: An Embodied Multimodal Language Model
+
+                                                     Danny Driess 1 2 Fei Xia 1 Mehdi S. M. Sajjadi 3 Corey Lynch 1 Aakanksha Chowdhery 3
+                                                 Brian Ichter 1 Ayzaan Wahid 1 Jonathan Tompson 1 Quan Vuong 1 Tianhe Yu 1 Wenlong Huang 1
+                                                  Yevgen Chebotar 1 PierrePROMPT:
+                                                                             Sermanet 1 Daniel Duckworth
+                                                                           Q: How can embodied language   PROMPT:
+                                                                                                                  3
+                                                                                                                     Sergey Levine 1 Vincent Vanhoucke 1
+                                                                  1       models benefit 2              3  Language models1which understand
+                                                  Karol Hausman Marc PREDICTION:         robots? A:
+                                                                          Toussaint Klaus Greff Andy             Zeng
+                                                                                                          robot sensor        Igor Mordatch 3 Pete Florence 1
+                                                                                                                       data can
+                                                                                               Embodied language models can               PREDICTION:
+                                                                                            1 benefit robots by allowing them to
+                                                                                                                              2            be used to generate natural
+                                                                                                                             3 descriptions of the
+                                                                                             Robotics at Google TU Berlin
+                                                                                                                       language Google
+                                                                                              learn language in a more natural
+                                                                                             way.                      robot's environment.
+                                                                                                                                            Research
+                                                                                                    https://palm-e.github.io
+
+                                           Mobile Manipulation                                                                                                                     Task and Motion Planning
+                                                                                               PaLM-E: An Embodied Multimodal Language Model
+                                                                                                                                                                                                     Given <emb> Q: How
+                                                                                               Given <emb> … <img> Q: How to grasp blue block? A: First, grasp yellow block
+                                                                                                                                                                                                     to grasp blue block?
+
+
+
+
+arXiv:2303.03378v1 [cs.LG] 6 Mar 2023
+                                                                                                         ?        ViT                                                                                A: First grasp yellow
+                                                                                                                                                                                                     block and place it on
+                                                                                                        …          …                                                                                 the table, then grasp
+                                                                                                                                                                                                     the blue block.
+                                                                                                                       Large Language Model (PaLM)
+                                          Human: Bring me the rice chips from the                                                                                                  Tabletop Manipulation
+                                                                                                        …          …
+                                          drawer. Robot: 1. Go to the drawers, 2. Open
+                                                                                                                                                                                                     Given <img> Task: Sort
+                                          top drawer. I see <img>. 3. Pick the green rice
+                                                                                                                                                                                                     colors into corners.
+                                          chip bag from the drawer and place it on the                                 Control               A: First, grasp yellow block and …                      Step 1. Push the green
+                                          counter.
+                                                                                                                                                                                                     star to the bottom left.    Scene Unde
+                                          Visual Q&A, Captioning …                                                                                                                                   Step 2. Push the green
+                                                                                                                                      Language Only Tasks
+                                                                                                               Describe the                                                                          circle to the green star.
+                                                            Given <img>. Q: What’s in the                      following <img>:      Here is a Haiku about
+                                                            image? Answer in emojis.                           A dog jumping         embodied language models:       Q: Miami Beach borders which ocean? A: Atlantic.               TBD
+                                                            A: 🍏🍌🍇🍐🍑🍈🍒.                                                                                                                                                              TBD
+                                                                                                               over a hurdle at a    Embodied language               Q: What is 372 x 18? A: 6696.
+                                                                                                               dog show.             models are the future of        Language models trained on robot sensor data can
+                                                                                                                                     natural language                be used to guide a robot’s actions.
+
+                                        Figure 1: PaLM-E is a single general-purpose multimodal language model for embodied reasoning tasks, visual-language tasks,                                                              Visual Q&A
+                                        and language tasks. PaLM-E transfers knowledge from visual-language domains into embodied reasoning – from robot planning in
+                                        environments with complex dynamics and physical constraints, to answering questions about the observable world. PaLM-E operates on
+                                                                                                                                                                                                                                     TBD
+                                        multimodal sentences, i.e. sequences of tokens where inputs from arbitrary modalities (e.g. images, neural 3D representations, or states, in
+                                        green and blue) are inserted alongside text tokens (in orange) as input to an LLM, trained end-to-end.
+
+                                                                            Abstract                                                  1. Introduction
+                                        Large language models have been demonstrated to perform                                       Large language models (LLMs) demonstrate strong reason-
+                                        complex tasks. However, enabling general inference in the                                     ing capabilities across various domains, including dialogue
+                                        real world, e.g. for robotics problems, raises the challenge                                  (Glaese et al., 2022; Thoppilan et al., 2022), step-by-step
+                                        of grounding. We propose embodied language models to di-                                      reasoning (Wei et al., 2022; Kojima et al., 2022), math prob-
+                                        rectly incorporate real-world continuous sensor modalities                                    lem solving (Lewkowycz et al., 2022; Polu et al., 2022), and
+                                        into language models and thereby establish the link be-                                       code writing (Chen et al., 2021a). However, a limitation of
+                                        tween words and percepts. Input to our embodied language                                      such models for inference in the real world is the issue of
+                                        model are multi-modal sentences that interleave visual, con-                                  grounding: while training LLMs on massive textual data
+                                        tinuous state estimation, and textual input encodings. We                                     may lead to representations that relate to our physical world,
+                                        train these encodings end-to-end, in conjunction with a pre-                                  connecting those representations to real-world visual and
+                                        trained large language model, for multiple embodied tasks                                     physical sensor modalities is essential to solving a wider
+                                        including sequential robotic manipulation planning, visual                                    range of grounded real-world problems in computer vision
+                                        question answering, and captioning. Our evaluations show                                      and robotics (Tellex et al., 2020). Previous work (Ahn et al.,
+                                        that PaLM-E, a single large embodied multimodal model,                                        2022) interfaces the output of LLMs with learned robotic
+                                        can address a variety of embodied reasoning tasks, from a                                     policies and affordance functions to make decisions, but is
+                                        variety of observation modalities, on multiple embodiments,                                   limited in that the LLM itself is only provided with textual
+                                        and further, exhibits positive transfer: the model benefits                                   input, which is insufficient for many tasks where the geo-
+                                        from diverse joint training across internet-scale language,                                   metric configuration of the scene is important. Further, in
+                                        vision, and visual-language domains. Our largest model,                                       our experiments we show that current state-of-the-art visual-
+                                        PaLM-E-562B with 562B parameters, in addition to being                                        language models trained on typical vision-language tasks
+                                        trained on robotics tasks, is a visual-language generalist                                    such as visual-question-answering (VQA) cannot directly
+                                        with state-of-the-art performance on OK-VQA, and retains                                      solve robotic reasoning tasks.
+                                        generalist language capabilities with increasing scale.                                       In this paper we propose embodied language models, which
+                                                            PaLM-E: An Embodied Multimodal Language Model
+
+  Visually-conditioned Jokes + Few-shot prompting                     Robot Visual Perception, Dialogue, and Planning                     Robot: I am a robot operating in a kitchen. Given
+                                                                                                                                          <img>, what do I see? a bowl of eggs, a bowl of
+                        I see (image omitted). Description: A cow                                     flour, and a bowl of sugar.. and a spatula.. and a spoon.. and a bag of flour.. and a bag of
+                        sitting on a rug. Joke: Why is the cow                                        sugar. When a human asks me to do a task, I will respond with the sequence of actions
+                        sitting on a rug? Because it wants to be a                                    I would do to accomplish the task with only the items I see. Human: Use all of the
+                        cow-ch! … I see <img>. Description: a                                         ingredients you see to make a cake batter. 1. crack egg. 2. put egg in bowl. 3. put flour
+                        donkey is carrying a dog, cat, and rooster.                                   in bowl. 4. put sugar in bowl. 5. mix. 6. put in pan. 7. bake. 8. eat. 9. clean up.
+                        Joke: what do you call a donkey with a
+                        rooster on his back. A rooster booster.                                           Physical Prediction             Spatial Grounding           Given <img> . Q: What
+                                                                             Given <img>. Q: If a                                                                     flavor is the doughnut
+  Zero-shot Multimodal Chain-of-Thought                     Robot Initiative robot wanted to be                       Given <img> .                              on the right? Strawberry.. Q:
+                                                                             useful here, what                        Q: What will                               What flavor is the doughnut
+                   Given <img>. Q: Can I go down                             steps should it take?                    the robot do                               on the left? A blueberry.
+                   this street on a bicycle, yes or                          A: clean table..pick                     next? A: fall.
+                   no? A: Let’s think step by step.                          up trash.. pick up
+                                                                                                                                       Photo 1: <img1>. Photo 2: <img2>. Q: What is in Photo 1
+                   1. do not enter. 2. except                                chairs.. wipe chairs..
+                                                                                                                                       but NOT in Photo 2? A: sunglasses.
+                   bicycles. 3. do not entry except                          put chairs down.
+                                                                                                                                       Photo 1: <img1>. Photo 2: <img2>. Q: What is in Photo 1
+                   bicycles. 4. yes.                                                                                                   but NOT in Photo 2? A: Let’s think step by step and
+                                                             Zero-shot: Multi-image Relationships
+                                                                                                                                       explain. Photo 1 has sunglasses on top of folded
+                   Given <img>. Q: How many                                                Q: Where is                                 clothes. Photo 2 does not have sunglasses on top of
+                   championship rings did the player                                       <img1> in this                              folded clothes. Therefore, sunglasses are in Photo 1 but
+                   on the left win in his career A: Let’s                                  scene <img2>? A:                            not in Photo 2.
+                   think step by step. 1. kobe bryant is                                   a stove top with a
+                   on the left. 2. kobe bryant has won                                                                                 End-to-End Egocentric Q&A, Dialogue
+                                                                                           pot on it.
+                   5 championship rings.
+                                                                                    OCR-free Math Reasoning Given <img> .                                   Photo 1, at 10:30 am: <img1>.
+                      Given <img>. Q: Who are the two teams playing in this                                                                                 Photo 2, at 12:45 pm: <img2>.
+                      photo, and which was the last to win a championship, and                        Q: I am getting just two
+                                                                                                                                                            Photo 3, at 3:45 pm: <img3>.
+                      which year did they win, and who was their star player that                     custom pizza for me and my
+                                                                                                                                                            Q: I forget, what did I have for
+                      year? A: Let's think step by step. 1. team in white is new                      friend. How much should I
+                                                                                                                                                            lunch, and what time was it? A:
+ york knick. 2. team in green is boston celtic. 3. last to win championship was                       pay in total? A: Let's think
+                                                                                                                                                            Let’s think step by step.
+ boston celtic. 4. year was 2008. 5. star player was paul pierce. 6. i am not                         step by step. 1st step: 2
+                                                                                                                                                            1. you had a sandwich for lunch.
+ sure if this is correct. i am not basketball fan. i just google it.                                  custom pizzas. 2nd step: 2 x
+                                                                                                                                                            2. it was 12:45 pm.
+                                                                                                      $9.99. 3rd step: $19.98.
+
+Figure 2: PaLM-E-562B can do zero-shot multimodal chain-of-thought reasoning, can tell visually-conditioned jokes given an image, and
+demonstrates an array of robot-relevant multimodal-informed capabilities including perception, visually-grounded dialogue, and planning.
+PaLM-E also generalizes, zero-shot, to multi-image prompts despite only being trained on single-image prompts. PaLM-E can also
+perform math given an image with textually-interleaved handwritten numbers. In addition, the model can perform, zero-shot, question and
+answering on temporally-annotated egocentric vision, similar to what was shown in (Zeng et al., 2022) but end-to-end all in one model.
+
+directly incorporate continuous inputs from sensor modali-                                         efficiency for robotics tasks,Physical Reasoning
+                                                                                                                                  e.g. significantly increasing
+                                                                                                                                                    Given <img> . Q:
+                                                                                                                                                    Which of these
+ties of an embodied agent and thereby enable the language                                          learning success from handfuls of training examples,         and
+                                                                                                                                                    objects is best for
+model itself to make more grounded inferences for sequen-                                          even demonstrating one-shot or zero-shot generalization         to
+                                                                                                                                                    climbing up high?
+
+tial decision making in the real world. Inputs such as images                                      novel combinations of objects or unseen objects.A: ladder.
+and state estimates are embedded into the same latent embed-
+                                                                                                   We scale PaLM-E up to 562B parameters, integrating the
+ding as language tokens and processed by the self-attention
+                                                                                                   540B PaLM (Chowdhery et al., 2022) LLM and the 22B
+layers of a Transformer-based LLM in the same way as text.
+                                                                                                   Vision Transformer (ViT) (Dehghani et al., 2023) into, to
+We start from a pre-trained LLM in which we inject the
+                                                                                                   our knowledge, the largest vision-language model currently
+continuous inputs through an encoder. These encoders are
+                                                                                                   reported. PaLM-E-562B achieves state-of-the-art perfor-
+trained end-to-end to output sequential decisions in terms of
+                                                                                                   mance on the OK-VQA (Marino et al., 2019) benchmark,
+natural text that can be interpreted by the embodied agent
+                                                                                                   without relying on task-specific finetuning. Although not
+by conditioning low-level policies or give an answer to an
+                                                                                                   the focus of our experimentation, we also find (Fig. 2) that
+embodied question. We evaluate the approach in a vari-
+                                                                                                   PaLM-E-562B exhibits a wide array of capabilities includ-
+ety of settings, comparing different input representations
+                                                                                                   ing zero-shot multimodal chain-of-thought (CoT) reasoning,
+(e.g. standard vs. object-centric ViT encodings for visual
+                                                                                                   few-shot prompting, OCR-free math reasoning, and multi-
+input), freezing vs. finetuning the language model while
+                                                                                                   image reasoning, despite being trained on only single-image
+training the encoders, and investigating whether co-training
+                                                                                                   examples. Zero-shot CoT (Kojima et al., 2022), originally a
+on multiple tasks enables transfer.
+                                                                                                   language-only concept, has been shown on multimodal data
+To investigate the approach’s breadth, we evaluate on three                                        with task-specific programs (Zeng et al., 2022) but to our
+robotic manipulation domains (two of which are closed-                                             knowledge, not via an end-to-end model.
+loop in the real-world), standard visual-language tasks such
+                                                                                                   To summarize our main contributions, we (1) propose
+as VQA and image captioning, as well as language tasks.
+                                                                                                   and demonstrate that a generalist, transfer-learned, multi-
+Our results indicate that multi-task training improves perfor-
+                                                                                                   embodiment decision-making agent can be trained via mix-
+mance compared to training models on individual tasks. We
+                                                                                                   ing in embodied data into the training of a multimodal large
+show that this transfer across tasks can lead to high data-
+                                      PaLM-E: An Embodied Multimodal Language Model
+
+language model. We show that, (2) while current state-of-        rectly leverage the world knowledge embedded in its param-
+the-art general-purpose visual-language models out-of-the-       eters. This enables not only embodied reasoning but also
+box (zero-shot) do not well address embodied reasoning           question answering, as demonstrated in our experiments.
+problems, it is possible to train a competent general-purpose    Among works that output actions, perhaps most similar is
+visual-language model that is also an efficient embodied         the approach proposed in Gato (Reed et al., 2022) which,
+reasoner. In studying how to best train such models, we (3)      like PaLM-E, is a generalist multi-embodiment agent. In
+introduce novel architectural ideas such as neural scene rep-    contrast to Gato, we demonstrate positive transfer across
+resentations and entity-labeling multimodal tokens. Finally,     different tasks where the model benefits from diverse joint
+in addition to our focus on PaLM-E as an embodied reasoner       training across multiple domains.
+we (4) show that PaLM-E is also a quantitatively compe-
+                                                                 LLMs in embodied task planning. There have been sev-
+tent vision and language generalist, and (5) demonstrate
+                                                                 eral methods proposed to leverage LLMs in embodied do-
+that scaling the language model size enables multimodal
+                                                                 mains. While many works focus on understanding natural
+finetuning with less catastrophic forgetting.
+                                                                 language goals (Lynch & Sermanet, 2020; Shridhar et al.,
+                                                                 2022a; Nair et al., 2022; Lynch et al., 2022), fewer con-
+2. Related Work                                                  sider natural language as a representation for planning –
+General vision-language modeling. Building on suc-               the focus of this work. LLMs contain vast amounts of in-
+cesses in large language (Brown et al., 2020; Devlin et al.,     ternalized knowledge about the world (Bommasani et al.,
+2018) and vision (Dosovitskiy et al., 2020) models, recent       2021), but without grounding, generated plans may be im-
+years have seen a growing interest in large vision-language      possible to execute. One line of research has employed
+models (VLMs) (Li et al., 2019; Lu et al., 2019; Hao et al.,     prompting to elicit a sequence of instructions directly from
+2022; Gan et al., 2022). Unlike their predecessors, VLMs         an LLM either by leveraging semantic similarity between an
+are capable of simultaneously understanding both images          LLM’s generation and an eligible set of instructions (Huang
+and text, and can be applied to tasks such as visual ques-       et al., 2022b), incorporating affordance functions (Ahn et al.,
+tion answering (Zhou et al., 2020; Zellers et al., 2021b),       2022), visual feedback (Huang et al., 2022c), generating
+captioning (Hu et al., 2022), optical character recognition      world models (Nottingham et al., 2023; Zellers et al., 2021a),
+(Li et al., 2021), and object detection (Chen et al., 2021b).    planning over graphs and maps (Shah et al., 2022; Huang
+The methods by which images are integrated varies. For ex-       et al., 2022a), visual explanations (Wang et al., 2023), pro-
+ample, Alayrac et al. (2022) augments pretrained language        gram generation (Liang et al., 2022; Singh et al., 2022), or
+models with a mechanism to directly attend to a single con-      injecting information into the prompt (Zeng et al., 2022). In
+text image. In contrast, PaLM-E represents images and            contrast, PaLM-E is trained to generate plans directly with-
+text as “multimodal sentences” of latent vectors, allowing       out relying on auxiliary models for grounding. This in turn
+it to process multiple images in a flexible way within any       enables direct integration of the rich semantic knowledge
+part of a sentence. More closely related to our work is          stored in pretrained LLMs into the planning process.
+Frozen (Tsimpoukelli et al., 2021) where vision encoder          With few exceptions, the parameters of the LLMs employed
+parameters are optimized via backpropagation through a           in many of these works are employed as-is without further
+frozen LLM (Lu et al., 2021). Inspired by this work, we          training. In LID (Li et al., 2022), this constraint is relaxed
+investigate the design in a broader scope by introducing         and LLM parameters are finetuned to produce a planning net-
+alternative input modalities (e.g. neural scene representa-      work for generating high-level instructions. (SL)3 (Sharma
+tions), and our proposed approach empirically outperforms        et al., 2021) tackles the more challenging task of simulta-
+Frozen by more than 45% on the VQAv2 benchmark. More             neously finetuning two LLMs: a planning network, which
+importantly we demonstrate that PaLM-E is applicable not         produces high-level instructions, and a low-level policy net-
+only to perceptual but also embodied tasks.                      work, which selects actions. With PaLM-E, our interests
+                                                                 are distinct and complementary: we investigate a generalist,
+Actions-output models. Prior works focus on combining
+                                                                 multi-embodiment model, across multiple modalities.
+vision and language inputs in an embodied setting with the
+goal of direct action prediction (Guhur et al., 2022; Shridhar
+et al., 2022b;a; Zhang & Chai, 2021; Silva et al., 2021; Jang    3. PaLM-E: An Embodied Multimodal
+et al., 2022; Nair et al., 2022; Lynch et al., 2022; Brohan         Language Model
+et al., 2022). Among these methods, VIMA (Jiang et al.,
+2022) explores multimodal prompts similar to PaLM-E. The         The main architectural idea of PaLM-E is to inject continu-
+role of language is perhaps most aptly described as task         ous, embodied observations such as images, state estimates,
+specification in these works. In contrast, PaLM-E generates      or other sensor modalities into the language embedding
+high-level instructions as text; in doing so, the model is       space of a pre-trained language model. This is realized by
+able to naturally condition upon its own predictions and di-     encoding the continuous observations into a sequence of
+
