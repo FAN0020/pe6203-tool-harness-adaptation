@@ -1,0 +1,37 @@
+{
+  "status": "new_mechanisms_confirmed_with_one_hypothesis_corrected",
+  "model_calls": 0,
+  "tool_calls": 29,
+  "catalog_calls": 2,
+  "separate_v1_attempt": {
+    "tool_calls": 1,
+    "catalog_calls": 1,
+    "reason": "Unregistered bulk source mistaken as exposed tool; collector stopped before second call. All files preserved."
+  },
+  "execution_note": "Middle14calls completed in one session. Late11stopped on native status error due collector assert; last4scheduled calls resumed under87ce944in fresh process without rerunning any completed call.",
+  "confirmed": [
+    {
+      "mechanism": "new_Late_status_tool_broken",
+      "fact": "review_project_status returns isError=true: storage.getTasksByProject is not a function. Actual storage exposes getTasks, not getTasksByProject.",
+      "scope": "New Late callable tool, exact observed new drift."
+    },
+    {
+      "mechanism": "flat_vs_hierarchy_view",
+      "fact": "One parent and2children persist as3unique IDs; default hierarchy prints children twice and total5. showHierarchy=false with omitted parentId returns3unique records, though heading wrongly says top level.",
+      "scope": "Inherited view behavior, relevant fallback for broken new status tool."
+    },
+    {
+      "mechanism": "record_score_not_decomposition_verification",
+      "fact": "Parent score stays9before/after2explicit child tasks; each child score3. Parent details/complexity8/hours24 unchanged. Analyzer ignores whether children already cover parent scope.",
+      "scope": "Inherited heuristic, not proof actual real-world tasks are manageable. Must assess leaf content/coverage separately, never lower fields or delete work to hide warnings."
+    },
+    {
+      "mechanism": "automatic_subtask_non_idempotence_and_empty_IDs",
+      "fact": "Each auto call adds3legacy records with empty IDs. Next list automatically migrates them to unified tasks, also with empty IDs. Repeat produces9totalrecords,6empty-IDrows and only4distinct IDs includingempty. Parent warning remains.",
+      "scope": "Inherited defect in analyzer legacy write/migration path, bothstages observed; use actual create_task+parentId only if needed and supported by successful synthetic children."
+    }
+  ],
+  "corrected_hypothesis": "Automatic subtasks are not permanently invisible in same process: each wrapper recreates storage and migrates legacy rows on next call, emitting non-JSON stdout logs. The empty IDs and duplicate rows remain.",
+  "candidate_boundary": "A possible new candidate must be frozen separately and attach only to actual changed Late review_project_status plus demonstrated state-view/analysis dependencies. Do not reference unregistered bulk tool or claim Middle improvement from metadata-only project tags. No model candidate started.",
+  "no_repetition": "Do not rerun completed document_sequence or these local probes. Preserve negative candidates and originalqualityrubrics."
+}

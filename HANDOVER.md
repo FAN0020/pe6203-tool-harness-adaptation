@@ -12,7 +12,17 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：document_sequence 开发对照已淘汰，需寻找不同机制
+### 当前最新断点：层级/项目状态新机制已实测，待冻结针对 Late 的候选
+
+- document_sequence 已在`be1ce54`完整归档并淘汰（下节）。之后仅做源码/目录筛选与合成工具探测，**没有新 agent/judge 请求**，Goal仍活动。排除日志28/Excel305/财务等未证明机制候选；筛选索引`results/evidence/mechanism-screening-20261101/`，没有读参考答案或全量旧轨迹。
+- 新探测在`cd50478`预注册v1：发现bulk_create_tasks虽有新增源码但没有注册到实际catalog；仅1次create_project后采集脚本停止。原文件/失败全部保留。**不能再以这个未注册bulk作为变化工具依据。**
+- `da268fc`冻结v2，用实际create_task建立合成父+2子，共29调用（Middle14、Late15）+2catalog。Late第11次真实调用发现新`review_project_status`报`storage.getTasksByProject is not a function`；采集断言停止。`87ce944`事前冻结仅余4调用的续接，新MCP进程执行尾段，未重跑已完成调用；须披露非连续session。合计本地30调用+3catalog、模型费用0。
+- 已复现：持久化3个有效ID，默认层级列表把子任务重复为根，显示5条；`list_tasks(showHierarchy=false)`且省略parentId返回3个唯一ID，但标题错误地称top level。父复杂度得分在真实子任务拆分前后均9，两个子任务各3；父字段完全未改，分析器不考虑子任务覆盖。
+- 自动拆分缺陷：autoCreateSubtasks先写3条legacy记录，ID全为空；下一次list会自动迁移，仍保留空ID。重复后共9条，6个空ID、3个模板名称各重复2次。还在stdout发非JSON迁移日志（已保存）。不能把它当可靠的任务分解/难度验证，不能静默修数据。此行为为继承限制，新增漂移是Late的broken status工具。
+- 完整证据`results/evidence/hierarchy-contract-probes-v2-20261101/mechanism-review.json`与`state-checks.json`；99文件归档含所有源码/原结果/失败日志。离线复核：`python3 results/evidence/hierarchy-contract-probes-v2-20261101/verify_probes.py`。**不要重跑这些probe**。所有MCP进程均已退出。
+- 下一步：先冻结不同候选。可围绕实际新增Late `review_project_status`及有直接共享任务依赖的list/analysis工具，提供已实测的flat读取替代、记录级复杂度含义、自动拆分写坏ID的边界与真实create_task+parentId路径。不能添加通用预算指令、任务答案、跳过真实叶任务难度检查或降低字段来消警。Middle没有这个新增状态工具，不应假称同一机制适用两阶段。建议先定向task283 Late（已有真实产物覆盖但常无最终答复）+235保持，重新事前冻结具体开发/独立重复日程与沿用的实际质量规则，再实施；尚无新updater或新模型实验。
+
+### 已结束的上一轮：document_sequence 开发对照已淘汰
 
 - 六单元日程正常退出，session61462结束；30评分齐全。6份逐属性审阅/全部3页渲染在`5b1538b`冻结后才揭示方法。**不要重启本候选或追加抽样**。PDF/两个渲染服务及浏览器均已关闭。
 - 457变化任务：候选正常完成0/2，对SP1/2；完整产物两组均0/2。候选TF4.6/PE7.6，SP TF1.8/PE6.6。235两组完成1/1、TF/PE10，摘要均错、全项0/1。开发门槛失败，不进入36条验证；Goal仍活动。
