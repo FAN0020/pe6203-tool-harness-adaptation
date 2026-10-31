@@ -1,0 +1,54 @@
+{
+  "checks": [
+    {
+      "cell_id": "cell-003",
+      "trajectory_member": "existing-method-recheck-20261031/cells/cell-003/run/raw_trace.json",
+      "allowed_node_types": [
+        "Expression",
+        "BinOp",
+        "UnaryOp",
+        "Call",
+        "Name",
+        "Load",
+        "Constant"
+      ],
+      "function_source": "def compile_safe(expr: str) -> ast.Expression:\n    _precheck(expr)\n    try:\n        tree = ast.parse(expr, mode='eval')\n    except SyntaxError as exc:\n        raise UnsafeExpression(f'syntax error: {exc.msg}') from None\n    depth = nodes = 0\n    stack = [(tree, 1)]\n    while stack:\n        node, d = stack.pop()\n        nodes += 1\n        depth = max(depth, d)\n        if nodes > MAX_NODES or depth > MAX_DEPTH:\n            raise UnsafeExpression('expression is too complex')\n        if not isinstance(node, _ALLOWED_NODES):\n            raise UnsafeExpression(f'disallowed syntax: {type(node).__name__}')\n        if isinstance(node, ast.Constant):\n            if isinstance(node.value, bool) or not isinstance(node.value, (int, float)):\n                raise UnsafeExpression('only numeric literals are allowed')\n        if isinstance(node, ast.Call):\n            if not isinstance(node.func, ast.Name) or node.func.id not in _FUNCS:\n                raise UnsafeExpression('call to a non-allowlisted function')\n            if node.keywords or any((isinstance(a, ast.Starred) for a in node.args)):\n                raise UnsafeExpression('keyword and starred arguments are not allowed')\n        if isinstance(node, ast.Name):\n            if node.id not in _FUNCS and node.id not in _CONSTS:\n                raise UnsafeExpression(f'unknown identifier: {node.id}')\n        for child in ast.iter_child_nodes(node):\n            stack.append((child, d + 1))\n    return tree",
+      "sample": "1+1",
+      "sample_ast_types": [
+        "Expression",
+        "BinOp",
+        "Constant",
+        "Add",
+        "Constant"
+      ],
+      "unsupported_reachable_operator_node": "Add",
+      "conclusion": "Recorded validator rejects the Add node reached by its traversal; the supplied arithmetic example does not work as advertised.",
+      "evidence_type": "static control-flow inspection plus standard-library AST characterization; no generated code executed"
+    },
+    {
+      "cell_id": "cell-004",
+      "trajectory_member": "existing-method-recheck-20261031/cells/cell-004/run/raw_trace.json",
+      "allowed_node_types": [
+        "Expression",
+        "BinOp",
+        "UnaryOp",
+        "Constant"
+      ],
+      "function_source": "def _check(tree: ast.AST) -> None:\n    nodes = list(ast.walk(tree))\n    if len(nodes) > MAX_NODES:\n        raise UnsafeExpression('expression too complex')\n    depth = 0\n    for n in nodes:\n        depth = max(depth, len(list(ast.walk(n))))\n    if depth > MAX_DEPTH:\n        raise UnsafeExpression('expression nested too deeply')\n    for node in nodes:\n        if isinstance(node, ast.Expression):\n            continue\n        if isinstance(node, ast.BinOp):\n            if type(node.op) not in _ALLOWED_BINOPS:\n                raise UnsafeExpression(f'operator {type(node.op).__name__} not allowed')\n        elif isinstance(node, ast.UnaryOp):\n            if type(node.op) not in _ALLOWED_UNARY:\n                raise UnsafeExpression(f'unary {type(node.op).__name__} not allowed')\n        elif isinstance(node, ast.Constant):\n            if not isinstance(node.value, (int, float)) or isinstance(node.value, bool):\n                raise UnsafeExpression('only numeric literals allowed')\n        else:\n            raise UnsafeExpression(f'node {type(node).__name__} not allowed')",
+      "sample": "1+1",
+      "sample_ast_types": [
+        "Expression",
+        "BinOp",
+        "Constant",
+        "Add",
+        "Constant"
+      ],
+      "unsupported_reachable_operator_node": "Add",
+      "conclusion": "Recorded validator rejects the Add node reached by its traversal; the supplied arithmetic example does not work as advertised.",
+      "evidence_type": "static control-flow inspection plus standard-library AST characterization; no generated code executed"
+    }
+  ],
+  "new_model_calls": 0,
+  "generated_code_executed": false,
+  "limit": "Narrow functional defect proof; not a complete security audit."
+}
