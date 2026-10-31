@@ -80,3 +80,14 @@ python3 results/evidence/completion-quality-20261031/verify_trial.py > /tmp/pe62
 ```
 
 原始包 SHA-256：`9954a1039a946f7e7bd46c39e56b1ce63cb35d1d188941d3889b5a5b4370d9b6`。源码包不含安装后的全部依赖；原 CLI 命令只是历史复现说明，不是新增付费调用的授权。
+
+
+### 下一候选的离线提案（待单独批准）
+
+上一目标回合属于 progress：12 条真实试验得到新反例并完成归档。随后离线追踪确认：预算规则已注入，但不含具体 12 轮 / 4096 token 限额；133 Middle 在最终答案处截断，283 Late 无工具错误仍逐组扩写到轮数耗尽。因果修复仍是待检验假说。
+
+- 已拟且仅拟一个 `budget_contract`：以 `budget_feedback` 为对照，只替换一条预算规则，明确限额、先覆盖所需工作再细化、预留核验/汇报；不提高预算、不放宽质量属性、不修改不变工具。候选尚未注册到运行框架。
+- [可读提案](reports/budget-contract-proposal.html)；`results/evidence/budget-contract-proposal-20261031/proposal.json` 为机器方案，`knowledge-diffs.json` 是精确差异，`mechanism-evidence.json` 是逐轮证据。9 个静态知识条件仅替换原有 29 处规则；5 个 Early/retention 条件保持 K0。复核：`python3 results/evidence/budget-contract-proposal-20261031/verify_preview.py`。这些不是新轨迹或新质量分数。
+- 拟申请 6 条：133 Middle、283 Late、235 Middle × 原 budget_feedback / 新候选，各 1 次；30 个原协议评分槽、至多 2 次可用性预检。拟固定 DigitalOcean 端点、禁止 fallback，使用不含方法名的 cell/workspace IDs。公开端点元数据已读取，无凭据、无推理调用；真实端点可用性仍未测试。
+- 预计 US$0.15–0.40、5–12 分钟，申请独立 US$1 上限。先前 12 条批准不能复用于这一轮。完整路径也已说明：初筛阳性后，与原 Patch 的完整 Middle/Late 对照最多再需 9 条；若将新方法列为课程主结果，匹配三阶段及 No Update/Full Rewrite 最多再需 21 条。均须另批，阴性/不确定即停，绝不自动执行后续矩阵。
+- **当前等待事项：**用户批准或拒绝这 6 条及单候选接入。在回答前不注册新策略、不预检模型、不评分、不运行新实验。独立可做的设计、差异检查、费用估算和文档已完成；仍没有验证出符合双重改善目标的策略，课程 TA 缺口也未关闭。

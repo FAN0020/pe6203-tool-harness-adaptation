@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PE6203 · 预算规则最小改进提案</title><style>body{font:17px/1.7 system-ui,sans-serif;margin:0;background:#f4f6f9;color:#182437}main{max-width:1020px;margin:24px auto;background:white;padding:34px;border-radius:12px}h1{font-size:29px;line-height:1.35}h2{font-size:22px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:15px}th,td{text-align:left;vertical-align:top;padding:10px;border-bottom:1px solid #dae1e9}th{background:#eef3f8}.note{border-left:4px solid #b6842b;background:#fff8e8;padding:12px 16px}code,pre{font-size:14px;overflow-wrap:anywhere}pre{white-space:pre-wrap;padding:14px;background:#f2f5f8}a{color:#175da8}.small{font-size:14px;color:#536075}@media(max-width:650px){main{margin:10px;padding:18px}table{font-size:13px}}</style><main>
+<h1>下一步只验证一个机制：把预算变成可执行的规划规则</h1>
+<p class="note"><strong>状态：离线提案，未获批、未运行。</strong>上一轮 12 条已完成，budget_feedback 与原 Patch 都正常完成 4/6，未证明双重改善。当前只生成一个候选的知识预览，未注册可执行策略、未新增模型调用或评分。性能目标仍未完成。</p>
+<h2>依据：同样失败，发生在两个不同位置</h2>
+<table><tr><th>条件</th><th>原始记录确认的现象</th><th>待检验解释</th></tr>
+<tr><td>133 Middle</td><td>候选第 4 轮最终答案触及 4096 tokens，其中 reasoning 901，finish_reason=length；原 Patch 也在最终答案阶段截断。</td><td>泛泛要求“简洁”不足以安排最终输出。提示里没有明确的会话预算，答案扩写挤占输出空间。</td></tr>
+<tr><td>283 Late</td><td>候选无工具错误，却按工作流逐项扩展：先做完 M1，再 M2、M3、M4，第 12 轮仍创建 M5 子任务，没有最后审查和答案。</td><td>按单项纵深细化，导致全局覆盖、核验和汇报被拖到预算之后。</td></tr></table>
+<p>这些现象不证明新规则一定有效。预算规则确实已随工具描述提供给模型，并非丢失注入；它只说遵守已有 turn/output limits，没有具体数字。<a href="../results/evidence/budget-contract-proposal-20261031/mechanism-evidence.json">原始逐轮证据与提示</a>。</p>
+<h2>唯一候选：budget_contract（基于 budget_feedback）</h2>
+<p>只替换已经加在变化工具上的一条预算规则，保留所有 schema、description、routing、原有安全限制和冻结探测记录。agent 仍自主选择工具和参数。新规则不预设具体任务答案、不改评分、不增加资源预算。</p>
+<p><strong>新规则要点：</strong>明确 12 轮 / 每轮 4096 tokens；先为每个必需交付物建立完整的最小产物，再细化某一个；留最后两轮核验与汇报；最终答案以约 1200 tokens 为目标，先写结果、证据和限制。不得省掉必需工作或安全检查，也不能降低数据或复杂度数字来“通过”。</p>
+<details><summary>完整英文替换文本</summary><pre>This session allows at most 12 model rounds and 4096 generated tokens per response, including reasoning. Count rounds from your first response. Establish a minimal complete artifact for every required deliverable before refining any one. Reserve the final two rounds for necessary checks and reporting, not optional expansion. Aim for a final answer within 1200 tokens: required results, evidence and limitations first; include only code needed for the request. Group independent calls with known inputs; await dependencies. Never skip a safety check, remove required work, lower stored difficulty to hide warnings, or claim unverified success to meet this budget.</pre></details>
+<p>1200 tokens 和“两轮预留”是待验证的模型指导，不是假定已经实现的硬性保障。实际执行上限仍是 4096 / 12。缩短答案后若缺少要求、产生错误或仅声称成功，将按原质量属性失败处理。此规则含相关的多个规划条款，不能用一次对照分别证明每句话的效果。</p>
+<p>离线预览覆盖 3 tasks × 3 stages 共 9 个知识条件：只替换原有的 29 处预算规则，其他字段保持不变；三个 Early 和 task235 全部保持精确 K0。<a href="../results/evidence/budget-contract-proposal-20261031/preview-audit.json">静态核查</a> · <a href="../results/evidence/budget-contract-proposal-20261031/knowledge-diffs.json">逐工具精确差异</a>。静态通过只证明更新范围，不证明行为或质量改善。</p>
+<h2>先提议 6 条，不直接重跑完整矩阵</h2>
+<table><tr><th>任务 / 阶段</th><th>两组</th><th>验证目的</th></tr><tr><td>133 Middle</td><td>budget_feedback / budget_contract</td><td>截断恢复、验证与求值的边界、代码和建议一致性</td></tr><tr><td>283 Late</td><td>同上</td><td>持久化工作覆盖、真实拆解、依赖完整性和最终核验</td></tr><tr><td>235 Middle</td><td>同上</td><td>不变知识下三类图表的数据、单位和数字保持</td></tr></table>
+<p>各执行 1 次，共 6 条 / 30 个原协议有效评分槽，最多另含 2 次获批可用性预检。此次用 budget_feedback 作同期对照，才能只比较这条规则；旧原 Patch 成绩仅作历史参照。这是已知失败的机制筛查，不能代替与原 Patch、No Update、Full Rewrite 的完整比较。</p>
+<h2>先消除能够控制的比较差异</h2>
+<p>两组 agent / judge 拟都限制到 <code>digitalocean</code>，禁止 fallback，并要求支持所需参数。选择依据是上轮两个候选失败条件的所有 agent 请求都使用这一后端，便于检查相同失败；不是搜索哪个供应商成绩最高。公开目录当前只有一个该端点，量化类型仍为 unknown。接口提供端点限制与禁用 fallback 的设置，见 <a href="https://openrouter.ai/docs/guides/routing/provider-selection#targeting-specific-provider-endpoints">OpenRouter 官方说明</a>。</p>
+<p>新计划须在执行前把 cell IDs 和工作目录改为不含策略名的中性编号，并对两组使用同一模板；方法映射保留在归档中。模型 ID、解码、任务、实际预算、MCP 工具及评分协议固定。供应商内部模型版本仍无法完全控制；若端点不可用则停止，不私自换供应商。没有在批准前试调用模型。</p>
+<h2>费用与停止条件</h2>
+<p><strong>预计 US$0.15–0.40、5–12 分钟，拟申请独立 US$1 上限。</strong>历史相同六格合计约 $0.0826、347 秒；按当前 DigitalOcean 未缓存价格和原 token 数重算约 $0.3167。输出、缓存和延迟会变化，此为估算。继续使用每请求先预留、费用未知即停的保护；更新生成本身无模型调用。<a href="../results/evidence/budget-contract-proposal-20261031/provider-endpoints.json">公开价格/端点快照</a>。</p>
+<p>六条结束就停止。初步信号须同时满足：变化任务正常完成更多；TF 不降低；至少一项独立于完成状态的产物或答案正确性改善；没有新增实质质量失败；保持任务不退化。沿用上一轮的具体质量属性，未知关键质量为 hold，不做加权总分、不改历史分数、不重跑低分。</p>
+<h2>怎样才算最终达成目标</h2>
+<p>六条通过也不会宣布完成目标。若值得继续，下一阶段才单独申请与原 Selective Patch 的完整 Middle/Late 对照：复用 3 条有效候选结果，最多新增 9 条。若进一步选择它作为课程主方法，再补匹配的三阶段三方法矩阵，复用已有效的 6 条候选结果，最多新增 21 条。每阶段均先报告成本和证据，再获批；负面或不确定结果即停，不自动扩展。后两阶段粗估合计 US$0.76–2.00、26–65 分钟，当前未申请执行。</p>
+<p>现有课程交付无需等待以上研究。新方法若要宣称满足课程比较，仍需要 TF/PE/ECS、recovery/retention、update cost，以及可信的 under-update / over-update 分析。原有 TA 问题仍待回复；性能胜出不能自动补足这些缺口。此前的 27 条主矩阵和课程报告继续保留。</p>
+<p>完整机器方案：<a href="../results/evidence/budget-contract-proposal-20261031/proposal.json">proposal.json</a>。上一轮：<a href="completion-quality-results.html">12 条结果</a>。本提案不包含自动运行命令；批准后才接入候选与共同控制、冻结并执行。</p>
+</main></html>

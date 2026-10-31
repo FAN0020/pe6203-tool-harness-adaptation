@@ -1,0 +1,162 @@
+{
+  "id": "budget-contract-proposal-v1",
+  "status": "draft_not_registered_not_executed",
+  "created_at": "2026-10-31T12:18:07.702430+00:00",
+  "previous_turn_classification": "progress: 12 new trajectories completed, independently verified and archived in commit 520dee1; no further execution authorized",
+  "objective_preserved": "Find a selective adaptation with improved completion and independently supported task quality, then establish course-required baseline/stage evidence. A small pilot is not completion.",
+  "authorization": {
+    "approved": false,
+    "model_calls_permitted": 0,
+    "diagnostic_runs_permitted": 0,
+    "deployment": false,
+    "historical_12_cell_approval_exhausted": true
+  },
+  "hypothesis": "The existing generic budget note leaves actual limits implicit and permits depth-first expansion. Replacing only that note with explicit limits and coverage-before-refinement may allow necessary work, checking and reporting to finish within the same budget without sacrificing quality. Behavioral efficacy is unproven.",
+  "candidate": {
+    "name": "budget_contract",
+    "base": "existing budget_feedback",
+    "single_intervention": "Replace the existing BUDGET_RULE string on exactly those directly changed/added tool records that already contain it. All other records, schemas, descriptions, routing, probe facts and rules remain byte-equivalent as JSON values.",
+    "before": "Work within the existing turn and output limits. Group small independent calls only when their inputs are already known; await dependent results and keep arguments concise. Complete the required work and essential checks, then give a concise evidence-based final answer instead of reproducing full tool outputs. Do not add optional follow-up work.",
+    "after": "This session allows at most 12 model rounds and 4096 generated tokens per response, including reasoning. Count rounds from your first response. Establish a minimal complete artifact for every required deliverable before refining any one. Reserve the final two rounds for necessary checks and reporting, not optional expansion. Aim for a final answer within 1200 tokens: required results, evidence and limitations first; include only code needed for the request. Group independent calls with known inputs; await dependencies. Never skip a safety check, remove required work, lower stored difficulty to hide warnings, or claim unverified success to meet this budget.",
+    "runtime_budget_unchanged": {
+      "max_rounds": 12,
+      "max_completion_tokens": 4096,
+      "run_timeout_seconds": 900
+    },
+    "soft_policy_not_runtime_limit": "1200-token answer target and two-round reserve are model instructions, not guaranteed caps or early-success relabeling. 4096/12 remain the actual limits.",
+    "task_selection": "Agent still decides tools, arguments, sequence and necessary checks. No tool chain or benchmark answer is hard-coded.",
+    "exposure": "Designer has inspected the development tasks and failures. No claim of unseen-task generalization; numeric budgets come from the runtime config, not reference answers.",
+    "limits": "A single replacement contains several related planning instructions; a positive trial cannot isolate budget disclosure from coverage order or answer-length target."
+  },
+  "pilot": {
+    "purpose": "Mechanism check on the two observed completion failures plus retention; not a full benchmark or winner selection",
+    "pairs": [
+      {
+        "task_id": 133,
+        "stage": "middle",
+        "purpose": "Final-answer truncation and evidence-boundary/code-consistency properties"
+      },
+      {
+        "task_id": 283,
+        "stage": "late",
+        "purpose": "Depth-first expansion, actual persisted scope/decomposition/dependencies and final audit"
+      },
+      {
+        "task_id": 235,
+        "stage": "middle",
+        "purpose": "Unchanged exact-K0 chart data, monetary units and arithmetic retention"
+      }
+    ],
+    "arms": [
+      "budget_feedback",
+      "budget_contract"
+    ],
+    "repeats": 1,
+    "trajectories_max": 6,
+    "valid_judge_slots": 30,
+    "preflights_max": 2,
+    "extra_candidate_or_low_score_rerun": false,
+    "order": "Seed 1729 produces an opaque, fixed six-cell order before any request; both arms use neutral cell IDs and paths. Record the mapping outside model-visible prompts.",
+    "comparator_reason": "Existing budget_feedback is the causal control for the single rule replacement. Historical original Selective Patch remains a descriptive reference; it is not a new contemporaneous control.",
+    "why_not_all_cells_now": "The previous 12-cell study identified two specific completion failures. First establish whether the one changed rule addresses them; broader comparisons need another approval."
+  },
+  "fairness": {
+    "same_within_pilot": [
+      "Model snapshot",
+      "temperature 0",
+      "agent reasoning settings unchanged",
+      "4096 output tokens",
+      "12 rounds",
+      "900 seconds",
+      "120-second request timeout",
+      "original task text",
+      "all MCP implementations",
+      "judge original rubric and five valid slots",
+      "provider endpoint and price caps",
+      "workspace-path template"
+    ],
+    "provider": {
+      "only": [
+        "digitalocean"
+      ],
+      "order": [
+        "digitalocean"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "max_price": {
+        "prompt": 0.3,
+        "completion": 1.2,
+        "request": 0
+      }
+    },
+    "provider_reason": "Both failed budget_feedback focal cells used DigitalOcean for every agent response. Choose the same provider to examine those observed failures, not by searching providers for the highest score. Catalog currently exposes one digitalocean endpoint; its quantization is unknown. Apply the same endpoint to both agent and judge arms.",
+    "provider_limit": "Public catalog support is not a model availability test. Endpoint unavailable or unsupported parameters: stop; do not silently change provider. Actual backend weights/revision remain outside our control.",
+    "provider_source": "https://openrouter.ai/docs/guides/routing/provider-selection#targeting-specific-provider-endpoints",
+    "path_control": "Use opaque cell IDs for both arms before freezing, so model-visible workspace paths do not contain arm labels. Paths are necessarily distinct to preserve isolated persisted state.",
+    "retention": "Both task235 knowledge objects must be exact K0. Differences in task235 outputs remain stochastic/infrastructure variation, not adaptation causality.",
+    "historical_comparability": "Both pilot arms have identical new provider/path controls. Do not splice their scores into prior randomized-backend main/development matrices."
+  },
+  "evaluation": {
+    "original_scores": "TF/PE from five new original-protocol judge slots per new trajectory; no rescoring of historical trajectories. Completion independently from raw stop/exceeded/finish_reason.",
+    "quality_rubric_source": "experiments/completion-quality-v1.json#quality_cases",
+    "quality_rule": "Keep the exact previously frozen required properties. Inspect saved artifacts and nonempty final-answer accuracy independently of completion; missing final answers remain unknown, not a second failure or improvement.",
+    "no_shortcut": "A short completed response with missing required artifacts/safety checks, invented data, lowered difficulty fields or unsupported security claims fails quality.",
+    "pilot_signal_requires": [
+      "More normally completed changed cells than the simultaneous budget_feedback control, without retention completion loss",
+      "TF mean not lower; every score and failure retained",
+      "At least one independent artifact/answer correctness improvement with no new material property failure; unknown material quality means hold",
+      "Retention data, unit, arithmetic and K0 properties do not regress"
+    ],
+    "not_claimed": [
+      "ECS from only two stages",
+      "statistical superiority from one repetition",
+      "winning against original Selective Patch/No Update/Full Rewrite",
+      "course completeness",
+      "causal isolation of each clause inside the replacement rule"
+    ],
+    "failure_boundary": "Keep low scores, truncations, exhaustion and unknown costs. Infrastructure failure pauses the cohort for review; no automatic rerun or fallback."
+  },
+  "stopping": {
+    "after_six": "Stop and report the full six cells; no automatic repeat, third arm, candidate sweep or confirmation.",
+    "if_not_signal": "Preserve the negative result; review the hypothesis before proposing anything else. Do not keep incrementing rule variants automatically.",
+    "if_signal": "Do not promote yet. Present a separately costed expanded comparison with original Selective Patch and course baselines and await approval."
+  },
+  "remaining_to_finish_objective": [
+    "A positive controlled pilot is not evidence on the omitted changed/retention stage cells.",
+    "The final developed-method comparison needs Early/Middle/Late with No Update and Full Rewrite under matched settings, TF/PE/ECS, recovery/retention, update costs and adequate failure analysis.",
+    "Keep the existing 27-cell course cohort; it remains valid for its original method and settings. New provider-pinned scores cannot replace its cells silently.",
+    "If a complete provider-pinned three-task three-stage three-method matrix becomes necessary, it is 27 trajectories/135 ratings; at most the three candidate pilot cells could be reused if protocol and evidence are unchanged, leaving 24. Additional original-Patch comparison is separate. None is authorized now.",
+    "If the six-cell mechanism pilot is positive, a separate full Middle/Late comparison against original Selective Patch would require at most 9 further trajectories: reuse the three valid candidate cells, add three omitted candidate cells and all six original-Patch cells under the same pinned settings. No automatic execution.",
+    "Only if that full comparison is positive and the new method is to be the course headline, a matched Early/Middle/Late × No Update/Full Rewrite/new method matrix contains 27 cells. Reuse its six valid Middle/Late candidate cells; at most 21 additional trajectories remain. This staged path is at most 36 new trajectories in total (6 + 9 + 21), each later phase independently proposed and approved, never a promised automatic Cartesian sweep."
+  ],
+  "expected_cost": {
+    "estimated_usd_range": [
+      0.15,
+      0.4
+    ],
+    "proposed_limit_usd": 1.0,
+    "estimated_minutes_range": [
+      5,
+      12
+    ],
+    "historical_proxy_six_cells_mixed_provider_usd": 0.0825626016,
+    "historical_proxy_elapsed_seconds": 347.302908,
+    "proxy_prompt_tokens": 1507364,
+    "proxy_completion_tokens": 62996,
+    "digitalocean_snapshot_prompt_per_million": 0.18,
+    "digitalocean_snapshot_completion_per_million": 0.72,
+    "no_cache_proxy_usd": 0.31668264,
+    "guard_ceiling_proxy_usd": 0.5278044000000001,
+    "update_model_cost_usd": 0,
+    "uncertainty": "New outputs, cache rates, backend latency and retries can change usage. Public metadata fetch is free of model inference. The cap is conditional on provider price/context contract; unknown charge reserves remain held. Not a guarantee that all cells fit.",
+    "optional_future_matrix_estimate": "Conditional planning only: phase B at most 9 new trajectories (~US$0.23–0.60, 8–20 minutes); phase C at most 21 (~US$0.53–1.40, 18–45 minutes). Existing valid candidate cells are reused if settings/inputs are unchanged. Together with the six-cell pilot this totals at most 36 trajectories (~US$0.91–2.40, 31–77 minutes). These are rough linear projections, not approved budgets; stop after any negative/uncertain stage. The existing course delivery does not require this research expansion."
+  },
+  "implementation_before_paid_execution": [
+    "After approval, register only budget_contract and exact note replacement; test changed-record-only edits and exact-K0 preservation. No extra variants.",
+    "Add/test shared opaque cell identifiers and provider validation before freezing the pilot; no drift in existing historical files.",
+    "Use a new shared spend ledger with US$1 cap; guard agent/judge/preflight, stop on unknown charges.",
+    "Freeze code/config/tasks/metadata/knowledge/rubric, then execute at most six cells. A model availability preflight is included in the requested authorization, not run beforehand."
+  ],
+  "no_runtime_changes_now": true
+}
