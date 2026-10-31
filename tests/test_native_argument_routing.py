@@ -107,7 +107,9 @@ def test_native_routing_validator_rejects_out_of_scope_delta(mutation):
     elif mutation == "rule":
         tool["usage_rules"].append("Skip requested work.")
     elif mutation == "unrelated":
-        candidate["tools"][-1]["description"] = "Unrelated corruption."
+        next(t for t in candidate["tools"] if t["server_id"] != SERVER)["description"] = (
+            "Unrelated corruption."
+        )
     else:
         tool["description"] += " Unverified advice."
     assert validate_routing(candidate, old, target, base, context["feedback"])["errors"]
@@ -129,7 +131,10 @@ def test_native_routing_preserves_unrelated_updates_and_needs_actual_trigger_cha
     old, target, context = inputs()
     target["tools"][-1]["description"] += " New unrelated native description."
     candidate, _, _ = adapt(old, target, STRATEGY, context)
-    assert candidate["tools"][-1] == base_patch(old, target)["knowledge"]["tools"][-1]
+    unrelated = next(t for t in candidate["tools"] if t["server_id"] != SERVER)
+    assert unrelated == next(
+        t for t in base_patch(old, target)["knowledge"]["tools"] if t["server_id"] != SERVER
+    )
     # Synthetic boundary: all MagicUI contracts already present in K0; only
     # unrelated metadata changes. Presence alone must not trigger this updater.
     old = deepcopy(target)

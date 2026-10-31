@@ -33,6 +33,7 @@ VARIANTS = (
     "contract_reconcile",
     "native_media_contract",
     "discovery_contract",
+    "native_argument_routing",
 )
 
 SUFFICIENCY_RULE = (
@@ -659,6 +660,21 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "native_argument_routing":
+        from .native_argument_routing import expected_routing, validate_routing
+
+        feedback = context.get("feedback", [])
+        result["knowledge"], annotations = expected_routing(base, target, feedback)
+        result["changes"].extend(annotations)
+        result["validation"] = validate_routing(
+            result["knowledge"], old, target, base, feedback
+        )
+        if result["validation"]["errors"]:
+            raise ValueError("Native argument routing changed a protected contract")
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
         return result
     if strategy == "discovery_contract":
         from .discovery_contract import expected_discovery, validate_discovery
