@@ -82,7 +82,7 @@ python3 results/evidence/completion-quality-20261031/verify_trial.py > /tmp/pe62
 原始包 SHA-256：`9954a1039a946f7e7bd46c39e56b1ce63cb35d1d188941d3889b5a5b4370d9b6`。源码包不含安装后的全部依赖；原 CLI 命令只是历史复现说明，不是新增付费调用的授权。
 
 
-### 下一候选的离线提案（待单独批准）
+### 下一候选的离线提案（批准前历史快照；当前状态见下节）
 
 上一目标回合属于 progress：12 条真实试验得到新反例并完成归档。随后离线追踪确认：预算规则已注入，但不含具体 12 轮 / 4096 token 限额；133 Middle 在最终答案处截断，283 Late 无工具错误仍逐组扩写到轮数耗尽。因果修复仍是待检验假说。
 
@@ -91,3 +91,22 @@ python3 results/evidence/completion-quality-20261031/verify_trial.py > /tmp/pe62
 - 拟申请 6 条：133 Middle、283 Late、235 Middle × 原 budget_feedback / 新候选，各 1 次；30 个原协议评分槽、至多 2 次可用性预检。拟固定 DigitalOcean 端点、禁止 fallback，使用不含方法名的 cell/workspace IDs。公开端点元数据已读取，无凭据、无推理调用；真实端点可用性仍未测试。
 - 预计 US$0.15–0.40、5–12 分钟，申请独立 US$1 上限。先前 12 条批准不能复用于这一轮。完整路径也已说明：初筛阳性后，与原 Patch 的完整 Middle/Late 对照最多再需 9 条；若将新方法列为课程主结果，匹配三阶段及 No Update/Full Rewrite 最多再需 21 条。均须另批，阴性/不确定即停，绝不自动执行后续矩阵。
 - **当前等待事项：**用户批准或拒绝这 6 条及单候选接入。在回答前不注册新策略、不预检模型、不评分、不运行新实验。独立可做的设计、差异检查、费用估算和文档已完成；仍没有验证出符合双重改善目标的策略，课程 TA 缺口也未关闭。
+
+
+### 六条 budget_contract 试验（已完成，停止，不晋级）
+
+用户随后批准“这轮目标能够完成都可以批准”，范围按此前问题限定为单候选接入、6 条轨迹、30 个有效评分槽、至多 2 次预检、独立 US$1 上限；不是承诺结果必为正或无限扩展。批准记录在 `results/evidence/budget-contract-proposal-20261031/approval.json`，原提案快照保留。
+
+- **实现与核验：**源码冻结 `418ed2b`，协议 `experiments/budget-contract-v1.json`，配置 `configs/budget-contract-v1.json`。只替换原预算规则，133 Middle 5 处、283 Late 11 处、235 Middle 0 处，与批准预览完全一致。两组固定 DigitalOcean、禁止 fallback，使用不暴露方法名的 cell 路径；12 轮/4096 tokens 等实际预算不变。333 项离线测试通过；全部 57 项冻结输入在执行后仍匹配。
+- **结果：**指定三对均完成，6/6 轨迹和30/30评分。对照 budget_feedback：完成3/3、变化任务2/2、保持1/1，TF **9.9333**、PE **9.7333**；候选 budget_contract：相同完成数，TF **9.8667**、PE **8.9333**。无 Early，不计算 ECS。不将当前成功与旧失败拼成修复效果。
+- **费用：**61 请求＝29 agent +30 judge +2 preflight，全部实际响应为 DigitalOcean。总计 **$0.089010216**，未知项0；约3.83分钟 API 执行窗口。对照 agent/judge $0.033376212/$0.010540008；候选 $0.033273108/$0.011807928；共享预检 $0.00001296。确定性更新无模型调用。费用来自响应，未另核账户账单。
+- **质量：**283 Late 候选的35=6+29任务及204h汇总准确；对照M3写67h但落盘79h，并虚构一次参数失败。候选133却误把不支持 `**` 推断为没有指数，把解析与求值混淆，其示例MAX_DEPTH检查不递增深度。保持任务两组数据与单位均保留，但渲染图未存档。候选改名已拆分父节点后警告清零，仅能说明分析器对文本敏感，不能据此认定根因解决或已确认over-update。20属性为12 pass/4 fail/4 unknown，未合成分数；judge错误独立记录，原评分不改。
+- **判定：**本轮未证明完成率与任务质量同时提高，不晋级，停止新增调用。单次已暴露任务、后端内部版本未知、规则内多句无法独立归因；不能泛化。仍没有达到双重改善研究目标。
+- **审阅：**`reports/budget-contract-results.html`；完整证据 `results/evidence/budget-contract-20261031/` 含原始包（262文件）、哈希、源码包、独立复算、产物事实、质量审阅、judge审计、执行环境及命令。原始包 SHA-256 `b82b34719e304d3037ab465ecfe1bc46c7d1ff9be0712b1123623a39600c115a`。本轮只在 `codex/completion-quality-study` 本地提交；未合并/推送main，未改课程PDF/Slides，未部署。
+- **下一步和边界：**可独立审阅本报告；本轮没有剩余实验。后续重复、候选或扩展均未获批，不运行既提到的9/21条或旧R2/R3。课程原有TA接受受控under-update、无关知识over-update因果证据、Full Rewrite解释与工具删除/重命名覆盖缺口均未关闭；问题草稿仍在既有交付中，不发送。
+
+离线复算（零模型调用）：
+
+```bash
+python3 results/evidence/budget-contract-20261031/verify_trial.py
+```

@@ -21,7 +21,7 @@
 - **冻结计划**：[课程完成计划](reports/course-completion-plan.html)，机器依据：`experiments/course-completion-plan.json`；这是原冻结计划；最新状态见 `HANDOVER.md` 与 `submission/handover-20261031/findings.json`。
 - **主实验**：[27 条结果、指标与案例](reports/course-v1.3-experiment.html)。
 - **历史研究**：[全部成功与失败记录](reports/selective-strategy-search.html)；108 条 R1 已完成，其中原三方法81条各有3次重复，可独立作附录。R2/R3 因连接失败停止，不再自动恢复。PE +0.5 等阈值仅为历史研究标准。
-- **完成率 / 质量后续试验**：[获批 12 条结果](reports/completion-quality-results.html)：两组均完成 4/6，候选未晋级；总费用 $0.157216447，无未知项。与课程主矩阵分开，新增执行须再次批准。 [下一单候选提案](reports/budget-contract-proposal.html)仅完成离线设计，6 条验证待批准。
+- **完成率 / 质量后续试验**：[获批 12 条结果](reports/completion-quality-results.html)：两组均完成 4/6，候选未晋级；总费用 $0.157216447，无未知项。与课程主矩阵分开，新增执行须再次批准。 [六条预算规则试验](reports/budget-contract-results.html)也已获批完成：两组均完成3/3，新候选 TF/PE 更低，不晋级；费用 $0.089010216。已停止新增调用。
 - **旧课程试验**：[A/B 的 54 条记录](reports/experiment-readiness.html)，与 v1.3 分开，不回填或混算。
 
 ## 使用

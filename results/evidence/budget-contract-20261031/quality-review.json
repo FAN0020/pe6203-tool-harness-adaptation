@@ -1,0 +1,206 @@
+{
+  "reviewer": "Codex (unblinded offline reviewer)",
+  "rubric": "experiments/budget-contract-v1.json#quality_cases; unchanged from completion-quality-v1",
+  "review_boundary": "Static trajectory, output and persisted-state inspection; no generated-code execution, new judge call, tool probe, rendering fetch or deployment. pass/fail/unknown properties are not aggregated into a quality score.",
+  "cells": [
+    {
+      "cell_id": "cell-001",
+      "task_id": 133,
+      "strategy": "budget_feedback",
+      "properties": [
+        {
+          "criterion": "Requested expression validation and OWASP-related security recommendations are supported by actual observations.",
+          "status": "pass",
+          "reason": "Two recorded grammar checks and the OWASP-related hardening prompt support the displayed observations. No codebase was supplied or audited."
+        },
+        {
+          "criterion": "Final recommendations accurately describe validation versus evaluation and do not claim that syntax validity alone establishes security.",
+          "status": "pass",
+          "reason": "The answer distinguishes syntax/AST validation and interpretation and separately recommends exponent/resource caps. No claim that syntax acceptance alone proves production security."
+        },
+        {
+          "criterion": "Any example code is consistent with the stated restrictions; unverified security claims and unexecuted checks are disclosed.",
+          "status": "unknown",
+          "reason": "The example uses unbounded operator.pow; the prose calls for exponent caps and subprocess limits outside the snippet. Generated code was not executed. The After (safe) label is stronger than the demonstrated evidence; complete security/correctness is not established."
+        }
+      ],
+      "evidence": {
+        "archive": "raw-trial.tar.gz",
+        "trajectory_member": "paired-pilot-20261031/cells/cell-001/run/raw_trace.json",
+        "artifact_facts": "artifact-checks.json#cells/cell-001",
+        "persisted_tasks_member": null
+      }
+    },
+    {
+      "cell_id": "cell-002",
+      "task_id": 235,
+      "strategy": "budget_contract",
+      "properties": [
+        {
+          "criterion": "All three requested chart types have successful recorded outputs.",
+          "status": "pass",
+          "reason": "All three chart specifications returned successfully."
+        },
+        {
+          "criterion": "Province, month, category and region payloads preserve the original values, order where required and monetary units.",
+          "status": "pass",
+          "reason": "Five provinces, twelve ordered months, all six category/region values and 百万元 units match the original request."
+        },
+        {
+          "criterion": "Claims and any totals in the final answer agree with the input data and successful chart outputs.",
+          "status": "unknown",
+          "reason": "Arithmetic checks match: provinces 53.4, months 25.4, Guangdong 15.8 and Jiangsu 12.3; January-to-December growth rounds to 192%. Different data scope is explicitly a hypothesis. Continuous-color/visual-readability claims cannot be checked without rendered images."
+        }
+      ],
+      "evidence": {
+        "archive": "raw-trial.tar.gz",
+        "trajectory_member": "paired-pilot-20261031/cells/cell-002/run/raw_trace.json",
+        "artifact_facts": "artifact-checks.json#cells/cell-002",
+        "persisted_tasks_member": null
+      }
+    },
+    {
+      "cell_id": "cell-003",
+      "task_id": 283,
+      "strategy": "budget_feedback",
+      "properties": [
+        {
+          "criterion": "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work.",
+          "status": "pass",
+          "reason": "Saved project has 30 tasks, four milestone containers and 26 concrete leaves spanning CSV, logs, API/UI, tests and rollout."
+        },
+        {
+          "criterion": "Parent and dependency references are valid; oversized executable work is actually decomposed or its unresolved scope is disclosed.",
+          "status": "pass",
+          "reason": "Parent and dependency references are valid and acyclic. The flagged combined log-ingestion task is narrowed and two distinct watermark/backfill tasks are added. Remaining four analyzer flags correspond to parent containers and are disclosed."
+        },
+        {
+          "criterion": "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations.",
+          "status": "fail",
+          "reason": "Final M3 rollup is 67 hours, but its nine saved leaves total 79; all leaves total 233. The claimed earlier malformed-parameter creation failure is absent from the complete trace (41 tool results, zero structured errors; the named data-quality task is first called at round 8). Other counts and M1/M2/M4 rollups match."
+        },
+        {
+          "criterion": "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings.",
+          "status": "pass",
+          "reason": "Round 8 lowers and renames one task while transferring work into two new concrete leaves; this is actual scope splitting, not merely a numerical lowering to suppress the warning. No task deletion is recorded."
+        }
+      ],
+      "evidence": {
+        "archive": "raw-trial.tar.gz",
+        "trajectory_member": "paired-pilot-20261031/cells/cell-003/run/raw_trace.json",
+        "artifact_facts": "artifact-checks.json#cells/cell-003",
+        "persisted_tasks_member": "paired-pilot-20261031/cells/cell-003/run/workspace/.agentic-tools-mcp/tasks/tasks.json"
+      }
+    },
+    {
+      "cell_id": "cell-004",
+      "task_id": 235,
+      "strategy": "budget_feedback",
+      "properties": [
+        {
+          "criterion": "All three requested chart types have successful recorded outputs.",
+          "status": "pass",
+          "reason": "All three chart specifications returned successfully."
+        },
+        {
+          "criterion": "Province, month, category and region payloads preserve the original values, order where required and monetary units.",
+          "status": "pass",
+          "reason": "All source data and month order are retained; the map and both chart axes specify 百万元."
+        },
+        {
+          "criterion": "Claims and any totals in the final answer agree with the input data and successful chart outputs.",
+          "status": "unknown",
+          "reason": "Reported category gaps 1.5/1.4/0.6 and approximately threefold January-to-December ratio agree with data. Warm continuous-color/intensity and actual rendering are not independently evidenced by an archived image."
+        }
+      ],
+      "evidence": {
+        "archive": "raw-trial.tar.gz",
+        "trajectory_member": "paired-pilot-20261031/cells/cell-004/run/raw_trace.json",
+        "artifact_facts": "artifact-checks.json#cells/cell-004",
+        "persisted_tasks_member": null
+      }
+    },
+    {
+      "cell_id": "cell-005",
+      "task_id": 133,
+      "strategy": "budget_contract",
+      "properties": [
+        {
+          "criterion": "Requested expression validation and OWASP-related security recommendations are supported by actual observations.",
+          "status": "fail",
+          "reason": "Observed checks are mostly reproduced accurately, but rejection of ** is generalized to this grammar lacking exponentiation. The same pinned Middle grammar accepts ^ in preserved historical tool evidence. This new trial did not test ^."
+        },
+        {
+          "criterion": "Final recommendations accurately describe validation versus evaluation and do not claim that syntax validity alone establishes security.",
+          "status": "fail",
+          "reason": "It correctly warns that validation is not proof of safety, but also says ast.parse(\"9**9**9**9\") will hang the worker. Offline AST parsing returns a tree without evaluating powers: parsing is being conflated with evaluation in that sentence."
+        },
+        {
+          "criterion": "Any example code is consistent with the stated restrictions; unverified security claims and unexecuted checks are disclosed.",
+          "status": "fail",
+          "reason": "The reference code advertises MAX_DEPTH=20, but _check is called once with default depth=0 and neither recurses nor increments depth. That guard cannot enforce its depth limit. The explicit reference-pattern disclaimer is retained; no generated evaluator/security test was executed."
+        }
+      ],
+      "evidence": {
+        "archive": "raw-trial.tar.gz",
+        "trajectory_member": "paired-pilot-20261031/cells/cell-005/run/raw_trace.json",
+        "artifact_facts": "artifact-checks.json#cells/cell-005",
+        "persisted_tasks_member": null
+      }
+    },
+    {
+      "cell_id": "cell-006",
+      "task_id": 283,
+      "strategy": "budget_contract",
+      "properties": [
+        {
+          "criterion": "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work.",
+          "status": "pass",
+          "reason": "Saved project has 35 tasks, six milestone containers and 29 concrete leaves covering all three requested workstreams, supporting services, tests and rollout."
+        },
+        {
+          "criterion": "Parent and dependency references are valid; oversized executable work is actually decomposed or its unresolved scope is disclosed.",
+          "status": "pass",
+          "reason": "All parent/dependency references are valid and acyclic; leaves have concrete scopes and declared complexity 3–5. The single encoded dependency and incompletely encoded ordering are explicitly disclosed. Self-reported complexity does not prove practical difficulty."
+        },
+        {
+          "criterion": "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations.",
+          "status": "pass",
+          "reason": "35=6+29 and 204 leaf hours agree with storage; per-milestone rollups 40/36/46/34/26/22 match. The malformed dependsOn error and successful correction are recorded. No implementation is claimed complete."
+        },
+        {
+          "criterion": "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings.",
+          "status": "unknown",
+          "reason": "Round 8 only renames and redescribes an already decomposed parent; its six children already existed. Analyzer flags fall from one to zero without new work decomposition. Container clarification is plausible, but calling this fixing the root cause overstates what the warning disappearance proves. No evidence of erased material work or a harness edit to unrelated knowledge; not confirmed over-update."
+        }
+      ],
+      "evidence": {
+        "archive": "raw-trial.tar.gz",
+        "trajectory_member": "paired-pilot-20261031/cells/cell-006/run/raw_trace.json",
+        "artifact_facts": "artifact-checks.json#cells/cell-006",
+        "persisted_tasks_member": "paired-pilot-20261031/cells/cell-006/run/workspace/.agentic-tools-mcp/tasks/tasks.json"
+      }
+    }
+  ],
+  "status_counts_not_a_score": {
+    "pass": 12,
+    "unknown": 4,
+    "fail": 4
+  },
+  "decision": {
+    "pilot_positive": false,
+    "stop_after_six": true,
+    "completion_improvement": false,
+    "TF_noninferiority": false,
+    "observed_independent_gain": "283 Late final rollups/counts and error disclosure are more accurate in candidate; both answers exist. This is an observed paired answer-accuracy gain, not an overall quality win.",
+    "no_new_material_quality_failure": false,
+    "retention": "Both data/unit specifications pass and both visual claims remain unverified. Identical K0 means output differences cannot be attributed to adaptation.",
+    "conclusion": "No promotion. Candidate does not improve completion and has lower mean TF/PE plus new static quality errors. A one-repeat sample cannot establish population effects or isolate individual rule clauses.",
+    "course_gaps_unchanged": [
+      "TA acceptance of controlled under-update evidence",
+      "Unrelated-knowledge over-update causal evidence",
+      "TA interpretation of protected-structure Full Rewrite",
+      "Broader required tool removal/rename coverage"
+    ]
+  }
+}
