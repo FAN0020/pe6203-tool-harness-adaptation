@@ -497,6 +497,10 @@ def availability_preflight(plan, output):
 
     path = Path(output) / "preflight" / f"{datetime.now(UTC):%Y%m%dT%H%M%S%f}.json"
     records = []
+    prior_calls = sum(len(read_json(p)) for p in (Path(output) / "preflight").glob("*.json"))
+    maximum_calls = plan.get("max_preflight_calls")
+    if maximum_calls is not None and prior_calls >= maximum_calls:
+        raise ValueError("Approved preflight call limit reached")
     for role in ("agent", "judge", "updater"):
         settings = plan[role] if role == "updater" else plan["config"][role]
         key, url = credentials(settings)
@@ -509,6 +513,8 @@ def availability_preflight(plan, output):
             and resolved == plan["config"]["agent"]["model"]
         ):
             continue
+        if maximum_calls is not None and prior_calls + len(records) >= maximum_calls:
+            raise ValueError("Approved preflight call limit reached")
         item = {"role": role, "model": resolved, "retries": []}
         records.append(item)
         started = time.monotonic()
@@ -531,6 +537,11 @@ def availability_preflight(plan, output):
                     item["retries"].append,
                 )
             item["usage"] = response.usage.model_dump() if response.usage else None
+            item["actual_provider"] = getattr(response, "provider", None)
+            item["actual_model"] = response.model
+            item["response_id"] = response.id
+            if spend_stopped(plan["config"].get("spend_guard")):
+                raise ValueError("Preflight response stopped the spend/provider guard")
             item["status"] = "reachable"
         except Exception as exc:
             item.update(status="failed", error_type=type(exc).__name__)

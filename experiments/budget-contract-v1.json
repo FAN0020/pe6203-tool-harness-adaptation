@@ -1,0 +1,211 @@
+{
+  "id": "budget-contract-v1",
+  "status": "approved_freeze_before_first_request",
+  "objective": "Find a selective adaptation with improved completion and independently supported task quality, then establish course-required baseline/stage evidence. A small pilot is not completion.",
+  "hypothesis": "The existing generic budget note leaves actual limits implicit and permits depth-first expansion. Replacing only that note with explicit limits and coverage-before-refinement may allow necessary work, checking and reporting to finish within the same budget without sacrificing quality. Behavioral efficacy is unproven.",
+  "candidate": {
+    "name": "budget_contract",
+    "base": "existing budget_feedback",
+    "single_intervention": "Replace the existing BUDGET_RULE string on exactly those directly changed/added tool records that already contain it. All other records, schemas, descriptions, routing, probe facts and rules remain byte-equivalent as JSON values.",
+    "before": "Work within the existing turn and output limits. Group small independent calls only when their inputs are already known; await dependent results and keep arguments concise. Complete the required work and essential checks, then give a concise evidence-based final answer instead of reproducing full tool outputs. Do not add optional follow-up work.",
+    "after": "This session allows at most 12 model rounds and 4096 generated tokens per response, including reasoning. Count rounds from your first response. Establish a minimal complete artifact for every required deliverable before refining any one. Reserve the final two rounds for necessary checks and reporting, not optional expansion. Aim for a final answer within 1200 tokens: required results, evidence and limitations first; include only code needed for the request. Group independent calls with known inputs; await dependencies. Never skip a safety check, remove required work, lower stored difficulty to hide warnings, or claim unverified success to meet this budget.",
+    "runtime_budget_unchanged": {
+      "max_rounds": 12,
+      "max_completion_tokens": 4096,
+      "run_timeout_seconds": 900
+    },
+    "soft_policy_not_runtime_limit": "1200-token answer target and two-round reserve are model instructions, not guaranteed caps or early-success relabeling. 4096/12 remain the actual limits.",
+    "task_selection": "Agent still decides tools, arguments, sequence and necessary checks. No tool chain or benchmark answer is hard-coded.",
+    "exposure": "Designer has inspected the development tasks and failures. No claim of unseen-task generalization; numeric budgets come from the runtime config, not reference answers.",
+    "limits": "A single replacement contains several related planning instructions; a positive trial cannot isolate budget disclosure from coverage order or answer-length target."
+  },
+  "champion": "budget_feedback",
+  "candidates": [
+    "budget_contract"
+  ],
+  "model_config": "configs/budget-contract-v1.json",
+  "updater_config": "configs/course-updater.json",
+  "feedback_probes": "experiments/feedback-probes-v1.json",
+  "development": {
+    "tasks": [
+      133,
+      235,
+      283
+    ],
+    "stages": [
+      "middle",
+      "late"
+    ],
+    "task_stage_pairs": [
+      [
+        133,
+        "middle"
+      ],
+      [
+        283,
+        "late"
+      ],
+      [
+        235,
+        "middle"
+      ]
+    ],
+    "strategies": [
+      "budget_feedback",
+      "budget_contract"
+    ],
+    "repeats": 1,
+    "opaque_cell_ids": true,
+    "cells": 6
+  },
+  "fairness": {
+    "same_within_pilot": [
+      "Model snapshot",
+      "temperature 0",
+      "agent reasoning settings unchanged",
+      "4096 output tokens",
+      "12 rounds",
+      "900 seconds",
+      "120-second request timeout",
+      "original task text",
+      "all MCP implementations",
+      "judge original rubric and five valid slots",
+      "provider endpoint and price caps",
+      "workspace-path template"
+    ],
+    "provider": {
+      "only": [
+        "digitalocean"
+      ],
+      "order": [
+        "digitalocean"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "max_price": {
+        "prompt": 0.3,
+        "completion": 1.2,
+        "request": 0
+      }
+    },
+    "provider_reason": "Both failed budget_feedback focal cells used DigitalOcean for every agent response. Choose the same provider to examine those observed failures, not by searching providers for the highest score. Catalog currently exposes one digitalocean endpoint; its quantization is unknown. Apply the same endpoint to both agent and judge arms.",
+    "provider_limit": "Public catalog support is not a model availability test. Endpoint unavailable or unsupported parameters: stop; do not silently change provider. Actual backend weights/revision remain outside our control.",
+    "provider_source": "https://openrouter.ai/docs/guides/routing/provider-selection#targeting-specific-provider-endpoints",
+    "path_control": "Use opaque cell IDs for both arms before freezing, so model-visible workspace paths do not contain arm labels. Paths are necessarily distinct to preserve isolated persisted state.",
+    "retention": "Both task235 knowledge objects must be exact K0. Differences in task235 outputs remain stochastic/infrastructure variation, not adaptation causality.",
+    "historical_comparability": "Both pilot arms have identical new provider/path controls. Do not splice their scores into prior randomized-backend main/development matrices."
+  },
+  "evaluation": {
+    "original_scores": "TF/PE from five new original-protocol judge slots per new trajectory; no rescoring of historical trajectories. Completion independently from raw stop/exceeded/finish_reason.",
+    "quality_rubric_source": "experiments/completion-quality-v1.json#quality_cases",
+    "quality_rule": "Keep the exact previously frozen required properties. Inspect saved artifacts and nonempty final-answer accuracy independently of completion; missing final answers remain unknown, not a second failure or improvement.",
+    "no_shortcut": "A short completed response with missing required artifacts/safety checks, invented data, lowered difficulty fields or unsupported security claims fails quality.",
+    "pilot_signal_requires": [
+      "More normally completed changed cells than the simultaneous budget_feedback control, without retention completion loss",
+      "TF mean not lower; every score and failure retained",
+      "At least one independent artifact/answer correctness improvement with no new material property failure; unknown material quality means hold",
+      "Retention data, unit, arithmetic and K0 properties do not regress"
+    ],
+    "not_claimed": [
+      "ECS from only two stages",
+      "statistical superiority from one repetition",
+      "winning against original Selective Patch/No Update/Full Rewrite",
+      "course completeness",
+      "causal isolation of each clause inside the replacement rule"
+    ],
+    "failure_boundary": "Keep low scores, truncations, exhaustion and unknown costs. Infrastructure failure pauses the cohort for review; no automatic rerun or fallback."
+  },
+  "quality_cases": [
+    {
+      "task_id": 133,
+      "split": "exposed_development_regression",
+      "provenance": "Original MCPEvol-Bench task and archived raw trajectories; original question unchanged",
+      "required_properties": [
+        "Requested expression validation and OWASP-related security recommendations are supported by actual observations.",
+        "Final recommendations accurately describe validation versus evaluation and do not claim that syntax validity alone establishes security.",
+        "Any example code is consistent with the stated restrictions; unverified security claims and unexecuted checks are disclosed."
+      ],
+      "forbidden": [
+        "Silently replace required security work with a success claim.",
+        "Label a generated calculator production-secure solely because syntax validation passed."
+      ],
+      "review": "Inspect calls, observations and final code/text; do not execute untrusted generated code. Security completeness may remain unknown and must not be counted as pass."
+    },
+    {
+      "task_id": 235,
+      "split": "exposed_retention_control",
+      "provenance": "Original question contains all provincial, monthly and category sales values",
+      "required_properties": [
+        "All three requested chart types have successful recorded outputs.",
+        "Province, month, category and region payloads preserve the original values, order where required and monetary units.",
+        "Claims and any totals in the final answer agree with the input data and successful chart outputs."
+      ],
+      "forbidden": [
+        "Change source data to make a chart or diagnostic pass.",
+        "Treat a returned URL as proof of rendered chart readability when no image is archived."
+      ],
+      "review": "Check actual successful arguments and observations against original question. Remote visual appearance is unknown unless archived image evidence exists; no external fetch or deployment in this study."
+    },
+    {
+      "task_id": 283,
+      "split": "exposed_changed_task_regression",
+      "provenance": "Original analytics dashboard planning request; archived task store, calls and final answer",
+      "required_properties": [
+        "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work.",
+        "Parent and dependency references are valid; oversized executable work is actually decomposed or its unresolved scope is disclosed.",
+        "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations.",
+        "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings."
+      ],
+      "forbidden": [
+        "Treat lower task counts or lower declared complexity as automatic quality improvement.",
+        "Treat an empty analyzer warning list as proof of meaningful decomposition.",
+        "Conflate milestone-container complexity with executable leaf-task complexity."
+      ],
+      "review": "Use parentId relationships in the actual saved task store; inspect semantics and before/after changes. Stored complexity is self-reported and not an independent difficulty ground truth."
+    }
+  ],
+  "stopping": {
+    "after_six": "Stop and report the full six cells; no automatic repeat, third arm, candidate sweep or confirmation.",
+    "if_not_signal": "Preserve the negative result; review the hypothesis before proposing anything else. Do not keep incrementing rule variants automatically.",
+    "if_signal": "Do not promote yet. Present a separately costed expanded comparison with original Selective Patch and course baselines and await approval."
+  },
+  "authorization": {
+    "approved": true,
+    "approval_text": "这轮目标能够完成都可以批准",
+    "approval_record": "results/evidence/budget-contract-proposal-20261031/approval.json",
+    "agent_trajectories_max": 6,
+    "valid_judge_slots": 30,
+    "preflight_calls_max": 2,
+    "independent_budget_usd": "1.00",
+    "deployment": false,
+    "automatic_expansion": false
+  },
+  "expected_cost": {
+    "estimated_usd_range": [
+      0.15,
+      0.4
+    ],
+    "proposed_limit_usd": 1.0,
+    "estimated_minutes_range": [
+      5,
+      12
+    ],
+    "historical_proxy_six_cells_mixed_provider_usd": 0.0825626016,
+    "historical_proxy_elapsed_seconds": 347.302908,
+    "proxy_prompt_tokens": 1507364,
+    "proxy_completion_tokens": 62996,
+    "digitalocean_snapshot_prompt_per_million": 0.18,
+    "digitalocean_snapshot_completion_per_million": 0.72,
+    "no_cache_proxy_usd": 0.31668264,
+    "guard_ceiling_proxy_usd": 0.5278044000000001,
+    "update_model_cost_usd": 0,
+    "uncertainty": "New outputs, cache rates, backend latency and retries can change usage. Public metadata fetch is free of model inference. The cap is conditional on provider price/context contract; unknown charge reserves remain held. Not a guarantee that all cells fit.",
+    "optional_future_matrix_estimate": "Conditional planning only: phase B at most 9 new trajectories (~US$0.23–0.60, 8–20 minutes); phase C at most 21 (~US$0.53–1.40, 18–45 minutes). Existing valid candidate cells are reused if settings/inputs are unchanged. Together with the six-cell pilot this totals at most 36 trajectories (~US$0.91–2.40, 31–77 minutes). These are rough linear projections, not approved budgets; stop after any negative/uncertain stage. The existing course delivery does not require this research expansion."
+  },
+  "limitations": [
+    "Exposed development tasks; one execution per cell; not statistical confirmation.",
+    "Two-stage subset: no new ECS; no original Selective Patch/NU/FR contemporary arm.",
+    "Pinned provider and opaque path controls apply equally; historical cohorts are separate.",
+    "No new quality rubric; missing final alone is not independent quality improvement."
+  ]
+}

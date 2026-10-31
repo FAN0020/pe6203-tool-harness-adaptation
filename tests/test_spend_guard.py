@@ -223,3 +223,80 @@ def test_availability_preflight_cannot_bypass_the_shared_cap(tmp_path, monkeypat
     except ValueError:
         pass
     assert calls == [], "Preflight reached model endpoint despite insufficient budget"
+
+
+@pytest.mark.parametrize(
+    "actual_provider,actual_model,blocked",
+    [
+        ("DigitalOcean", "deepseek/deepseek-v4.1-flash-1017", False),
+        ("Other", "deepseek/deepseek-v4.1-flash-1017", True),
+        (None, "deepseek/deepseek-v4.1-flash-1017", True),
+        ("DigitalOcean", "other-model", True),
+    ],
+)
+def test_pinned_route_applies_to_every_request_and_mismatch_blocks_followups(
+    tmp_path, actual_provider, actual_model, blocked
+):
+    route = {
+        "only": ["digitalocean"],
+        "order": ["digitalocean"],
+        "allow_fallbacks": False,
+        "require_parameters": True,
+    }
+    rules = {**policy(tmp_path), "provider_route": route, "expected_provider": "DigitalOcean"}
+    payloads = []
+
+    def handle(request):
+        payloads.append(json.loads(request.content))
+        body = response(0.01)
+        body.update(provider=actual_provider, model=actual_model)
+        return httpx.Response(200, json=body)
+
+    with OpenAI(
+        api_key="test",
+        base_url="https://openrouter.ai/api/v1",
+        max_retries=0,
+        http_client=httpx.Client(transport=httpx.MockTransport(handle)),
+    ) as client:
+        # No explicit provider on request: also exercises availability-preflight routing.
+        result = spend_guard.complete_sync(client, rules, **kwargs())
+        assert result.model == actual_model  # Raw evidence is returned even on a mismatch.
+        assert spend_guard.stopped(rules) is blocked
+        if blocked:
+            with pytest.raises(spend_guard.BudgetStopped):
+                spend_guard.complete_sync(client, rules, **kwargs())
+    assert len(payloads) == 1
+    assert payloads[0]["provider"] == {
+        **route,
+        "max_price": {"prompt": 0.3, "completion": 1.2, "request": 0},
+    }
+    data = json.loads((tmp_path / "budget.json").read_text())
+    assert data["known_usd"] == "0.01"
+    assert data["requests"][0]["actual_provider"] == actual_provider
+
+
+def test_conflicting_provider_override_is_rejected_before_network(tmp_path):
+    rules = {
+        **policy(tmp_path),
+        "provider_route": {"only": ["digitalocean"]},
+        "expected_provider": "DigitalOcean",
+    }
+    with OpenAI(api_key="test", base_url="https://openrouter.ai/api/v1", max_retries=0) as client:
+        with pytest.raises(spend_guard.BudgetStopped, match="provider"):
+            spend_guard.reserve(
+                client, rules, {**kwargs(), "extra_body": {"provider": {"only": ["other"]}}}
+            )
+    assert not (tmp_path / "budget.json").exists()
+
+
+def test_preflight_cap_blocks_an_extra_session_without_a_request(tmp_path):
+    from pe6203.experiment import availability_preflight
+
+    (tmp_path / "preflight").mkdir()
+    (tmp_path / "preflight/old.json").write_text(
+        json.dumps(
+            [{"role": "agent", "status": "reachable"}, {"role": "judge", "status": "reachable"}]
+        )
+    )
+    with pytest.raises(ValueError, match="preflight.*limit"):
+        availability_preflight({"max_preflight_calls": 2}, tmp_path)

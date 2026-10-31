@@ -119,3 +119,51 @@ def test_execution_rejects_unreviewed_or_modified_shared_knowledge(tmp_path):
     write_json(tmp_path / "adaptations/a/knowledge.json", {"tools": ["mutated"]})
     with pytest.raises(ValueError, match="changed"):
         check_knowledge(tmp_path)
+
+
+def test_explicit_pairs_do_not_expand_into_cartesian_cells_and_paths_hide_arms():
+    from pe6203.strategy_search import cells_for
+
+    spec = {
+        "development": {
+            "tasks": [133, 235, 283],
+            "stages": ["middle", "late"],
+            "task_stage_pairs": [[133, "middle"], [283, "late"], [235, "middle"]],
+            "strategies": ["selective_patch", "budget_feedback"],
+            "repeats": 1,
+            "opaque_cell_ids": True,
+        }
+    }
+    cells = cells_for(spec, "development")
+    assert len(cells) == len({c["id"] for c in cells}) == 6
+    assert {(c["task_id"], c["version"]) for c in cells} == {
+        (133, "middle"),
+        (283, "late"),
+        (235, "middle"),
+    }
+    assert all(c["id"].startswith("cell-") and c["strategy"] not in c["id"] for c in cells)
+    assert cells == cells_for(spec, "development")
+    spec["development"]["task_stage_pairs"].append([133, "middle"])
+    with pytest.raises(ValueError, match="distinct"):
+        cells_for(spec, "development")
+
+
+def test_budget_contract_rejects_config_that_conflicts_with_its_advertised_limits(tmp_path):
+    from pe6203.strategy_search import prepare_search
+
+    spec = {
+        "model_config": "config.json",
+        "development": {
+            "tasks": [133],
+            "stages": ["middle"],
+            "strategies": ["budget_contract"],
+            "repeats": 1,
+        },
+    }
+    write_json(tmp_path / "spec.json", spec)
+    write_json(
+        tmp_path / "config.json", {"max_rounds": 20, "agent": {"max_completion_tokens": 4096}}
+    )
+    with pytest.raises(ValueError, match="budget_contract.*12.*4096"):
+        prepare_search(tmp_path, tmp_path / "out", "spec.json", "development")
+    assert not (tmp_path / "out").exists()

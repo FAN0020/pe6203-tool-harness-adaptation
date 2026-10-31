@@ -425,3 +425,22 @@ def test_budget_feedback_only_extends_parent_rules_on_changed_and_added_tools(mo
     for unchanged in [deepcopy(old), catalog("late")]:
         same, _, same_cost = adapt(old, unchanged, "budget_feedback", context)
         assert same == old and same_cost["calls"] == 0
+
+
+def test_budget_contract_replaces_only_the_existing_changed_tool_budget_rule():
+    from pe6203.patch_variants import BUDGET_RULE
+
+    old, target = catalog(), changed()
+    control, _, _ = adapt(old, target, "budget_feedback")
+    candidate, _, cost = adapt(old, target, "budget_contract")
+    before = control["tools"][0]["usage_rules"]
+    after = candidate["tools"][0]["usage_rules"]
+    assert len(before) == len(after)
+    assert before[-1] == BUDGET_RULE and after[-1] != BUDGET_RULE
+    assert "12 model rounds" in after[-1] and "4096" in after[-1]
+    candidate["tools"][0]["usage_rules"][-1] = BUDGET_RULE
+    assert candidate == control
+    assert candidate["tools"][1] == old["tools"][1]
+    assert cost["calls"] == 0
+    unchanged, _, _ = adapt(old, catalog("late"), "budget_contract")
+    assert unchanged["tools"] == old["tools"]

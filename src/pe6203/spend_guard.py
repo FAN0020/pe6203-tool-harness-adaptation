@@ -66,10 +66,13 @@ def reserve(client, policy, kwargs):
     extra = request.setdefault("extra_body", {})
     if set(extra) - {"reasoning", "response_format", "provider"}:
         raise BudgetStopped("Unpriced extra request options")
-    if set(extra.get("provider", {})) - {"max_price"}:
+    route = policy.get("provider_route", {})
+    supplied_route = {k: v for k, v in extra.get("provider", {}).items() if k != "max_price"}
+    if supplied_route and supplied_route != route:
         raise BudgetStopped("Unexpected provider override")
     extra["provider"] = {
-        "max_price": {"prompt": float(rates[0]), "completion": float(rates[1]), "request": 0}
+        **deepcopy(route),
+        "max_price": {"prompt": float(rates[0]), "completion": float(rates[1]), "request": 0},
     }
     # Full published context is a conservative input bound; output is additionally reserved.
     bound = (policy["context_tokens"] * rates[0] + maximum * rates[1]) / Decimal(1000000)
@@ -105,6 +108,17 @@ def settle(policy, index, response=None, error=None):
         if row["status"] != "pending":
             raise BudgetStopped("Request was already settled")
         row.update(finished_at=datetime.now(UTC).isoformat(), error_type=error)
+        if response is not None and policy.get("expected_provider"):
+            row.update(
+                actual_provider=getattr(response, "provider", None),
+                actual_model=response.model,
+                response_id=response.id,
+            )
+            if (
+                row["actual_provider"] != policy["expected_provider"]
+                or row["actual_model"] != policy["model"]
+            ):
+                data.update(blocked=True, stop_reason="unexpected_provider_or_model")
         if cost is None:
             row["status"] = "unknown_charge"
             data["unknown_reserved_usd"] = str(

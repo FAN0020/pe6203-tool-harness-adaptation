@@ -31,9 +31,19 @@ def cells_for(spec, phase, candidate=None):
     if phase == "confirmation" and candidate not in VARIANTS:
         raise ValueError("Choose a registered candidate for fresh confirmation")
     cells = make_cells(group["tasks"], group["stages"], strategies, group["repeats"])
+    if "task_stage_pairs" in group:
+        pairs = [tuple(pair) for pair in group["task_stage_pairs"]]
+        allowed = {(c["task_id"], c["version"]) for c in cells}
+        if not pairs or len(pairs) != len(set(pairs)) or not set(pairs) <= allowed:
+            raise ValueError("Need distinct supported task-stage pairs")
+        cells = [c for c in cells if (c["task_id"], c["version"]) in pairs]
     # Complete repeat blocks, randomized within each block; no model seed promise.
     random.Random(1729).shuffle(cells)
-    return sorted(cells, key=lambda c: c["seed"])
+    cells = sorted(cells, key=lambda c: c["seed"])
+    if group.get("opaque_cell_ids"):
+        for index, cell in enumerate(cells, 1):
+            cell["id"] = f"cell-{index:03d}"
+    return cells
 
 
 def prepare_search(root, output, spec_path, phase, candidate=None, round_number=1):
@@ -41,6 +51,10 @@ def prepare_search(root, output, spec_path, phase, candidate=None, round_number=
     spec = read_json(root / spec_path)
     cells = cells_for(spec, phase, candidate)
     group = spec[phase]
+    if any(c["strategy"] == "budget_contract" for c in cells):
+        config = read_json(root / spec["model_config"])
+        if config.get("max_rounds") != 12 or config["agent"].get("max_completion_tokens") != 4096:
+            raise ValueError("budget_contract requires 12 rounds and 4096 output tokens")
     plan = prepare(
         root,
         output,
@@ -64,6 +78,9 @@ def prepare_search(root, output, spec_path, phase, candidate=None, round_number=
         availability_preflight=True,
         stop_after_infrastructure_failures=2,
     )
+    if "preflight_calls_max" in spec.get("authorization", {}):
+        plan["max_preflight_calls"] = spec["authorization"]["preflight_calls_max"]
+    print(f"Explicit research schedule frozen: {len(cells)} trajectories.", flush=True)
     plan["shared_adaptations"] = {
         f"{c['task_id']}-{c['version']}-{c['strategy']}": f"adaptations/{c['task_id']}-{c['version']}-{c['strategy']}/adaptation.json"
         for c in cells
