@@ -1,6 +1,6 @@
 # PE6203 交付交接 · 2026-10-31
 
-**最新授权：用户要求“请不要设置上限和额度限制，以完成任务为优先目标”。后续研究按证据继续，不设总费用/轨迹额度；保持逐条记账、公平执行设置及历史证据。下文各轮限额及等待批准的表述仅描述当时状态。最新已完成协议：`experiments/tool-migration-v1.json`，12条均已归档；不含部署授权。**
+**最新授权：用户要求“请不要设置上限和额度限制，以完成任务为优先目标”。后续研究按证据继续，不设总费用/轨迹额度；保持逐条记账、公平执行设置及历史证据。下文各轮限额及等待批准的表述仅描述当时状态。最新已完成主对照：`experiments/tool-migration-v1.json`，12条已归档；另完成2条无关路由受控诊断（文末）。不含部署授权。**
 
 课程交付已冻结。四条获批诊断已经结束；PE +0.5 和历史 promotion gates 不属于课程要求。后续新增的完成率 / 任务质量研究另列在文末；文末获批的 12 条试验已执行并归档，总费用 US$0.1572164470；**授权已用完，不自动扩展实验或部署**。课程验收仍需组内审阅及 TA 澄清，不以策略胜出为条件。
 
@@ -163,3 +163,18 @@ python3 results/evidence/budget-contract-20261031/verify_trial.py
 本轮已无运行中的模型实验。当前研究仅在`codex/completion-quality-study`本地归档提交；没有新增main push。原课程main交付状态不变。
 
 零模型离线复算：`python3 results/evidence/tool-migration-pilot-20261031/verify_trial.py`。
+
+### 最新：无关路由受控诊断（已完成，局部机制确认）
+
+上一目标回合为progress：12条迁移对照与独立审阅已提交9f9e0c9。本回合按持续研究授权完成上节方案中的2条agent/10评分及2次公开同输入重放；不设总额度，无新策略或部署。
+
+- **唯一差异：**430Late现有budget_feedback知识中，`wikipedia-mcp::readArticle.routing.tool_name`从`readArticle`改成`read_article`。Wikipedia元数据三阶段完全不变，与Swiftipedia迁移无依赖；模型看到的工具定义一致。正确路由直接返回41,962字符文章，错误路由明确Tool not found。
+- **完整轨迹：**cell-001故障组第2、3轮两次触发该错误；cell-002控制组第2轮成功。两组均7次工具调用，agent轮数5/4，都正常结束。故障组如实披露读失败，使用搜索摘要完成解释和示例。原TF9.6/10、PE6.0/6.8，独立复算10个原评分一致；多份judge误判了已有batch材料或重试数，原分未修改。
+- **结论分类：**无关路由改动→局部读功能损害：confirmed（受控）；整个任务失败：contradicted；TF/PE差值的因果归属：suggestive（首轮已随机分岔，且评分错误）；正常updater自然产生此错：未观察到，本次明确不是。正常scope/identity验证器会拒绝3项违规，实验只从研究replay入口注入，未改正式验证器。
+- **课程解释：**现在under缺参和over无关路由两类受控局部机制均有真实轨迹。brief没有自然发生要求，也没有明说必须导致整个任务失败；但guard消融/局部损害是否满足教师对方法失败分析的预期仍待TA，不能自动写成已验收。旧evaluate相关规则对照仍suggestive，6条chart负结果和主27结果不变。问题草稿在新evidence-review.json，未发送。
+- **归档：**`results/evidence/routing-fault-check-20261031/`含87文件raw-trial.tar.gz，SHA256 `50fa23e2b4120c95ef5cf5f2eba1413617e94d63c5383c043d29ad5ef4e58ae8`；driver/protocol冻结37dd2d0，51个source/diagnostic输入执行后无漂移。标准库verify_trial.py、evidence-review、原始费用、执行/复现说明俱全。19请求=9agent+10judge，实际DigitalOcean；$0.021366768、未知0，77.54秒。无updater或模型预检调用。
+- **阅读与交付：**`reports/routing-fault-results.html`已生成；迁移报告链接更新为已执行状态，旧提案保持执行前快照。本附录还没有合入冻结课程PDF/共享Slides，main未push。后续整合必须区分受控局部机制与自然失败，不能把9.6→10当方法晋级。当前没有运行中的模型实验。
+- **目标仍未完成：**这对条件不构成新的改进策略。已有budget_feedback在匹配开发对照中有完成/TF收益，同时保留反例；不能把“每个附加片段完美、统计显著或击败所有baseline”自设为课程要求，也不能只凭一项高分宣称整体质量更好。下一步应寻找具体、任务相关的知识适应机制与质量证据，不再堆叠同类通用规则。研究可继续，无需旧额度确认；不自动恢复81/108网格。
+- **数据边界提醒：**一次过宽的官方任务打印暴露了9/24/72/90的原答案/轨迹（未送入updater、agent或judge，也未因此选择/执行新实验）。今后这些只能标为已暴露开发案例；选任务时只读取idx/question/servers/tool_calls字段，勿再整条打印。潜在下一项是先离线评估90的真实每日题工具删除及其公开服务依赖，保留现有133/235/283/430；若不可运行或无法辨别恢复，不执行。不要为更容易得到阳性而丢弃旧任务或失败。
+
+独立离线复核：`python3 results/evidence/routing-fault-check-20261031/verify_trial.py`。

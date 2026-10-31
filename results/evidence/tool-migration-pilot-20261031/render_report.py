@@ -57,7 +57,7 @@ def main():
         "<p>Full Rewrite重新构建完整目标目录，模型改写全部15条Middle/Late描述；schemas、routing、output schema和usage rules取目标元数据。并非每个字段由LLM自由生成。本次补上可选updater供应商固定和统一记账；不使用这些新设置的历史默认行为仍受回归测试保护，旧结果不改。</p>",
         "<p>本轮每格单次、一个补充任务；不能宣称显著性、稳定胜出或泛化。原公开MCP服务访问实时Wikipedia/Swiftipedia，内容和响应时间可能变化；完整观察与时间均归档。Swift检查包含全部围栏片段语法解析及12个核心CounterView、两项疑点的本机类型检查；不执行生成代码，不证明全部片段、iOS SDK兼容或运行正确。省略类型/回调的教学片段、API签名不自动当成完整app的编译错误。</p>",
         f"<p>全部请求已知费用US${v['known_usd']}（updater${v['updater_usd']}，预检${v['preflight_usd']}），未知费用{v['unknown_cost_items']}项；{v['api_requests']}个API请求，含更新的账本跨度{v['elapsed_seconds_including_updates']:.1f}秒。总费用和轨迹额度未设置上限，记录仍完整。</p>",
-        "<h2>课程失败分析缺口</h2><p>No Update调用旧工具是stale-knowledge局部失败，不能改称Selective Patch under-update。既有受控缺参案例保留；先前相关evaluate规则对照仍不足以确认over-update。新离线提案把真实Swiftipedia迁移时的无关Wikipedia路由误改作为受控故障，原scope/routing验证器会拒绝它，故若执行必须标注guard消融；目前只是方案，不冒充已运行的失败轨迹。TA问题草稿未发送。</p>",
+        '<h2>课程失败分析缺口</h2><p>No Update调用旧工具是stale-knowledge局部失败，不能改称Selective Patch under-update。既有受控缺参案例保留；先前相关evaluate规则对照仍不足以确认over-update。后续独立的<a href="routing-fault-results.html">两条路由诊断</a>已确认：无关Wikipedia路由误改导致局部读取失败，但agent补偿后仍完成任务。该受控guard消融不是自然方法失败；正常验证器会拒绝它。课程接受范围仍待TA确认，草稿未发送。后续诊断没有改动本轮12条结果。</p>',
         "<h2>逐格原评分与审阅</h2>",
     ]
     for row in q["cells"]:
@@ -81,7 +81,7 @@ def main():
             f'<a href="../results/evidence/tool-migration-pilot-20261031/{name}">{name}</a> · '
         )
     parts += [
-        '<a href="../results/evidence/coverage-audit-20261031/selection-audit.json">覆盖选择依据</a> · <a href="../results/evidence/routing-fault-proposal-20261031/plan.json">未执行的诊断提案</a> · <a href="../HANDOVER.md">HANDOVER</a></p>',
+        '<a href="../results/evidence/coverage-audit-20261031/selection-audit.json">覆盖选择依据</a> · <a href="../results/evidence/routing-fault-proposal-20261031/plan.json">诊断执行前提案快照</a> · <a href="../HANDOVER.md">HANDOVER</a></p>',
         "<pre>python3 results/evidence/tool-migration-pilot-20261031/verify_trial.py</pre>",
         f"<p>归档SHA-256：{v['archive_sha256']}。冻结源码eae035e；课程主报告/PDF/Slides保持原有快照，新结果作为独立附录。</p></main></html>",
     ]
