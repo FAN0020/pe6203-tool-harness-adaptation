@@ -12,13 +12,14 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：project_state_contract 已冻结，准备四单元开发执行
+### 当前最新断点：project_state_contract 四单元开发已淘汰
 
-- 上轮是实质进展：document_sequence淘汰、层级与新增状态工具缺陷在6c3c1fa归档。当前新候选9ca6064预注册，04cd085实现；358离线测试通过（13integration排除），规则逐字匹配冻结文本。
-- 仅修改Late新增review_project_status及直接相关list_tasks/analyze_task_complexity的3条usage rules。真实失败/flat替代、记录级评分和自动生成空ID边界已探测；不改任何工具执行、元数据或路由，无通用预算指令/任务答案。235两组精确K0。
-- 固定开发：283Late+235Late，各SP/候选一次，共4条；通过后2批×每条件3重复，共24条独立验证。每批必须完成数与质量全项数都严格高于SP、TF不降，保持任务不降。task283沿用4项质量维度，并在模型前明确：未解决的实质执行范围不能因披露就算通过；里程碑和可执行叶任务要区分。
-- 协议`experiments/project-state-v1.json`；raw `results/raw/project-state-pilot-20261101`；证据`results/evidence/project-state-pilot-20261101`。知识accepted、模型前计划/知识/源码hash及随机匿名映射已冻结。先查experiment.json和进程再续接，不重复启动。
-- 用本目录collect_blind.py采集实际tasks.json与工具调用，4份属性审阅冻结后再揭示方法与TF/PE。没有新的有效性结论，Goal仍活动。无需PDF或渲染服务。
+- session31424 正常退出，4/4 evaluated、20/20 judge。四份盲化产物审阅在 `1f71f01` 冻结后才揭示方法和评分。**不要重启本候选，不进入 24 条独立验证**；Goal仍活动。
+- 283Late 两组正常完成均0/1、质量全项均0/1、TF均9.8；候选PE9.0对SP8.2。候选25个有效任务记录，第11轮4096输出tokens全计reasoning而截断；SP50个有效记录，第12轮仍在创建子任务而耗尽轮数。两组最终答复为空，交付属性unknown，不算完整质量通过。
+- 235两组完成、TF/PE10，图表数据正确但摘要错误，全项0/1；知识均精确K0，不对文字差异作适应因果解释。候选只改3条规则的机制/公平条件与原验收保持不变。
+- 报告 `reports/project-state-pilot.html`；离线核验 `python3 results/evidence/project-state-pilot-20261101/verify_trial.py`。181原始文件、141源码文件、52计划输入及20额外冻结文件均核验。49请求（27agent+20judge+2preflight）$0.092103372、未知0，220.413秒；更新模型calls/tokens/USD均0；ECS不适用。
+- 两组首轮都调用另一新增工具 review_workspace_health，报 `memoryStorage.listMemories is not a function`，本候选未覆盖它。此处只有实际错误观察，**不能直接假定再补一条规则就改善，也不能把截断包装成知识漂移**。下一步先筛查不同任务/工具的具体可修复机制；若研究workspace工具，须本地冻结探测并证明与目标要求相关，再决定新实验，不能直接重复此候选。
+- 原预注册9ca6064、实现04cd085、执行前冻结0e7a9c4；358离线测试通过。所有MCP进程已退出，无需PDF/渲染服务。原course/NU/FR/所有负结果保留，无push/部署/TA消息。
 
 ### 已完成的前置探测：层级/项目状态机制
 
