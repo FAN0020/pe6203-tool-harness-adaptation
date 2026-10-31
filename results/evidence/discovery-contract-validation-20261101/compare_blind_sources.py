@@ -48,8 +48,8 @@ def main():
                     data = source["data"]
                     for page in data.get("page_texts", []):
                         pages[page["page"]].append((rid, page["text"]))
-                    if "text" in data:
-                        full_texts.append((rid, data["text"]))
+                    if "full_text" in data:
+                        full_texts.append((rid, data["full_text"]))
         activation.append({"review_id": rid, "discovery_calls": len(discovery),
                            "calls": discovery, "tool_calls": len(packet["calls"])})
     comparisons = [{"tool": key[0], "arguments": json.loads(key[1]),
