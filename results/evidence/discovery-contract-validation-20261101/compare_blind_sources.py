@@ -39,7 +39,8 @@ def main():
                 try:
                     decoded = json.loads(text)
                 except ValueError:
-                    errors.append({"review_id": rid, "tool": tool, "text": text})
+                    errors.append({"review_id": rid, "call_index": index, "tool": tool,
+                                   "arguments": args, "text": text, "result": result})
                     continue
                 for source in decoded.get("results", []):
                     if not source.get("success"):
