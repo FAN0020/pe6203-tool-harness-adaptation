@@ -1,6 +1,6 @@
 # PE6203 交付交接 · 2026-10-31
 
-课程交付已冻结。四条获批诊断已经结束；PE +0.5 和历史 promotion gates 不属于课程要求。后续新增的完成率 / 任务质量研究另列在文末；现已单独获批文末限定的 12 条试验、原协议评分和预检，合计上限 US$1；**不自动扩展实验或部署**。课程验收仍需组内审阅及 TA 澄清，不以策略胜出为条件。
+课程交付已冻结。四条获批诊断已经结束；PE +0.5 和历史 promotion gates 不属于课程要求。后续新增的完成率 / 任务质量研究另列在文末；文末获批的 12 条试验已执行并归档，总费用 US$0.1572164470；**授权已用完，不自动扩展实验或部署**。课程验收仍需组内审阅及 TA 澄清，不以策略胜出为条件。
 
 ## 当前可交付内容
 
@@ -59,16 +59,24 @@ python3 submission/handover-20261031/verify.py
 
 主交付已通过非 force push 合并到 main：`e95b51a3601a5966d06f05ae1e729f8e8bad60f9`。远端 ref 已核对，GitHub Adapter checks 成功；核查内容提交为 `61a3cf3`。本节和 [`delivery.json`](submission/handover-20261031/delivery.json) 的后续记录提交仅补交付回执。当前未解决项仍以上表为准，没有宣称课程验收已完成。
 
-## 后续研究：完成率与任务质量（独立，12 条已批准）
+## 后续研究：完成率与任务质量（12 条完成，未晋级）
 
-用户新增目标是找到完成率和任务质量更好的策略。工作位于 `codex/completion-quality-study`，基于已推送的 main `ef96d08`；此研究尚未合并或推送，不修改冻结课程报告、Slides 或历史评分。
+工作位于 `codex/completion-quality-study`，基于已推送的 main `ef96d08`；此研究仅本地提交，尚未合并或推送。课程报告、Slides、27 条主实验及所有历史评分保持冻结。
 
-- 先验证已有 `budget_feedback`，没有新增策略实现。18 个 task/stage/arm 知识条件完成离线检查；12 个 Middle/Late 条件与历史归档相同，Early 和 task235 保持精确 K0。
-- 已新增只读提取器 `scripts/audit_completion_quality.py` 与测试。它读取归档中的原评分、实际完成状态、调用、费用与持久化任务，不产生新 judge 分数。事实包位于 `results/evidence/completion-quality-20261031/development-v3/facts.json`，知识检查为同目录上一级 `freeze-audit.json`。
-- 历史开发结果：budget_feedback 6/6 正常结束、TF 10；原 Patch 5/6、TF 10。候选 task283 Middle 的最终复杂度概述与三个里程碑数据不一致，故没有宣布质量改善或策略胜出。低任务数、低自报复杂度和高 judge 分数均不能单独证明质量。
-- 已批准协议：`experiments/completion-quality-v1.json`；人读版 `reports/completion-quality-plan.html`。提议 3 tasks × Middle/Late × 2 arms × 1 repeat = 12 条，60 个原协议评分槽；不定义自动确认阶段。预计 US$0.12–0.30、10–20 分钟，已批准上限 US$1，费用与时间预估基于旧账单。
-- **批准记录：**用户回复“批准这 12 条，费用上限 US$1”；见 `results/evidence/completion-quality-20261031/approval.json`。`configs/completion-quality-v1.json` 复制原模型/预算协议，仅新增相同的价格路由限制及 `spend_guard`。每个请求在发出前保守预留全上下文 + 最大输出费用，费用未知或不足时停止；SDK 内部重试禁用。公开价格依据在 `pricing.json`，未修改账户设置。
-- **下一步：**完成冻结输入核对后执行这一轮，保留所有中断及费用；不得超过 12 条或自动重新运行低分轨迹。费用保护覆盖 agent、judge 和预检，受供应商公开上下文与 max_price 合同约束。
-- 判定要求：变化任务完成数增加；原 TF 均值不降低；有独立于完成状态的产物/答案正确性改善，且无实质性质量退化。若质量持平或证据不足则 hold。不能用 PE +0.5、任意加权分、删除网络失败或重新标记历史实验得到赢家。
-- 后续 Early/ECS、No Update/Full Rewrite 的新同期比较、重复或新任务均须另行提出成本与证据收益并获批。本轮没有 Early，不拼接旧 Early 冒充新 ECS。已有课程完整矩阵只作为注明时间与实现版本的历史参照。
-- 上文 TA 问题与 over-update 证据缺口未关闭。性能研究不自动满足这些课程验收事项。
+- 用户明确批准“这 12 条，费用上限 US$1”。按原计划验证已有 `budget_feedback`，没有新增策略。3 tasks × Middle/Late × 2 arms × 1 次，12/12 轨迹、60/60 原协议评分已结束。两组正常完成均 **4/6**（变化任务 2/4、保持任务 2/2），133 Middle 均截断、283 Late 均耗尽轮数。
+- 原 Patch：TF **9.9667**、PE **9.0**、agent+judge **$0.0726556104**；候选：TF **10**、PE **8.8**、**$0.0845529246**。共享预检 $0.000007912，合计 **$0.1572164470**，未知费用 0；69 agent + 60 judge + 2 preflight = 131 请求，约 10.56 分钟。更新无模型调用、无新增探测。没有 Early，不计算新 ECS。
+- **判定：未证明完成率与任务质量同时改善，不晋级。** 候选图表答案的部分算术更准确，283 Middle 容器解释更清楚；但两个保持格的地图缺少金额单位，133 Middle 误把不支持 `**` 推断成不支持指数及消除 DoS。原 Patch 也有月度合计和安全代码测试错误。没有改 judge 分数；逐属性 pass/fail/unknown 与证据均保留。
+- **公平性限制：**模型 ID、解码、任务、预算、judge 协议相同；57 个冻结输入和执行前源码哈希未漂移，task235 两组是精确 K0。但 OpenRouter 实际后端供应商不同，工作目录也含策略名；冻结协议“只有知识不同”的措辞过强。原协议保留，结果报告明确补充这项限制，不能作纯补丁因果结论。相同 K0 下的输出差异不能证明适应机制造成保持退化。
+- **可读入口：**[`reports/completion-quality-results.html`](reports/completion-quality-results.html)。完整证据目录：`results/evidence/completion-quality-20261031/`：`raw-trial.tar.gz`（500 文件）、`raw-manifest.json`、`source-98c4f8e.tar.gz`、`trial-verification.json`、`trial-facts/facts.json`、`quality-review.json`、`artifact-checks.json`、`post-run-input-verification.json`、`reproduction.json`。知识/工具/调用在原始包，五个 judge 原始分值逐格披露。
+- `quality-review-template.json` 是填表前模板，最终状态以 `quality-review.json` 为准。`protocol-audit.json` / `verification.json` 是批准前快照；`approval.json` / `approved-verification.json` 是执行前批准及核验。勿将快照状态当成当前状态。
+- 冻结执行代码为 `98c4f8e`。`experiments/completion-quality-v1.json` 与 `configs/completion-quality-v1.json` 未因结果修改。请求级费用预留和相同 provider 价格上限已覆盖全部调用；账本已结算，未触发预算封锁。供应商接口价格/上下文约定仍是保护前提。
+- **未完成：**没有找到本轮标准下同时改善两项的策略。上文 TA 接受范围、over-update 因果证据和 Full Rewrite 解释仍未解决。不能用本轮 TF 接近满分关闭这些问题，也不能把旧开发阶段的 6/6 代替这轮 4/6。
+- **下一步：**先审阅本报告。课程可按已有交付推进；若继续性能研究，先提出针对后端控制、截断和知识边界的最小方案、费用和预期证据，再单独获批。当前没有新候选、重复或扩展获批，不恢复旧 R2/R3，不重跑低分，不部署，不自动改课程 Slides。
+
+本轮离线核查（只用 Python 标准库，不启动模型或服务）：
+
+```bash
+python3 results/evidence/completion-quality-20261031/verify_trial.py > /tmp/pe6203-trial-verified.json
+```
+
+原始包 SHA-256：`9954a1039a946f7e7bd46c39e56b1ce63cb35d1d188941d3889b5a5b4370d9b6`。源码包不含安装后的全部依赖；原 CLI 命令只是历史复现说明，不是新增付费调用的授权。
