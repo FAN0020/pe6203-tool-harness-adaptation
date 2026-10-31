@@ -117,6 +117,7 @@ def validate_notes(payload, selected, changed_ids):
 def semantic_notes(selected, changed, feedback, context, strategy):
     from integration import baselines as provider
 
+    from .costs import sum_usd
     from .request_retry import request_sync
 
     settings = {
@@ -129,8 +130,15 @@ def semantic_notes(selected, changed, feedback, context, strategy):
         "allow_metadata_api": False,
         **context.get("updater", {}),
     }
+    changed_ids = {t["tool_id"] for t in changed}
     messages = [
-        {"role": "system", "content": NOTE_PROMPT},
+        {
+            "role": "system",
+            "content": NOTE_PROMPT
+            + "\nThe complete allowed basis ID list is: "
+            + json.dumps(sorted(changed_ids))
+            + ". Names merely mentioned inside descriptions are NOT valid basis IDs.",
+        },
         {
             "role": "user",
             "content": json.dumps(
@@ -154,47 +162,75 @@ def semantic_notes(selected, changed, feedback, context, strategy):
         "strategy": strategy,
         "status": "started",
         "settings": settings,
-        "request": messages,
+        "request": deepcopy(messages),
         "cost": cost,
+        "attempts": [],
     }
     started = perf_counter()
     provider._save_audit(context, audit)
     try:
         if not settings["allow_metadata_api"]:
             raise ValueError("Explicit allow_metadata_api required")
-        cost["calls"] = 1
 
         def on_retry(event):
             audit.setdefault("request_retries", []).append(event)
             cost["calls"] += 1
             provider._save_audit(context, audit)
 
-        response = request_sync(
-            lambda: provider._request_completion(messages, settings),
-            settings.get("request_retry"),
-            on_retry,
-        )
-        audit["response"] = response
-        usage = response.get("usage") or {}
-        cost["usd"] = provider_usd(usage)
-        cost["known_usd"] = cost["usd"] or 0.0
-        for key in ("prompt_tokens", "completion_tokens"):
-            value = usage.get(key)
-            cost[key] = value if type(value) is int and value >= 0 else None
-        if all(cost[k] is not None for k in ("prompt_tokens", "completion_tokens")):
-            cost["total_tokens"] = cost["prompt_tokens"] + cost["completion_tokens"]
-        if audit.get("request_retries"):
-            cost.update(prompt_tokens=None, completion_tokens=None, total_tokens=None, usd=None)
-        choice = response["choices"][0]
-        if choice.get("finish_reason") != "stop":
-            raise ValueError("Note generation truncated or incomplete")
-        notes = validate_notes(
-            json.loads(choice["message"]["content"]), selected, {t["tool_id"] for t in changed}
-        )
-        cost["update_operations"] = len(notes)
-        audit.update(status="validated", semantic_grounding="requires_human_review")
-        return notes, cost
+        for attempt in range(2):
+            record = {"attempt": attempt + 1, "request": deepcopy(messages)}
+            audit["attempts"].append(record)
+            cost["calls"] += 1
+            provider._save_audit(context, audit)
+            response = request_sync(
+                lambda: provider._request_completion(messages, settings),
+                settings.get("request_retry"),
+                on_retry,
+            )
+            audit["response"] = record["response"] = response
+            usages = [r["response"].get("usage") or {} for r in audit["attempts"]]
+            charges = [provider_usd(usage) for usage in usages]
+            cost["usd"] = sum_usd(charges)
+            cost["known_usd"] = sum(c for c in charges if c is not None)
+            for key in ("prompt_tokens", "completion_tokens"):
+                values = [u.get(key) for u in usages]
+                cost[key] = sum(values) if all(type(v) is int and v >= 0 for v in values) else None
+            if all(cost[k] is not None for k in ("prompt_tokens", "completion_tokens")):
+                cost["total_tokens"] = cost["prompt_tokens"] + cost["completion_tokens"]
+            if audit.get("request_retries"):
+                cost.update(prompt_tokens=None, completion_tokens=None, total_tokens=None, usd=None)
+            provider._save_audit(context, audit)
+            try:
+                choice = response["choices"][0]
+                if choice.get("finish_reason") != "stop":
+                    raise ValueError("Note generation truncated or incomplete")
+                notes = validate_notes(
+                    json.loads(choice["message"]["content"]), selected, changed_ids
+                )
+            except (ValueError, KeyError, TypeError, IndexError) as exc:
+                record["validation_error"] = str(exc)
+                provider._save_audit(context, audit)
+                if attempt == 1:
+                    raise
+                content = response.get("choices", [{}])[0].get("message", {}).get("content") or "{}"
+                messages += [
+                    {"role": "assistant", "content": content},
+                    {
+                        "role": "user",
+                        "content": "Repair only the invalid JSON note structure. Validation: "
+                        + str(exc)
+                        + ". Every basis ID must come from this exact changed-tool list: "
+                        + json.dumps(sorted(changed_ids))
+                        + ". Do not substitute unrelated evidence. Drop a note if it has no changed-tool basis. Return the complete notes object.",
+                    },
+                ]
+                continue
+            cost["update_operations"] = len(notes)
+            audit.update(status="validated", semantic_grounding="requires_human_review")
+            return notes, cost
     except Exception as exc:
+        if any("response" not in r for r in audit["attempts"]):
+            cost.update(prompt_tokens=None, completion_tokens=None, total_tokens=None, usd=None)
         audit.update(status="failed", error_type=type(exc).__name__)
         raise NoteError(
             f"Semantic note generation failed ({type(exc).__name__}); see note audit", audit

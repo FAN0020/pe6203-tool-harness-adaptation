@@ -232,7 +232,8 @@ def test_failed_note_artifact_preserves_incurred_cost_and_raw_response(tmp_path,
         )
     artifact = json.loads((tmp_path / "out/adaptation.json").read_text())
     audit = json.loads((tmp_path / "out/updater-audit.json").read_text())
-    assert artifact["status"] == "failed" and artifact["cost"]["usd"] == 0.001
+    assert artifact["status"] == "failed" and artifact["cost"]["usd"] == 0.002
+    assert artifact["cost"]["calls"] == 2 and len(audit["attempts"]) == 2
     assert audit["response"] == completion(
         [{"tool_id": "absent::tool", "basis": ["server::lookup"], "rules": ["Bad"]}]
     )
@@ -270,3 +271,28 @@ def test_writer_passes_frozen_feedback_to_model(tmp_path, monkeypatch):
         {"updater": {"allow_metadata_api": True}, "feedback": feedback},
     )
     assert requests[0]["feedback"] == feedback
+
+
+def test_note_schema_repair_is_bounded_audited_and_keeps_both_response_costs(tmp_path, monkeypatch):
+    import integration.baselines as provider
+
+    replies = iter([completion([{**note(), "basis": ["server::unrelated"]}]), completion([note()])])
+    sent = []
+
+    def respond(messages, settings):
+        sent.append(deepcopy(messages))
+        return next(replies)
+
+    monkeypatch.setattr(provider, "_request_completion", respond)
+    audit_path = tmp_path / "audit.json"
+    knowledge, _, cost = adapt(
+        catalog(),
+        changed(),
+        "linked_notes",
+        {"updater": {"allow_metadata_api": True}, "audit_path": str(audit_path)},
+    )
+    audit = json.loads(audit_path.read_text())
+    assert cost["calls"] == 2 and cost["usd"] == 0.002 and cost["total_tokens"] == 200
+    assert len(audit["attempts"]) == 2 and audit["attempts"][0]["validation_error"]
+    assert note()["rules"][0] in knowledge["tools"][0]["usage_rules"]
+    assert "server::lookup" in sent[1][-1]["content"]
