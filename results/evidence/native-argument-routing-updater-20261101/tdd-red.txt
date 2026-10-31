@@ -1,0 +1,37 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_native_routing_changes_only_seven_allowed_descriptions __________
+
+    def test_native_routing_changes_only_seven_allowed_descriptions():
+        old, target, context = inputs()
+        pristine = deepcopy((old, target, context))
+>       candidate, changes, cost = adapt(old, target, STRATEGY, context)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_native_argument_routing.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+strategy = 'native_argument_routing'
+context = {'feedback': [{'args': {'probe': 'frozen_native_contract_and_category_readiness'}, 'result': {'empty_input_schema': Tr...component_source_returned': True, 'zero_argument_route': True}, 'server': '@magicuidesign/mcp', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: native_argument_routing
+
+src/pe6203/baselines.py:110: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_native_argument_routing.py::test_native_routing_changes_only_seven_allowed_descriptions
+1 failed in 0.07s

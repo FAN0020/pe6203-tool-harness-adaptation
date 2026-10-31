@@ -18,7 +18,13 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：MagicUI 原生机制已证实，原题依赖尚不满足
+### 当前最新断点：MagicUI 知识更新器离线实现准备中，正式日志仍缺失
+
+- 上一轮`10bac8a`完成两套探针及原始附件核验，属于实质进展。本轮确认仍无原始logs或用户路径答复；没有启动模型试验。但知识更新器可独立实现，先完成这项必要工作，不把写计划/等待当进展。
+- `experiments/native-argument-routing-updater-v1.json`冻结Late三条空参数工具及四条直接相关路由说明，共7处description，五条原生事实证据。所有schema/routing/usage_rules/其他工具保持SP；未知契约或缺证据拒绝，Early/Middle/无相关变更返回SP/K0。只预注册离线实现与测试，不是agent日程。
+- `tests/test_native_argument_routing.py`已先写测试；首个消费者测试按预期因Unsupported strategy失败，原始输出在`results/evidence/native-argument-routing-updater-20261101/tdd-red.txt`。下一步实现并验证，再更新本断点。不能把离线通过当任务双改善；377真实日志与正式验收仍是模型试验前提。
+
+### 已归档前置：MagicUI 原生机制与原题依赖核对
 
 - `7c5f0af`预注册的9工具调用/3catalog已全部完成，执行器session95656已退出；0模型/0评分/USD0。独立离线核验56归档文件与34冻结源码输入通过，见`results/evidence/magicui-argument-routing-probes-20261101/verification.json`；不要重跑。
 - Late三个新增精确工具均暴露空参数schema：单项查询报Component undefined、批量报No valid component names（均isError=true），搜索丢失query/category，返回78项且isError=false。三阶段原有getTextAnimations均返回逐字相同的14个真实实现，canary含9476字符代码。确认了原生参数路由缺陷和通用替代，尚未测agent改善。
