@@ -18,7 +18,15 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：native_media_contract 六单元开发未晋级
+### 当前最新断点：必需路径源码复核继续；没有新模型日程
+
+- 上轮native_media_contract六单元仍淘汰，见下节；本轮是有边界的源码/包布局复核，新增记录`results/evidence/mechanism-screening-20261101/post-media-required-path-screen.json`。无新原生工具、agent或judge请求，未改运行时/源码。不是方法空间穷尽证明。
+- HeroUI默认docs路径保留；新增wrapper的数组下标对齐风险尚无真实响应证据，task378还缺当前React源码。Flowbite新显式样式控制未发现必需操作阻塞，Figma新工具不在原题要求内。fetch旧raw→response_format迁移保留GET/auto；filesystem范围/排序默认兼容；commands新增忽略的资源/环境参数暂无原题必需依赖。不要用可选能力代替完成率机制。
+- Agentic新增bulk-create.js是孤立文件，server.js没有import/注册；不能把它当原生可用批量接口或修改注册后声称知识策略改善。不要据此重跑283。
+- Orchestrator prompt确实被当一个文件路径，excludePaths/severity也被塞进文件数组；原run_sequence接受具体params。但三阶段相同shared客户端ESM fallback查找node_modules/node_modules/@j0kz/...，实际该位置不存在；smart-reviewer在正常平铺位置，security-scanner/test-generator/architecture-analyzer/doc-generator均未随归档提供。共享pipeline还会把单步success:false包装为外层success:true。已保存具体源码hash/存在性；尚无原生调用证明/有效替代。
+- 此处环境障碍不是新知识策略的胜利。若未来检查对称的依赖布局，应单独冻结并保持原生源码，不能修上游代码、伪造子工具成功或直接展开模型对照。当前没有需要等待的实验进程；Goal活动、目标未完成，继续寻找与原题必需工作相关的新机制。
+
+### 已结束的上一轮：native_media_contract 六单元开发未晋级
 
 - session37884退出0，6/6 evaluated、30/30 judge。全部六份盲审在`9c50dc2`冻结后才揭示方法/分数。**不要重跑此候选，不进入36条独立验证**；Goal仍活动，双重改善未成立。
 - 新机制：Middle/Late图标style筛选读取helper已移除字段，导致假空；Late PlantUML保存引用块外response，报not defined。8次图标+10次依赖/URL替代原生调用、10catalog、模型费0；`69badd6`与`9d09faa`完整归档。依赖Early/Middle保存PNG并视觉检查，Late单独冻结URL替代成功。不要重复探针。
