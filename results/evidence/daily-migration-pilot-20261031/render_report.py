@@ -79,7 +79,9 @@ def main():
         "<pre>python3 results/evidence/daily-migration-pilot-20261031/verify_trial.py</pre>",
         f"<p>原始归档SHA-256：{v['archive_sha256']}。源码52abbcf；本附录未替换课程PDF和共享Slides。</p></main></html>",
     ]
-    (ROOT / "reports/daily-migration-results.html").write_text("\n".join(parts) + "\n")
+    (ROOT / "reports/daily-migration-results.html").write_text(
+        "\n".join(part.rstrip() for part in parts) + "\n"
+    )
 
 
 if __name__ == "__main__":
