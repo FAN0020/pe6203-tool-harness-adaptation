@@ -13,9 +13,10 @@
 
 **三种方法均由 agent 自动选择工具、参数和下一步。** 原任务固定候选 MCP servers；No Update 保留 Early 知识，Full Rewrite 重建全部目标记录并用 LLM 重写全部描述，Selective Patch 用元数据差异与依赖规则更新受影响记录。模型相同，更新范围选择是确定性算法。范围与生成机制同时不同，不能声称纯范围消融。
 
-当前主实验 **27/27 轨迹有评分、135/135 评分槽有效**，其中 **20 正常完成、5 轮数耗尽、2 输出截断**。一次执行符合 brief 的计算预算例外；5 个 judge 评分不等于5次执行。独立复算、终态恢复和归档离线复现已通过。主要缺口是严格的 patch under-update / over-update 例证和最终展示；6 条回退诊断未证实 over-update，负结果保留。
+当前主实验 **27/27 轨迹有评分、135/135 评分槽有效**，其中 **20 正常完成、5 轮数耗尽、2 输出截断**。一次执行符合 brief 的计算预算例外；5 个 judge 评分不等于5次执行。独立复算、终态恢复和归档离线复现已通过。报告、独立复算与共享演示已整理；主要缺口仍是严格的 patch under-update / over-update 例证，以及组内审阅/排练；6 条回退诊断未证实 over-update，负结果保留。
 
-- **当前计划与逐项缺口**：[课程完成计划](reports/course-completion-plan.html)，机器依据：`experiments/course-completion-plan.json`。
+- **交付审阅入口**：[报告、复现包、案例与演示](submission/index.html)。九个 Selective Patch PE 合计82，平均9.1111；正常完成6/9。
+- **冻结计划**：[课程完成计划](reports/course-completion-plan.html)，机器依据：`experiments/course-completion-plan.json`；最新交付状态以审阅入口及 `submission/.context/delivery-status.json` 为准。
 - **主实验**：[27 条结果、指标与案例](reports/course-v1.3-experiment.html)。
 - **历史研究**：[全部成功与失败记录](reports/selective-strategy-search.html)；108 条 R1 已完成，其中原三方法81条各有3次重复，可独立作附录。R2/R3 因连接失败停止，不再自动恢复。PE +0.5 等阈值仅为历史研究标准。
 - **旧课程试验**：[A/B 的 54 条记录](reports/experiment-readiness.html)，与 v1.3 分开，不回填或混算。
@@ -55,6 +56,7 @@ python3 results/evidence/course-completion-20261031/audit_reuse.py
 | `results/raw/` | 本机冻结计划、知识、原始轨迹、评分、费用；不提交。 |
 | `results/evidence/`、`results/evaluation/` | 可分享归档、hash、离线审计和整理结果。 |
 | `tests/`、`scripts/` | 测试、核验与报告工具；先核对命令是否调用真实服务。 |
+| `submission/` | 离线复算脚本、最终报告审阅稿、原始证据包、讲稿与共享演示链接。大型归档仅本机打包。 |
 | `reports/` | 可读计划、主结果与完整成功/失败案例；历史结果不覆盖。 |
 | `docs/`、`contributions/` | 机器说明、来源与成员贡献记录。 |
 | `tools/netlify/` | 可选 Netlify CLI 的版本与依赖锁。 |

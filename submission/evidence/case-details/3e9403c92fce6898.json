@@ -1,0 +1,480 @@
+{
+  "trace": "results/raw/finalized-trial-20261031/cells/task133-middle-no_update-r0/run/raw_trace.json",
+  "sha256": "3e9403c92fce6898fba15bfef8689b78e4f929d342eed28c65dff349edd15267",
+  "task": 133,
+  "stage": "middle",
+  "method": "no_update",
+  "execution_status": "completed",
+  "TF": 10,
+  "PE": 6,
+  "tool_calls": 12,
+  "tool_errors": 2,
+  "transport_events": 0,
+  "knowledge_comparison_available": true,
+  "metadata_mismatches_vs_changed_target": [
+    "math-mcp::validate_syntax",
+    "mcp-ai-agent-guidelines::speckit-generator",
+    "mcp-ai-agent-guidelines::validate-spec",
+    "mcp-ai-agent-guidelines::design-assistant",
+    "mcp-ai-agent-guidelines::constitution-validator"
+  ],
+  "modified_metadata_unchanged_tools": [],
+  "review_rule": "Metadata mismatch and unrelated edits are screening signals, not causal failure verdicts. Usage-rule omissions absent from metadata need separate semantic review.",
+  "original_knowledge_path": "results/raw/finalized-trial-20261031/catalogs/133/early.json",
+  "updated_knowledge_path": "results/raw/finalized-trial-20261031/cells/task133-middle-no_update-r0/run/knowledge.json",
+  "exact_differences": [
+    {
+      "tool_id": "math-mcp::validate_syntax",
+      "field": "parameters",
+      "original": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "Mathematical expression to validate"
+          }
+        },
+        "required": [
+          "expression"
+        ]
+      },
+      "target": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "Mathematical expression to validate"
+          },
+          "detailed": {
+            "type": "boolean",
+            "description": "If true, return a more detailed validation result when supported",
+            "default": false
+          },
+          "allow_variables": {
+            "type": "boolean",
+            "description": "If true, allow variable references during validation when supported",
+            "default": false
+          }
+        },
+        "required": [
+          "expression"
+        ]
+      },
+      "updated": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "Mathematical expression to validate"
+          }
+        },
+        "required": [
+          "expression"
+        ]
+      },
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "field": "name",
+      "original": null,
+      "target": "constitution-validator",
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "field": "parameters",
+      "original": null,
+      "target": {
+        "type": "object",
+        "properties": {
+          "artifactContent": {
+            "type": "string",
+            "description": "Content of the artifact to validate (spec.md, ADR, roadmap, plan, etc.)"
+          },
+          "artifactType": {
+            "type": "string",
+            "enum": [
+              "spec",
+              "adr",
+              "roadmap",
+              "plan",
+              "tasks",
+              "progress",
+              "custom"
+            ],
+            "description": "Type of artifact being validated",
+            "default": "spec"
+          },
+          "constitutionPath": {
+            "type": "string",
+            "description": "Path to CONSTITUTION.md file (optional if constitutionContent provided)"
+          },
+          "constitutionContent": {
+            "type": "string",
+            "description": "CONSTITUTION.md content directly (optional if constitutionPath provided)"
+          },
+          "validationLevel": {
+            "type": "string",
+            "enum": [
+              "strict",
+              "standard",
+              "lenient"
+            ],
+            "description": "Validation strictness level",
+            "default": "standard"
+          },
+          "checkPrinciples": {
+            "type": "boolean",
+            "description": "Validate against constitutional principles",
+            "default": true
+          },
+          "checkConstraints": {
+            "type": "boolean",
+            "description": "Validate against constitutional constraints",
+            "default": true
+          },
+          "checkQualityStandards": {
+            "type": "boolean",
+            "description": "Validate against quality standards",
+            "default": true
+          },
+          "outputFormat": {
+            "type": "string",
+            "enum": [
+              "json",
+              "markdown",
+              "summary"
+            ],
+            "description": "Output format for validation results",
+            "default": "markdown"
+          },
+          "includeRecommendations": {
+            "type": "boolean",
+            "description": "Include remediation recommendations",
+            "default": true
+          },
+          "includeExamples": {
+            "type": "boolean",
+            "description": "Include compliant examples for violations",
+            "default": false
+          }
+        },
+        "required": [
+          "artifactContent"
+        ]
+      },
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "field": "description",
+      "original": null,
+      "target": "Validate any project artifact (spec.md, ADR, roadmap, plan, or custom document) against CONSTITUTION.md principles, constraints, and quality standards. Provides standalone constitutional compliance checking independent of generation workflows. BEST FOR: post-generation validation, constitutional compliance audits, artifact quality assurance. OUTPUTS: Detailed validation report with compliance score, principle violations, constraint breaches, and remediation recommendations.",
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "field": "routing",
+      "original": null,
+      "target": {
+        "server_id": "mcp-ai-agent-guidelines",
+        "tool_name": "constitution-validator"
+      },
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "field": "usage_rules",
+      "original": null,
+      "target": [],
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::design-assistant",
+      "field": "description",
+      "original": "Orchestrate multi-phase design workflows with constraint validation, coverage enforcement, and artifact generation. BEST FOR: Coordinating design sessions, enforcing constraints, and producing ADRs and roadmaps. Example: 'Use the design-assistant to start a design session for an API gateway.'",
+      "target": "Orchestrate multi-phase design workflows with built-in constraint validation, coverage enforcement, and artifact generation. Outputs can be further validated using constitution-validator for constitutional compliance verification. BEST FOR: Coordinating design sessions, enforcing constraints, producing ADRs and roadmaps. Example: 'Use the design-assistant to start a design session for an API gateway.'",
+      "updated": "Orchestrate multi-phase design workflows with constraint validation, coverage enforcement, and artifact generation. BEST FOR: Coordinating design sessions, enforcing constraints, and producing ADRs and roadmaps. Example: 'Use the design-assistant to start a design session for an API gateway.'",
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::speckit-generator",
+      "field": "description",
+      "original": "Generate GitHub Spec-Kit artifacts (all documents: README.md, spec.md, plan.md, tasks.md, progress.md, adr.md, roadmap.md) from requirements. Optionally validate against CONSTITUTION.md. BEST FOR: feature specs, project planning.",
+      "target": "Generate GitHub Spec-Kit artifacts (all documents: README.md, spec.md, plan.md, tasks.md, progress.md, adr.md, roadmap.md) from requirements with integrated constitutional validation during generation. Use constitution-validator for standalone validation of existing artifacts. BEST FOR: feature specs, project planning, constitutional compliance.",
+      "updated": "Generate GitHub Spec-Kit artifacts (all documents: README.md, spec.md, plan.md, tasks.md, progress.md, adr.md, roadmap.md) from requirements. Optionally validate against CONSTITUTION.md. BEST FOR: feature specs, project planning.",
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::validate-spec",
+      "field": "description",
+      "original": "Validate spec.md content against constitutional constraints without generating artifacts. Useful for iterative spec refinement and quality assurance. BEST FOR: spec validation, quality checks, constitutional compliance. OUTPUTS: Validation report with score, errors, warnings, and recommendations.",
+      "target": "Validate spec.md structure, completeness, and constitutional constraints without generating artifacts. Focuses on spec.md-specific validation. For broader artifact validation (ADRs, roadmaps, plans), use constitution-validator. BEST FOR: spec.md validation, iterative refinement, quality checks. OUTPUTS: Validation report with score, errors, warnings, and recommendations.",
+      "updated": "Validate spec.md content against constitutional constraints without generating artifacts. Useful for iterative spec refinement and quality assurance. BEST FOR: spec validation, quality checks, constitutional compliance. OUTPUTS: Validation report with score, errors, warnings, and recommendations.",
+      "metadata_unchanged_tool": false
+    }
+  ],
+  "calls_and_observations": [
+    {
+      "round": 1,
+      "call": {
+        "id": "call_7f06382daa39443889e87155",
+        "function": {
+          "arguments": "{\"expression\":\"(a + b) * c / 2 - sqrt(d)\"}",
+          "name": "validate_syntax__b7e42007400a"
+        },
+        "type": "function",
+        "index": 0
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "round": 1,
+      "call": {
+        "id": "call_4aaaee4fc38f45a1a2e7bb55",
+        "function": {
+          "arguments": "{\"expression\":\"__import__('os').system('rm -rf /')\"}",
+          "name": "validate_syntax__b7e42007400a"
+        },
+        "type": "function",
+        "index": 1
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 26: Unexpected character '_' at line 1, column 1"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "round": 1,
+      "call": {
+        "id": "call_d2405b6c3f824679b203efdb",
+        "function": {
+          "arguments": "{\"expression\":\"eval(\\\"2+2\\\")\"}",
+          "name": "validate_syntax__b7e42007400a"
+        },
+        "type": "function",
+        "index": 2
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "round": 1,
+      "call": {
+        "id": "call_dbd23ffb2a204b2fbc07f5d5",
+        "function": {
+          "arguments": "{\"expression\":\"(3 + 4) * 5 / 2 - sqrt(16)\"}",
+          "name": "evaluate__7722fb090eee"
+        },
+        "type": "function",
+        "index": 3
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"(3 + 4) * 5 / 2 - sqrt(16)\",\n  \"result\": 13.5,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "round": 1,
+      "call": {
+        "id": "call_b47d15f26c624952a539f9ee",
+        "function": {
+          "arguments": "{\"codeContext\":\"Python service that accepts user-supplied mathematical expressions as strings and evaluates them (e.g. calculator/rule-engine). Risk of code injection if using eval()/exec() or unrestricted ast evaluation.\",\"securityFocus\":\"vulnerability-analysis\",\"language\":\"python\",\"framework\":\"Python standard library (ast, operator) / web API backend\",\"securityRequirements\":[\"Never use eval() or exec() on untrusted input\",\"Parse expressions with ast.parse in mode='eval' and whitelist only safe node types\",\"Restrict allowed operators, functions and variable names\",\"Enforce input length and complexity limits to prevent DoS\",\"Guard against resource exhaustion (deep nesting, huge exponents)\",\"Return generic errors; log safely without leaking internals\"],\"complianceStandards\":[\"OWASP-Top-10\",\"NIST-Cybersecurity-Framework\"],\"analysisScope\":[\"input-validation\",\"api-security\",\"error-handling\",\"logging-monitoring\",\"configuration-security\"],\"riskTolerance\":\"low\",\"includeCodeExamples\":true,\"includeMitigations\":true,\"includeTestCases\":true,\"prioritizeFindings\":true,\"outputFormat\":\"detailed\"}",
+          "name": "security-hardening-prompt-builder__b65756357998"
+        },
+        "type": "function",
+        "index": 4
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "---\n# Note: Dropped unknown tools: security-scanner\nmode: 'agent'\nmodel: GPT-5-Codex\ntools: ['codebase', 'editFiles']\ndescription: 'Security vulnerability analysis analysis and hardening recommendations'\n---\n## 🛡️ Security Hardening Prompt Template\n\n### Metadata\n- Updated: 2026-10-30\n- Source tool: mcp_ai-agent-guid_security-hardening-prompt-builder\n- Suggested filename: security-hardening-vulnerability-analysis-prompt.prompt.md\n\n\n# Security Vulnerability Analysis Prompt\n\nPerform comprehensive security analysis of python code with focus on vulnerability analysis\n\n## Code Context\nPython service that accepts user-supplied mathematical expressions as strings and evaluates them (e.g. calculator/rule-engine). Risk of code injection if using eval()/exec() or unrestricted ast evaluation.\n\n## Security Requirements\n1. Never use eval() or exec() on untrusted input\n2. Parse expressions with ast.parse in mode='eval' and whitelist only safe node types\n3. Restrict allowed operators, functions and variable names\n4. Enforce input length and complexity limits to prevent DoS\n5. Guard against resource exhaustion (deep nesting, huge exponents)\n6. Return generic errors; log safely without leaking internals\n\n## Compliance Standards\nEvaluate against:\n- OWASP Top 10\n- NIST Cybersecurity Framework\n\n## Analysis Scope\nFocus on these security areas:\n- Input Validation\n- Api Security\n- Error Handling\n- Logging Monitoring\n- Configuration Security\n\n\n### Python-Specific Security Checks\n\n**Common python Vulnerabilities to Check:**\n- SQL injection via string concatenation\n- Pickle deserialization attacks\n- Command injection through os.system() or subprocess\n- Path traversal vulnerabilities\n- Insecure deserialization with eval() or exec()\n\n**Specific Checks for python Code:**\n- Check for SQL queries using string concatenation instead of parameterized queries\n- Review all uses of pickle.loads() for untrusted data\n- Validate file paths to prevent directory traversal\n- Check for eval(), exec(), or compile() on user input\n- Review subprocess calls for shell injection vulnerabilities\n\n**python Security Best Practices:**\n- Use parameterized queries or ORMs (SQLAlchemy, Django ORM)\n- Avoid pickle for untrusted data; use JSON instead\n- Use subprocess with shell=False and argument lists\n- Implement proper input validation using Pydantic or similar\n\n\n### Framework-Specific Security Considerations\n\nConsider Python standard library (ast, operator) / web API backend-specific security patterns and best practices in your analysis.\n\n\n### Context-Aware Vulnerability Analysis\n\nBased on the provided code context, pay special attention to:\n\n**Authentication & Authorization:**\n- Verify password storage uses strong hashing (bcrypt, Argon2, PBKDF2)\n- Check for insecure direct object references (IDOR)\n- Validate session management and timeout configurations\n- Review token generation for sufficient entropy and secure storage\n- Ensure proper role-based access control (RBAC) implementation\n\n\n### Tailored Compliance Analysis\n\n**OWASP Top 10 Specific Checks:**\n- **A01:2021 – Broken Access Control**: Verify proper authorization checks on all sensitive operations\n- **A02:2021 – Cryptographic Failures**: Check for weak cryptography or unencrypted sensitive data\n- **A03:2021 – Injection**: Review for SQL, NoSQL, OS, and LDAP injection vulnerabilities\n- **A04:2021 – Insecure Design**: Assess threat modeling and security design patterns\n- **A05:2021 – Security Misconfiguration**: Check security headers, error handling, and defaults\n- **A06:2021 – Vulnerable Components**: Identify outdated or vulnerable dependencies\n- **A07:2021 – Authentication Failures**: Review authentication implementation and session management\n- **A08:2021 – Software and Data Integrity**: Validate CI/CD pipeline and update mechanisms\n- **A09:2021 – Logging Failures**: Ensure adequate security event logging and monitoring\n- **A10:2021 – Server-Side Request Forgery**: Check for SSRF vulnerabilities in external requests\n\n**NIST Cybersecurity Framework:**\n- **Identify**: Asset inventory and risk assessment\n- **Protect**: Access control, data security, and protective technology\n- **Detect**: Security monitoring and anomaly detection\n- **Respond**: Incident response procedures and communications\n- **Recover**: Recovery planning and improvements\n\n## Core Security Checks (includes OWASP Top 10)\n- [OWASP-A01] Broken Access Control: Verify authorization on sensitive operations and enforce least privilege.\n- [OWASP-A02] Cryptographic Failures: Ensure strong encryption for data in transit and at rest with proper key handling.\n- [OWASP-A03] Injection: Check for SQL/NoSQL/OS/LDAP injection and require parameterized inputs.\n- [OWASP-A04] Insecure Design: Confirm threat modeling, secure defaults, and defense-in-depth patterns.\n- [OWASP-A05] Security Misconfiguration: Validate headers, error handling, TLS, and hardened runtime configuration.\n- [OWASP-A06] Vulnerable and Outdated Components: Review dependencies for CVEs and enforce supply-chain security checks.\n- [OWASP-A07] Identification and Authentication Failures: Assess credential handling, MFA, session controls, and brute-force protections.\n- [OWASP-A08] Software and Data Integrity Failures: Verify code signing, update validation, and integrity of pipelines and artifacts.\n- [OWASP-A09] Security Logging and Monitoring Failures: Ensure security events are logged, monitored, and trigger alerting with retention.\n- [OWASP-A10] Server-Side Request Forgery: Check SSRF protections on outbound calls, allowlists, and metadata service access.\n- [SCOPE-1] Input Validation Review: Evaluate Input Validation controls within the provided context.\n- [SCOPE-2] Api Security Review: Evaluate Api Security controls within the provided context.\n- [SCOPE-3] Error Handling Review: Evaluate Error Handling controls within the provided context.\n- [SCOPE-4] Logging Monitoring Review: Evaluate Logging Monitoring controls within the provided context.\n- [SCOPE-5] Configuration Security Review: Evaluate Configuration Security controls within the provided context.\n\n## Recommendations\n- Mitigate Broken Access Control: Provide remediation guidance, validation steps, and test cases addressing Verify authorization on sensitive operations and enforce least privilege.\n- Mitigate Cryptographic Failures: Provide remediation guidance, validation steps, and test cases addressing Ensure strong encryption for data in transit and at rest with proper key handling.\n- Mitigate Injection: Provide remediation guidance, validation steps, and test cases addressing Check for SQL/NoSQL/OS/LDAP injection and require parameterized inputs.\n- Mitigate Insecure Design: Provide remediation guidance, validation steps, and test cases addressing Confirm threat modeling, secure defaults, and defense-in-depth patterns.\n- Mitigate Security Misconfiguration: Provide remediation guidance, validation steps, and test cases addressing Validate headers, error handling, TLS, and hardened runtime configuration.\n- Mitigate Vulnerable and Outdated Components: Provide remediation guidance, validation steps, and test cases addressing Review dependencies for CVEs and enforce supply-chain security checks.\n- Mitigate Identification and Authentication Failures: Provide remediation guidance, validation steps, and test cases addressing Assess credential handling, MFA, session controls, and brute-force protections.\n- Mitigate Software and Data Integrity Failures: Provide remediation guidance, validation steps, and test cases addressing Verify code signing, update validation, and integrity of pipelines and artifacts.\n- Mitigate Security Logging and Monitoring Failures: Provide remediation guidance, validation steps, and test cases addressing Ensure security events are logged, monitored, and trigger alerting with retention.\n- Mitigate Server-Side Request Forgery: Provide remediation guidance, validation steps, and test cases addressing Check SSRF protections on outbound calls, allowlists, and metadata service access.\n- Mitigate Input Validation Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Input Validation controls within the provided context.\n- Mitigate Api Security Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Api Security controls within the provided context.\n- Mitigate Error Handling Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Error Handling controls within the provided context.\n- Mitigate Logging Monitoring Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Logging Monitoring controls within the provided context.\n- Mitigate Configuration Security Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Configuration Security controls within the provided context.\n\n## Compliance Controls\n- OWASP-Top-10: Map findings to OWASP Top 10 risks; Validate coverage across authentication, access control, and injection (Context: Python service that accepts user-supplied mathematical expressions as strings and evaluates them (e.g. calculator/rule-engine). Risk of code injection if using )\n- NIST-Cybersecurity-Framework: Identify assets and risks; protect with layered controls; Detect anomalies, respond to incidents, and recover operations (Context: Python service that accepts user-supplied mathematical expressions as strings and evaluates them (e.g. calculator/rule-engine). Risk of code injection if using )\n\n## Security Analysis Framework\n\n### 1. Vulnerability Identification\n- Scan for common vulnerability patterns (OWASP Top 10)\n- Identify insecure coding practices\n- Check for hardcoded secrets and credentials\n- Analyze input validation and sanitization\n\n### 2. Risk Assessment\n- Rate findings by severity (Critical/High/Medium/Low)\n- Assess likelihood of exploitation (Very High/High/Medium/Low/Very Low)\n- Evaluate impact on confidentiality, integrity, and availability\n- Consider attack vectors and threat scenarios\n- Document risk exposure and likelihood\n- Apply OWASP Risk Rating methodology (Impact × Likelihood)\n\n### 3. Security Controls Evaluation\n- Review authentication mechanisms\n- Validate authorization and access controls\n- Check encryption and data protection\n- Assess logging and monitoring coverage\n\n### 4. Remediation Guidance\n- Provide specific fix recommendations\n- Suggest secure coding alternatives\n- Include implementation best practices\n- Reference security libraries and frameworks\n\n## Output Format\n\nProvide a comprehensive security assessment report including:\n- **Executive Summary**: High-level security posture overview\n- **Findings**: Detailed vulnerability descriptions with severity and likelihood ratings\n- **Risk Analysis**: OWASP-based impact × likelihood assessment with risk matrix position\n- **Recommendations**: Prioritized remediation steps with implementation guidance\n- **Code Examples**: Before/after code snippets showing secure implementations\n- **Test Cases**: Security test scenarios to validate fixes\n\n## OWASP Risk Assessment Framework\nFollow OWASP Risk Rating Methodology using Impact vs Likelihood matrix:\n\n### Risk Calculation: Overall Risk = Likelihood × Impact\n\n**Likelihood Factors:**\n- Threat Agent (skill level, motive, opportunity, population size)\n- Vulnerability (ease of discovery, exploit, awareness, intrusion detection)\n\n**Impact Factors:**\n- Technical Impact (loss of confidentiality, integrity, availability, accountability)\n- Business Impact (financial damage, reputation damage, non-compliance, privacy violation)\n\n### Risk Matrix Visualization\n\n```mermaid\nquadrantChart\n    title Security Risk Assessment Matrix\n    x-axis Low Impact --> High Impact\n    y-axis Low Likelihood --> High Likelihood\n    quadrant-1 Monitor & Review (High Impact, Low Likelihood)\n    quadrant-2 Immediate Action Required (High Impact, High Likelihood)\n    quadrant-3 Accept Risk (Low Impact, Low Likelihood)\n    quadrant-4 Mitigate When Possible (Low Impact, High Likelihood)\n```\n\n\n## Risk Tolerance\nApply low risk tolerance:\n- Accept minimal risk only (Low Impact × Low Likelihood)\n- Flag all potential security issues, even minor ones\n- Recommend defense-in-depth approaches\n- Prioritize security over convenience\n- Require mitigation for Medium+ risk findings\n\n## Prioritization Criteria\n1. **Critical**: Immediate threats with high exploitability\n2. **High**: Significant security risks requiring prompt attention\n3. **Medium**: Important improvements with moderate risk\n4. **Low**: Best practice recommendations with minimal risk\n# Document Handling\n\nWhen working with documents or external knowledge sources:\n\n1. **Retrieve Relevant Information**:\n   - Extract information relevant to: Security vulnerability analysis analysis\n   - Focus on content that addresses the requirements\n\n2. **Quote and Cite**:\n   - Include direct quotes where appropriate\n   - Always cite the source of information\n   - Use clear markers like [Source: ...]\n\n3. **Synthesize Information**:\n   - Combine information from multiple sources\n   - Resolve any conflicts or contradictions\n   - Provide a coherent answer\n\n# Reasoning and Tool Use\n\nInterleave thinking and action when tools are available:\n\n1. **Thought**: What do I need to accomplish?\n   - Current goal: Security vulnerability analysis analysis\n\n2. **Action**: What tool or action should I use?\n   - Choose the appropriate tool (e.g., search, code execution, file access)\n\n3. **Observation**: What did I learn?\n   - Analyze the results from the action\n\n4. **Repeat**: Continue the Thought → Action → Observation cycle\n   - Keep iterating until the goal is achieved\n\n**Note**: Only use tools when they add value to solving the task.\n\n# Model-Specific Tips\n\n- Prefer Markdown with clear headings and sections\n- Place instructions at the beginning (and optionally re-assert at the end) in long contexts\n- Use explicit step numbering for CoT where helpful\n\n- Preferred Style: MARKDOWN\n\n```md\n# Instructions\n...your task...\n\n# Context\n...data...\n\n# Output Format\nJSON fields ...\n```\n\n# Pitfalls to Avoid\n\n- Vague instructions → replace with precise, positive directives\n- Forced behaviors (e.g., 'always use a tool') → say 'Use tools when needed'\n- Context mixing → separate Instructions vs Data clearly\n- Limited examples → vary few-shot examples to avoid overfitting\n- Repetitive sample phrases → add 'vary language naturally'\n- Negative instructions → state what to do, not just what not to do\n\n\n## Security-Specific Pitfalls to Avoid\n\n- Over-relying on client-side validation → implement server-side validation\n- Ignoring principle of least privilege → restrict access to minimum required\n- Using deprecated cryptographic algorithms → use current security standards\n- Hardcoding sensitive configuration → use secure configuration management\n- Insufficient logging of security events → implement comprehensive audit trails\n- Assuming internal networks are secure → implement zero-trust principles\n\n\n\n## Further Reading\n\n*The following resources are provided for informational and educational purposes only. Their inclusion does not imply endorsement, affiliation, or guarantee of accuracy. Information may change over time; please verify current information with official sources.*\n\n- **[OWASP Top 10](https://owasp.org/www-project-top-ten/)**: Standard awareness document for web application security risks\n- **[NIST Cybersecurity Framework](https://www.nist.gov/cyberframework)**: Comprehensive framework for managing cybersecurity risk\n- **[SANS Secure Coding Practices](https://reports.weforum.org/docs/WEF_Global_Cybersecurity_Outlook_2025.pdf)**: Quick reference guide for secure software development\n- **[CWE Top 25 Most Dangerous Weaknesses](https://cwe.mitre.org/top25/archive/2023/2023_top25_list.html)**: Most widespread and critical software weaknesses\n- **[OWASP Code Review Guide](https://owasp.org/www-project-code-review-guide/)**: Comprehensive guide for security-focused code reviews\n\n\n\n## Disclaimer\n- Security recommendations are based on common best practices and may need customization for your specific environment\n- Always validate security measures with penetration testing and security audits\n- Compliance requirements may vary by jurisdiction and industry\n- Keep security tools and dependencies up to date\n"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "round": 2,
+      "call": {
+        "id": "call_22a70345f6604232b753ccdc",
+        "function": {
+          "arguments": "{\"expression\":\"eval(\\\"2+2\\\")\"}",
+          "name": "evaluate__7722fb090eee"
+        },
+        "type": "function",
+        "index": 0
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Evaluation error: Function not allowed: eval"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "round": 2,
+      "call": {
+        "id": "call_37c64f28cfcb4324b35869a4",
+        "function": {
+          "arguments": "{\"expression\":\"__import__('os')\"}",
+          "name": "evaluate__7722fb090eee"
+        },
+        "type": "function",
+        "index": 1
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 12: Unexpected character '_' at line 1, column 1"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "round": 2,
+      "call": {
+        "id": "call_602e67853a8c4acdaf1eea3a",
+        "function": {
+          "arguments": "{\"expression\":\"open('/etc/passwd')\"}",
+          "name": "evaluate__7722fb090eee"
+        },
+        "type": "function",
+        "index": 2
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Evaluation error: Function not allowed: open"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "round": 2,
+      "call": {
+        "id": "call_75ac73a653734fb192d3ad45",
+        "function": {
+          "arguments": "{\"expression\":\"2 ** 10 + max(3, 7)\"}",
+          "name": "evaluate__7722fb090eee"
+        },
+        "type": "function",
+        "index": 3
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 4: Expected expression\nLine 1, Column 4: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "round": 3,
+      "call": {
+        "id": "call_ce98010a695d4365ad69ab44",
+        "function": {
+          "arguments": "{\"expression\":\"2 ^ 10 + max(3, 7)\"}",
+          "name": "evaluate__7722fb090eee"
+        },
+        "type": "function",
+        "index": 0
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"2 ^ 10 + max(3, 7)\",\n  \"result\": 1031,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "round": 3,
+      "call": {
+        "id": "call_61877669deac44608a3e7bfc",
+        "function": {
+          "arguments": "{\"expression\":\"abs(-5) + min(2,9) * floor(3.7)\"}",
+          "name": "evaluate__7722fb090eee"
+        },
+        "type": "function",
+        "index": 1
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"abs(-5) + min(2,9) * floor(3.7)\",\n  \"result\": 11,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "round": 3,
+      "call": {
+        "id": "call_619d866b4b36473897607b83",
+        "function": {
+          "arguments": "{\"expression\":\"2 && 3\"}",
+          "name": "evaluate__7722fb090eee"
+        },
+        "type": "function",
+        "index": 2
+      },
+      "observation": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"2 && 3\",\n  \"result\": 3,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    }
+  ],
+  "classification": "inconclusive",
+  "classified_claim": "The observed behavior is caused by under/over-updating harness knowledge",
+  "causal_limit": "Structural screening signals do not establish that an edited or stale record caused a regression. No isolated counterfactual was run."
+}

@@ -1,0 +1,436 @@
+{
+  "trace": "results/raw/course-v1.1-20261030/cells/task133-late-no_update-r0/run/raw_trace.json",
+  "sha256": "1d8a8415c3aff33f8804def6fdb982b950ab2bed4e9aa4dffc3de05488d1df6c",
+  "task": 133,
+  "stage": "late",
+  "method": "no_update",
+  "execution_status": "failed",
+  "TF": null,
+  "PE": null,
+  "tool_calls": 0,
+  "tool_errors": 0,
+  "transport_events": 2,
+  "knowledge_comparison_available": true,
+  "metadata_mismatches_vs_changed_target": [
+    "math-mcp::validate_syntax",
+    "mcp-ai-agent-guidelines::prompt-version-manager",
+    "mcp-ai-agent-guidelines::speckit-generator",
+    "mcp-ai-agent-guidelines::validate-spec",
+    "mcp-ai-agent-guidelines::design-assistant",
+    "mcp-ai-agent-guidelines::prompt-hierarchy",
+    "mcp-ai-agent-guidelines::hierarchical-prompt-builder",
+    "mcp-ai-agent-guidelines::prompting-hierarchy-evaluator",
+    "mcp-ai-agent-guidelines::constitution-validator",
+    "math-mcp::batch_evaluate"
+  ],
+  "modified_metadata_unchanged_tools": [],
+  "review_rule": "Metadata mismatch and unrelated edits are screening signals, not causal failure verdicts. Usage-rule omissions absent from metadata need separate semantic review.",
+  "original_knowledge_path": "results/raw/course-v1.1-20261030/catalogs/133/early.json",
+  "updated_knowledge_path": "results/raw/course-v1.1-20261030/cells/task133-late-no_update-r0/run/knowledge.json",
+  "exact_differences": [
+    {
+      "tool_id": "math-mcp::batch_evaluate",
+      "field": "name",
+      "original": null,
+      "target": "batch_evaluate",
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "math-mcp::batch_evaluate",
+      "field": "parameters",
+      "original": null,
+      "target": {
+        "type": "object",
+        "properties": {
+          "expressions": {
+            "type": "array",
+            "description": "Array of mathematical expressions to evaluate",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stop_on_error": {
+            "type": "boolean",
+            "description": "If true, stop processing on first error; if false, continue and report all results",
+            "default": false
+          }
+        },
+        "required": [
+          "expressions"
+        ]
+      },
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "math-mcp::batch_evaluate",
+      "field": "description",
+      "original": null,
+      "target": "Evaluate multiple mathematical expressions in a single batch operation",
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "math-mcp::batch_evaluate",
+      "field": "routing",
+      "original": null,
+      "target": {
+        "server_id": "math-mcp",
+        "tool_name": "batch_evaluate"
+      },
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "math-mcp::batch_evaluate",
+      "field": "usage_rules",
+      "original": null,
+      "target": [],
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "math-mcp::validate_syntax",
+      "field": "parameters",
+      "original": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "Mathematical expression to validate"
+          }
+        },
+        "required": [
+          "expression"
+        ]
+      },
+      "target": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "Mathematical expression to validate",
+            "minLength": 1
+          },
+          "detailed": {
+            "type": "boolean",
+            "description": "If true, return a more detailed validation result when supported",
+            "default": false
+          },
+          "allow_variables": {
+            "type": "boolean",
+            "description": "Explicitly specify whether variable references are allowed during validation"
+          },
+          "show_ast": {
+            "type": "boolean",
+            "description": "If true, include the abstract syntax tree (AST) structure in the validation result",
+            "default": false
+          },
+          "check_balanced": {
+            "type": "boolean",
+            "description": "If true, perform additional validation to ensure all brackets and parentheses are properly balanced",
+            "default": true
+          },
+          "max_depth": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Maximum allowed nesting depth for expressions (e.g., nested parentheses or function calls). If specified, validation fails if depth exceeds this limit"
+          }
+        },
+        "required": [
+          "expression",
+          "allow_variables"
+        ]
+      },
+      "updated": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "Mathematical expression to validate"
+          }
+        },
+        "required": [
+          "expression"
+        ]
+      },
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "field": "name",
+      "original": null,
+      "target": "constitution-validator",
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "field": "parameters",
+      "original": null,
+      "target": {
+        "type": "object",
+        "properties": {
+          "artifactContent": {
+            "type": "string",
+            "description": "Content of the artifact to validate (spec.md, ADR, roadmap, plan, etc.)"
+          },
+          "artifactType": {
+            "type": "string",
+            "enum": [
+              "spec",
+              "adr",
+              "roadmap",
+              "plan",
+              "tasks",
+              "progress",
+              "custom"
+            ],
+            "description": "Type of artifact being validated",
+            "default": "spec"
+          },
+          "constitutionPath": {
+            "type": "string",
+            "description": "Path to CONSTITUTION.md file (optional if constitutionContent provided)"
+          },
+          "constitutionContent": {
+            "type": "string",
+            "description": "CONSTITUTION.md content directly (optional if constitutionPath provided)"
+          },
+          "validationLevel": {
+            "type": "string",
+            "enum": [
+              "strict",
+              "standard",
+              "lenient"
+            ],
+            "description": "Validation strictness level",
+            "default": "standard"
+          },
+          "checkPrinciples": {
+            "type": "boolean",
+            "description": "Validate against constitutional principles",
+            "default": true
+          },
+          "checkConstraints": {
+            "type": "boolean",
+            "description": "Validate against constitutional constraints",
+            "default": true
+          },
+          "checkQualityStandards": {
+            "type": "boolean",
+            "description": "Validate against quality standards",
+            "default": true
+          },
+          "outputFormat": {
+            "type": "string",
+            "enum": [
+              "json",
+              "markdown",
+              "summary"
+            ],
+            "description": "Output format for validation results",
+            "default": "markdown"
+          },
+          "includeRecommendations": {
+            "type": "boolean",
+            "description": "Include remediation recommendations",
+            "default": true
+          },
+          "includeExamples": {
+            "type": "boolean",
+            "description": "Include compliant examples for violations",
+            "default": false
+          }
+        },
+        "required": [
+          "artifactContent"
+        ]
+      },
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "field": "description",
+      "original": null,
+      "target": "Validate any project artifact (spec.md, ADR, roadmap, plan, or custom document) against CONSTITUTION.md principles, constraints, and quality standards. Provides standalone constitutional compliance checking independent of generation workflows. BEST FOR: post-generation validation, constitutional compliance audits, artifact quality assurance. OUTPUTS: Detailed validation report with compliance score, principle violations, constraint breaches, and remediation recommendations.",
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "field": "routing",
+      "original": null,
+      "target": {
+        "server_id": "mcp-ai-agent-guidelines",
+        "tool_name": "constitution-validator"
+      },
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "field": "usage_rules",
+      "original": null,
+      "target": [],
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::design-assistant",
+      "field": "description",
+      "original": "Orchestrate multi-phase design workflows with constraint validation, coverage enforcement, and artifact generation. BEST FOR: Coordinating design sessions, enforcing constraints, and producing ADRs and roadmaps. Example: 'Use the design-assistant to start a design session for an API gateway.'",
+      "target": "Orchestrate multi-phase design workflows with built-in constraint validation, coverage enforcement, and artifact generation. Outputs can be further validated using constitution-validator for constitutional compliance verification. BEST FOR: Coordinating design sessions, enforcing constraints, producing ADRs and roadmaps. Example: 'Use the design-assistant to start a design session for an API gateway.'",
+      "updated": "Orchestrate multi-phase design workflows with constraint validation, coverage enforcement, and artifact generation. BEST FOR: Coordinating design sessions, enforcing constraints, and producing ADRs and roadmaps. Example: 'Use the design-assistant to start a design session for an API gateway.'",
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::hierarchical-prompt-builder",
+      "field": "description",
+      "original": "Create AI prompts with context→goal→requirements hierarchy supporting chain-of-thought, few-shot, and zero-shot techniques. BEST FOR: code reviews, feature specifications, technical decisions, complex task breakdown. OUTPUTS: Structured markdown prompts for LLM injection.",
+      "target": "Create AI prompts with context→goal→requirements hierarchy supporting chain-of-thought, few-shot, and zero-shot techniques. BEST FOR: code reviews, feature specifications, technical decisions, complex task breakdown. OUTPUTS: Structured markdown prompts for LLM injection. TIP: Save and version generated prompts using prompt-version-manager for lifecycle tracking and rollback.",
+      "updated": "Create AI prompts with context→goal→requirements hierarchy supporting chain-of-thought, few-shot, and zero-shot techniques. BEST FOR: code reviews, feature specifications, technical decisions, complex task breakdown. OUTPUTS: Structured markdown prompts for LLM injection.",
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::prompt-hierarchy",
+      "field": "description",
+      "original": "Manage prompting hierarchy operations with modes: 'build' (create prompts), 'select' (recommend level), 'evaluate' (score quality). BEST FOR: all hierarchy operations, prompt creation, level selection, quality assessment. OUTPUTS: Mode-specific structured responses.",
+      "target": "Manage prompting hierarchy operations with modes: 'build' (create prompts), 'select' (recommend level), 'evaluate' (score quality). BEST FOR: all hierarchy operations, prompt creation, level selection, quality assessment. OUTPUTS: Mode-specific structured responses. TIP: Persist built prompts as named versions using prompt-version-manager to enable diffing and rollback across iterations.",
+      "updated": "Manage prompting hierarchy operations with modes: 'build' (create prompts), 'select' (recommend level), 'evaluate' (score quality). BEST FOR: all hierarchy operations, prompt creation, level selection, quality assessment. OUTPUTS: Mode-specific structured responses.",
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::prompt-version-manager",
+      "field": "name",
+      "original": null,
+      "target": "prompt-version-manager",
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::prompt-version-manager",
+      "field": "parameters",
+      "original": null,
+      "target": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "save",
+              "list",
+              "diff",
+              "restore",
+              "delete"
+            ],
+            "description": "Operation to perform: 'save' stores a prompt version, 'list' shows all versions for a key, 'diff' computes line-level diff between two versions, 'restore' retrieves a specific version's content, 'delete' removes a version."
+          },
+          "key": {
+            "type": "string",
+            "description": "Logical name for the prompt (e.g., 'auth-system-prompt', 'onboarding-spec'). Groups versions under a shared identifier.",
+            "examples": [
+              "auth-system-prompt",
+              "payment-spec",
+              "onboarding-flow"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "description": "Prompt content to save (required for 'save' action)."
+          },
+          "label": {
+            "type": "string",
+            "description": "Optional human-readable label for the version (e.g., 'v1-initial', 'v2-with-cot').",
+            "examples": [
+              "v1-initial",
+              "v2-chain-of-thought",
+              "v3-security-hardened"
+            ]
+          },
+          "versionA": {
+            "type": "string",
+            "description": "Version ID or label for the base side of a diff (required for 'diff' action)."
+          },
+          "versionB": {
+            "type": "string",
+            "description": "Version ID or label for the comparison side of a diff (required for 'diff' action). Omit to diff against the latest saved version."
+          },
+          "versionId": {
+            "type": "string",
+            "description": "Specific version ID to restore or delete (required for 'restore' and 'delete' actions)."
+          },
+          "includeMetadata": {
+            "type": "boolean",
+            "description": "Include version metadata (timestamp, label, character count) in the response.",
+            "default": true
+          }
+        },
+        "required": [
+          "action",
+          "key"
+        ]
+      },
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::prompt-version-manager",
+      "field": "description",
+      "original": null,
+      "target": "Version and manage prompt artifacts with save, list, diff, restore, and delete operations using an in-memory registry of named prompt versions and optional metadata output. BEST FOR: prompt lifecycle management, iterative prompt refinement, A/B comparison of prompt variants, rollback to previous prompt versions. OUTPUTS: Version metadata, line-level diffs between versions, restored prompt content, or deletion confirmation.",
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::prompt-version-manager",
+      "field": "routing",
+      "original": null,
+      "target": {
+        "server_id": "mcp-ai-agent-guidelines",
+        "tool_name": "prompt-version-manager"
+      },
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::prompt-version-manager",
+      "field": "usage_rules",
+      "original": null,
+      "target": [],
+      "updated": null,
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::prompting-hierarchy-evaluator",
+      "field": "description",
+      "original": "Evaluate prompt quality with hierarchical taxonomy and numeric scoring based on clarity, specificity, completeness, and cognitive complexity. BEST FOR: prompt quality assessment, effectiveness measurement, prompt optimization. OUTPUTS: Detailed scores with improvement recommendations.",
+      "target": "Evaluate prompt quality with hierarchical taxonomy and numeric scoring based on clarity, specificity, completeness, and cognitive complexity. BEST FOR: prompt quality assessment, effectiveness measurement, prompt optimization. OUTPUTS: Detailed scores with improvement recommendations. TIP: Store evaluation snapshots as named versions in prompt-version-manager to track quality improvements over time.",
+      "updated": "Evaluate prompt quality with hierarchical taxonomy and numeric scoring based on clarity, specificity, completeness, and cognitive complexity. BEST FOR: prompt quality assessment, effectiveness measurement, prompt optimization. OUTPUTS: Detailed scores with improvement recommendations.",
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::speckit-generator",
+      "field": "description",
+      "original": "Generate GitHub Spec-Kit artifacts (all documents: README.md, spec.md, plan.md, tasks.md, progress.md, adr.md, roadmap.md) from requirements. Optionally validate against CONSTITUTION.md. BEST FOR: feature specs, project planning.",
+      "target": "Generate GitHub Spec-Kit artifacts (all documents: README.md, spec.md, plan.md, tasks.md, progress.md, adr.md, roadmap.md) from requirements with integrated constitutional validation during generation. Use constitution-validator for standalone validation of existing artifacts. BEST FOR: feature specs, project planning, constitutional compliance. TIP: Version generated spec artifacts using prompt-version-manager to maintain a history of spec iterations.",
+      "updated": "Generate GitHub Spec-Kit artifacts (all documents: README.md, spec.md, plan.md, tasks.md, progress.md, adr.md, roadmap.md) from requirements. Optionally validate against CONSTITUTION.md. BEST FOR: feature specs, project planning.",
+      "metadata_unchanged_tool": false
+    },
+    {
+      "tool_id": "mcp-ai-agent-guidelines::validate-spec",
+      "field": "description",
+      "original": "Validate spec.md content against constitutional constraints without generating artifacts. Useful for iterative spec refinement and quality assurance. BEST FOR: spec validation, quality checks, constitutional compliance. OUTPUTS: Validation report with score, errors, warnings, and recommendations.",
+      "target": "Validate spec.md structure, completeness, and constitutional constraints without generating artifacts. Focuses on spec.md-specific validation. For broader artifact validation (ADRs, roadmaps, plans), use constitution-validator. BEST FOR: spec.md validation, iterative refinement, quality checks. OUTPUTS: Validation report with score, errors, warnings, and recommendations.",
+      "updated": "Validate spec.md content against constitutional constraints without generating artifacts. Useful for iterative spec refinement and quality assurance. BEST FOR: spec validation, quality checks, constitutional compliance. OUTPUTS: Validation report with score, errors, warnings, and recommendations.",
+      "metadata_unchanged_tool": false
+    }
+  ],
+  "calls_and_observations": [],
+  "classification": "inconclusive",
+  "classified_claim": "The observed behavior is caused by under/over-updating harness knowledge",
+  "causal_limit": "Structural screening signals do not establish that an edited or stale record caused a regression. No isolated counterfactual was run."
+}
