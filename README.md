@@ -15,7 +15,7 @@
 
 当前主实验 **27/27 轨迹有评分、135/135 评分槽有效**，其中 **20 正常完成、5 轮数耗尽、2 输出截断**。一次执行符合 brief 的计算预算例外；5 个 judge 评分不等于5次执行。独立复算、终态恢复和归档离线复现已通过。报告、独立复算与共享演示已整理；受控缺参及新增无关路由误改的局部损害机制已确认，课程是否接受此类注入案例待 TA 判断；自然 updater 失误未证实。brief 未要求失败必须自然发生。新增路由附录尚未合入冻结 PDF/Slides。6 条旧回退负结果保留；组内审阅/排练待完成。
 
-- **最新观测契约研究**：[6条开发对照](reports/observed-contract-pilot.html)：定位并实测新校验控制未落实及非报错响应语义丢失；候选完成/TF提高，但必需产物仍有代码错误。已冻结36条独立重复，尚无可复现双重改善结论。状态见 HANDOVER。
+- **最新观测契约研究**：[36条独立验证](reports/observed-contract-validation.html)已结束：变化任务候选正常完成5/12，原SP8/12，产物全项通过均0/12；两批均未过门槛，候选淘汰，Goal继续。[6条开发对照](reports/observed-contract-pilot.html)的完成/TF优势未复现。匿名审阅、原评分、费用及离线复算均已归档；下一步先找不同机制，不重复抽样旧候选。
 - **最新交付**：[审阅入口](submission/handover-20261031/index.html)、[整合报告](submission/report-final.html)、[PDF](submission/PE6203-final-report.pdf)、[HANDOVER](HANDOVER.md)。核查结论、未发送的 TA 问题及下一步以此为准。
 - **获批诊断历史附录**：[4条受控诊断与复算](submission/diagnostics-20261031/index.html)：20个评分，$0.046002，已停止扩展；缺参机制已确认，额外规则影响仍为提示性证据。原报告和复现包保持冻结；课程适用性以最新整合报告 Appendix E 为准。
 - **历史交付快照**：[报告、复现包、案例与演示](submission/index.html)。九个 Selective Patch PE 合计82，平均9.1111；正常完成6/9。
