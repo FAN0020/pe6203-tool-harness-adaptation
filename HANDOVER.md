@@ -12,7 +12,15 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：层级/项目状态新机制已实测，待冻结针对 Late 的候选
+### 当前最新断点：project_state_contract 已冻结，准备四单元开发执行
+
+- 上轮是实质进展：document_sequence淘汰、层级与新增状态工具缺陷在6c3c1fa归档。当前新候选9ca6064预注册，04cd085实现；358离线测试通过（13integration排除），规则逐字匹配冻结文本。
+- 仅修改Late新增review_project_status及直接相关list_tasks/analyze_task_complexity的3条usage rules。真实失败/flat替代、记录级评分和自动生成空ID边界已探测；不改任何工具执行、元数据或路由，无通用预算指令/任务答案。235两组精确K0。
+- 固定开发：283Late+235Late，各SP/候选一次，共4条；通过后2批×每条件3重复，共24条独立验证。每批必须完成数与质量全项数都严格高于SP、TF不降，保持任务不降。task283沿用4项质量维度，并在模型前明确：未解决的实质执行范围不能因披露就算通过；里程碑和可执行叶任务要区分。
+- 协议`experiments/project-state-v1.json`；raw `results/raw/project-state-pilot-20261101`；证据`results/evidence/project-state-pilot-20261101`。知识accepted、模型前计划/知识/源码hash及随机匿名映射已冻结。先查experiment.json和进程再续接，不重复启动。
+- 用本目录collect_blind.py采集实际tasks.json与工具调用，4份属性审阅冻结后再揭示方法与TF/PE。没有新的有效性结论，Goal仍活动。无需PDF或渲染服务。
+
+### 已完成的前置探测：层级/项目状态机制
 
 - document_sequence 已在`be1ce54`完整归档并淘汰（下节）。之后仅做源码/目录筛选与合成工具探测，**没有新 agent/judge 请求**，Goal仍活动。排除日志28/Excel305/财务等未证明机制候选；筛选索引`results/evidence/mechanism-screening-20261101/`，没有读参考答案或全量旧轨迹。
 - 新探测在`cd50478`预注册v1：发现bulk_create_tasks虽有新增源码但没有注册到实际catalog；仅1次create_project后采集脚本停止。原文件/失败全部保留。**不能再以这个未注册bulk作为变化工具依据。**
