@@ -380,3 +380,48 @@ def test_probe_memory_quotes_both_observed_outcomes_without_inventing_an_alterna
     assert "success" in rules.lower() and "OLD_STAGE_SENTINEL" not in rules
     assert knowledge["tools"][1] == catalog()["tools"][1]
     assert cost["calls"] == 0 and cost["total_tokens"] == 0
+
+
+def test_budget_feedback_only_extends_parent_rules_on_changed_and_added_tools(monkeypatch):
+    import integration.baselines as provider
+
+    monkeypatch.setattr(
+        provider, "_request_completion", lambda *_: pytest.fail("budget patch made a model call")
+    )
+    old, target = catalog(), changed()
+    added = deepcopy(target["tools"][0])
+    added.update(
+        tool_id="server::new_lookup",
+        name="new_lookup",
+        routing={"server_id": "server", "tool_name": "new_lookup"},
+    )
+    target["tools"].append(added)
+    before = deepcopy((old, target))
+    feedback = [
+        {
+            "stage": "late",
+            "server": "server",
+            "tool": "lookup",
+            "args": {"mode": True},
+            "result": {"isError": True, "error": "MISSING_HANDLER"},
+        }
+    ]
+    context = {"feedback": feedback}
+    parent, _, _ = adapt(old, target, "sufficiency_feedback", context)
+    knowledge, log, cost = adapt(old, target, "budget_feedback", context)
+    from pe6203.patch_variants import BUDGET_RULE
+
+    for actual, original in zip(knowledge["tools"], parent["tools"], strict=True):
+        if actual["tool_id"] == "server::unrelated":
+            assert actual == original == old["tools"][1]
+        else:
+            assert actual["usage_rules"] == original["usage_rules"] + [BUDGET_RULE]
+            restored = deepcopy(actual)
+            restored["usage_rules"].pop()
+            assert restored == original
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+    assert sum(entry.get("evidence") == "existing_runtime_budget" for entry in log) == 2
+    for unchanged in [deepcopy(old), catalog("late")]:
+        same, _, same_cost = adapt(old, unchanged, "budget_feedback", context)
+        assert same == old and same_cost["calls"] == 0

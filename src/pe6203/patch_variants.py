@@ -20,6 +20,7 @@ VARIANTS = (
     "sufficiency_notes",
     "workflow_notes",
     "sufficiency_feedback",
+    "budget_feedback",
 )
 
 SUFFICIENCY_RULE = (
@@ -27,6 +28,13 @@ SUFFICIENCY_RULE = (
     "needed fact or state instead of rechecking it through another tool. Optional capabilities "
     "do not add user requirements. Preserve necessary safety checks. Correct the underlying "
     "cause of a diagnostic; do not change stored data merely to silence the diagnostic."
+)
+
+BUDGET_RULE = (
+    "Work within the existing turn and output limits. Group small independent calls only "
+    "when their inputs are already known; await dependent results and keep arguments concise. "
+    "Complete the required work and essential checks, then give a concise evidence-based "
+    "final answer instead of reproducing full tool outputs. Do not add optional follow-up work."
 )
 
 WORKFLOW_PROMPT = """
@@ -343,7 +351,7 @@ def adapt_result(old, target, strategy, context=None):
         if strategy in ("linked_notes", "workflow_notes"):
             continue
         note = delta_note(tool, change)
-        if strategy in ("sufficiency_notes", "sufficiency_feedback"):
+        if strategy in ("sufficiency_notes", "sufficiency_feedback", "budget_feedback"):
             note += " " + SUFFICIENCY_RULE
         tool["usage_rules"].append(note)
         modified.add(tool["tool_id"])
@@ -364,7 +372,7 @@ def adapt_result(old, target, strategy, context=None):
         ]
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
-    if strategy == "sufficiency_feedback":
+    if strategy in ("sufficiency_feedback", "budget_feedback"):
         by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
         for observation in feedback:
             tool_id = f"{observation['server']}::{observation['tool']}"
@@ -378,6 +386,21 @@ def adapt_result(old, target, strategy, context=None):
                     "basis": [changes[tool_id]["change_id"]],
                     "note": rule,
                     "evidence": "frozen_probe_observation",
+                }
+            )
+    if strategy == "budget_feedback":
+        for tool in result["knowledge"]["tools"]:
+            if tool["tool_id"] not in changes:
+                continue
+            tool["usage_rules"].append(BUDGET_RULE)
+            modified.add(tool["tool_id"])
+            result["changes"].append(
+                {
+                    "operation": "append_delta_note",
+                    "tool_id": tool["tool_id"],
+                    "basis": [changes[tool["tool_id"]]["change_id"]],
+                    "note": BUDGET_RULE,
+                    "evidence": "existing_runtime_budget",
                 }
             )
     if strategy in ("linked_notes", "workflow_notes") or (
