@@ -1,5 +1,47 @@
 # PE6203 交付交接 · 2026-10-31
 
+## 新聊天接手入口：新版研究目标（2026-10-31）
+
+**先读本节即可；其后是按时间保留的历史记录。** 用户最新明确选择：**仍须找到可复现的完成率与任务质量双重改善策略，负结果不能作为研究目标完成条件。** 取消总费用/总轨迹额度的授权仍有效；这不取消公平的单次执行预算，也不授权部署、发送 TA 消息或推送当前研究分支。不要用历史段落中的旧等待批准/旧 US$1 限额覆盖最新指示。
+
+### 新版 Goal 文本
+
+> 基于 PE6203 Group Project 4 brief 与 MCPEvol-Bench，设计并验证至少一种符合选择性工具知识适应范围的策略，使它在预先冻结的变化任务验证子集上，相比原 Selective Patch，取得可复现的正常完成率和任务质量双重改善，同时保持不变任务能力。No Update 与 Full Rewrite 保留为课程比较基线。任务质量同时检查 TF 和任务要求的实际产物正确性，不能以 PE 上升、提前结束、删减任务要求或选择性展示成功代替质量改善。
+>
+> 复用已有有效证据；每轮先定位具体机制、冻结知识差异和验收检查，再实施和验证。固定模型、供应商、解码、单次预算和评分协议；开发与独立复核分开。保存所有正负结果、原评分、轨迹和费用，报告 TF/PE/ECS、恢复、保持、完成状态及更新成本，不合成任意加权分数。失败候选可以淘汰，但未验证双重改善时，整个研究目标保持未完成。
+>
+> 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
+
+### 执行解释与当前断点
+
+- **验收先冻结：**正常完成与 TF 分开；质量检查只覆盖任务必需的功能、数据、代码或产物，逐项 pass/fail/unknown，不事后加条款。TF 已接近满分时，以预先定义的产物正确性检验改善，但不能隐瞒 TF 退化。独立复核必须采用未据结果改写的方法和同一检查；五个 judge 不是五次 agent 重复。具体重复数与比较规则先写入下一份协议，不套用旧 PE +0.5 门槛，不要求每格或每个基线都胜出。
+- **代码位置：**`/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety`；当前研究分支 `codex/completion-quality-study`。本次目标整理前最新证据提交 `fcadce5fbf6f1e49d88189948a94e8a9307971db`。当前研究尚未 push；不要从 main 创建空白工作区后误以为最新研究丢失。
+- **Goal 平台状态：**本次读取为 `paused`，旧 objective 仍是“找到更好策略”。本文更新研究约定，没有编辑应用内 Goal 的 objective。现有工具只能新建目标或改变状态，不能改写未完成目标/恢复暂停目标；需用户在应用中替换并恢复，或在新聊天用上述文本启动 Goal。不要为绕过限制把旧目标标成完成。
+- **最新实测：**六条定点复核中原 SP 与 budget_feedback 都正常完成 2/3；TF 9.8 vs 8.9333，PE 9.4 vs 8.0。此前完成收益未复现，尚无可靠双重改善结论。全部实验进程已在上一轮结束；本次只整理目标与接手说明，无模型/评分/部署调用。
+- **已知故障边界：**283 的轮数耗尽、UUID 抄写恢复及上游层级重复计数，133 的生成校验代码错误，不能直接认定都是过期工具知识。更多通用规则尚未解决这些问题。下一步先离线区分知识适应可修复机制与执行器/上游/一般代码生成错误，再选单一机制；不先重跑旧候选。
+- **课程与研究分开：**原 27 条主实验/PDF/Slides 已冻结；研究未赢不抹去课程交付。受控 under-update 缺参及 over-update 无关路由的局部损害有证据；是否满足 TA 对方法失败分析的期待仍待确认。Full Rewrite 完整重建目录并改写所有描述，但结构字段/usage rules 取元数据，解释待 TA。不得称课程已经验收。
+
+### 按需读取，避免重新灌入全部历史
+
+1. 本节与 [README](README.md)，然后核对课程 brief §§2–4：`/Users/fanysmacpro/Documents/Graduate_learning/PE6203-BoAn/group_project/PE6203 Group Project 4 - Tool Harness Adaptation under Environment Change.docx`。
+2. 最新跨研究汇总：[existing-method-recheck.html](reports/existing-method-recheck.html)。需要逐格事实时才读 `results/evidence/existing-method-recheck-20261031/quality-review.json`、`judge-audit.json` 和 `trial-verification.json`。
+3. 课程交付：[report-final.html](submission/report-final.html)；新增无关知识损害证据：[routing-fault-results.html](reports/routing-fault-results.html)。迁移扩展按需要读 `reports/tool-migration-results.html`、`reports/daily-migration-results.html`。
+4. 研究实现：`src/pe6203/selective.py`、`patch_variants.py`、`baselines.py`；公平执行配置：`configs/existing-method-recheck-v1.json`。原始包/源码快照按报告索引定位，不批量解包打印。不要读取或打印 `.env`、`.env copy`；实验费用账本不是 Codex 聊天 credits 账单。
+5. 零 API 复算命令：`python3 results/evidence/existing-method-recheck-20261031/verify_trial.py`。本次仅核对文档差异与路径，没有重跑此前已通过的完整审计。
+
+新聊天可以直接使用：
+
+```text
+在 /Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety 的现有
+codex/completion-quality-study 分支接手；先读 HANDOVER.md 的“新聊天接手入口”，
+再按需读它列出的文件，不读取整个聊天、全部历史轨迹或密钥。
+按其中“新版 Goal 文本”创建并推进目标。我要求可复现的完成率和任务质量双重改善，
+不能以负结果宣告研究目标完成；不设总费用/轨迹上限，但保留公平单次预算及完整记账。
+从断点继续，先离线冻结具体机制和验收规则，不重跑已完成实验或自动展开大矩阵。
+```
+
+## 历史交付与研究记录（下文保留原状态，当前指示以上节为准）
+
 **最新授权：用户要求“请不要设置上限和额度限制，以完成任务为优先目标”。后续研究按证据继续，不设总费用/轨迹额度；保持逐条记账、公平执行设置及历史证据。下文各轮限额及等待批准的表述仅描述当时状态。最新已完成：`experiments/existing-method-recheck-v1.json` 的6条定点复核，完成收益未复现，不晋级。可读汇总：[`reports/existing-method-recheck.html`](reports/existing-method-recheck.html)。另有12条实时信息、12条Swift迁移和2条无关路由诊断（文末）。不含部署授权。**
 
 课程交付已冻结。四条获批诊断已经结束；PE +0.5 和历史 promotion gates 不属于课程要求。后续新增的完成率 / 任务质量研究另列在文末；文末获批的 12 条试验已执行并归档，总费用 US$0.1572164470；**授权已用完，不自动扩展实验或部署**。课程验收仍需组内审阅及 TA 澄清，不以策略胜出为条件。
