@@ -55,6 +55,12 @@ python3 submission/handover-20261031/verify.py
 
 下一位接手者先查看本文件、最新报告与 `submission/handover-20261031/verification.json`。未得到用户新批准，不运行 experiment/driver/preflight，不重评已有轨迹、不扩充实验、不部署 Netlify。TA 回复如要求补充，先提出最小、独立计费的方案再获批执行。
 
+## 共享材料同步
+
+已将上述比较结论同步至 [Slides 第13页与讲稿](https://docs.google.com/presentation/d/1vcofhraTu_EJuhCm45WDVUMQzRFrY36T/edit) 和 [小组任务表](https://docs.google.com/document/d/1fbhITsq__0Xaxjp85qVaQxIO1kQS6oDF-RFe7G7G5kQ/edit)。任务表主口径改为 27 条 / 3 方法 / 每格一次，13 页主讲 + 5 页附录；保留原认领人、初审状态及标明历史的 Sprint 计划。108 条确认与候选研究不作为主报告数据。
+
+本次仅同步文档；PE 优势分别为 +1.2444（vs NU）和 +0.7556（vs FR），并未证明总体胜出。数字、评分、轨迹、成本与原最终 PDF 未改。任务状态与未完成事项详见 [`shared-sync.json`](submission/handover-20261031/shared-sync.json)；线上认领表是组内分工的最新来源。本次开始时检测到 `codex/completion-quality-study` 的独立研究改动；该分支由其他工作维护，本次未合并或修改，也未授权新实验。
+
 ## Git 交付回执
 
 主交付已通过非 force push 合并到 main：`e95b51a3601a5966d06f05ae1e729f8e8bad60f9`。远端 ref 已核对，GitHub Adapter checks 成功；核查内容提交为 `61a3cf3`。本节和 [`delivery.json`](submission/handover-20261031/delivery.json) 的后续记录提交仅补交付回执。当前未解决项仍以上表为准，没有宣称课程验收已完成。

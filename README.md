@@ -2,6 +2,16 @@
 
 **当前目标：完成可复现、可辩护的课程项目。** 采用「最小实验 → 验证与交付 → 获批后才扩展」。策略搜索已暂停；任何新增实验、API 探测或重跑都先获用户批准。
 
+**已核实的比较结论：Selective Patch 的 PE 最高，但尚无整体优于两个 baseline 的证据。** 每格一次执行，仅报告观察差异，不宣称统计显著性。
+
+| 方法 | TF | PE | ECS（总体 SD） | 正常完成 | 更新 API USD |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| No Update | 9.9556 | 7.8667 | 9.9241 | 7/9 | 0 |
+| Full Rewrite | 9.9778 | 8.3556 | 9.9464 | 7/9 | 0.049176 |
+| Selective Patch | 9.8889 | 9.1111 | 9.7318 | 6/9 | 0 |
+
+Patch PE 比 NU 高 1.2444、比 FR 高 0.7556；TF、ECS、完成率未领先。零更新 API 费用与 NU 并列，不代表整场实验免费。[独立复算](submission/evidence/recomputed/metrics.json)；历史候选未获完整确认，不混入主结果。
+
 | 当前选择 | 说明 |
 | --- | --- |
 | 主实验 | MCPEvol-Bench 固定 **133 / 283** 变化任务、**235** 未变化任务；Early / Middle / Late × No Update / Full Rewrite / Selective Patch × **1 次**＝27 条。已完成，无需重跑。 |
@@ -15,6 +25,7 @@
 
 当前主实验 **27/27 轨迹有评分、135/135 评分槽有效**，其中 **20 正常完成、5 轮数耗尽、2 输出截断**。一次执行符合 brief 的计算预算例外；5 个 judge 评分不等于5次执行。独立复算、终态恢复和归档离线复现已通过。报告、独立复算与共享演示已整理；受控缺参机制已确认，是否满足课程案例要求待 TA 判断；over-update 的“无关知识修改导致损害”仍未证实。brief 未要求失败必须自然发生。6 条旧回退负结果保留；组内审阅/排练待完成。
 
+- **团队审阅**：[任务表](https://docs.google.com/document/d/1fbhITsq__0Xaxjp85qVaQxIO1kQS6oDF-RFe7G7G5kQ/edit) · [Slides](https://docs.google.com/presentation/d/1vcofhraTu_EJuhCm45WDVUMQzRFrY36T/edit)。13 页主讲 + 5 页附录；原认领和初审状态保留，材料就绪不等于团队审核或课程验收完成。
 - **最新交付**：[审阅入口](submission/handover-20261031/index.html)、[整合报告](submission/report-final.html)、[PDF](submission/PE6203-final-report.pdf)、[HANDOVER](HANDOVER.md)。核查结论、未发送的 TA 问题及下一步以此为准。
 - **获批诊断历史附录**：[4条受控诊断与复算](submission/diagnostics-20261031/index.html)：20个评分，$0.046002，已停止扩展；缺参机制已确认，额外规则影响仍为提示性证据。原报告和复现包保持冻结；课程适用性以最新整合报告 Appendix E 为准。
 - **历史交付快照**：[报告、复现包、案例与演示](submission/index.html)。九个 Selective Patch PE 合计82，平均9.1111；正常完成6/9。
