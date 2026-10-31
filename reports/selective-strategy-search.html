@@ -3,7 +3,7 @@
 <p>依据课程 brief 与 <a href="https://arxiv.org/html/2607.14642v1">MCPEvol 论文</a>，分别报告指标，不合成任意加权总分。课程核心是变化任务能否恢复、原本可用的任务是否受损；本小子集 TF 接近上限，故候选搜索以受约束的 PE 改善为目标。</p>
 <div class="scroll"><table><thead><tr><th>评价层次</th><th>指标与比较</th><th>判断范围</th></tr></thead><tbody><tr><td>主要结果</td><td>变化任务 TF：Middle/Late 与同阶段 No Update 对照，并展示自身 Early</td><td>衡量恢复；高绝对 TF 不自动证明有恢复增益</td></tr><tr><td>主要结果</td><td>未变化任务 TF：与原 Selective Patch 及自身 Early 对照</td><td>衡量保持；逐任务展示，避免均值掩盖退化</td></tr><tr><td>跨版本稳定性</td><td>ECS＝三个版本 TF 均值减标准差</td><td>同时列发布代码与论文附录的标准差口径</td></tr><tr><td>效率与代价</td><td>PE、更新 tokens／秒／费用；执行费用另列</td><td>满足质量约束后比较效率；PE 不等同于 token 成本</td></tr><tr><td>补充运行证据</td><td>完成率、截断、轮数耗尽、工具错误及完整轨迹</td><td>补充解释 TF/PE；不改原 benchmark 的评分</td></tr></tbody></table></div>
 <p>本项目预设筛选门槛：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定；均值容差也不是统计意义上的无退化证明。开发集结果只用于选候选，不能作为独立确认结果。</p>
-<p>所有 agent 自行选择工具及参数。固定模型、任务、judge 与执行预算；新规则只来自工具元数据和独立小型探针。三阶段 Early 共用 K0。开发结果用于筛选，确认结果才用于晋级；既有任务上的新重复不代表未见任务泛化。</p>
+<p>所有 agent 自行选择工具及参数。固定模型、任务、judge 与执行预算；updater 只接收元数据和冻结探针，不接收题目、答案或评分。设计者参考了已披露轨迹与运行限制来修改通用规则；三阶段 Early 共用 K0。开发结果用于筛选，确认结果才用于晋级；既有任务上的新重复不代表未见任务泛化。</p>
 <p>原有结果：<a href="course-v1.3-experiment.html">v1.3 与六条诊断</a> · <a href="experiment-readiness.html">旧 A/B 的成功与失败案例</a></p>
 <h2>方法依据</h2>
 <div class="scroll"><table><thead><tr><th>论文</th><th>我们的改造</th><th>与原方法的区别</th></tr></thead><tbody><tr><td><a href="https://arxiv.org/html/2510.04618v1">ACE</a></td><td>delta_notes：先应用元数据差异补丁，再只向变化/新增工具追加当前必需参数与使用边界提示。</td><td>首版采用确定性编译，没有复现 ACE 的 Generator/Reflector/Curator 训练循环或 helpful/harmful 计数。</td></tr><tr><td><a href="https://arxiv.org/html/2502.12110v1">A-MEM</a></td><td>linked_notes：从变化工具出发检索少量同服务候选邻居，LLM 根据元数据为相关工具生成局部使用规则。</td><td>工具知识替代对话记忆；首版用词项相似度候选过滤而非额外 embedding 模型，并锁定 schema/routing/description。</td></tr><tr><td><a href="https://proceedings.neurips.cc/paper_files/paper/2023/file/1b44b878bb782e6954cd888628510e90-Paper-Conference.pdf">Reflexion</a></td><td>feedback_notes：只使用冻结的安全工具探测反馈，生成针对变化工具的错误规避规则；正式运行中不从 judge 学习。</td><td>经验在执行前冻结；不重试已评分任务，不增加 agent 轮数，不复现论文的整任务多次试错。</td></tr></tbody></table></div>
@@ -11,6 +11,8 @@
 <p>v1 在任务执行前被拦截：关联补丁引用了不属于变化集合的工具 ID。执行轨迹数为 0；失败响应、已生成补丁与费用均已归档。v1.1 增加明确 ID 列表及最多一次结构修复，不按分数重试。<a href="../results/evidence/selective-search-20261031/generation-v1-failure.json">完整记录</a>；已知更新费用 $0.005274。</p>
 <p>v2 的 workflow 候选在执行前被语义审查拒绝：建议使用已知失败的工具作为替代路径，并把使用条件写得过窄。0 条任务执行，原响应和费用保留。<a href="../results/evidence/selective-search-20261031/generation-v2-rejection.json">拒绝记录</a>；已知更新费用 $0.006019。</p>
 <p>第二轮：<strong>sufficiency_notes</strong> 在变化工具上添加结果复用、完成条件和保留必要检查的规则；<strong>sufficiency_feedback</strong> 再加入冻结探针的局部结果记忆，直接记录观察而不生成替代方案。两者更新都不调用 LLM。</p>
+<p>第三轮：<strong>budget_feedback</strong> 保留 sufficiency_feedback 的全部规则与探针记录，仅在变化工具上追加小批量独立调用、等待依赖结果、在原预算内给出简洁最终答案的指导。不增加轮数或 tokens，也不预设工具顺序。</p>
+<p>第一次确认未晋级：108 条轨迹、540 个评分齐全。变化后 PE 提高 0.911，TF/ECS 均值相同，但正常完成 14/27 低于原 Patch 的 17/27。差异来自共同 K0 的 Early（3/9 对 6/9），变化后两者均为 11/18；不能据此断言补丁导致完成率下降，也不事后放宽门槛。<a href="../results/evidence/selective-search-20261031/confirmation-r1-review.json">独立复算、成本与归档</a>。</p>
 <h2>selective-search-v1.1-development-20261031</h2>
 <p>development：完整评分 24/24；执行完成 16。截断或轮数耗尽即使 TF 高，也不算执行完成。</p>
 <p><a href="../results/raw/selective-search-v1.1-development-20261031/plan.json">冻结计划</a> · <a href="../results/raw/selective-search-v1.1-development-20261031/runs.csv">全部单元 CSV</a> · <a href="../results/raw/selective-search-v1.1-development-20261031/readable-analysis.json">结构化分析与完整错误</a></p>

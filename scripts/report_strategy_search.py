@@ -171,7 +171,7 @@ def render(directories, destination):
             ],
         ),
         "<p>本项目预设筛选门槛：PE 至少提高 0.5，整体 TF/ECS 下降均不超过 0.2，任一任务×阶段的平均 TF 下降不超过 0.5，完成数不降低；另检查三次重复的一致性与配对检验。这些是我们的实验选择，不是课程或论文规定；均值容差也不是统计意义上的无退化证明。开发集结果只用于选候选，不能作为独立确认结果。</p>",
-        "<p>所有 agent 自行选择工具及参数。固定模型、任务、judge 与执行预算；新规则只来自工具元数据和独立小型探针。三阶段 Early 共用 K0。开发结果用于筛选，确认结果才用于晋级；既有任务上的新重复不代表未见任务泛化。</p>",
+        "<p>所有 agent 自行选择工具及参数。固定模型、任务、judge 与执行预算；updater 只接收元数据和冻结探针，不接收题目、答案或评分。设计者参考了已披露轨迹与运行限制来修改通用规则；三阶段 Early 共用 K0。开发结果用于筛选，确认结果才用于晋级；既有任务上的新重复不代表未见任务泛化。</p>",
         "<p>原有结果："
         + link(ROOT / "reports/course-v1.3-experiment.html", "v1.3 与六条诊断", destination)
         + " · "
@@ -213,6 +213,16 @@ def render(directories, destination):
     sections.append(
         "<p>第二轮：<strong>sufficiency_notes</strong> 在变化工具上添加结果复用、完成条件和保留必要检查的规则；<strong>sufficiency_feedback</strong> 再加入冻结探针的局部结果记忆，直接记录观察而不生成替代方案。两者更新都不调用 LLM。</p>"
     )
+    sections.append(
+        "<p>第三轮：<strong>budget_feedback</strong> 保留 sufficiency_feedback 的全部规则与探针记录，仅在变化工具上追加小批量独立调用、等待依赖结果、在原预算内给出简洁最终答案的指导。不增加轮数或 tokens，也不预设工具顺序。</p>"
+    )
+    confirmation = ROOT / "results/evidence/selective-search-20261031/confirmation-r1-review.json"
+    if confirmation.exists():
+        sections.append(
+            "<p>第一次确认未晋级：108 条轨迹、540 个评分齐全。变化后 PE 提高 0.911，TF/ECS 均值相同，但正常完成 14/27 低于原 Patch 的 17/27。差异来自共同 K0 的 Early（3/9 对 6/9），变化后两者均为 11/18；不能据此断言补丁导致完成率下降，也不事后放宽门槛。"
+            + link(confirmation, "独立复算、成本与归档", destination)
+            + "。</p>"
+        )
     for directory in directories:
         directory = Path(directory).resolve()
         a = analyze(directory)
