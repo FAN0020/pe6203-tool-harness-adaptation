@@ -1,0 +1,117 @@
+{
+  "id": "city-station-filter-probes-v2",
+  "status": "frozen_before_native_calls",
+  "hypothesis": "New exact-station filters can discard direct trains serving other stations within the city represented by a city query code. Source proves raw telecode equality; native city query expansion and service availability still require observation.",
+  "server": "12306-mcp",
+  "stages": [
+    "early",
+    "middle",
+    "late"
+  ],
+  "source": [
+    {
+      "path": ".cache/mcpevol/original/node_modules/12306-mcp/package.json",
+      "sha256": "7e78992148eb232e43a66a69dbc42d786cd8038a4831b92678ef976f0b058e8a"
+    },
+    {
+      "path": ".cache/mcpevol/original/node_modules/12306-mcp/build/index.js",
+      "sha256": "973b9e478108ca17764c3e480fc7f65ba84506c22ec177de827977a60f6d1eab"
+    },
+    {
+      "path": ".cache/mcpevol/original/node_modules/12306-mcp/build/types.js",
+      "sha256": "b33284aa69803e559c361e230263ff74234a7a2efddf9d8ddf893f813a4aec82"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/12306-mcp/package.json",
+      "sha256": "7e78992148eb232e43a66a69dbc42d786cd8038a4831b92678ef976f0b058e8a"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/12306-mcp/build/index.js",
+      "sha256": "8cb668d4de9f0cfb6b8bdccd85152ec7d83f522ea514016646f93232343b2ec6"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/12306-mcp/build/types.js",
+      "sha256": "b33284aa69803e559c361e230263ff74234a7a2efddf9d8ddf893f813a4aec82"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/12306-mcp/package.json",
+      "sha256": "7e78992148eb232e43a66a69dbc42d786cd8038a4831b92678ef976f0b058e8a"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/12306-mcp/build/index.js",
+      "sha256": "3f182ee330068d5e1b91922a0f61e7666900ede070784caa4a169a01acadaca8"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/12306-mcp/build/types.js",
+      "sha256": "b33284aa69803e559c361e230263ff74234a7a2efddf9d8ddf893f813a4aec82"
+    },
+    {
+      "path": "configs/server-profiles.json",
+      "sha256": "1010a78b85b0356bd0cd8c69fe35aa5fdc026adefe443f25016dd8ddc232388b"
+    }
+  ],
+  "synthetic_route": {
+    "from_city": "天津",
+    "to_city": "济南"
+  },
+  "date_policy": "Call Early get-current-date once; parse returned Shanghai YYYY-MM-DD and use plus3 calendar days for all ticket calls. Do not choose dates/routes after outcomes.",
+  "station_policy": "Each stage calls get-station-code-of-citys with 天津|济南 and uses the returned station_code strings. No hardcoded codes or benchmark task locations.",
+  "ticket_arguments": {
+    "trainFilterFlags": "G",
+    "format": "json",
+    "limitedNum": 0
+  },
+  "schedule": {
+    "early": [
+      "get-current-date",
+      "get-station-code-of-citys",
+      "get-tickets:default"
+    ],
+    "middle": [
+      "get-station-code-of-citys",
+      "get-tickets:default",
+      "get-tickets:directOnly=true",
+      "get-tickets:stationExactMatch=true"
+    ],
+    "late": [
+      "get-station-code-of-citys",
+      "get-tickets:default",
+      "get-tickets:directOnly=true",
+      "get-tickets:stationExactMatch=true"
+    ]
+  },
+  "max_tool_calls": 11,
+  "max_catalog_calls": 3,
+  "timeouts": {
+    "session_seconds": 45,
+    "tool_seconds": 30
+  },
+  "stop_rules": [
+    "No retries, no route/date replacement, no model calls.",
+    "If server initialization/catalog/date/code/default-ticket readiness fails or default response is empty/non-JSON/error, retain evidence and stop remaining stages/calls; no proven available task mechanism.",
+    "Exact-filter failures are evidence: save them and complete the other planned exact-filter call if the native session remains live.",
+    "If interruption occurs, never restart completed calls; inspect saved observations/handle and preregister only remaining work if warranted."
+  ],
+  "acceptance": {
+    "mechanism": "All planned default responses are real nonempty ticket lists; at least one returned direct train has origin/destination telecodes differing from the representative city code; exact filters remove those trains, consistent with source equality. Show retained/dropped identities, not only counts.",
+    "source_equivalence": "Compare actual train identity/station/time fields across same-stage live queries; ticket availability may change. Nonequivalence limits inference, never deletes/retries evidence.",
+    "not_sufficient": "Native filter loss alone is not completion or quality improvement. No agent experiment is authorized by this probe result without a separate frozen strategy/rubric/schedule.",
+    "potential_tasks": [
+      102,
+      107,
+      114
+    ],
+    "exclusions": "No booking, purchase, cloud deployment, publication, credentials or task reference answers. Only public native read queries."
+  },
+  "new_agent_calls": 0,
+  "new_judge_calls": 0,
+  "expected_model_usd": 0,
+  "continuation": {
+    "prior_plan": "experiments/city-station-filter-probes-v1.json",
+    "prior_commit": "95de81f",
+    "prior_execution": "results/evidence/city-station-filter-probes-20261101/execution.json",
+    "prior_tool_calls": 0,
+    "prior_catalog_calls": 0,
+    "reason": "Shared transport rejected missing reviewed profile before native process launch. Add the archived package bin entry as common profile; then perform the unchanged unexecuted schedule once. No native result is repeated or replaced."
+  }
+}
