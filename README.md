@@ -15,6 +15,7 @@
 
 当前主实验 **27/27 轨迹有评分、135/135 评分槽有效**，其中 **20 正常完成、5 轮数耗尽、2 输出截断**。一次执行符合 brief 的计算预算例外；5 个 judge 评分不等于5次执行。独立复算、终态恢复和归档离线复现已通过。报告、独立复算与共享演示已整理；主要缺口仍是严格的 patch under-update / over-update 例证，以及组内审阅/排练；6 条回退诊断未证实 over-update，负结果保留。
 
+- **获批诊断附录**：[4条受控诊断与复算](submission/diagnostics-20261031/index.html)：20个评分，$0.046002，已停止扩展；缺参机制已确认，额外规则影响仍为提示性证据。原报告和复现包保持冻结。
 - **交付审阅入口**：[报告、复现包、案例与演示](submission/index.html)。九个 Selective Patch PE 合计82，平均9.1111；正常完成6/9。
 - **冻结计划**：[课程完成计划](reports/course-completion-plan.html)，机器依据：`experiments/course-completion-plan.json`；最新交付状态以审阅入口及 `submission/.context/delivery-status.json` 为准。
 - **主实验**：[27 条结果、指标与案例](reports/course-v1.3-experiment.html)。
