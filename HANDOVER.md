@@ -18,12 +18,14 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：MagicUI 知识更新器已实现，离线复核收尾中
+### 当前最新断点：MagicUI 知识更新器离线闭环；正式试验等待原始日志
 
 - 上一轮`10bac8a`完成两套探针及原始附件核验，属于实质进展。本轮确认仍无原始logs或用户路径答复；没有启动模型试验。但知识更新器可独立实现，先完成这项必要工作，不把写计划/等待当进展。
 - `experiments/native-argument-routing-updater-v1.json`冻结Late三条空参数工具及四条直接相关路由说明，共7处description，五条原生事实证据。所有schema/routing/usage_rules/其他工具保持SP；未知契约或缺证据拒绝，Early/Middle/无相关变更返回SP/K0。只预注册离线实现与测试，不是agent日程。
 - `ef97a48`在实现前冻结精确知识差异/证据/测试，首测按预期Unsupported strategy失败。已实现`native_argument_routing`并注册到公共adapt入口；相关82测试与全部404离线测试通过（13integration排除），两新模块/测试ruff通过。首次实现有1个测试错误：按最后一项找无关工具，而SP把新增工具追加其后；改为按server_id定位，原验收不变。原始red、全套测试及说明在`results/evidence/native-argument-routing-updater-20261101/`。
-- 下一步保存实际原生catalog的离线知识差异、model-facing schema/routing投影及235真实K0等值复核，再归档。没有新原生/模型请求。不能把离线通过当任务双改善；377真实日志与正式验收仍是模型试验前提。
+- `cee763a`实现后，公共adapt及prepare_tools完成4组/8次离线适应：MagicUI Early/Middle/Late与235真实留存原生目录。独立标准库校验确认仅Late7处description改变，模型实际接收的parameters/routes保持原样；235两方法知识文件均与原始Early K0字节相同。37个选定文件归档168019字节，`python3 results/evidence/native-argument-routing-updater-20261101/verify_offline.py`可无服务复核。
+- 全部执行已终结，pytest21293退出0，没有新native/agent/judge请求，确定性更新calls/tokens/USD均0。`decision.json`明确本轮为实质进展而非已达到连续阻塞阈值。原始日志问题尚无用户答复，未创建agent日程；不能把离线通过当完成率/实际任务质量双改善。
+- 现在可独立完成的更新器工作已闭环；下一步需要真实原日志（来源/格式/统计oracle冻结）或新的、有原题必需路径依据且输入齐全的机制。保留条件协议的原4单元开发与两批各12验证门槛。不要重复已通过的离线检查制造进展、不要重跑旧失败候选、不要以合成canary替代正式输入。Goal仍活动，目标未达成；尚未证明方法空间不存在成功策略。
 
 ### 已归档前置：MagicUI 原生机制与原题依赖核对
 
