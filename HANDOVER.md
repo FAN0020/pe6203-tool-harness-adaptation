@@ -18,7 +18,13 @@
 >
 > 不设总费用或总轨迹硬上限；按证据推进，不自动展开全笛卡尔矩阵，不对同一失败方案重复抽样直到赢。完成条件是：改善经独立重复支持、范围与局限明确、课程要求及报告/复现包/展示材料得到核对与整理。不能承诺一定存在这样的策略；若当前方法空间没有可检验的新机制，应如实说明障碍，不伪称目标完成。
 
-### 当前最新断点：discovery_contract 两批独立验证已淘汰；继续寻找不同机制
+### 当前最新断点：MagicUI 参数路由机制已预注册，待原生证据
+
+- 上一轮`discovery_contract`已淘汰且不可重跑（下节）。本轮定向源码核对发现不同机制：MagicUI Late三个新精确查询工具用普通JSON对象注册，当前SDK把它们当annotations，可能导出空参数schema并把request context传给handler，丢失真实用户参数。目录不一定失败，原有无参分类接口可能仍可用；目前仅源码假设。
+- `experiments/magicui-argument-routing-probes-v1.json`冻结固定canary=text-animate、9次工具调用/3catalog/0模型；collector在`results/evidence/magicui-argument-routing-probes-20261101/run_probes.py`。先检查Early目录/真实分类代码，再Middle索引/分类，最后Late三条故障及分类替代。意外错误/缺少canary立即停止，不重试/换查询/修原生源码。共用profile仅按三阶段原包bin补入dist/server.js，不传凭据。
+- 尚无新的agent候选/评分日程。若原生证据通过，再单独验证task377原始日志与code-runner依赖，冻结实际网页/统计产物规则和公平对照；不能把原生调用成功当双重改善。Saleskit新增参数偏向OCR可选规则/差旅，task106仅单张名片且需外部OCR与上传，未调用这些服务。
+
+### 已结束：discovery_contract 两批独立验证已淘汰；后续源码筛查
 
 - 闭环提交`32da2d3`后新增有边界源码复核：`results/evidence/mechanism-screening-20261101/post-discovery-required-path-screen.json`，27源码hash、8项判断，原生/agent/judge新增调用均0。Draw.io预设/复制、Smart Reviewer摘要、Bilibili未传递过滤、WHOIS raw、AIM邻域、Mermaid可选config、ntfy通知、Playwright代码生成均未建立新必需完成路径，具体理由保留。尚无新候选或实验进程；不是穷尽性证明。下一定向入口可查MagicUI过滤和Saleskit工作流与原题的必要联系。
 - 36/36 evaluated、180/180 judge完整，runner70532退出0；PDF HTTP27070及报告HTTP66095均已关闭，浏览器已关闭。全部36份逐属性盲审在`9a117d2`冻结提交后才揭示方法/分数。**不要重跑或调参本候选**；Goal仍活动，双重改善未成立。
