@@ -123,6 +123,14 @@ def main():
     assert abs(spent - preflight_usd - sum(
         (Decimal(r["cost_usd"][role]) for r in rows for role in ("agent", "judge")), Decimal(0)
     )) < Decimal("1e-12")
+    update_costs = json.loads((FOLDER / "update-costs.json").read_text())
+    assert update_costs["model_calls"] == update_costs["tokens"] == update_costs["usd"] == 0
+    assert len(update_costs["conditions"]) == 6
+    for condition in update_costs["conditions"]:
+        adaptation = read(f"adaptations/{condition['task_id']}-{condition['stage']}-{condition['strategy']}/adaptation.json")
+        assert condition["cost"] == adaptation["cost"]
+        cost = adaptation["cost"]
+        assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
     def summarize(selected):
         result = {}
         for arm in ("selective_patch", "discovery_contract"):
