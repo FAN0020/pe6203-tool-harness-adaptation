@@ -27,6 +27,7 @@ VARIANTS = (
     "artifact_contract",
     "document_sequence",
     "project_state_contract",
+    "thinking_contract",
 )
 
 SUFFICIENCY_RULE = (
@@ -237,6 +238,55 @@ def document_sequence_notes(observation):
             "pages. The verified fresh-project sequence is set_page, load_slidev, apply_theme; "
             "all three synthetic pages then persisted through another reload. Theme success "
             "alone does not establish an artifact's rendered quality."
+        ),
+    }
+
+
+def thinking_contract_notes(observation):
+    """Use only frozen native notebook failures and a verified terminal path."""
+    expected = {'kind': 'thinking_contract_v1',
+     'sequential_error': 'thinkingServer.getThoughtHistory is not a function',
+     'parallel_invalid_fields': ['pathsSummary', 'synthesisReady'],
+     'synthesis_invalid_fields': ['synthesisData'],
+     'single_path_terminal_status': 'completed',
+     'single_path_terminal_ready': False,
+     'single_path_terminal_active_paths': [],
+     'unverified_source_echoed': True}
+    if (
+        observation["stage"] != "late"
+        or observation["server"] != "@modelcontextprotocol/server-sequential-thinking"
+        or observation["tool"] != "sequentialthinking"
+        or json.dumps(observation["result"], sort_keys=True) != json.dumps(expected, sort_keys=True)
+    ):
+        raise ValueError("Invalid verified thinking contract evidence")
+    return {
+        '@modelcontextprotocol/server-sequential-thinking::sequentialthinking': (
+            'Verified Late regression: valid calls return "thinkingServer.getThoughtHistory is not '
+            'a function" with or without confidenceScore/thoughtPriority. Optional argument '
+            'changes do not repair this missing-method failure. If a tool-backed thought record is '
+            'needed, parallel-thinking was verified to support a single path (totalPaths=1) with '
+            'valid receipts; use its documented active/completed path status and the verified '
+            "terminal contract. These are notebook records, not execution of the user's requested "
+            'work. Obtain external facts and artifacts through the relevant actual task tools.'
+        ),
+        '@modelcontextprotocol/server-sequential-thinking::parallel-thinking': (
+            'Verified native output contract: a single path with totalPaths=1 can be recorded as '
+            'active and later completed under the same pathId, incrementing thoughtInPath. Set '
+            'pathStatus="completed" and readyForSynthesis=false to close the path without '
+            'scheduling the unsupported synthesis response; the valid receipt removes that path '
+            'from activePaths. With readyForSynthesis=true the handler emits undeclared '
+            'pathsSummary/synthesisReady fields and the native MCP client rejects the response, '
+            'even though the internal path was updated. This completion flag concerns only the '
+            'notebook path, not completion or validation of external work.'
+        ),
+        '@modelcontextprotocol/server-sequential-thinking::convergent-synthesis': (
+            'Verified Late failure: this handler emits an undeclared synthesisData field and the '
+            'native MCP client rejects its structured response. The raw response also echoes a '
+            'supplied conclusion for a nonexistent source path, so it does not verify source '
+            'evidence or correctness. Do not rely on this receipt as a successful synthesis or '
+            'task result. Consolidate the available actual observations and disclose unresolved '
+            'facts in the user-facing response; obtaining this broken wrapper receipt is not a '
+            'prerequisite for that consolidation.'
         ),
     }
 
@@ -580,6 +630,7 @@ def adapt_result(old, target, strategy, context=None):
             "artifact_contract",
             "document_sequence",
             "project_state_contract",
+            "thinking_contract",
         ):
             continue
         note = delta_note(tool, change)
@@ -610,19 +661,18 @@ def adapt_result(old, target, strategy, context=None):
         ]
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
-    if strategy in ("document_sequence", "project_state_contract"):
+    if strategy in ("document_sequence", "project_state_contract", "thinking_contract"):
         by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}
         for observation in feedback:
             source_id = f"{observation['server']}::{observation['tool']}"
-            notes = (
-                document_sequence_notes(observation)
-                if strategy == "document_sequence"
-                else project_state_notes(observation)
-            )
+            builders = {
+                "document_sequence": document_sequence_notes,
+                "project_state_contract": project_state_notes,
+                "thinking_contract": thinking_contract_notes,
+            }
+            notes = builders[strategy](observation)
             if not notes.keys() <= by_id.keys():
-                contract = (
-                    "document sequence" if strategy == "document_sequence" else "project state"
-                )
+                contract = strategy.replace("_", " ")
                 raise ValueError(f"Missing tool required by verified {contract}")
             for tool_id, rule in notes.items():
                 by_id[tool_id]["usage_rules"].append(rule)
@@ -633,11 +683,11 @@ def adapt_result(old, target, strategy, context=None):
                         "tool_id": tool_id,
                         "basis": [changes[source_id]["change_id"]],
                         "note": rule,
-                        "evidence": (
-                            "frozen_synthetic_write_reload_theme_sequence"
-                            if strategy == "document_sequence"
-                            else "frozen_synthetic_project_state_views"
-                        ),
+                        "evidence": {
+                            "document_sequence": "frozen_synthetic_write_reload_theme_sequence",
+                            "project_state_contract": "frozen_synthetic_project_state_views",
+                            "thinking_contract": "frozen_synthetic_native_notebook_contract",
+                        }[strategy],
                     }
                 )
     if strategy in ("observed_contract", "artifact_contract"):

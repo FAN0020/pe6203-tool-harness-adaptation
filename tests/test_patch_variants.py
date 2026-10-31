@@ -238,6 +238,103 @@ def test_project_state_contract_rejects_unverified_facts_or_missing_fallback():
         adapt(old, target, "project_state_contract", {"feedback": [project_state_observation()]})
 
 
+def thinking_catalog(stage="early"):
+    result = catalog(stage)
+    names = ["sequentialthinking", "unrelated"]
+    if stage == "late":
+        names.extend(["parallel-thinking", "convergent-synthesis"])
+    tools = []
+    for name in names:
+        tool = deepcopy(result["tools"][0])
+        server = "@modelcontextprotocol/server-sequential-thinking"
+        tool.update(
+            tool_id=f"{server}::{name}",
+            server_id=server,
+            name=name,
+            routing={"server_id": server, "tool_name": name},
+        )
+        if stage == "late" and name == "sequentialthinking":
+            tool["description"] += " New Late confidence tracking and synthesis workflow"
+        tools.append(tool)
+    result["tools"] = tools
+    return result
+
+
+def thinking_observation(stage="late"):
+    return {
+        "stage": stage,
+        "server": "@modelcontextprotocol/server-sequential-thinking",
+        "tool": "sequentialthinking",
+        "args": {"probe": "synthetic_state_views"},
+        "result": {
+            "kind": "thinking_contract_v1",
+            "sequential_error": "thinkingServer.getThoughtHistory is not a function",
+            "parallel_invalid_fields": ["pathsSummary", "synthesisReady"],
+            "synthesis_invalid_fields": ["synthesisData"],
+            "single_path_terminal_status": "completed",
+            "single_path_terminal_ready": False,
+            "single_path_terminal_active_paths": [],
+            "unverified_source_echoed": True,
+        },
+    }
+
+
+def test_thinking_contract_keeps_metadata_and_unrelated_rules_unchanged():
+    old, target = thinking_catalog(), thinking_catalog("late")
+    before = deepcopy((old, target))
+    knowledge, changes, cost = adapt(
+        old, target, "thinking_contract", {"feedback": [thinking_observation()]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    for a, b in zip(base["tools"], knowledge["tools"], strict=True):
+        assert {k: v for k, v in a.items() if k != "usage_rules"} == {
+            k: v for k, v in b.items() if k != "usage_rules"
+        }
+        assert b["usage_rules"][: len(a["usage_rules"])] == a["usage_rules"]
+        assert len(b["usage_rules"]) - len(a["usage_rules"]) == (a["name"] != "unrelated")
+    notes = [c for c in changes if c["operation"] == "append_thinking_contract"]
+    assert len(notes) == 3 and len({tuple(n["basis"]) for n in notes}) == 1
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+
+
+def test_thinking_contract_requires_matching_stage_and_actual_changed_basis():
+    old, target = thinking_catalog(), thinking_catalog("late")
+    candidate, _, _ = adapt(
+        old, target, "thinking_contract", {"feedback": [thinking_observation("middle")]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    assert candidate == base
+    candidate, _, _ = adapt(
+        old, old, "thinking_contract", {"feedback": [thinking_observation()]}
+    )
+    assert candidate == old
+    unchanged_status = deepcopy(target)
+    unchanged_status["version"] = "early"
+    for tool in unchanged_status["tools"]:
+        tool["version"] = "early"
+    target["tools"][1]["description"] += " unrelated view metadata change"
+    candidate, _, _ = adapt(
+        unchanged_status,
+        target,
+        "thinking_contract",
+        {"feedback": [thinking_observation()]},
+    )
+    base, _, _ = adapt(unchanged_status, target, "selective_patch")
+    assert candidate == base
+
+
+def test_thinking_contract_rejects_unverified_facts_or_missing_fallback():
+    old, target = thinking_catalog(), thinking_catalog("late")
+    evidence = thinking_observation()
+    evidence["result"]["single_path_terminal_ready"] = True
+    with pytest.raises(ValueError, match="thinking contract"):
+        adapt(old, target, "thinking_contract", {"feedback": [evidence]})
+    target["tools"] = [t for t in target["tools"] if t["name"] != "parallel-thinking"]
+    with pytest.raises(ValueError, match="thinking contract"):
+        adapt(old, target, "thinking_contract", {"feedback": [thinking_observation()]})
+
+
 def test_artifact_contract_distinguishes_persisted_state_without_rewriting_metadata():
     old, target = catalog(), changed()
     before = deepcopy((old, target))
