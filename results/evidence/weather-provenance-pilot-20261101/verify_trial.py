@@ -1,4 +1,5 @@
 """Offline raw-response, knowledge, cost and frozen-quality verification; no API calls."""
+import gzip
 import json
 import statistics
 import tarfile
@@ -43,7 +44,13 @@ def main():
             assert a == b == read("catalogs/235/early.json")
     source_manifest = json.loads((FOLDER / "source-manifest.json").read_text())
     source_archive = FOLDER / "source-4e54a66.tar"
-    assert sha(source_archive.read_bytes()) == source_manifest["archive_sha256"]
+    if source_archive.is_file():
+        source_bytes = source_archive.read_bytes()
+    else:
+        source_archive = FOLDER / "source-4e54a66.tar.gz"
+        source_bytes = gzip.decompress(source_archive.read_bytes())
+    # The frozen manifest hashes the original tar bytes, not the gzip wrapper.
+    assert sha(source_bytes) == source_manifest["archive_sha256"]
     with tarfile.open(source_archive) as tar:
         source = {m.name: tar.extractfile(m).read() for m in tar if m.isfile()}
     assert {k: sha(v) for k, v in source.items()} == source_manifest["files"]
