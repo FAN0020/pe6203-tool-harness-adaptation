@@ -1,0 +1,160 @@
+{
+  "status": "property_decisions_frozen_before_method_and_score_reveal",
+  "protocol": "experiments/observed-contract-v1.json",
+  "reviewer": "Same coordinating agent; method labels and scores omitted in input; not a separate human reviewer and method may be inferred from response text.",
+  "rows": [
+    {
+      "review_id": "review-1",
+      "task_id": 133,
+      "properties": {
+        "validation": "fail",
+        "guidance": "pass",
+        "implementation_consistency": "fail"
+      },
+      "evidence": [
+        "The answer says the MCP grammar has no identifiers and permits numbers/+ - * / parentheses only, despite independent q+1 and 2^3 acceptance. It equates this tool with its Python AST evaluator.",
+        "General restricted grammar, input limits and OWASP injection/DoS advice are present.",
+        "Recommended evaluator permits repeated left-nested **64 with no intermediate magnitude bound; tiny input can request enormous integers despite claimed DoS controls. No generated code executed."
+      ],
+      "core_pass": false,
+      "input_sha256": "05330024da34e6d0d15d9deb73b26782dfa18a800df75395cc0cff74caa36835",
+      "static_parse_only": [
+        {
+          "block": 0,
+          "parses": true
+        },
+        {
+          "block": 1,
+          "parses": true
+        }
+      ]
+    },
+    {
+      "review_id": "review-2",
+      "task_id": 235,
+      "properties": {
+        "charts": "pass",
+        "summary": "fail"
+      },
+      "evidence": [
+        "All requested payloads, values and monetary units match question.",
+        "Monthly total is 25.4M, not stated23.4M. Jiangsu Clothing3.6M is below Home Appliances3.9M, contradicting weakest-in-both claim."
+      ],
+      "core_pass": false,
+      "input_sha256": "fe46a8d2d42d8b5637ff8337f11df960707b329ea2f1c66aae2fa345cf504e5b",
+      "static_parse_only": []
+    },
+    {
+      "review_id": "review-3",
+      "task_id": 133,
+      "properties": {
+        "validation": "pass",
+        "guidance": "pass",
+        "implementation_consistency": "fail"
+      },
+      "evidence": [
+        "Accurately identifies allow_variables=false accepting q+1; distinguishes syntax, security and ^ versus Python **; recognizes generic prompt scaffolding.",
+        "Provides restricted grammar and resource limits, fail-closed recommendations and OWASP mapping.",
+        "Its own sqrt(16) success test cannot pass: every ast.Name including sqrt is added to names, default allow_variables=false rejects names. x^2 uses ast.BitXor absent from allowlist, so own expected9 test fails. Guard depth increments on traversal without decrement, counting nodes instead of nesting. Exponent check skips nonconstant exponent subtrees."
+      ],
+      "core_pass": false,
+      "input_sha256": "8db6139f5635821bf63a1544d6c066cb9d642c84725f7202f642c8b9edf5266f",
+      "static_parse_only": [
+        {
+          "block": 0,
+          "parses": true
+        },
+        {
+          "block": 1,
+          "parses": true
+        }
+      ]
+    },
+    {
+      "review_id": "review-4",
+      "task_id": 133,
+      "properties": {
+        "validation": "fail",
+        "guidance": "pass",
+        "implementation_consistency": "fail"
+      },
+      "evidence": [
+        "Says grammar has no identifiers despite recorded successful variable expression and set_variable/evaluate. Correctly observes max_depth limit was not enforced.",
+        "General OWASP-focused validation, limits, isolation and generic errors advice present.",
+        "Drop-in _ALLOWED_NODES contains *[_BIN_OPS], inserting a dict rather than operator classes; isinstance check reaches this dict on ast.Add and raises TypeError. Function names also rejected with empty scope."
+      ],
+      "core_pass": false,
+      "input_sha256": "6538ed1ed2126fb3d4d8631b1083cf05f073cbc3fc318060205988f420c0827a",
+      "static_parse_only": [
+        {
+          "block": 0,
+          "parses": false,
+          "reason": "invalid syntax"
+        },
+        {
+          "block": 1,
+          "parses": true
+        },
+        {
+          "block": 2,
+          "parses": true
+        },
+        {
+          "block": 3,
+          "parses": true
+        }
+      ]
+    },
+    {
+      "review_id": "review-5",
+      "task_id": 235,
+      "properties": {
+        "charts": "pass",
+        "summary": "fail"
+      },
+      "evidence": [
+        "All three chart outputs contain requested values and monetary units; grouped category orientation preserves comparisons.",
+        "Electronics gap1.4M is claimed largest, but Clothing gap1.5M is larger. Do not use unknown rendering as a failure gate."
+      ],
+      "core_pass": false,
+      "input_sha256": "0270ecc6089d9c9cc96d13b72ac7e6c63f6dcce135384f1e82c4a0827be23851",
+      "static_parse_only": []
+    },
+    {
+      "review_id": "review-6",
+      "task_id": 133,
+      "properties": {
+        "validation": "pass",
+        "guidance": "pass",
+        "implementation_consistency": "fail"
+      },
+      "evidence": [
+        "Correctly identifies ignored variable control, syntax versus evaluation, non-error semantic failure and ^ exponentiation. No tool result treated as verification of Python.",
+        "Recommends explicit grammar, resource bounds, fail-closed errors and isolated evaluation.",
+        "Whitelisted function calls are rejected by recursive ast.Name check unless function name is separately supplied as a variable; sqrt(4)/sin(1) therefore fail despite advertised support. Text says validate rejects10/0, but validate only walks AST; division occurs in _eval. Final test block is unfinished."
+      ],
+      "core_pass": false,
+      "input_sha256": "4ce6dabc5808bbd58d16c637ff2a2265a157fc3f3319c87a076c9b7a4bbcb53f",
+      "static_parse_only": [
+        {
+          "block": 0,
+          "parses": true
+        },
+        {
+          "block": 1,
+          "parses": true
+        }
+      ]
+    }
+  ],
+  "review1_static_resource_counterexample": {
+    "expression": "((((((((2**64)**64)**64)**64)**64)**64)**64)**64)",
+    "input_length": 49,
+    "ast_nodes": 26,
+    "ast_depth": 10,
+    "integer_result_bit_length_formula": "64**8 + 1 = 281474976710657 bits; inferred algebraically, not computed",
+    "under_review1_input_limits": true,
+    "generated_code_executed": false
+  },
+  "scope": "Required properties only. Unknown full security and chart rendering are disclosed, not counted as new failure criteria."
+}
