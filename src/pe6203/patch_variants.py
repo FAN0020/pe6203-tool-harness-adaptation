@@ -41,6 +41,7 @@ VARIANTS = (
     "optional_parameter_projection",
     "capability_warning",
     "capability_withdrawal",
+    "native_record_batch",
 )
 
 SUFFICIENCY_RULE = (
@@ -667,6 +668,19 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "native_record_batch":
+        from .native_record_batch import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "certificate": "exact source/native certificate; changed producer usage_rules only",
+            "native_runtime": "unchanged; no new macro executor or automatic tool calls",
+            "edits": len(changes),
+        }}
         return result
     if strategy in ("capability_warning", "capability_withdrawal"):
         from .capability_withdrawal import compile_knowledge

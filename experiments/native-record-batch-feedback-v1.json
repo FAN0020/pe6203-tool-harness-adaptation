@@ -1,0 +1,26 @@
+{
+  "kind": "task_free_native_record_batch_certificate",
+  "observations": [
+    {
+      "stage": "late",
+      "server": "@pimzino/agentic-tools-mcp",
+      "tool": "create_project",
+      "args": {},
+      "result": {
+        "kind": "native_record_batch_v1",
+        "stage": "late",
+        "changed_record": "@pimzino/agentic-tools-mcp::create_project",
+        "record_sha256": "22cc8e1f4d92fd2d7f169cee46e386cb86a3eb0f74971fdb69c01a90ceb08c68",
+        "parser_record": "@pimzino/agentic-tools-mcp::parse_prd",
+        "parser_record_sha256": "4b00179128ea471f567fbdd68822bc8b6db09194cc59432db2dee3794c1659c1",
+        "native_observations_sha256": "910c180a45fabc69bdb9d630abecb3a3759f73c0cc45bba080b7840dfc8ff7f1",
+        "parser_source_sha256": "d84ed2420bd56f9c648fe6a730fa61b9a12a3ab01254acbad86b5626859c338d",
+        "rules": [
+          "Verified project initialization path: create_project persists the project record only. For multiple already-specified task records in that project, parse_prd can persist them in one native call using the returned projectId. It is a pattern-based record importer, not intelligent task design. Use it only when its input restrictions preserve the complete intended work and required fields; ordinary create_task remains available for records that do not fit.",
+          "The verified lossless input form is blank-line-separated ASCII paragraphs, each at most 500 characters: one first line \"- TITLE\" with a plain title longer than five characters, followed by \"Details: ...\" lines containing the full record details. No other line may start a task pattern. Do not shorten away requirements to fit; use ordinary task creation instead. Keep estimateComplexity=true for the verified path, but its keyword-based estimates are not proof of real difficulty. Imported priority/status defaults and heuristic tags/estimates may need legitimate corrections if requirements differ.",
+          "parse_prd writes flat records: generateSubtasks does not create a hierarchy, and dependencies are not inferred. Its receipt omits created IDs. Retrieve actual IDs with list_tasks using the same projectId, showHierarchy=false, includeCompleted=true and parentId omitted; then use ordinary update_task with those IDs for any required parent/dependency links. Inspect persisted contents and relationships. Repeating the import duplicates records, and source does not promise a transaction; inspect saved state after an error before deciding what remains. Never treat imported heuristics or a successful receipt as completed external work."
+        ]
+      }
+    }
+  ]
+}
