@@ -1,0 +1,172 @@
+{
+  "project-middle": {
+    "probes": [
+      {
+        "id": "P1",
+        "basis": "@pimzino/agentic-tools-mcp::create_project",
+        "tool_id": "@pimzino/agentic-tools-mcp::create_project",
+        "arguments": {
+          "workingDirectory": "$WORKSPACE",
+          "name": "RepoTagProbe",
+          "description": "Contract probe for optional repoUrl and tags persistence.",
+          "repoUrl": "https://example.invalid/probe-repo",
+          "tags": [
+            "probe-tag-a",
+            "probe-tag-b"
+          ]
+        },
+        "question": "Does create_project accept the new repoUrl and tags arguments and include them in its creation response?"
+      },
+      {
+        "id": "P2",
+        "basis": "@pimzino/agentic-tools-mcp::create_project",
+        "tool_id": "@pimzino/agentic-tools-mcp::create_project",
+        "arguments": {
+          "workingDirectory": "$WORKSPACE",
+          "name": "MinimalProbe",
+          "description": "Contract probe without optional metadata."
+        },
+        "question": "Does create_project still succeed with only the required workingDirectory, name, and description, reporting absent repoUrl/tags without error?"
+      },
+      {
+        "id": "P3",
+        "basis": "@pimzino/agentic-tools-mcp::create_project",
+        "tool_id": "@pimzino/agentic-tools-mcp::list_projects",
+        "arguments": {
+          "workingDirectory": "$WORKSPACE"
+        },
+        "question": "Does list_projects over the fixture expose repoUrl/tags fields on existing projects, indicating the metadata schema was persisted rather than only accepted on create?"
+      }
+    ]
+  },
+  "math-middle": {
+    "probes": [
+      {
+        "id": "P1",
+        "basis": "math-mcp::validate_syntax",
+        "tool_id": "math-mcp::validate_syntax",
+        "arguments": {
+          "expression": "1+2",
+          "detailed": true
+        },
+        "question": "Does validate_syntax accept the new detailed parameter and return a distinguishable detailed result shape for a valid expression?"
+      },
+      {
+        "id": "P2",
+        "basis": "math-mcp::validate_syntax",
+        "tool_id": "math-mcp::validate_syntax",
+        "arguments": {
+          "expression": "x+1",
+          "allow_variables": true
+        },
+        "question": "Does allow_variables=true permit a variable reference that would otherwise be rejected, demonstrating the new capability actually works?"
+      },
+      {
+        "id": "P3",
+        "basis": "math-mcp::validate_syntax",
+        "tool_id": "math-mcp::validate_syntax",
+        "arguments": {
+          "expression": "x+1",
+          "allow_variables": false
+        },
+        "question": "With allow_variables=false (default), is a variable reference rejected, establishing the flag meaningfully gates variable acceptance?"
+      }
+    ]
+  },
+  "project-late": {
+    "probes": [
+      {
+        "id": "P1",
+        "basis": "@pimzino/agentic-tools-mcp::review_project_status",
+        "tool_id": "@pimzino/agentic-tools-mcp::review_project_status",
+        "arguments": {
+          "workingDirectory": "$WORKSPACE",
+          "projectId": "$PROJECT"
+        },
+        "question": "Does review_project_status return a project-scoped status snapshot distinguishing the blocked child FixtureRecordBeta from pending FixtureRecordAlpha?"
+      },
+      {
+        "id": "P2",
+        "basis": "@pimzino/agentic-tools-mcp::review_workspace_health",
+        "tool_id": "@pimzino/agentic-tools-mcp::review_workspace_health",
+        "arguments": {
+          "workingDirectory": "$WORKSPACE",
+          "includeMemories": true,
+          "includeCompletedTasks": true,
+          "maxItems": 25
+        },
+        "question": "Does review_workspace_health aggregate both fixture projects and reflect the single completed task in a completion signal?"
+      },
+      {
+        "id": "P3",
+        "basis": "@pimzino/agentic-tools-mcp::list_projects",
+        "tool_id": "@pimzino/agentic-tools-mcp::list_projects",
+        "arguments": {
+          "workingDirectory": "$WORKSPACE"
+        },
+        "question": "Does list_projects enumerate both fixture projects with concise details rather than a full workspace health summary?"
+      },
+      {
+        "id": "P4",
+        "basis": "@pimzino/agentic-tools-mcp::get_next_task_recommendation",
+        "tool_id": "@pimzino/agentic-tools-mcp::get_next_task_recommendation",
+        "arguments": {
+          "workingDirectory": "$WORKSPACE",
+          "projectId": "$PROJECT",
+          "maxRecommendations": 3,
+          "excludeBlocked": true
+        },
+        "question": "Does get_next_task_recommendation recommend the dependent-free pending task FixtureRecordAlpha while excluding blocked FixtureRecordBeta?"
+      }
+    ]
+  },
+  "math-late": {
+    "probes": [
+      {
+        "id": "P1",
+        "basis": "math-mcp::validate_syntax",
+        "tool_id": "math-mcp::validate_syntax",
+        "arguments": {
+          "expression": "x + 1",
+          "allow_variables": true
+        },
+        "question": "Does validate_syntax accept a variable reference when allow_variables is explicitly true?"
+      },
+      {
+        "id": "P2",
+        "basis": "math-mcp::validate_syntax",
+        "tool_id": "math-mcp::validate_syntax",
+        "arguments": {
+          "expression": "x + 1",
+          "allow_variables": false
+        },
+        "question": "Does validate_syntax reject the same variable reference when allow_variables is explicitly false?"
+      },
+      {
+        "id": "P3",
+        "basis": "math-mcp::validate_syntax",
+        "tool_id": "math-mcp::validate_syntax",
+        "arguments": {
+          "expression": "((1+2))",
+          "allow_variables": true,
+          "max_depth": 1,
+          "check_balanced": true
+        },
+        "question": "Does validate_syntax enforce max_depth by failing on nesting depth exceeding the specified limit?"
+      },
+      {
+        "id": "P4",
+        "basis": "math-mcp::batch_evaluate",
+        "tool_id": "math-mcp::batch_evaluate",
+        "arguments": {
+          "expressions": [
+            "1+1",
+            "2+2"
+          ],
+          "stop_on_error": false
+        },
+        "question": "Does batch_evaluate return per-expression results for a valid multi-expression batch?"
+      }
+    ]
+  }
+}
