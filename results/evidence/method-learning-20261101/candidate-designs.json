@@ -1,0 +1,36 @@
+{
+  "candidates": [
+    {
+      "id": "effect_credited_memory",
+      "bottleneck": "局部知识有用但未产生正确产物，且官方高分不可靠地标记经验质量。",
+      "new_mechanism": "借鉴ACE/ExpeL，按独立可执行结果给原子经验支持/反例信用，用替换/撤销而非无条件追加维护局部知识。",
+      "dual_gain_hypothesis": "不传播失败替代和无产物的高分经验，可能同时少走弯路、少输出错误。",
+      "readiness": "原题133/283输入可以完整；但现有可用updater训练材料主要是原生工具收据，缺少在不读原题答案条件下的端到端成功/失败程序对。",
+      "falsifier": "规则在预留通用反例上仍推荐失败路径；或更新结果等价于旧feedback_notes，不能建立新机制。",
+      "decision": "不选入本轮模型试验。缺少学习信号是可补充的设计缺口，不是整类方法无效；不能拿已评分benchmark轨迹回灌补足。"
+    },
+    {
+      "id": "retrieved_context_memory",
+      "bottleneck": "大批原生代码/日志进入上下文，最后4096 reasoning截断。",
+      "new_mechanism": "借鉴A-MEM的存储/检索分离，按相关性仅展开需要的记忆内容。",
+      "dual_gain_hypothesis": "保留可追溯证据同时减少无关内容，可能给产物推导留下空间。",
+      "readiness": "现agent_loop每轮提供固定全工具知识和累积原生消息。动态检索/历史压缩需要改变执行器；直接删减原生返回也违反固定公平条件。静态知识压缩只能触及一小部分已观察prompt。",
+      "falsifier": "需要改runner才能达成目标，或在固定轨迹下无法改变主体上下文。",
+      "decision": "当前范围不准入动态版本；没有据此否定静态知识通过改变调用行为产生收益的可能。"
+    },
+    {
+      "id": "verified_component_memory",
+      "bottleneck": "工具路由正确后仍要重新把大批源码转换为可运行产物。",
+      "new_mechanism": "借鉴Voyager，把原生返回中完整、依赖闭合、已验证效果的程序作为知识值；按能力而非题目检索，冻结后仅写入受影响工具记录。",
+      "dual_gain_hypothesis": "减少重新搜索和代码改造负担，同时复用已执行验证的组件；不包含日志解析器、统计答案或完整dashboard。",
+      "readiness": "路线1无已就绪MagicUI原题；路线3已有独立日志与解析/展示检查。选此项做零模型准入：代码2481字节合格，但当前Node环境不具备TSX/React/别名/样式闭合，渲染未验证。",
+      "falsifier": "两段预先选定代码不能在共同冻结环境执行并呈现原生声明效果；后续若补足环境仍无完成/core增益，否定该具体版本。",
+      "decision": "本轮所选，离线准入not_ready。未生成agent知识、未运行模型对照；不得换成下一短组件或把依赖失败算成策略任务失败。"
+    }
+  ],
+  "selected": "verified_component_memory",
+  "model_trial_registered": false,
+  "next_admissible_work": "要继续此方向，需单独声明并验证双方相同的依赖/样式构建环境，并证明与冻结原生组件兼容；或为effect_credited_memory先建立不含benchmark答案的通用程序经验对。均不得复用失败版本反复抽样。没有准入候选前不启动agent试验。",
+  "validation_policy": "新的完整开发试验先冻结输入/知识/验收/日程；开发通过后两批独立验证，每批完成及实际质量均严格高于SP，TF及保持不降；原NU/FR证据继续保留。",
+  "goal_complete": false
+}
