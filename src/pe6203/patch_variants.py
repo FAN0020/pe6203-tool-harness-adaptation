@@ -34,6 +34,7 @@ VARIANTS = (
     "native_media_contract",
     "discovery_contract",
     "native_argument_routing",
+    "verified_component_memory",
 )
 
 SUFFICIENCY_RULE = (
@@ -660,6 +661,19 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "verified_component_memory":
+        from .verified_component_memory import expected_memory, validate_memory
+
+        feedback = context.get("feedback", [])
+        result["knowledge"], annotations = expected_memory(base, target, feedback)
+        result["changes"].extend(annotations)
+        result["validation"] = validate_memory(result["knowledge"], old, target, base, feedback)
+        if result["validation"]["errors"]:
+            raise ValueError("Program memory changed a protected contract")
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
         return result
     if strategy == "native_argument_routing":
         from .native_argument_routing import expected_routing, validate_routing
