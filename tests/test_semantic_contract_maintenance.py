@@ -11,7 +11,7 @@ from pe6203.selective import adapt_result
 
 
 def fixture():
-    catalogs = json.loads(Path('tests/fixtures/semantic-maintenance-catalogs.json').read_text())
+    catalogs = json.loads(Path("tests/fixtures/semantic-maintenance-catalogs.json").read_text())
     old, target = catalogs["early"], catalogs["late"]
     base = adapt_result(old, target)
     by = {t["tool_id"]: t for t in base["knowledge"]["tools"]}
@@ -108,3 +108,35 @@ def test_compiler_rejects_unsupported_or_structural_mutations(mutation):
         p["edits"][0]["basis"] = "math-mcp::get_variable"
     with pytest.raises(ValueError):
         scm.compile_patch(old, target, p, {"s1"}, True)
+
+
+def test_claim_decisions_cannot_choose_basis_or_omit_a_field():
+    old, target, _, _ = fixture()
+    claims = scm.claim_inventory(old, target)
+    assert claims and all(
+        c["tool_id"] == "math-mcp::validate_syntax" or c["tool_id"] == "math-mcp::batch_evaluate"
+        for c in claims
+    )
+    decisions = [
+        {
+            "id": c["id"],
+            "verdict": "retain",
+            "after": c["before"],
+            "evidence": ["s1"],
+            "reason": "Test retained claim.",
+        }
+        for c in claims
+    ]
+    chosen = next(
+        x
+        for x in decisions
+        if x["id"] == "math-mcp::validate_syntax/parameters.properties.allow_variables.description"
+    )
+    chosen.update(verdict="replace", after="Test corrected claim.")
+    proposal = scm.claim_proposal(old, target, decisions, {"s1"})
+    assert len(proposal["edits"]) == 1 and proposal["edges"] == []
+    assert proposal["edits"][0]["basis"] == "math-mcp::validate_syntax"
+    with pytest.raises(ValueError, match="complete"):
+        scm.claim_proposal(old, target, decisions[:-1], {"s1"})
+    with pytest.raises(ValueError):
+        scm.claim_proposal(old, target, decisions + [decisions[0]], {"s1"})

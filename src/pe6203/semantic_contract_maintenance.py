@@ -126,3 +126,72 @@ def frozen_patch(old, target, feedback, closure):
     ):
         raise ValueError("Frozen proposal catalog mismatch")
     return compile_patch(old, target, data["proposal"], set(data["evidence_ids"]), closure)
+
+
+def claim_inventory(old, target):
+    """The host owns the actual diff, field identity and root provenance."""
+    base = adapt_result(old, target)
+    changed = {r["tool_id"] for r in base["diff"]["changed"] + base["diff"]["added"]}
+    claims = []
+    for tool in target["tools"]:
+        if tool["tool_id"] not in changed or tool["server_id"] != "math-mcp":
+            continue
+        paths = [("description", tool["description"])]
+        paths += [
+            (f"parameters.properties.{key}.description", prop["description"])
+            for key, prop in tool["parameters"].get("properties", {}).items()
+            if isinstance(prop.get("description"), str)
+        ]
+        for path, before in paths:
+            claims.append(
+                {
+                    "id": tool["tool_id"] + "/" + path,
+                    "tool_id": tool["tool_id"],
+                    "path": path,
+                    "before": before,
+                }
+            )
+    return claims
+
+
+def claim_proposal(old, target, decisions, evidence_ids):
+    """Turn a complete claim adjudication into direct-only verified field edits."""
+    claims = {c["id"]: c for c in claim_inventory(old, target)}
+    if not isinstance(decisions, list) or len(decisions) != len(claims):
+        raise ValueError("Need complete claim decisions")
+    seen = set()
+    edits = []
+    for row in decisions:
+        if not isinstance(row, dict) or set(row) != {
+            "id",
+            "verdict",
+            "after",
+            "evidence",
+            "reason",
+        }:
+            raise ValueError("Invalid decision fields")
+        identity = row["id"]
+        if identity not in claims or identity in seen:
+            raise ValueError("Unknown or duplicate claim")
+        seen.add(identity)
+        claim = claims[identity]
+        if row["verdict"] not in ("retain", "replace", "unknown"):
+            raise ValueError("Invalid verdict")
+        if row["verdict"] != "replace":
+            if row["after"] != claim["before"]:
+                raise ValueError("Retained/unknown claim changed")
+            continue
+        if row["after"] == claim["before"]:
+            raise ValueError("Replacement did not change claim")
+        edits.append(
+            {key: claim[key] for key in ("tool_id", "path", "before")}
+            | {
+                "after": row["after"],
+                "basis": claim["tool_id"],
+                "evidence": row["evidence"],
+                "reason": row["reason"],
+            }
+        )
+    proposal = {"edges": [], "edits": edits}
+    compile_patch(old, target, proposal, evidence_ids, False)
+    return proposal
