@@ -1,0 +1,55 @@
+PE6203 semantic claim repair v2 — reproduction and claim boundary
+
+Run commands from /Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety.
+No model request is needed to audit this result:
+  python3 results/evidence/semantic-claim-repair-20261101/verify_archive.py
+This verifies 290 raw files, 331 source files, all 30 first-valid judge slots,
+six statuses and blind property reviews, metrics, and 60 unique API receipts.
+The property reviews remain coordinator judgments; verification does not turn
+these into independent human labels or a comprehensive security audit.
+
+Runtime/compiler/config snapshot: source-c0471ba.tar.gz and source-manifest.json.
+Both original preflight plan (zero API calls) and repaired execution plan,
+all actual model/tool/judge outputs, workspaces and three ledgers are preserved
+in raw-trial.tar.gz, with per-file SHA256 in raw-manifest.json. No extraction is
+needed for the standard-library verifier. Do not overwrite an existing workspace.
+Original benchmark/native dependency commit and hashes are in archived plan.json;
+bootstrap instructions remain in repository README. This snapshot does not bundle
+upstream native packages or claim deterministic provider responses.
+
+Actual historical sequence (these commands invoke APIs; do not rerun closed
+versions as confirmation or as retry-until-win):
+  commit22351ca: frozen three generic native probes, then recorded all results.
+  commit07576b0: v1 generator/protocol frozen; 3 updater calls, Late rejected.
+  commit539a2c4: host-scoped v2 generator frozen; 2 updater calls, accepted.
+  commitc41848b: original six-cell knowledge/sequence frozen and reviewed.
+  commitc0471ba: separate actor ledger after local BudgetStopped before API.
+  ./experiment search prepare --spec experiments/semantic-claim-repair-execution-v2.json --output results/raw/semantic-claim-repair-pilot-20261101-exec
+  ./experiment search build --output results/raw/semantic-claim-repair-pilot-20261101-exec
+  ./experiment search review --output results/raw/semantic-claim-repair-pilot-20261101-exec --note '<record exact semantic review>'
+  ./experiment search run --output results/raw/semantic-claim-repair-pilot-20261101-exec
+  python3 results/evidence/semantic-claim-repair-20261101/collect_blind.py
+  [all six property reviews frozen before method/TF/PE revelation]
+  uv run python results/evidence/semantic-claim-repair-20261101/decide.py
+
+Implementation verification:
+  uv run pytest -q tests/test_semantic_contract_maintenance.py tests/test_contract_reconcile.py tests/test_patch_variants.py
+Result: 66 passed. New compiler tests first failed before implementation; they
+protect schema constraints, unrelated records, evidence/impact identity,
+direct/closure separation, stale values, duplicates, and complete claim coverage.
+
+Metrics and decision:
+133M/L: SP completion1/2/core0/2/TF9.3/PE5.9/calls62;
+candidate completion1/2/core0/2/TF9.9/PE7.7/calls13.
+235L: both complete and TF/PE10; coreSP0/1,candidate1/1 on identical K0.
+No strict dual gain. No independent validation executed. ECS not applicable.
+Candidate C03 main evaluator passed bounded positive checks; its delivered CI
+fragment failed parsing. Crediting that case anyway does not change the failed
+completion-gain gate. No current result is unseen validation evidence.
+
+Costs: v1 updater$0.002960976; v2 updater$0.003234600;
+v2 actor/judge/preflight$0.066128004; total$0.072323580; unknown0.
+No total spend/token cap was introduced. Per-call fairness remained unchanged.
+No push, deployment, external message, branch switch or worktree creation.
+Goal objective is unchanged and incomplete; current tool still reports the old
+blocked state. This turn did not mark complete or set blocked again.

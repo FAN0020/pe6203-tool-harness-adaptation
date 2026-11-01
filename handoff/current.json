@@ -8,9 +8,9 @@
     "source_thread": "01a19253-fa19-74f2-89ca-eae44eeb98fb",
     "old_goal": "用户已明确授权暂停旧聊天Goal并创建新聊天继续；旧Goal已暂停，未完成。新聊天是研究的唯一执行者。",
     "working_rule": "所有仓库命令显式使用repository作为workdir。不要扫描父目录/home；不要切换分支、创建新worktree或重置文件。保留全部已有文件、原评分、正负结果。",
-    "live_work": "交接时无正在运行的模型实验或renderer；此前runner84029、15339及相关服务均已结束，本轮进程检查无匹配研究进程。不要因为看到旧lock/state文件就重启实验。",
+    "live_work": "本轮6/6原benchmark开发运行已evaluated，runner42786退出0；无正在运行的模型实验。v1/v2具体版本关闭，两批验证未启动。不要因旧lock/state文件重启。",
     "current_thread": "01a19594-5645-7520-bf4f-98de0419fc4e",
-    "new_goal": "本聊天同一完整Goal已由工具确认为blocked；未完成，无总token预算。旧Goal仍暂停。"
+    "new_goal": "同一完整Goal由用户明确授权继续；本轮完成独立审查、机制生成和原benchmark开发，目标未完成。最近Goal工具仍保留此前blocked状态，本轮未重建、标记complete或再次设置blocked；历史阻塞审计不覆盖当前授权。"
   },
   "goal": {
     "create_in_new_chat": true,
@@ -19,11 +19,11 @@
     "completion": "仅完整目标经真实证据证明后才能complete；不能把负结果、归档、训练准入或计划当作目标完成。"
   },
   "minimum_read_order": [
-    "HANDOVER.md：只读顶部“新聊天接手入口”、新版Goal和当前最新断点，遇到“已归档”即停止；不要cat整个文件。",
-    "handoff/current.json：本文件，保存全部关键用户约束与按需索引。",
-    "results/evidence/interface-mechanism-review-20261101/bounded-review.json：最新有边界文献/源码核对与设计准入结论。",
-    "results/evidence/interface-mechanism-review-20261101/diagnostic.json：只需核对精确catalog变化或四条调用投影时读取；无需无故重复复算。",
-    "最近实际模型实验仍为experience-gated-learning；其bounded-review/decision仅按需读取。"
+    "handoff/current.json：当前索引，保留用户约束与已有结果。",
+    "HANDOVER.md：只读顶部新版Goal及“当前最新状态：LLM契约维护已完成开发”，遇到历史状态即停止。",
+    "results/evidence/semantic-claim-repair-20261101/decision.json与interpretation.json：最近实际6单元开发结果、结论边界与成本。",
+    "results/evidence/semantic-contract-maintenance-20261101/review-decision.json：限制来源、五类失败矩阵、独立审查采纳和固定论文/源码，只按需要读。",
+    "reports/semantic-claim-repair-development.html：本轮完整研究链；其余旧结果仅沿必要索引定向读取。"
   ],
   "hard_constraints": [
     "不得加载完整历史聊天、全部轨迹或密钥。不要读取.env；只有真实授权模型执行时通过./experiment或uv --env-file .env内部使用凭据，绝不输出。",
@@ -50,6 +50,28 @@
     "ledger_lesson": "prefix-workflow轮错误追加旧ledger后已完整保留合并记录、按响应ID分离并恢复旧字节；不得再复用旧路径。"
   },
   "recent_results": [
+    {
+      "method": "semantic contract maintenance / host-scoped claim repair v2",
+      "result": "v1联合编辑/依赖输出在Late两次来源校验失败，3 updater调用后关闭，未运行actor。v2由程序固定真实diff与字段，LLM逐项保留/替换/未知；14项保留4、替换10，2 updater调用后冻结。原133M/L+235L开发6/6 evaluated，30/30原评分槽位。133完成SP1/2候选1/2，core均0/2；TF9.3/9.9，PE5.9/7.7，调用62/13。严格双提升失败，不执行两批独立验证。仅否定具体版本。",
+      "retention": "235L两组完成、TF/PE10；core SP0/1候选1/1，但知识完全相同，不作适应因果解释。",
+      "sensitivity": "C03主实现小型正例通过，交付CI片段无法解析；即使宽松记core通过，完成率仍打平，不能晋级。",
+      "cost": "60 unique API requests，USD0.072323580，未知0；v1 updater0.002960976，v2 updater0.003234600，actor/judge/preflight0.066128004。3独立账本完整保留。",
+      "verification": "66针对性测试通过。verify_archive.py离线验证290原始文件、331源文件、全部运行/评分/费用通过；HTML本地7链接存在。原账本策略不匹配的本地预检失败在任何actor/judge请求前发生，原计划和修复计划保留。",
+      "frozen_commits": [
+        "22351ca",
+        "07576b0",
+        "539a2c4",
+        "c41848b",
+        "c0471ba"
+      ],
+      "paths": [
+        "reports/semantic-claim-repair-development.html",
+        "results/evidence/semantic-claim-repair-20261101/decision.json",
+        "results/evidence/semantic-claim-repair-20261101/interpretation.json",
+        "results/evidence/semantic-claim-repair-20261101/reproduction.txt",
+        "results/evidence/semantic-contract-maintenance-20261101/review-decision.json"
+      ]
+    },
     {
       "method": "interface mechanism admission review",
       "result": "完成交接三条文献线索原文/固定作者源码核对；新catalog/四条调用投影否决当前压缩和新增工具隔离前提。无候选、无模型或原生调用、无新性能结果；Goal未完成。",
@@ -90,10 +112,10 @@
     }
   ],
   "next_action": {
-    "state": "无准入候选、无未完成实验。相同机制准入障碍在本聊天三轮持续存在，已完成blocked审计并由Goal工具确认blocked；不是目标完成。",
-    "research_direction": "当前障碍是尚未得到区别于旧方案、在固定actor/updater/反馈边界内且有具体证据的知识适应机制。不要将已读三文献的重新搜索或准入记录重复归档当作进展。未来新实验必须先建立新机制证据；当前结论不等于方法空间穷尽。",
-    "do_not_repeat": "document_sequence已经提供Markdown实例；单纯再加简短Markdown例子不构成新机制。GEPA/ExpeL训练准入已失败，不重跑同一4样本；不通过改小任务取得正例。",
-    "required_next_progress": "完整的失败依据→原论文/固定源码→不同机制→可执行冻结与实际验证；如当前无法建立新机制，具体说明证据/范围障碍，不伪称完成或循环检查。",
+    "state": "本轮取得实质进展，具体v1/v2已关闭，当前无未完成实验、无已准入下一候选；完整Goal未完成。旧三轮blocked审计仅历史保留。",
+    "research_direction": "工具契约修订带来调用数、TF/PE与validation属性的局部改善，完整交付和代码正确性仍是关键瓶颈。先区分这些观察与因果解释，再比较有依据、范围内、可证伪的下一机制；不能凭停止字段推断截断根因。语义依赖传播尚未真正通过检验，若选择该机制需有实际changed-root与源码支持关系，但这不是所有新机制的通用先决条件。",
+    "do_not_repeat": "不重跑已关闭v1/v2直到获胜，不将当前答案/评分轨迹输入updater；不重开377日志路线。特定经验学习的正例门槛、append-only和一跳依赖属于实现选择，不能升级为所有方法的永久准入限制。",
+    "required_next_progress": "在同一完整Goal和公平边界内，推进能区分竞争解释的机制检验；范围合法、机制清楚、有合理依据、依赖齐全、可证伪、可公平执行即可准入，无需试验前已有成功证明。课程交付缺口并行保留，不代替研究双提升。",
     "completed_reading": "EasyTool2401.06201v3/JARVIS7624cf3、Play2Prompt2503.14432v2/124c026、Trace-Free+2602.20426v2/tool-optimizerc86928d已核读相关段与固定源码；细节见最新bounded-review。Less-is-More/ToolScope仅初筛，不当作固定实现依据。"
   },
   "on_demand_map": {
@@ -121,8 +143,10 @@
       "reports/course-completion-plan.html"
     ],
     "large_archives": "各results/evidence下tar.gz仅复现需要时按manifest定向提取，不整体展开或加载。results/raw是旧原始执行，不能全量扫描内容。",
-    "latest_admission_review": "results/evidence/interface-mechanism-review-20261101/bounded-review.json",
-    "latest_diagnostic": "results/evidence/interface-mechanism-review-20261101/diagnostic.json"
+    "latest_admission_review": "results/evidence/semantic-contract-maintenance-20261101/review-decision.json",
+    "latest_diagnostic": "results/evidence/interface-mechanism-review-20261101/diagnostic.json",
+    "latest_development": "results/evidence/semantic-claim-repair-20261101/decision.json",
+    "latest_reproducer": "results/evidence/semantic-claim-repair-20261101/verify_archive.py"
   },
   "blocked_audit": {
     "status": "blocked",
@@ -153,6 +177,14 @@
       "课程交付全部完成"
     ],
     "resume_condition": "需要新的、具体且范围内的机制证据或用户给出的新研究方向，使失败依据→方法/固定源码→可执行知识差异→冻结验证链能够成立。单纯重复相同搜索/采样不构成解除阻塞。",
-    "preserved": "完整objective、原评分、正负结果、固定模型/供应商/解码/单次预算/评分协议不变。"
+    "preserved": "完整objective、原评分、正负结果、固定模型/供应商/解码/单次预算/评分协议不变。",
+    "superseded_for_current_work": "该审计为此前三轮历史。用户已授权恢复同一Goal，本轮有真实机制与6单元实验进展，不累计为重复阻塞轮；工具旧状态不意味着当前授权工作必须停止。"
+  },
+  "current_round_authority": {
+    "source": "用户2026-11-01同一Goal研究路径与执行授权；课程DOCX SHA256 6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d；分项来源见review-decision.json。",
+    "review": "唯一授权独立agent只读，使用ai-pipeline-evaluation；已完成，不改文件、不跑实验、不操作Goal、不派生agent。主线程唯一写者/实验执行者。",
+    "goal": "完整双提升、两批各自通过、TF与保持不降、课程交付均保留；本轮未达标，不标complete。",
+    "historical_choices": "旧暂停/审批/优先级不覆盖后续授权；正例依赖仅适用于确实需要正例的机制；保留/删除与LLM参与不是禁区。",
+    "next_candidate": "本轮失败不证明整类LLM维护无效；不要求试验前证明成功，不将一个候选的条件变成所有候选的限制。"
   }
 }

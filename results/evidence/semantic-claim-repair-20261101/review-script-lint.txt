@@ -1,0 +1,140 @@
+E701 Multiple statements on one line (colon)
+  --> results/evidence/semantic-claim-repair-20261101/collect_blind.py:12:61
+   |
+10 | (HERE/'blind-inputs').mkdir(exist_ok=True)
+11 | for rid,cid in mapping.items():
+12 |     if state['cells'].get(cid,{}).get('status')!='evaluated':continue
+   |                                                             ^
+13 |     trace=json.loads((RAW/'cells'/cid/'run/raw_trace.json').read_text())
+14 |     calls=[]
+   |
+
+E701 Multiple statements on one line (colon)
+  --> results/evidence/semantic-claim-repair-20261101/collect_blind.py:16:40
+   |
+14 |     calls=[]
+15 |     for event in trace['events']:
+16 |         if event['type']!='tool_result':continue
+   |                                        ^
+17 |         call=event['call']['function']; name=call['name']
+18 |         row={'tool':name,'arguments':call['arguments']}
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> results/evidence/semantic-claim-repair-20261101/collect_blind.py:17:39
+   |
+15 |     for event in trace['events']:
+16 |         if event['type']!='tool_result':continue
+17 |         call=event['call']['function']; name=call['name']
+   |                                       ^
+18 |         row={'tool':name,'arguments':call['arguments']}
+19 |         if name.startswith('math_') or 'validate_syntax' in name or 'evaluate' in name:
+   |
+
+E701 Multiple statements on one line (colon)
+  --> results/evidence/semantic-claim-repair-20261101/collect_blind.py:27:21
+   |
+25 |     packet={'id':rid,'question':trace['question'],'answer':trace.get('answer'),'calls':calls}
+26 |     dest=HERE/'blind-inputs'/(rid+'.json')
+27 |     if dest.exists():assert json.loads(dest.read_text())==packet
+   |                     ^
+28 |     else:dest.write_text(json.dumps(packet,ensure_ascii=False,indent=2)+'\n')
+29 | print(json.dumps({'ready':sorted(p.stem for p in (HERE/'blind-inputs').glob('*.json')),'evaluated':sum(x['status']=='evaluated' for x …
+   |
+
+E701 Multiple statements on one line (colon)
+  --> results/evidence/semantic-claim-repair-20261101/collect_blind.py:28:9
+   |
+26 |     dest=HERE/'blind-inputs'/(rid+'.json')
+27 |     if dest.exists():assert json.loads(dest.read_text())==packet
+28 |     else:dest.write_text(json.dumps(packet,ensure_ascii=False,indent=2)+'\n')
+   |         ^
+29 | print(json.dumps({'ready':sorted(p.stem for p in (HERE/'blind-inputs').glob('*.json')),'evaluated':sum(x['status']=='evaluated' for x …
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> results/evidence/semantic-claim-repair-20261101/decide.py:26:51
+   |
+24 |         save(HERE/'review-freeze.json',{'before_unblinding':True,'files':freeze_files(ROOT,list((HERE/'blind-reviews').glob('*.json'))…
+25 |     verify_files(ROOT,json.loads((HERE/'review-freeze.json').read_text())['files'])
+26 |     plan=json.loads((RAW/'plan.json').read_text());verify_files(ROOT,plan['files']);check_knowledge(RAW)
+   |                                                   ^
+27 |     summary=summarize(RAW)
+28 |     assert summary['planned']==summary['scored']==6
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> results/evidence/semantic-claim-repair-20261101/decide.py:26:84
+   |
+24 |         save(HERE/'review-freeze.json',{'before_unblinding':True,'files':freeze_files(ROOT,list((HERE/'blind-reviews').glob('*.json'))…
+25 |     verify_files(ROOT,json.loads((HERE/'review-freeze.json').read_text())['files'])
+26 |     plan=json.loads((RAW/'plan.json').read_text());verify_files(ROOT,plan['files']);check_knowledge(RAW)
+   |                                                                                    ^
+27 |     summary=summarize(RAW)
+28 |     assert summary['planned']==summary['scored']==6
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> results/evidence/semantic-claim-repair-20261101/decide.py:37:55
+   |
+35 |         for event in trace['events']:
+36 |             if event['type']=='tool_result':
+37 |                 name=event['call']['function']['name'];counts[name]=counts.get(name,0)+1
+   |                                                       ^
+38 |         rows.append({**row,'review_id':reverse[row['id']],'properties':review['properties'],'core_pass':review['core_pass'],'tool_coun…
+39 |     metrics={}
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> results/evidence/semantic-claim-repair-20261101/decide.py:45:33
+   |
+43 |             rs=[r for r in rows if r['strategy']==strategy and r['task_id']==task]
+44 |             metrics[strategy][group]={'n':len(rs),'completed':sum(r['execution_status']=='completed' for r in rs),'core_pass':sum(r['c…
+45 |     b=metrics['selective_patch'];c=metrics['semantic_contract_direct']
+   |                                 ^
+46 |     gates={'completion_strict_gain':c['changed']['completed']>b['changed']['completed'],'quality_strict_gain':c['changed']['core_pass'…
+47 |     ledgers={};ids=[]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> results/evidence/semantic-claim-repair-20261101/decide.py:47:15
+   |
+45 |     b=metrics['selective_patch'];c=metrics['semantic_contract_direct']
+46 |     gates={'completion_strict_gain':c['changed']['completed']>b['changed']['completed'],'quality_strict_gain':c['changed']['core_pass'…
+47 |     ledgers={};ids=[]
+   |               ^
+48 |     for label,path in [('v1_updater','results/raw/semantic-maintenance-costs-20261101/spend-ledger.json'),('v2_updater','results/raw/s…
+49 |         d=json.loads((ROOT/path).read_text());req=d['requests'];known=sum(Decimal(x.get('actual_usd') or '0') for x in req)
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> results/evidence/semantic-claim-repair-20261101/decide.py:49:46
+   |
+47 |     ledgers={};ids=[]
+48 |     for label,path in [('v1_updater','results/raw/semantic-maintenance-costs-20261101/spend-ledger.json'),('v2_updater','results/raw/s…
+49 |         d=json.loads((ROOT/path).read_text());req=d['requests'];known=sum(Decimal(x.get('actual_usd') or '0') for x in req)
+   |                                              ^
+50 |         assert known==Decimal(d['known_usd'])
+51 |         assert all(x['actual_model']=='deepseek/deepseek-v4.1-flash-1017' and x['actual_provider']=='DigitalOcean' for x in req if x['…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> results/evidence/semantic-claim-repair-20261101/decide.py:49:64
+   |
+47 |     ledgers={};ids=[]
+48 |     for label,path in [('v1_updater','results/raw/semantic-maintenance-costs-20261101/spend-ledger.json'),('v2_updater','results/raw/s…
+49 |         d=json.loads((ROOT/path).read_text());req=d['requests'];known=sum(Decimal(x.get('actual_usd') or '0') for x in req)
+   |                                                                ^
+50 |         assert known==Decimal(d['known_usd'])
+51 |         assert all(x['actual_model']=='deepseek/deepseek-v4.1-flash-1017' and x['actual_provider']=='DigitalOcean' for x in req if x['…
+   |
+
+E701 Multiple statements on one line (colon)
+  --> results/evidence/semantic-claim-repair-20261101/decide.py:58:24
+   |
+56 |     save(HERE/'decision.json',result)
+57 |     print(json.dumps({k:v for k,v in result.items() if k!='rows'},ensure_ascii=False,indent=2))
+58 | if __name__=='__main__':main()
+   |                        ^
+
+Found 15 errors (2 fixed, 13 remaining).

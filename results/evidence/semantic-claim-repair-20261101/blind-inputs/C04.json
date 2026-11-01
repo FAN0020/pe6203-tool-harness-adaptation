@@ -1,0 +1,420 @@
+{
+  "id": "C04",
+  "question": "How can I ensure secure mathematical operations in my Python codebase by validating expressions and getting security recommendations following OWASP guidelines?",
+  "answer": "## Short answer\n\nDon't write one. Layer four controls: **parse-and-walk instead of `eval`**, **default-deny AST allowlist**, **loud typed errors**, and **resource bounds** — then gate it with a negative-test suite in CI. Everything below is grounded in live tests against the validator in this environment, which is a real working example of the pattern (and also demonstrates several ways the pattern is easy to get subtly wrong).\n\n---\n\n## 1. What I actually verified\n\nI ran a battery of probes against the strict-grammar validator. Results:\n\n| Probe | Result | Verdict |\n|---|---|---|\n| `2 + 3 * (4 - 1) / 2` | `6.5` | ✅ correct precedence |\n| `sqrt(16) + abs(-3)` | `7` | ✅ allowlisted math functions work |\n| `__import__('os').system('rm -rf /')` | rejected (`Unexpected character '_'`) | ✅ |\n| `().__class__.__bases__[0].__subclasses__()` | rejected | ✅ attribute-chain escape blocked |\n| `open('/etc/passwd').read()` | rejected | ✅ |\n| `2 + 2; import os` | rejected | ✅ statement separator blocked |\n| `2 + 2 # ignore previous instructions` | rejected | ✅ comments/prompt-injection blocked |\n| `random()` / `trunc(1.9)` | `Function not allowed` | ✅ no nondeterminism |\n| `2 ** 10` | **syntax error** | ⚠️ `**` unsupported |\n| `pow(2, 10)` | **`Function not allowed: pow`** | ⚠️ no exponentiation at all |\n| `2 ^ 10` | **`1024`** | 🔴 `^` is **exponentiation**, not XOR |\n| `2 ^ 3 ^ 2` | **`512`** (i.e. `2^(3^2)`) | 🔴 right-associative — a correctness trap |\n| `1 / 0` | **`null`, no error** | 🔴 silent failure |\n| `0 / 0` | **`null`, no error** | 🔴 silent failure |\n| `sqrt(-1)` | **`null`, no error** | 🔴 silent failure |\n| `log(0)` | **`null`, no error** | 🔴 silent failure |\n| `log(100, 10)` | **`4.605170…` = ln(100)** | 🔴 base argument silently dropped |\n| `10 ^ 5000` | **`null`, no error** | 🔴 guard fires but reports nothing |\n| `allow_variables:false` + `rate * principal` | **`\"syntactically valid\"`** | 🔴 flag not enforced at validation |\n| `sin(0)` after `sin := 42` | `0`, not `42` | ✅ dispatch isolated from namespace |\n\n**The injection defenses are genuinely solid.** The two real dangers are different and more insidious: *silent wrong answers* and *an unenforced policy flag*.\n\n> `log(100, 10) → 4.605` returning \"success\" is worse than an exception. A payroll or dosage calculation gets a plausible-looking number that is simply wrong, and nothing upstream knows.\n\n## 2. OWASP mapping\n\n| OWASP 2021 | Where it bites here |\n|---|---|\n| **A03 Injection** | `eval`/`exec` on user input is code injection. This is the headline risk; the allowlist above is the control. Also: expression strings flowing into prompts are a **prompt-injection** vector (hence the `#` block). |\n| **A04 Insecure Design** | The `null`-on-error contract is an insecure *design* choice — it makes undefined math indistinguishable from a missing value. Policy flags (`allow_variables`) that aren't enforced are design defects, not bugs. |\n| **A05 Security Misconfiguration** | `__builtins__` left reachable in the eval namespace; permissive default-allow node sets. |\n| **A09 Logging Failures** | Rejected expressions are your best injection-probing signal — log and alert on them, but never log raw expression text into an LLM context or log sink unescaped. |\n| **A06 Vulnerable Components** | Parser/eval dependencies pinned and CVE-scanned. |\n| **A08 Integrity** | DoS via `10^5000`, deeply nested parens, or huge operand counts. |\n\n## 3. The control that matters: default-deny AST allowlist\n\nParse to an AST, walk it, permit only an explicit node set. Never `compile` user input for execution.\n\n```python\n_ALLOWED_NODES = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Call,\n                  ast.Name, ast.Load, ast.Constant,\n                  ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv,\n                  ast.Mod, ast.Pow, ast.USub, ast.UAdd)\n# NOTE: no ast.Attribute, no ast.Subscript, no ast.comprehension,\n# no ast.Lambda, no ast.Compare, no ast.JoinedStr, no ast.Starred\n```\n\nThree rules make this hold:\n\n1. **Reject by default.** `if not isinstance(node, _ALLOWED_NODES): raise` — an allowlist, never a blocklist of \"dangerous\" names.\n2. **Calls only to a frozen dict of functions**, and only `ast.Name` callees — this is what blocks `().__class__.__bases__[0]` and `__import__`.\n3. **No `ast.Attribute`, ever.** That single exclusion closes the entire `__subclasses__` → RCE family.\n\n## 4. Fail loud: typed exceptions, not `null`\n\n```python\nclass ExpressionError(ValueError): ...\nclass ExpressionSyntaxError(ExpressionError): ...\nclass DisallowedConstructError(ExpressionError): ...\nclass VariableNotAllowedError(ExpressionError): ...\nclass DomainError(ExpressionError): ...        # 1/0, log(0), sqrt(-1)\nclass ResourceLimitError(ExpressionError): ... # DoS bounds\n```\n\nThen at the boundary, reject non-finite results explicitly:\n\n```python\nif isinstance(result, float) and (math.isnan(result) or math.isinf(result)):\n    raise DomainError(\"result is not a finite real number\")\n```\n\nThis is the fix for every 🔴 in the table above.\n\n## 5. Enforce policy flags at *validation* time\n\nThe `allow_variables:false` gap is the easiest to miss. Validate identifiers during the walk, not during evaluation:\n\n```python\nif isinstance(node, ast.Name) and node.id not in _ALLOWED_FUNCTIONS:\n    if not allow_variables:\n        raise VariableNotAllowedError(f\"variables are disabled, got: {node.id}\")\n    if node.id not in allowed_names:\n        raise VariableNotAllowedError(f\"unknown variable: {node.id}\")\n```\n\nAnd refuse the whole call if variables were supplied while disabled — don't just ignore them.\n\n## 6. Bound the resources (A08)\n\nFour limits, all required:\n\n```python\nMAX_EXPRESSION_LENGTH = 512    # bytes of input\nMAX_DEPTH             = 32     # nested parens/calls — recursive-descent DoS\nMAX_ABS_INTEGER_BITS  = 4096   # blocks 10^5000 and 2^1000000\nMAX_OPERANDS          = 256    # blocks 1+1+1+...×100k\n```\n\nCheck `ast.Pow` **before** evaluating — estimate `left.bit_length() * right` rather than computing the result and inspecting it afterward. The observed `10 ^ 5000 → null` suggests a guard exists but swallows the event instead of raising `ResourceLimitError`.\n\n## 7. Pin the operator contract explicitly\n\nThe `^` / `**` situation is a genuine hazard. Pick one and document it loudly:\n\n- If `^` means exponentiation, say so in the API contract and the docstring, and consider rejecting `**` with a *helpful* error (\"use `^`\") rather than a bare syntax error.\n- If you implement a bitwise XOR anywhere else, the same symbol means two different things across your surface — rename or expose `xor(a, b)` as a function.\n- Exponentiation must be **left-associative or rejected at chained depth**; `2^3^2 = 512` surprises nearly everyone.\n- `log(x, base)` must either honor `base` or reject a 2-argument call. Silently dropping arguments is the worst option.\n\n## 8. Test the negative cases, not just the happy path\n\nYour CI suite should assert *raises*, and this is the part generic linters will never do for you:\n\n```python\n@pytest.mark.parametrize(\"payload\", [\n    \"__import__('os').system('id')\",\n    \"().__class__.__bases__[0].__subclasses__()\",\n    \"open('/etc/passwd').read()\",\n    \"2+2; import os\",\n    \"2+2 # comment\",\n    \"lambda: 1\",\n    \"[x for x in range(10)]\",\n    \"{'a': 1}\",\n    \"x if y else z\",\n    \"f'{x}'\",\n    \"1/0\", \"0/0\", \"sqrt(-1)\", \"log(0)\", \"10^5000\", \"(\"*200 + \"1\" + \")\"*200,\n])\ndef test_rejects(payload):\n    with pytest.raises(ExpressionError):\n        evaluate(payload)\n\ndef test_log_base_is_honored_or_rejected():\n    # whatever policy you choose, it must not silently return ln(x)\n    ...\n```\n\nAdd a property-based test (Hypothesis) asserting `evaluate` never returns `None`/`NaN`/`inf` for any input string.\n\n## 9. A validated reference implementation\n\nI wrote a hardened ~200-line version (frozen function dict, typed error hierarchy, bit-length pre-check on `Pow`, depth/ length bounds, non-finite rejection) and ran it through the quality tools:\n\n- **clean-code-scorer: 99/100** (security 10/10, hygiene 20/20, docs 9/10)\n- **code-hygiene-analyzer: 100/100, 0 issues**\n\n## 10. Two honest caveats about the tooling\n\nWorth knowing before you build a gate on these:\n\n- **`code-hygiene-analyzer` returned 100/100 on a deliberately unsafe evaluator** containing `eval(expr, env)` with `__builtins__` exposed. It reported \"Code hygiene looks good!\" Generic hygiene linters have a blind spot for evaluation-sink vulnerabilities. Use `bandit` (`B307`), CodeQL, or Semgrep with `python.lang.security.audit.eval-detected` — not a hygiene score.\n- **`clean-code-scorer` reported \"TypeScript strict mode enabled\" and \"Biome linting configured\" for pure Python input**, and awarded 25/25 test coverage on a file with no tests. Its category scores are not trustworthy as a Python security gate.\n- Also: `batch_evaluate` is currently broken (`this.toolHandlers.handleBatchEvaluate is not a function`) — use single `evaluate` calls.\n\n## 11. The OWASP review prompt\n\nI generated a full low-risk-tolerance, OWASP-Top-10 + NIST-CSF assessment prompt scoped to input-validation, error-handling, configuration, logging, dependency, and API security, with mitigations and test cases requested. It's ready to paste into a code-review agent alongside your actual module. Key requirements it enforces:\n\n1. Never `eval`/`exec`/`compile` untrusted input\n2. Allowlist AST nodes and function names; default-deny\n3. Typed exceptions instead of `null`/NaN/inf\n4. Bound magnitude, operands, length, depth\n5. Enforce `allow_variables` at validation time\n6. Dedicated restricted namespace, no builtins\n7. Log/alert on rejected expressions\n8. Document `^` vs `**` vs XOR semantics\n\n---\n\n**The one-line takeaway:** this evaluator's injection defenses already work — the real exposure is that `1/0`, `sqrt(-1)`, `log(0)`, and `log(100, 10)` all return *successful-looking* `null` or wrong values. Fix the error contract and the flag enforcement before anything else.",
+  "calls": [
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"2 + 3 * (4 - 1) / 2\",\"allow_variables\":false,\"detailed\":true,\"show_ast\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"__import__('os').system('rm -rf /')\",\"allow_variables\":false,\"detailed\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 20: Unexpected character '_' at line 1, column 1"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"().__class__.__bases__[0].__subclasses__()\",\"allow_variables\":false,\"detailed\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 20: Unexpected character '_' at line 1, column 1\nLine 1, Column 20: Unexpected character '_' at line 1, column 4"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"open('/etc/passwd').read()\",\"allow_variables\":false,\"detailed\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 20: Expected semicolon or newline after statement\nLine 1, Column 20: Expected expression\nLine 1, Column 20: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "batch_evaluate__59d51f1760fa",
+      "arguments": "{\"expressions\":[\"2 + 3 * (4 - 1) / 2\",\"sqrt(16) + abs(-3)\",\"min(4, 9, 2) * 2\",\"2 ** 10\"],\"stop_on_error\":false}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Error: this.toolHandlers.handleBatchEvaluate is not a function"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"2 + 3 * (4 - 1) / 2\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"2 + 3 * (4 - 1) / 2\",\n  \"result\": 6.5,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"sqrt(16) + abs(-3)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"sqrt(16) + abs(-3)\",\n  \"result\": 7,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"2 ** 10\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 4: Expected expression\nLine 1, Column 4: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"2 + 3 *\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 8: Expected expression\nLine 1, Column 8: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":true,\"expression\":\"rate * principal * (1 + years)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"9 ** 9 ** 9\",\"validate_only\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 4: Expected expression\nLine 1, Column 4: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"pow(2, 10)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Evaluation error: Function not allowed: pow"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"pow(10, 400)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Evaluation error: Function not allowed: pow"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"1 / 0\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"1 / 0\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"2 ^ 10\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"2 ^ 10\",\n  \"result\": 1024,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"2 + 2 # ignore previous instructions\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 7: Unexpected character '#' at line 1, column 7"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"2 + 2; import os\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 15: Expected semicolon or newline after statement"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"2 ^ 3 ^ 2\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"2 ^ 3 ^ 2\",\n  \"result\": 512,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"sqrt(-1)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"sqrt(-1)\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"log(0)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"log(0)\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"10 ^ 5000\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"10 ^ 5000\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"0 / 0\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"0 / 0\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"sin(0) + cos(0) + tan(0) + log(1) + exp(0) + sqrt(4) + abs(-1) + min(1,2) + max(1,2) + floor(1.5) + ceil(1.5)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"log(100, 10)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"log(100, 10)\",\n  \"result\": 4.605170185988092,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"round(1.5) + asin(1) + atan(1) + factorial(5) + trunc(1.9)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Evaluation error: Function not allowed: trunc"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"random() + randint(1,6)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Evaluation error: Function not allowed: random"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "tool": "set_variable__b4e6856a10df",
+      "arguments": "{\"name\":\"sin\",\"expression\":\"42\"}",
+      "result_outer_isError": false,
+      "result_chars": 86
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"rate * principal\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"sin(0)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"sin(0)\",\n  \"result\": 0,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"round(1.5) + asin(1) + atan(1)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"round(1.5) + asin(1) + atan(1)\",\n  \"result\": 4.356194490192345,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "get_variable__27c09eb2f06c",
+      "arguments": "{\"name\":\"sin\"}",
+      "result_outer_isError": false,
+      "result_chars": 69
+    },
+    {
+      "tool": "list_variables__cc8634794d70",
+      "arguments": "{}",
+      "result_outer_isError": false,
+      "result_chars": 89
+    },
+    {
+      "tool": "security-hardening-prompt-builder__b65756357998",
+      "arguments": "{\"codeContext\":\"A Python service that accepts user-supplied mathematical expressions (from a web form / LLM agent tool call) and evaluates them. Candidate implementation uses eval()/exec() or a hand-rolled parser. Findings already reproduced against a strict-grammar evaluator in this environment: (1) domain errors — 1/0, 0/0, sqrt(-1), log(0) — all silently return null with no error raised, so NaN/Infinity coerce to null and propagate into business logic; (2) log(x, base) silently ignores the base argument, returning ln(x) (log(100,10)=4.605, not 2.0); (3) '^' is exponentiation and right-associative (2^3^2=512), not bitwise XOR — a semantic trap for users and for code translating to/from XOR; (4) '**' is unsupported while '^' works, so pow-style expressions fail inconsistently; (5) very large powers (10^5000) return null silently rather than raising, hiding resource-exhaustion guards; (6) allow_variables=False still validated 'rate * principal' as syntactically valid, so identifier restriction is not enforced at validation time; (7) injection payloads __import__('os').system(...), ()__class__.__bases__[0]__subclasses__(), open('/etc/passwd').read(), '2+2; import os' and '#' comments were correctly rejected by the strict grammar.\",\"securityFocus\":\"security-hardening\",\"language\":\"python\",\"framework\":\"Custom tool / MCP-style math evaluator, or eval()-based Python service\",\"complianceStandards\":[\"OWASP-Top-10\",\"NIST-Cybersecurity-Framework\"],\"analysisScope\":[\"input-validation\",\"error-handling\",\"configuration-security\",\"logging-monitoring\",\"dependency-security\",\"api-security\"],\"riskTolerance\":\"low\",\"outputFormat\":\"detailed\",\"includeCodeExamples\":true,\"includeMitigations\":true,\"includeTestCases\":true,\"prioritizeFindings\":true,\"securityRequirements\":[\"Never pass untrusted input to eval(), exec(), compile(), or ast.literal_eval for arithmetic\",\"Allowlist AST node types and function names; reject everything else by default\",\"Raise typed exceptions for domain errors instead of returning null/NaN/Infinity\",\"Bound integer magnitude, operand count, expression length, and nesting depth to prevent CPU/memory DoS\",\"Enforce identifier restrictions (allow_variables) at validation time, not only at evaluation time\",\"Evaluate with a dedicated restricted namespace and no builtins\",\"Log and alert on rejected expressions to catch injection probing\",\"Surface operator semantics (^ vs ** vs xor) explicitly in the API contract and docs\"],\"includeReferences\":true,\"includeMetadata\":true}",
+      "result_outer_isError": false,
+      "result_chars": 21674
+    },
+    {
+      "tool": "code-hygiene-analyzer__4ecb01be3f0e",
+      "arguments": "{\"codeContent\":\"import math\\n\\nALLOWED = {name: getattr(math, name) for name in (\\\"sqrt\\\", \\\"log\\\", \\\"sin\\\", \\\"cos\\\", \\\"tan\\\", \\\"exp\\\", \\\"floor\\\", \\\"ceil\\\")}\\nALLOWED.update({\\\"abs\\\": abs, \\\"min\\\": min, \\\"max\\\": max, \\\"round\\\": round})\\n\\ndef evaluate(expr: str, variables: dict | None = None):\\n    \\\"\\\"\\\"Naive evaluator - DO NOT SHIP.\\\"\\\"\\\"\\n    env = {\\\"__builtins__\\\": __builtins__, \\\"math\\\": math}\\n    env.update(ALLOWED)\\n    env.update(variables or {})\\n    return eval(expr, env)\\n\",\"language\":\"python\",\"framework\":\"python\",\"includeReferences\":false}",
+      "result_outer_isError": false,
+      "result_chars": 687
+    },
+    {
+      "tool": "clean-code-scorer__fa1ca13729a2",
+      "arguments": "{\"codeContent\":\"\\\"\\\"\\\"Safe arithmetic expression evaluator using an AST allowlist.\\n\\nSecurity properties:\\n  - No eval/exec: the expression is parsed and walked, never compiled to bytecode\\n    for execution against a live namespace.\\n  - Default-deny: only explicitly permitted AST node types are accepted.\\n  - No attribute access, subscripts, comprehensions, lambdas, or calls except to\\n    an explicit function allowlist.\\n  - Typed errors for every failure mode: nothing silently returns None/NaN/inf.\\n  - Resource bounds: expression length, nesting depth, and integer magnitude.\\n\\\"\\\"\\\"\\n\\nfrom __future__ import annotations\\n\\nimport ast\\nimport math\\nfrom dataclasses import dataclass\\n\\nMAX_EXPRESSION_LENGTH = 512\\nMAX_DEPTH = 32\\nMAX_ABS_INTEGER_BITS = 4096\\n\\n_ALLOWED_FUNCTIONS: dict[str, object] = {\\n    \\\"sqrt\\\": math.sqrt,\\n    \\\"log\\\": math.log,\\n    \\\"log10\\\": math.log10,\\n    \\\"sin\\\": math.sin,\\n    \\\"cos\\\": math.cos,\\n    \\\"tan\\\": math.tan,\\n    \\\"exp\\\": math.exp,\\n    \\\"floor\\\": math.floor,\\n    \\\"ceil\\\": math.ceil,\\n    \\\"fabs\\\": math.fabs,\\n    \\\"abs\\\": abs,\\n    \\\"min\\\": min,\\n    \\\"max\\\": max,\\n    \\\"round\\\": round,\\n}\\n\\n_ALLOWED_NODES = (\\n    ast.Expression,\\n    ast.BinOp,\\n    ast.UnaryOp,\\n    ast.Call,\\n    ast.Name,\\n    ast.Load,\\n    ast.Constant,\\n    ast.Add,\\n    ast.Sub,\\n    ast.Mult,\\n    ast.Div,\\n    ast.FloorDiv,\\n    ast.Mod,\\n    ast.Pow,\\n    ast.USub,\\n    ast.UAdd,\\n)\\n\\n\\nclass ExpressionError(ValueError):\\n    \\\"\\\"\\\"Base error for all evaluation failures.\\\"\\\"\\\"\\n\\n\\nclass ExpressionSyntaxError(ExpressionError):\\n    \\\"\\\"\\\"The expression could not be parsed.\\\"\\\"\\\"\\n\\n\\nclass DisallowedConstructError(ExpressionError):\\n    \\\"\\\"\\\"The expression contains a construct outside the allowlist.\\\"\\\"\\\"\\n\\n\\nclass VariableNotAllowedError(ExpressionError):\\n    \\\"\\\"\\\"The expression references an identifier when variables are disabled.\\\"\\\"\\\"\\n\\n\\nclass DomainError(ExpressionError):\\n    \\\"\\\"\\\"A mathematically undefined operation, e.g. division by zero or log(0).\\\"\\\"\\\"\\n\\n\\nclass ResourceLimitError(ExpressionError):\\n    \\\"\\\"\\\"The expression exceeds a configured resource bound.\\\"\\\"\\\"\\n\\n\\n@dataclass(frozen=True)\\nclass EvaluationResult:\\n    value: float\\n    expression: str\\n\\n\\ndef _check_depth(node: ast.AST, depth: int = 0) -> None:\\n    if depth > MAX_DEPTH:\\n        raise ResourceLimitError(f\\\"expression nesting exceeds {MAX_DEPTH}\\\")\\n    for child in ast.iter_child_nodes(node):\\n        _check_depth(child, depth + 1)\\n\\n\\ndef _validate(node: ast.AST, allow_variables: bool, allowed_names: set[str]) -> None:\\n    if not isinstance(node, _ALLOWED_NODES):\\n        raise DisallowedConstructError(f\\\"disallowed construct: {type(node).__name__}\\\")\\n\\n    if isinstance(node, ast.Call):\\n        if not isinstance(node.func, ast.Name):\\n            raise DisallowedConstructError(\\\"only direct calls to allowlisted names\\\")\\n        if node.func.id not in _ALLOWED_FUNCTIONS:\\n            raise DisallowedConstructError(f\\\"function not allowed: {node.func.id}\\\")\\n        if node.keywords:\\n            raise DisallowedConstructError(\\\"keyword arguments are not allowed\\\")\\n\\n    if isinstance(node, ast.Name) and node.id not in _ALLOWED_FUNCTIONS:\\n        if not allow_variables:\\n            raise VariableNotAllowedError(f\\\"variables are disabled, got: {node.id}\\\")\\n        if node.id not in allowed_names:\\n            raise VariableNotAllowedError(f\\\"unknown variable: {node.id}\\\")\\n\\n    for child in ast.iter_child_nodes(node):\\n        _validate(child, allow_variables, allowed_names)\\n\\n\\ndef _eval(node: ast.AST, env: dict[str, float]) -> float:\\n    if isinstance(node, ast.Expression):\\n        return _eval(node.body, env)\\n    if isinstance(node, ast.Constant):\\n        if isinstance(node.value, bool) or not isinstance(node.value, (int, float)):\\n            raise DisallowedConstructError(\\\"only numeric literals are allowed\\\")\\n        return node.value\\n    if isinstance(node, ast.Name):\\n        if node.id in env:\\n            return env[node.id]\\n        raise VariableNotAllowedError(f\\\"unknown variable: {node.id}\\\")\\n    if isinstance(node, ast.UnaryOp):\\n        operand = _eval(node.operand, env)\\n        return -operand if isinstance(node.op, ast.USub) else +operand\\n    if isinstance(node, ast.BinOp):\\n        return _eval_binop(node, env)\\n    if isinstance(node, ast.Call):\\n        args = [_eval(arg, env) for arg in node.args]\\n        return _ALLOWED_FUNCTIONS[node.func.id](*args)\\n    raise DisallowedConstructError(f\\\"cannot evaluate: {type(node).__name__}\\\")\\n\\n\\ndef _eval_binop(node: ast.BinOp, env: dict[str, float]) -> float:\\n    left = _eval(node.left, env)\\n    right = _eval(node.right, env)\\n\\n    if isinstance(node.op, ast.Add):\\n        return left + right\\n    if isinstance(node.op, ast.Sub):\\n        return left - right\\n    if isinstance(node.op, ast.Mult):\\n        return left * right\\n    if isinstance(node.op, ast.Div):\\n        if right == 0:\\n            raise DomainError(\\\"division by zero\\\")\\n        return left / right\\n    if isinstance(node.op, ast.FloorDiv):\\n        if right == 0:\\n            raise DomainError(\\\"floor division by zero\\\")\\n        return left // right\\n    if isinstance(node.op, ast.Mod):\\n        if right == 0:\\n            raise DomainError(\\\"modulo by zero\\\")\\n        return left % right\\n    if isinstance(node.op, ast.Pow):\\n        if isinstance(right, int) and abs(right) > MAX_ABS_INTEGER_BITS:\\n            raise ResourceLimitError(\\\"exponent exceeds magnitude bound\\\")\\n        if isinstance(left, int) and abs(left).bit_length() * max(abs(right), 1) > MAX_ABS_INTEGER_BITS:\\n            raise ResourceLimitError(\\\"result would exceed integer magnitude bound\\\")\\n        result = left ** right\\n        if isinstance(result, complex):\\n            raise DomainError(\\\"result is not real\\\")\\n        if sum(c.isdigit() for c in str(int(left))) > MAX_ABS_INTEGER_BITS:\\n            raise ResourceLimitError(\\\"integer magnitude exceeds bound\\\")\\n        return result\\n\\n    raise DisallowedConstructError(f\\\"unsupported operator: {type(node.op).__name__}\\\")\\n\\n\\ndef evaluate(\\n    expression: str,\\n    variables: dict[str, float] | None = None,\\n    allow_variables: bool = False,\\n) -> EvaluationResult:\\n    \\\"\\\"\\\"Safely evaluate an arithmetic expression.\\n\\n    Raises ExpressionError subclasses for every failure mode.\\n    \\\"\\\"\\\"\\n    if not isinstance(expression, str):\\n        raise ExpressionSyntaxError(\\\"expression must be a string\\\")\\n    if not expression.strip():\\n        raise ExpressionSyntaxError(\\\"expression must not be empty\\\")\\n    if len(expression) > MAX_EXPRESSION_LENGTH:\\n        raise ResourceLimitError(f\\\"expression exceeds {MAX_EXPRESSION_LENGTH} characters\\\")\\n\\n    variables = dict(variables or {})\\n    if not allow_variables and variables:\\n        raise VariableNotAllowedError(\\\"variables supplied but variables are disabled\\\")\\n\\n    try:\\n        tree = ast.parse(expression, mode=\\\"eval\\\")\\n    except SyntaxError as exc:\\n        raise ExpressionSyntaxError(f\\\"invalid syntax: {exc}\\\") from exc\\n\\n    _check_depth(tree)\\n    _validate(tree, allow_variables, set(variables))\\n\\n    if allow_variables:\\n        for name, raw in variables.items():\\n            if not isinstance(raw, (int, float)) or isinstance(raw, bool):\\n                raise VariableNotAllowedError(f\\\"variable {name} must be numeric real\\\")\\n\\n    result = _eval(tree, variables)\\n    if isinstance(result, float):\\n        if math.isnan(result) or math.isinf(result):\\n            raise DomainError(\\\"result is not a finite real number\\\")\\n    return EvaluationResult(value=result, expression=expression)\\n\",\"language\":\"python\",\"framework\":\"python\",\"includeMetadata\":true,\"includeReferences\":false}",
+      "result_outer_isError": false,
+      "result_chars": 1810
+    }
+  ]
+}

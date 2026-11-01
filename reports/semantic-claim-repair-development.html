@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PE6203：LLM 契约维护开发结果</title><style>body{font:16px/1.7 system-ui,sans-serif;max-width:1120px;margin:36px auto;padding:0 24px;color:#18232e;background:#fafbfd}h1,h2{line-height:1.3}h1{font-size:30px}h2{margin-top:36px;font-size:22px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{border:1px solid #cbd5df;padding:9px;text-align:left}th{background:#eaf0f5}a{color:#125a91}.notice{border-left:5px solid #b04c23;padding:14px 20px;background:#fff3eb}.small{color:#52606d;font-size:14px}code{background:#eef2f5;padding:1px 4px}li{margin:7px 0}.scroll{overflow:auto}</style><body>
+<h1>LLM 契约维护：形成了可执行候选，开发未达双提升</h1>
+<p class="small">同一 PE6203 Goal · 2026-11-01 · 分支 codex/completion-quality-study · 原 benchmark 133 Middle/Late + 235 Late</p>
+<div class="notice"><strong>决定：关闭本次具体候选，不进入独立验证。</strong>变化任务正常完成仍为 1/2 对 1/2，完整产物质量仍为 0/2 对 0/2。TF、PE 和调用效率虽改善，不能替代用户要求的双提升。完整 Goal 未完成。</div>
+<h2>失败证据 → 研究问题</h2>
+<p>既有 contract_reconcile 曾把调用数从40降到10、PE从5.9升到9.2，完成与完整质量仍均为0/2；多轮写作任务也出现未写出正文或最后响应截断。这里能证明局部改进未成为完整交付，不能仅凭停止字段断言上下文长、工具多或某种推理习惯是根因。</p>
+<p>另一类直接证据是知识语义不可靠：旧 workflow_notes 曾把已失败路径当替代，外层工具成功也可能包着内层失败。此次优先检验“谁判定契约失效、保留什么、删去什么以及如何验证”，没有继续重复457的写作提示。</p>
+<p>五类失败及事实／观察／假说、限制来源和候选比较见 <a href="../results/evidence/semantic-contract-maintenance-20261101/review-decision.json">有边界复盘与独立审查采纳记录</a>。独立 agent 只读，未改文件、运行实验、操作 Goal 或派生 agent。</p>
+<h2>限制的来源</h2>
+<table><tr><th>来源</th><th>本轮设计含义</th></tr><tr><td>课程 brief（SHA256 6a74fda1…611af0d）</td><td>固定模型、解码、任务、judge；NU/FR/SP、E/M/L及变化覆盖；指标、恢复/保持、更新成本、代码/日志、失败分析与10分钟展示。课程本身不要求用户追加的严格双提升。</td></tr><tr><td>当前用户授权</td><td>原 benchmark 严格双提升、两批独立验证、TF与保持不降；主线程唯一写者；377关闭；不push/部署/外发；无总费用上限。</td></tr><tr><td>冻结公平边界</td><td>同一 DeepSeek/DigitalOcean、actor4096 completion含reasoning、12轮、同一官方五评分协议。Updater不得看问题、答案、评分轨迹。</td></tr><tr><td>可修正的实现选择</td><td>一跳显式引用、短规则追加、人工字符串白名单、特定正反学习的正例门槛，不是所有新机制的永久准入要求。</td></tr></table>
+<h2>原始论文、固定源码与机制差异</h2>
+<ul><li><a href="https://arxiv.org/html/2502.12110v1">A-MEM v1</a>及作者源码 SHA <code>f9a173dec325d84fcc97e7828775c7b241c33466</code>，<code>memory_layer.py:819</code>：LLM决定相关记忆链接和旧项演化。本项目只借鉴局部语义决策，没有移植检索器或运行时记忆循环。</li>
+<li><a href="https://arxiv.org/html/2308.10144v3">ExpeL v3</a>及<a href="https://github.com/LeapLabTHU/ExpeL/blob/e41ec9a24823e7b560c561ab191441b56d9bcefc/agent/expel.py">固定作者源码</a>：<code>failure_critique()</code>可使用<code>success_history=None</code>，只有另一条正反对比路径要求成功。无正确actor正例不能排除所有反例学习；本轮仅用通用原生探针与源码，不输入任何已评分轨迹。</li>
+<li>复用已读 ACE、Reflexion 记录：局部知识单元与可执行验证提供参考，但不声称完整复现；ACE已固定实现中的ADD不能被误述为已实现任意删除。完整Actor反思重试仍不在固定执行边界内。</li></ul>
+<p>真实SP主要确定性合并元数据；workflow_notes的LLM已经影响范围、依据和内容，不只是措辞。contract_reconcile也已能替换描述，因此“替换”本身不是本轮新意。新意是由LLM依据证据逐条判断保留／替换／未知，再由程序保护确定的字段和来源。</p>
+<h2>冻结试验与两个版本的实际决定</h2>
+<p><strong>v1：联合编辑与依赖决策。</strong>模型输出证据引用、字段编辑和依赖边。Middle成功，Late两次把未变化的evaluate当变化依据；编译器拒绝。3次updater请求花费$0.002960976，没有benchmark运行。不能手工修成通过，也不能推断整类LLM更新无效。</p>
+<p><strong>v2：拆分决策职责。</strong>程序从真实diff枚举每个可改字段，固定scope、原值和basis；LLM只判定各项语义并写有依据的替换。14项中保留4项、替换10项；Middle2个，Late8个。语义审查核对源码与探针含义，结构校验不冒充语义正确性。新增batch接口缺失处理函数经预先冻结的3次通用探针核实；标量替代返回7和6。该探针不是benchmark成功。</p>
+<p>v2两次updater花费$0.003234600，之后固定知识，不再修订。原任务133M/L及235L共6条开发轨迹，每条件1次；没有合成benchmark。模型前冻结见<a href="../experiments/semantic-claim-repair-v2.json">生成与验收协议</a>，实际执行见<a href="../experiments/semantic-claim-repair-execution-v2.json">执行协议</a>。只有严格开发通过后，才准许运行两个各18条的验证批次；这两个批次保留未执行。</p>
+<p class="small">一次本地预检因16384-token updater与4096-token actor共用账本策略而被拒绝，未发出模型请求。已保存原计划和失败，分开账本后生成新执行计划；6份知识及顺序字节相同，单次预算没有提高。</p>
+<h2>实际结果（所有6条保留）</h2><div class="scroll"><table><tr><th>任务</th><th>阶段</th><th>策略</th><th>停止状态</th><th>TF</th><th>PE</th><th>完整质量</th><th>工具调用</th><th>盲审ID</th></tr><tr><td>235</td><td>late</td><td>semantic_contract_direct</td><td>completed</td><td>10</td><td>10</td><td>通过</td><td>3</td><td>C02</td></tr><tr><td>133</td><td>late</td><td>selective_patch</td><td>completed</td><td>9.4</td><td>5.4</td><td>失败</td><td>35</td><td>C04</td></tr><tr><td>133</td><td>middle</td><td>selective_patch</td><td>output_truncated</td><td>9.2</td><td>6.4</td><td>失败</td><td>27</td><td>C05</td></tr><tr><td>133</td><td>late</td><td>semantic_contract_direct</td><td>completed</td><td>9.8</td><td>9</td><td>失败</td><td>5</td><td>C01</td></tr><tr><td>133</td><td>middle</td><td>semantic_contract_direct</td><td>output_truncated</td><td>10</td><td>6.4</td><td>失败</td><td>8</td><td>C03</td></tr><tr><td>235</td><td>late</td><td>selective_patch</td><td>completed</td><td>10</td><td>10</td><td>失败</td><td>3</td><td>C06</td></tr></table></div>
+<p>变化任务：调用62→13，TF9.3→9.9，PE5.9→7.7；完成1/2→1/2，完整质量0/2→0/2。235保持任务两组均完成、TF/PE均10；候选质量1/1而SP0/1，但知识完全相同，不能把这次差异归因于补丁。ECS因缺少匹配三阶段而为null。</p>
+<h2>为什么局部收益仍没有通过</h2>
+<p>两组Middle最后响应均达到4096 token并截断，候选已减少调用仍没完整交付CI片段；这证明停止条件，没有证明截断根因。Late候选正常完成，但代码在小输入<code>2**1024</code>上产生未处理的OverflowError，且资源界限在运算之后才检查。SP代码还出现允许的sqrt/abs没有绑定进执行环境的问题。正确的工具知识没有自动成为正确代码。</p>
+<p>产物审查先冻结再揭示策略与TF/PE；使用同一协调者，非独立人工。C03完整主实现通过小型正例，但其明确提供的CI测试片段不能解析，因此完整质量不通过。即使作宽松敏感性分析、将C03记为通过，完成率仍无严格提升，拒绝晋级结论不变。</p>
+<p>原始判定见<a href="../results/evidence/semantic-claim-repair-20261101/decision.json">结果与门槛</a>、<a href="../results/evidence/semantic-claim-repair-20261101/interpretation.json">事实、观察与假说</a>、<a href="../results/evidence/semantic-claim-repair-20261101/review-freeze.json">揭盲前审查冻结</a>。具体代码检查保留C01/C03/C05原样代码和输出，没有修补产物再评分。</p>
+<h2>成本、复现与后续边界</h2>
+<p>本轮共60次API请求：5 updater、23 actor、30 judge、2预检，全部指定模型与DigitalOcean；总成本<strong>$0.072323580</strong>，未知费用0。v1更新19128 tokens/7.45秒；v2更新13380 tokens/6.41秒；冻结补丁复用不重复计算模型更新费。账本、全部成功/失败、原评分及文件哈希保留。</p>
+<p>复现说明见<a href="../results/evidence/semantic-claim-repair-20261101/reproduction.txt">reproduction.txt</a>。本轮关闭的是两个具体版本：v1不满足来源约束，v2不满足双提升。若继续检验依赖传播，应先落实具体变化根节点和源码支持的依赖关系；其他机制仍可按用户明确的准入标准比较。本轮没有验证语义依赖闭包，也没有证明LLM维护无效。不得将当前答案或评分轨迹回输updater，不重跑同一候选直到获胜。</p>
+<p>课程NU/FR与历史指标独立保留；严格under/over-update因果案例、最终整合报告、提交包和展示演练仍有缺口。这些工作不能替代尚未完成的研究突破。应用工具仍返回此前blocked状态，本轮依用户授权进行了实际研究，没有标记complete、重建Goal或再次设置blocked。</p></body></html>

@@ -1,0 +1,104 @@
+{
+  "id": "C03",
+  "question": "How can I ensure secure mathematical operations in my Python codebase by validating expressions and getting security recommendations following OWASP guidelines?",
+  "answer": "Here's what the safe-expression tooling actually did in the live tests — this is a real demonstration of validation catching attacks:\n\n| Expression | Validation result | Why it matters |\n|---|---|---|\n| `(2 + 3) * 4 - 10 / 2` | ✅ valid → evaluates to **15** | Legitimate arithmetic passes |\n| `sin(0.5) + sqrt(16)` | ✅ valid | Allow-listed math functions pass |\n| `2 ** 10` | ❌ rejected (`**` unsupported) | Grammar restricts the operator surface |\n| `__import__('os').system(...)` | ❌ `Unexpected character '_'` | Dunder / attribute access blocked |\n| `eval(\"1+1\")` | ❌ `Function not allowed: eval` | Function allow-list blocks `eval` |\n\nThe lesson: **a strict grammar + allow-list rejects dangerous payloads by construction**, rather than trying to \"sanitize\" them.\n\n---\n\n## 1. The core rule\n\n**Never pass untrusted input to `eval()`, `exec()`, or `compile()`.** Those execute arbitrary Python (`__import__('os').system('rm -rf /')`, `().__class__.__bases__` sandbox-escape tricks, infinite loops). Parse with `ast` in `mode=\"eval\"` and walk the tree against an **allow-list of nodes and operators**.\n\n### ❌ Vulnerable\n```python\ndef calc(user_input):\n    return eval(user_input)          # RCE, DoS, sandbox escape\n```\n\n### ✅ Safe (validate → then evaluate with an allow-list)\n\n```python\nimport ast\nimport math\nimport operator as op\n\n# ---- Guardrails (DoS bounds) ----\nMAX_EXPR_LEN   = 500     # characters\nMAX_AST_NODES  = 200     # structural complexity\nMAX_POW_EXP    = 1000    # prevents 9**9**9 / 2**10**9 blow-ups\nMAX_RESULT_BITS = 1 << 20  # optional: cap integer result size (~1M bits)\n\nBIN_OPS = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,\n           ast.Div: op.truediv, ast.FloorDiv: op.floordiv,\n           ast.Mod: op.mod, ast.Pow: op.pow}\nUNARY_OPS = {ast.UAdd: op.pos, ast.USub: op.neg}\nALLOWED_FUNCS = {\"abs\": abs, \"min\": min, \"max\": max, \"round\": round,\n                 \"sqrt\": math.sqrt, \"sin\": math.sin, \"cos\": math.cos,\n                 \"log\": math.log}\n\nclass UnsafeExpressionError(ValueError):\n    \"\"\"Raised on any validation failure (message is safe to log/show).\"\"\"\n\ndef validate_expression(expr: str) -> ast.Expression:\n    if not isinstance(expr, str):\n        raise UnsafeExpressionError(\"Expression must be a string.\")\n    if len(expr) > MAX_EXPR_LEN:\n        raise UnsafeExpressionError(\"Expression too long.\")\n    try:\n        tree = ast.parse(expr, mode=\"eval\")        # no statements/suites\n    except SyntaxError:\n        raise UnsafeExpressionError(\"Invalid syntax.\") from None\n    if sum(1 for _ in ast.walk(tree)) > MAX_AST_NODES:\n        raise UnsafeExpressionError(\"Expression too complex.\")\n    _check(tree)\n    return tree\n\ndef _check(node):\n    if isinstance(node, ast.Expression):\n        _check(node.body)\n    elif isinstance(node, ast.Constant):\n        if isinstance(node.value, bool) or not isinstance(node.value, (int, float)):\n            raise UnsafeExpressionError(\"Only numeric constants allowed.\")\n    elif isinstance(node, ast.BinOp):\n        if type(node.op) not in BIN_OPS:\n            raise UnsafeExpressionError(\"Operator not allowed.\")\n        if isinstance(node.op, ast.Pow):\n            _check_pow(node)\n        _check(node.left); _check(node.right)\n    elif isinstance(node, ast.UnaryOp):\n        if type(node.op) not in UNARY_OPS:\n            raise UnsafeExpressionError(\"Unary operator not allowed.\")\n        _check(node.operand)\n    elif isinstance(node, ast.Call):\n        if not isinstance(node.func, ast.Name) or node.func.id not in ALLOWED_FUNCS:\n            raise UnsafeExpressionError(\"Function not allowed.\")\n        if node.keywords:\n            raise UnsafeExpressionError(\"Keyword arguments not allowed.\")\n        for a in node.args:\n            _check(a)\n    else:\n        # Rejects Name, Attribute, Subscript, Lambda, comprehensions, etc.\n        raise UnsafeExpressionError(f\"Disallowed construct: {type(node).__name__}.\")\n\ndef _check_pow(node):\n    e = node.right\n    if not isinstance(e, ast.Constant) or not isinstance(e.value, int):\n        raise UnsafeExpressionError(\"Exponent must be an integer literal.\")\n    if not (0 <= e.value <= MAX_POW_EXP):\n        raise UnsafeExpressionError(\"Exponent out of safe range.\")\n\ndef _eval(node):\n    if isinstance(node, ast.Constant):\n        return node.value\n    if isinstance(node, ast.BinOp):\n        return BIN_OPS[type(node.op)](_eval(node.left), _eval(node.right))\n    if isinstance(node, ast.UnaryOp):\n        return UNARY_OPS[type(node.op)](_eval(node.operand))\n    if isinstance(node, ast.Call):\n        return ALLOWED_FUNCS[node.func.id](*(_eval(a) for a in node.args))\n    raise UnsafeExpressionError(\"Unsafe node reached evaluator.\")\n\ndef safe_evaluate(expr: str):\n    tree = validate_expression(expr)   # validate first...\n    return _eval(tree.body)            # ...then evaluate only allow-listed nodes\n```\n\n> Notes: `ast.Constant` covers Python 3.8+. Even with a bounded exponent, `(10**1000)**1000` can still build a huge integer — also enforce a **result-size/bit cap** or run in a subprocess with a hard timeout/memory limit (see defense-in-depth below).\n\n---\n\n## 2. OWASP Top 10 mapping for math evaluation\n\n| OWASP 2021 risk | How it applies here | Control implemented |\n|---|---|---|\n| **A03: Injection** | `eval()` = code injection / RCE | AST allow-list, `mode=\"eval\"`, no `eval/exec` |\n| **A04: Insecure Design** | Trusting user expressions | Deny-by-default grammar; threat model arithmetic |\n| **A05: Security Misconfiguration** | Permissive defaults | Explicit operator/function allow-lists; bounded limits |\n| **A06: Vulnerable Components** | Unsafe third-party eval libs | Pin deps; vet `sympy`/`simpleeval`; SCA scanning |\n| **A09: Logging & Monitoring** | Silent abuse | Log rejections & complexity trips; alert on bursts |\n| **A10 / DoS** (availability) | `9**9**9`, deep nesting | Length + node + exponent + result-size caps, timeouts |\n\n*(Maps cleanly to **OWASP ASVS V5 – Validation, Sanitization & Encoding** and **CWE-95 Improper Neutralization of Directives in Dynamically Evaluated Code (`eval`)**.)*\n\n---\n\n## 3. Defense-in-depth checklist\n\n1. **Allow-list, don't block-list** — enumerate permitted AST nodes, operators, and functions; reject everything else.\n2. **Bound resources** — max length, node count, exponent magnitude, result size; wrap evaluation in a `multiprocessing`/`resource` timeout for hard DoS limits.\n3. **Never leak internals** — return generic errors (`\"Invalid expression\"`); log details server-side only.\n4. **Rate-limit & authenticate** the endpoint (e.g., per-token/per-IP limits) to blunt brute-force and DoS.\n5. **Log & monitor** rejections and complexity trips; alert on spikes (A09).\n6. **Validate server-side** — client-side checks are UX only.\n7. **Scan dependencies** for CVEs (A06) and keep the interpreter patched.\n8. **Prefer a vetted library** if you need more features: [`simpleeval`](https://pypi.org/project/simpleeval/) or a sandboxed `sympy` parser — but still apply length/complexity limits and review its AST handling.\n\n---\n\n## 4. Security test cases (pytest)\n\n```python\nimport pytest\nfrom yourmodule import safe_evaluate, UnsafeExpressionError, validate_expression\n\n@pytest.mark.parametrize(\"expr,expected\", [\n    (\"(2+3)*4-10/2\", 15),\n    (\"sqrt(16) + sin(0)\", 4.0),\n])\ndef test_legit_arithmetic_passes(expr, expected):\n    assert safe_evaluate(expr) == pytest.approx(expected)\n\n@pytest.mark.parametrize(\"malicious\", [\n    \"__import__('os').system('id')\",     # RCE\n    \"().__class__.__bases__[0]\",         # sandbox escape\n    \"open('/etc/passwd').read()\",        # file read\n    \"eval('1+1')\",                       # nested eval\n    \"9**9**9\",                           # DoS blow-up\n    \"x + 1\",                             # unknown name\n    \"a.b\",                               # attribute access\n    \"[i for i in range(10)]\",            # comprehension\n    \"(\" * 300 + \"1\" + \")\" * 300,         # deep nesting\n])\ndef test_malicious_inputs_rejected(malicious):\n    with pytest.raises(UnsafeExpressionError):\n        safe_evaluate(malicious)\n\ndef test_length_limit():\n    with pytest.ra",
+  "calls": [
+    {
+      "tool": "security-hardening-prompt-builder__b65756357998",
+      "arguments": "{\"codeContext\":\"A Python service that accepts mathematical expressions from users and evaluates them (e.g., a calculator API, spreadsheet formula engine, or rules engine). The core risk is use of Python's built-in eval()/exec() or naive use of compile() on untrusted input, which enables arbitrary code execution (RCE), sandbox escapes, denial of service via exponential computation, and injection. The code needs to parse and evaluate arithmetic safely (numbers, +, -, *, /, **, parentheses, functions), enforce strict grammar, bound resource usage, and produce security recommendations aligned to OWASP Top 10 (A03:2021 Injection, A05:2021 Security Misconfiguration, A04:2021 Insecure Design) and OWASP ASVS input-validation and injection-prevention controls.\",\"securityFocus\":\"security-hardening\",\"language\":\"python\",\"framework\":\"Standard library (ast, operator), optional sympy/safe-eval libraries\",\"analysisScope\":[\"input-validation\",\"error-handling\",\"configuration-security\",\"api-security\",\"logging-monitoring\"],\"complianceStandards\":[\"OWASP-Top-10\",\"NIST-Cybersecurity-Framework\",\"ISO-27001\"],\"securityRequirements\":[\"Never call eval()/exec() on untrusted mathematical input\",\"Parse expressions with a strict grammar/whitelist AST node allowlist\",\"Bound expression length, nesting depth, and evaluation complexity\",\"Reject non-arithmetic identifiers and attribute/dunder access\",\"Log and rate-limit rejected or resource-abusive requests\",\"Return sanitized, non-leaking error messages\"],\"riskTolerance\":\"low\",\"outputFormat\":\"detailed\",\"prioritizeFindings\":true,\"includeMitigations\":true,\"includeTestCases\":true,\"includeCodeExamples\":true}",
+      "result_outer_isError": false,
+      "result_chars": 18970
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"(2 + 3) * 4 ** 2 - 10 / 2\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 14: Expected expression\nLine 1, Column 14: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"__import__('os').system('rm -rf /')\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 14: Expected expression\nLine 1, Column 14: Expected expression\nLine 1, Column 14: Unexpected character '_' at line 1, column 1"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"(2 + 3) * 4 - 10 / 2\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"2 ** 10\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 4: Expected expression\nLine 1, Column 4: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"sin(0.5) + sqrt(16)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"(2 + 3) * 4 - 10 / 2\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"(2 + 3) * 4 - 10 / 2\",\n  \"result\": 15,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"eval(\\\"1+1\\\")\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Evaluation error: Function not allowed: eval"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ]
+}
