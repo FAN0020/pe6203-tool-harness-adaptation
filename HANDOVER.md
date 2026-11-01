@@ -24,7 +24,21 @@
 
 交接时没有正在运行的实验或renderer。研究结果基点为`ac4c328`，本次交接不改任何旧结果。交接前仅出现EasyTool/Play2Prompt/工具描述重写的搜索线索，尚未完成原文与固定源码核对，也没有新候选或新模型调用；不能当作已完成研究。新聊天创建同一完整目标的Goal后自主推进，旧聊天不再并发研究。
 
-### 当前最新状态：批量路线完整成本诊断完成，不能普遍节省预算
+### 当前最新状态：真实 actor 项目经验采集完成，未满足两结构正例门槛
+
+- 同一完整 Goal active、未完成。主线程唯一写者/实验执行者；无新 agent/worktree、push、部署或外发。本轮真实执行是实质进展，不是重复阻塞轮。
+- 报告 [`reports/project-episode-learning-admission.html`](reports/project-episode-learning-admission.html)，离线复核 `python3 results/evidence/project-episode-learning-20261101/verify_training.py`。
+- 有边界检查：math validate_syntax 的 description/已有参数注释在 Early/Late 对照中未变，diff 是 schema 字段；不能将其问题归因完整替换描述。Early 部分 planner 文本已错误，不支持盲目回退。保留/删除机制本身仍是可检验空间。
+- AWM 2409.07429v1 / 作者 SHA8c0ff8c 的成功轨迹抽象机制，转为闭集工具/字段/匿名ID流+属性标签；禁止问题/答案/推理/原题评分轨迹。以前native-only程序和失败Slidev训练未真正实现成功actor经验诱导；本轮仍未调用updater。
+- `1867db0`冻结900401/900402完整6/12记录、各2SP、全部34工具、验收及条件开发/两批验证；`adb951c`冻结精确SP知识。模型/供应商/4096单次/12轮/原评分不变。15针对性测试通过。
+- runner86948退出0，4/4 evaluated，20官方评分。`091e97e`提交全部4产物判断后才揭官方评分；同协调者，非独立人工。
+- 900401两次正常/core均通过；900402两次均12轮耗尽、最终答复空，正常/core均失败。**4/4保存记录、全部字段及层级/依赖均正确**。平均TF8.8/PE7.9/ECSnull，不用高分替代交付。
+- 两条12record实际序列：round1项目；round2三根；round3–11按dependsOn ID链逐条创建；round12列表读取。原生错误0，最后completion224/204、reasoning56/25，均tool_calls而非length。可定位已采用路径耗尽轮次，不能证明知识干预效果；规模/深度/输入长度并未隔离。
+- 两结构各至少1正常+全项正例的冻结门槛失败：关闭此采集源，不补采，不放宽；updater0，没有候选、原题开发或验证。不否定所有经验学习，6record真实成功是新证据。
+- 下一具体判别：源码约束的依赖延期构造，完整字段与parent顺序保留，跨任务dependsOn待IDs齐后update。已有native direct_deferred保持字段/缩短理论依赖路径证据；需要核清只延后dependsOn的等价性、actualchanged知识host并冻结原题SP对照。不是parse_prd批量提示重写；不得把本轮失败准入池包装成AWM诱导。
+- 69请求=47actor+20judge+2preflight，USD0.054594420，未知0/未结0；170raw/116source文件离线核验通过，全部原始文件与评分/费用保留。NU/FR、原题严格双提升与两独立批、最终报告/复现/展示仍未完成。
+
+### 已结束上一轮：批量路线完整成本诊断完成，不能普遍节省预算
 
 - 同一 Goal active、未完成；本轮为实质诊断进展。无新 agent/worktree、模型调用、push、部署或外发，无运行实验。
 - 报告 [`reports/native-batch-cost-diagnostic.html`](reports/native-batch-cost-diagnostic.html)；离线命令 `python3 results/evidence/native-batch-cost-diagnostic-20261101/verify.py`。
