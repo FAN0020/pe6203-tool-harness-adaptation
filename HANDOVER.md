@@ -24,7 +24,22 @@
 
 交接时没有正在运行的实验或renderer。研究结果基点为`ac4c328`，本次交接不改任何旧结果。交接前仅出现EasyTool/Play2Prompt/工具描述重写的搜索线索，尚未完成原文与固定源码核对，也没有新候选或新模型调用；不能当作已完成研究。新聊天创建同一完整目标的Goal后自主推进，旧聊天不再并发研究。
 
-### 当前最新状态：真实 actor 项目经验采集完成，未满足两结构正例门槛
+### 当前最新状态：依赖拆分知识策略原题开发结束，未达到严格双提升
+
+- 同一完整 Goal 由工具确认 active、未完成；本轮是实质试验进展，不是重复阻塞。主线程独占写入/实验，未另开agent/worktree、push、部署或外发。当前无运行实验。
+- 报告 [`reports/dependency-cut-development.html`](reports/dependency-cut-development.html)；轻量证据 `results/evidence/dependency-cut-20261101/decision.json` 与 `interpretation.json`；离线复现见该目录 `reproduction.txt`。
+- 根据前轮真实actor的依赖ID串行创建观察和原生合约，固定LLMCompiler2312.04511v3、作者SHA a00c9d35507507da70e8c637eee64efc8c1857ae的依赖表示实现。本项目仅借符号操作图，未改执行器或移植作者规划器/并行调度器。
+- 候选仅修改283实际changed create_project描述（1862字符图），保持所有字段、parent创建顺序，待ID齐后写dependsOn。133/235精确等于SP；updater0，无benchmark问题/答案/评分轨迹进知识。模型、供应商、4096单次、12轮、工具和验收不变。
+- 原生v1在5e539a6冻结，52calls因输入details尾空格被.trim()删除而4路径全失败，完整保留；89e3bfe冻结仅修正输入的v2，另52calls全部等价，负控有效。两版共8catalog读取、0模型费用；理论waves10→8不等于actor实测，正常calls10→15。
+- 9a5c78b冻结候选/协议，cc5b9a6冻结精确10份知识，随后执行。74项针对性测试通过。runner74111退出0，10/10 evaluated，50官方槽位。d503f8d提交全部10产物判断后才看官方分数。
+- **原变化133M/L+283M/L：两组完成均1/4、core均0/4；TF9.05→9.70、PE8.20→7.80。项目283M/L：两组完成/core均0/2；TF8.5→9.8、PE8.5→8.7。235保持：两组正常、TF/PE10，core均0/1。ECSnull。** 133/235同知识波动不归因为补丁。
+- 新机制证据：候选两项目都采用延期依赖，各23records补链接；原SP Middle也延期27records。四项目均12轮耗尽、空答复、最后tool_calls而非length。候选各3轮补链接，参数错误恢复与末轮验证/细化可见；已采用不等于因果有效，未隔离各项轮次成本。
+- 3/4项目结构属性通过但4/4交付缺失；数学4/4实现一致性失败；235两份chart参数正确、摘要错误。局部结构、调用数123→116和官方分数收益均不构成双提升。
+- 评测限制：同协调者先验收后官方揭分；冻结packet的workingDirectory暴露cell编号，结合执行顺序可推断方法，所以**不是严格方法盲评或独立人工**。保留原包，不事后改验收；语义manageability改unknown的敏感性不改变core失败。
+- **关闭dependency_cut v1，不补采、不启动条件两批各30单元验证。** 排除“候选两次均未采用延期路径”，否定本版本充分性，不否定所有依赖表示/LLM更新。下一问题是构造、参数输出、补链接和收尾验证的代价，不再只改采用提示；无下一冻结模型候选。
+- 119请求=67actor+50judge+2preflight，USD0.205121340，未知/未结0；419raw/180source/272native文件离线核验通过。原NU/FR、全部成功失败及原评分保留。最终课程报告/复现包/10+5分钟展示和用户严格双提升、两独立批仍未完成。
+
+### 已结束上一轮：真实 actor 项目经验采集完成，未满足两结构正例门槛
 
 - 同一完整 Goal active、未完成。主线程唯一写者/实验执行者；无新 agent/worktree、push、部署或外发。本轮真实执行是实质进展，不是重复阻塞轮。
 - 报告 [`reports/project-episode-learning-admission.html`](reports/project-episode-learning-admission.html)，离线复核 `python3 results/evidence/project-episode-learning-20261101/verify_training.py`。
