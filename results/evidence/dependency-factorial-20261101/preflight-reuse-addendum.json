@@ -1,0 +1,23 @@
+{
+  "id": "a1-preflight-entry-correction",
+  "created_at": "2026-11-01T10:11:04.951209+00:00",
+  "output": "results/raw/extensions/dependency-factorial-v1",
+  "plan_sha256": "138239aacd250d9e9d01fd97d8bc7173f12c66507d6868a950d5d0dbb4edfe4c",
+  "approved_A1_sha256": "cc34b7607f9b6b2b00e3bc4be6fa1201739895374e4400f36b2f5b18695faebf",
+  "preflight_files": {
+    "preflight/20261101T093250426845.json": "ef43f8385df25b6854b8bbfee57f44f59f59daa808ad4151b292dc63ee4f65d2"
+  },
+  "frozen_files": {
+    "results/evidence/dependency-factorial-20261101/run_approved_a1.py": "1c9d2ae96e15c0157d43cf20e046e3605bbac753a6dc4acd664dd52f0afe4dfb",
+    "tests/test_factorial_preflight_reuse.py": "bc47b6c52eb0debb9b4b2670536fe80f89a055d476ed6a96dd76191a29f68104",
+    "results/evidence/dependency-factorial-20261101/continuation-a1.json": "cc34b7607f9b6b2b00e3bc4be6fa1201739895374e4400f36b2f5b18695faebf",
+    "results/evidence/dependency-factorial-20261101/accounting_continuation.py": "e8970d4c30e07523b3222b9fedb85142d869d53c30d8df501677a965c70540d0",
+    "results/evidence/dependency-factorial-20261101/continuation-authorization.json": "4c4ce6afdd3f0b60e546581802dc83f90544fa2194c629e5efc53d76e6506ac1"
+  },
+  "finding": "Original plan max_preflight_calls=2 is already exhausted by2successful frozen receipts. Generic resume calls availability_preflight again and would raise before any model call.",
+  "correction": "Reuse exactly the two matching settled successful receipts; verify inventory,hash,roles,model/provider,plan and settled IDs before continuation. No new preflight request, no raised limit, no changed credentials.",
+  "authority": "User explicitly approved A1 and authorized necessary in-scope local fixes. This corrects the entry implementation while preserving both original2-preflight cap and exact approved A1 exception; no additional failure-policy exception or approval required.",
+  "unchanged": "Original A1 manifest/code/authorization and all original source/knowledge/task/scoring/model/budget files remain byte-identical.",
+  "tests": "37 local tests passed; original preflight-cap rejection reproduced without network; corrupt/failed/wrong-provider/extra-record cases rejected.",
+  "new_model_calls_before_freeze": 0
+}

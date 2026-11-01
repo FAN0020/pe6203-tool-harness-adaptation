@@ -18,7 +18,7 @@
     "objective": "基于PE6203 Group Project 4 brief与MCPEvol-Bench，设计并验证至少一种符合选择性工具知识适应范围的策略，使其在预先冻结的变化任务验证子集上，相比原Selective Patch取得可复现的正常完成率与任务质量双重改善，同时保持不变任务能力。质量须同时检查官方TF与任务要求的实际产物正确性；不能用PE上升、提前结束、删减要求或选择性展示成功代替改善。复用有效证据，先明确具体机制和验收，固定模型、供应商、解码、单次预算与评分协议。开发与两批独立验证分开，各批完成率与实际质量均须严格优于SP、TF和不变任务能力不下降。原benchmark和受控合成扩展分开报告，合成成功不能证明原benchmark Goal完成。No Update/Full Rewrite保留课程基线。完成还需核对课程要求、报告、复现包和展示材料。所有正负结果、原评分和费用保留；未达双提升，目标保持未完成。",
     "budget": "无总费用/总轨迹硬上限；不得擅自设置新的总token预算。这不取消公平单次预算，也不允许无意义重试。",
     "completion": "仅完整目标经真实证据证明后才能complete；不能把负结果、归档、训练准入或计划当作目标完成。",
-    "current_state": "同一Goal已由update_goal确认blocked，未完成；不得创建替代Goal。用户明确批准A1后继续原剩余任务。"
+    "current_state": "User resumed research explicitly. Goal tool last returnedblocked; no resume status exists in tool API. Continue authorized work without creating/replacing Goal."
   },
   "minimum_read_order": [
     "handoff/current.json：完整目标、最新中断与待决定例外。",
@@ -221,7 +221,7 @@
     }
   ],
   "next_action": {
-    "state": "原16cell诊断中断；同Goal blocked未完成，A1待用户明确例外授权；不要将自动续行/备用key填写当批准。",
+    "state": "A1已明确批准，按原计划恢复；不再请求同一授权。工具Goal状态不能用update_goal改active，不创建新Goal。",
     "proposal": "results/evidence/dependency-factorial-20261101/continuation-a1.json，sha256 cc34b7607f9b6b2b00e3bc4be6fa1201739895374e4400f36b2f5b18695faebf",
     "if_approved": "将用户明确批准文本与manifest_sha256写入独立continuation-authorization.json，approved=true；先只读check，再用同文件accounting_continuation.py --run。它保留未知ledger/原outcome，按原评分2logical/1transport界恢复F07slot3/4/5，原顺序008–016，无actor重跑。",
     "if_not_approved": "保留不完整诊断，不运行模型；报告已排除/未知项，不等待个人网站或要求老师登录。",
@@ -302,7 +302,7 @@
     "next_candidate": "dependency_cut v1已闭环且失败；无下一冻结候选。具体版本失败不泛化为整类方法无效。"
   },
   "active_round": {
-    "status": "blocked_pending_concrete_A1_exception",
+    "status": "A1_approved_starting_original_remainder",
     "spec": "experiments/extensions/dependency-factorial-v1/protocol.json",
     "output": "results/raw/extensions/dependency-factorial-v1",
     "evidence": "results/evidence/dependency-factorial-20261101",
@@ -312,7 +312,7 @@
     "new_candidate": false,
     "validation_started": false,
     "goal_complete": false,
-    "next": "Ask only for the frozen A1 failure-policy exception. No model requests before explicit approval. Preserve strict original Goal and all evidence.",
+    "next": "Run run_approved_a1.py --run under uv --env-file.env; preserve old7actor and unchanged A1 exception. Then review onlynewproducts before their officialscores.",
     "actor_executed": 7,
     "evaluated_cells": 6,
     "judge_incomplete_cells": 1,
@@ -321,15 +321,17 @@
     "artifact_review_commit": "4739ccc",
     "unknown_charges": 1,
     "continuation_manifest_sha256": "cc34b7607f9b6b2b00e3bc4be6fa1201739895374e4400f36b2f5b18695faebf",
-    "continuation_executed": false
+    "continuation_executed": false,
+    "continuation_authorization_commit": "0ab3e1b",
+    "preflight_reuse_addendum": "results/evidence/dependency-factorial-20261101/preflight-reuse-addendum.json"
   },
   "current_recovery_audit": {
     "blocker": "Explicit decision on the frozen A1 unknown-charge failure-policy exception is still missing. The original ledger remains stopped.",
-    "same_condition_consecutive_goal_turns": 3,
+    "same_condition_consecutive_goal_turns": 0,
     "previous_turn": "progress: cd7b097 verified7executions and archived the interruption; implemented/tested/froze A1; requested a concrete exception.",
-    "current_turn": "no_progress: third consecutive goal turn with the same pending A1 decision; authorization absent, frozen proposal intact, ledger still91requests/known0.118087392/unknown1. No model/native calls or key change.",
+    "current_turn": "progress: user explicitly approved A1; exact approval committed0ab3e1b. Fixed generic resume preflight entry with37tests while retaining frozen2-call cap; no inference yet.",
     "pending_question": "Approve A1 retaining the one unknown cost and fixed remaining schedule, or keep this diagnostic stopped.",
-    "goal_status": "blocked; confirmed by update_goal tool after the3-turn audit. Objective incomplete and unchanged.",
+    "goal_status": "User resumed research explicitly. Goal tool last returnedblocked; no resume status exists in tool API. Continue authorized work without creating/replacing Goal.",
     "not_claimed": [
       "new research evidence",
       "method class exhausted",
