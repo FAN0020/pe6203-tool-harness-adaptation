@@ -1,0 +1,39 @@
+.........F                                                               [100%]
+=================================== FAILURES ===================================
+_____________ test_every_fixed_catalog_operation_can_be_projected ______________
+
+    def test_every_fixed_catalog_operation_can_be_projected():
+        catalog = json.loads((Path(__file__).parent / "fixtures/prefix-workflow-catalogs.json").read_text())["457"]["late"]
+        for tool in catalog["tools"]:
+            e = episode()
+>           project_episode("E01", e, {"write_page": {"tool_name": tool["name"]}}, {})
+
+tests/test_experience_projection.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+episode_id = 'E01'
+trace = {'answer': 'FINAL_SECRET', 'events': [{'call': {'function': {'arguments': '{"content": "ORACLE_OR_TASK_SECRET", "path"...T_RETURN'}]}, 'round': 2, 'type': 'tool_result'}], 'execution_status': 'completed', 'question': 'QUESTION_SECRET', ...}
+routes = {'write_page': {'tool_name': 'get_slidev_usage'}}, properties = {}
+
+    def project_episode(episode_id, trace, routes, properties):
+        if trace.get("task_id") not in (900201, 900202) or not re.fullmatch(r"E0[1-4]", episode_id):
+            raise ValueError("Only frozen generic episodes may enter reflection")
+        if set(properties) - PROPERTIES or any(v not in ("pass", "fail", "unknown") for v in properties.values()):
+            raise ValueError("Feedback must use property enums, never answers")
+        status = trace.get("execution_status")
+        if status not in {"completed", "output_truncated", "max_rounds", "error", "timeout", "not_started"}:
+            raise ValueError("Unrecognized execution status")
+        calls = []
+        for event in trace["events"]:
+            if event.get("type") != "tool_result":
+                continue
+            call = event["call"]["function"]
+            name = routes.get(call["name"], {}).get("tool_name")
+            if name not in NATIVE_TOOLS:
+>               raise ValueError("Unrecognized native tool")
+E               ValueError: Unrecognized native tool
+
+src/pe6203/experience_projection.py:30: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_experience_projection.py::test_every_fixed_catalog_operation_can_be_projected
+1 failed, 9 passed in 0.05s
