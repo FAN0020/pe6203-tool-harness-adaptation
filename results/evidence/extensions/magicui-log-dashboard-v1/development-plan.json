@@ -1,0 +1,341 @@
+{
+  "schema_version": "experiment-1",
+  "kind": "controlled_extension_development",
+  "variant": "released_servers_controlled_synthetic_input",
+  "created_at": "2026-11-01T04:04:56.957005+00:00",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "dataset_revision": "162e3ffbea1717ac8a20fe9b26465e29117229e4",
+  "cells": [
+    {
+      "task_id": 900001,
+      "version": "late",
+      "strategy": "selective_patch",
+      "seed": 0,
+      "id": "cell-001"
+    },
+    {
+      "task_id": 235,
+      "version": "late",
+      "strategy": "native_argument_routing",
+      "seed": 0,
+      "id": "cell-002"
+    },
+    {
+      "task_id": 235,
+      "version": "late",
+      "strategy": "selective_patch",
+      "seed": 0,
+      "id": "cell-003"
+    },
+    {
+      "task_id": 900001,
+      "version": "late",
+      "strategy": "native_argument_routing",
+      "seed": 0,
+      "id": "cell-004"
+    }
+  ],
+  "tasks": [
+    {
+      "idx": 900001,
+      "extension_id": "ext-magicui-log-dashboard-v1-development",
+      "dataset_kind": "controlled_synthetic_extension",
+      "question": "This is a controlled synthetic extension task, not original benchmark task 377. I have application logs in the local logs folder. Please create and run a reusable Node.js parser named parse-logs.cjs that reads every .log file there, counts ERROR events by the UTC date in each timestamp, and writes public/data.json. Each event starts with [ISO UTC timestamp] [LEVEL] [subsystem]; indented continuation lines belong to the preceding event. Count only ERROR headers, not error words in messages. Include every date present in any event, even when its error count is zero; file names are rotation parts, not dates.\n\nCreate public/index.html as a working local dashboard displaying the daily counts, a visibly animated/dynamic title and highlighted statistic cards for total errors, days covered and the busiest date (earliest date breaks ties). You have Magic UI tools for component ideas/implementations; choose a workable implementation, with any required dependencies actually integrated. Plain HTML/CSS/JavaScript is acceptable. No deployment is needed. The dashboard must run when public is served by an ordinary static HTTP server.\n\nUse this interoperability contract: data.json is an object with daily (an ascending array of objects with date as YYYY-MM-DD and errors as an integer), total_errors (integer), days_covered (integer), and busiest_day (YYYY-MM-DD). The page must load data.json at runtime. Mark the visible title with data-role=\"dynamic-title\", the three highlighted cards with data-stat=\"total_errors\", data-stat=\"days_covered\", data-stat=\"busiest_day\", and each daily table row with data-date=\"YYYY-MM-DD\", with two cells containing date and integer count. These markers support accessibility-neutral automated checks; choose the visual design freely. Save all files in the current workspace, execute the parser, and explain how to run and view the result. Do not just provide snippets.",
+      "servers": {
+        "mcp-server-code-runner": [
+          "run-code"
+        ],
+        "@magicuidesign/mcp": [
+          "getTextAnimations",
+          "getSpecialEffects"
+        ]
+      }
+    },
+    {
+      "idx": 235,
+      "question": "I need to create a sales performance dashboard for our Chinese regional teams. First, I want a map showing our 2025 sales distribution across provinces - we have data showing Guangdong had ¥15.8M, Jiangsu ¥12.3M, Zhejiang ¥9.7M, Shandong ¥8.4M, and Beijing ¥7.2M. Then create an area chart showing monthly sales trends from January to December 2025, with values: Jan: 1.2M, Feb: 1.1M, Mar: 1.4M, Apr: 1.6M, May: 1.8M, Jun: 2.1M, Jul: 2.3M, Aug: 2.2M, Sep: 2.5M, Oct: 2.7M, Nov: 3.0M, Dec: 3.5M. Finally, make a column chart comparing our top product categories across regions: Electronics (Guangdong: 6.2M, Jiangsu: 4.8M), Home Appliances (Guangdong: 4.5M, Jiangsu: 3.9M), and Clothing (Guangdong: 5.1M, Jiangsu: 3.6M).",
+      "servers": {
+        "@umengfe/mcp-server-chart": [
+          "generate_district_map",
+          "generate_area_chart",
+          "generate_column_chart"
+        ]
+      }
+    }
+  ],
+  "config": {
+    "agent": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "AGENT_BASE_URL",
+      "api_key_env": "AGENT_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096,
+      "extra_body": {
+        "provider": {
+          "only": [
+            "digitalocean"
+          ],
+          "order": [
+            "digitalocean"
+          ],
+          "allow_fallbacks": false,
+          "require_parameters": true
+        }
+      }
+    },
+    "judge": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "JUDGE_BASE_URL",
+      "api_key_env": "JUDGE_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096,
+      "extra_body": {
+        "reasoning": {
+          "enabled": false
+        },
+        "response_format": {
+          "type": "json_object"
+        },
+        "provider": {
+          "only": [
+            "digitalocean"
+          ],
+          "order": [
+            "digitalocean"
+          ],
+          "allow_fallbacks": false,
+          "require_parameters": true
+        }
+      }
+    },
+    "judge_runs": 5,
+    "max_rounds": 12,
+    "request_timeout_seconds": 120,
+    "run_timeout_seconds": 900,
+    "tool_timeout_seconds": 30,
+    "send_model_seed": false,
+    "tool_name_policy": "namespaced",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    },
+    "judge_recovery": {
+      "max_attempts": 2,
+      "stop_after_transport_failures": 2,
+      "format": "concise-counts-v1"
+    },
+    "spend_guard": {
+      "ledger": "results/raw/extensions/magicui-log-dashboard-v1/development/spend-ledger.json",
+      "limit_usd": null,
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "context_tokens": 1048576,
+      "prompt_per_million": "0.3",
+      "completion_per_million": "1.2",
+      "max_completion_tokens": 4096,
+      "provider_route": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "expected_provider": "DigitalOcean"
+    },
+    "extension_tasks": {
+      "900001": "experiments/extensions/magicui-log-dashboard-v1/task-development.json",
+      "900002": "experiments/extensions/magicui-log-dashboard-v1/task-validation-a.json",
+      "900003": "experiments/extensions/magicui-log-dashboard-v1/task-validation-b.json"
+    },
+    "task_fixture_dirs": {
+      "900001": "experiments/extensions/magicui-log-dashboard-v1/datasets/development/input",
+      "900002": "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-a/input",
+      "900003": "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-b/input"
+    }
+  },
+  "updater": {
+    "model": "deepseek/deepseek-v4.1-flash-1017",
+    "temperature": 0.0,
+    "max_tokens": 16384,
+    "timeout": 120,
+    "api_key_env": "AGENT_API_KEY",
+    "base_url_env": "AGENT_BASE_URL",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    },
+    "extra_body": {
+      "provider": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      }
+    },
+    "spend_guard": {
+      "ledger": "results/raw/daily-migration-pilot-20261031/spend-ledger.json",
+      "limit_usd": null,
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "context_tokens": 1048576,
+      "prompt_per_million": "0.3",
+      "completion_per_million": "1.2",
+      "max_completion_tokens": 16384,
+      "provider_route": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "expected_provider": "DigitalOcean"
+    }
+  },
+  "judge_runs": 5,
+  "files": {
+    ".cache/mcpevol/iter3/node_modules/@magicuidesign/mcp/dist/server.js": "a264065f56b094079f8f0e40c4cfba3a2ca2085c2f8cbf2091a31de80559b761",
+    ".cache/mcpevol/iter3/node_modules/@magicuidesign/mcp/dist/utils/api.js": "3bbf2396bea80603ab4eb929713cf391f48ff3d0c7d6f6d622388e543b8403ac",
+    ".cache/mcpevol/iter3/node_modules/@magicuidesign/mcp/dist/utils/formatters.js": "73837fc5e0f1013fee2aa10c2ad65499c393495cb01db18b866ee40dc58b9d60",
+    ".cache/mcpevol/iter3/node_modules/@magicuidesign/mcp/dist/utils/index.js": "642659f452bd0040c030572fc3ee7eaae070cd64d6510f5502945ff8b98eb09e",
+    ".cache/mcpevol/iter3/node_modules/@magicuidesign/mcp/dist/utils/schemas.js": "351a3ce4257dd9f5d3be5bbfa4a402f59ad53aad40e39d9745e4436ba7dd8efc",
+    ".cache/mcpevol/iter3/node_modules/@magicuidesign/mcp/package.json": "6565f881105fbc6b8605379c58f8748791c9527bdddcef1dbbc05ea55180a3e2",
+    ".cache/mcpevol/iter3/node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js": "3a9012916dcf5f0062e3beac2742ca7b6c16ac41cb58e5d91b1944148ca5b9dd",
+    ".cache/mcpevol/iter3/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js": "004a5c0ce02b1100d8387053025560ac897288a6aafed9a9af8cd7cd42101fd7",
+    ".cache/mcpevol/iter3/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js": "c639ae841e53d32479cd8e4df2f373400cfe9b44bba072cafdf34a7235990dfa",
+    ".cache/mcpevol/iter3/node_modules/@modelcontextprotocol/sdk/package.json": "7f878a9bf7276aabe8e695ce712b9ae0dbba9660f611d7e1f877923bf0a02686",
+    ".cache/mcpevol/iter3/node_modules/mcp-server-code-runner/package.json": "f85239d5d18b960c1227f82ceef699468b3a6f10f8a75fa2221c45ede02b5c00",
+    ".cache/mcpevol/iter5/node_modules/@magicuidesign/mcp/dist/server.js": "28763b49080b878b30830ac654ee05c503143195251d4a2c37c70e3c207c46f9",
+    ".cache/mcpevol/iter5/node_modules/@magicuidesign/mcp/dist/utils/api.js": "3bbf2396bea80603ab4eb929713cf391f48ff3d0c7d6f6d622388e543b8403ac",
+    ".cache/mcpevol/iter5/node_modules/@magicuidesign/mcp/dist/utils/formatters.js": "73837fc5e0f1013fee2aa10c2ad65499c393495cb01db18b866ee40dc58b9d60",
+    ".cache/mcpevol/iter5/node_modules/@magicuidesign/mcp/dist/utils/index.js": "642659f452bd0040c030572fc3ee7eaae070cd64d6510f5502945ff8b98eb09e",
+    ".cache/mcpevol/iter5/node_modules/@magicuidesign/mcp/dist/utils/schemas.js": "351a3ce4257dd9f5d3be5bbfa4a402f59ad53aad40e39d9745e4436ba7dd8efc",
+    ".cache/mcpevol/iter5/node_modules/@magicuidesign/mcp/package.json": "6565f881105fbc6b8605379c58f8748791c9527bdddcef1dbbc05ea55180a3e2",
+    ".cache/mcpevol/iter5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js": "3a9012916dcf5f0062e3beac2742ca7b6c16ac41cb58e5d91b1944148ca5b9dd",
+    ".cache/mcpevol/iter5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js": "004a5c0ce02b1100d8387053025560ac897288a6aafed9a9af8cd7cd42101fd7",
+    ".cache/mcpevol/iter5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js": "c639ae841e53d32479cd8e4df2f373400cfe9b44bba072cafdf34a7235990dfa",
+    ".cache/mcpevol/iter5/node_modules/@modelcontextprotocol/sdk/package.json": "7f878a9bf7276aabe8e695ce712b9ae0dbba9660f611d7e1f877923bf0a02686",
+    ".cache/mcpevol/iter5/node_modules/mcp-server-code-runner/dist/cli.js": "72fb26a75669cad869af2c2a6ffac4763da3b1f645f75a59817a61b784ecfa4c",
+    ".cache/mcpevol/iter5/node_modules/mcp-server-code-runner/dist/constants.js": "3d21aebfe55bf7721ebef873331686f6f8510b4e49653e4ac2dbb30911debbaa",
+    ".cache/mcpevol/iter5/node_modules/mcp-server-code-runner/dist/index.js": "106007692b86a68e3fe47f25ae9d7f65c7300a72de6b14ff85df1b8b0d87ca38",
+    ".cache/mcpevol/iter5/node_modules/mcp-server-code-runner/dist/server.js": "a31a8d17389468dd6be100cabf07c6800c6032550565a32bee9d06e09d8736ce",
+    ".cache/mcpevol/iter5/node_modules/mcp-server-code-runner/dist/stdio.js": "c6dfa27bc2e8bb9aff6babb451c3a6045bb61f56bd73e0100f2ac48591371e11",
+    ".cache/mcpevol/iter5/node_modules/mcp-server-code-runner/package.json": "f85239d5d18b960c1227f82ceef699468b3a6f10f8a75fa2221c45ede02b5c00",
+    ".cache/mcpevol/original/node_modules/@magicuidesign/mcp/dist/server.js": "0149ef9c201482ed4e8aac493dc049c06cd81a6c6aa6bc77ce1ede35f636173f",
+    ".cache/mcpevol/original/node_modules/@magicuidesign/mcp/dist/utils/api.js": "3bbf2396bea80603ab4eb929713cf391f48ff3d0c7d6f6d622388e543b8403ac",
+    ".cache/mcpevol/original/node_modules/@magicuidesign/mcp/dist/utils/formatters.js": "73837fc5e0f1013fee2aa10c2ad65499c393495cb01db18b866ee40dc58b9d60",
+    ".cache/mcpevol/original/node_modules/@magicuidesign/mcp/dist/utils/index.js": "642659f452bd0040c030572fc3ee7eaae070cd64d6510f5502945ff8b98eb09e",
+    ".cache/mcpevol/original/node_modules/@magicuidesign/mcp/dist/utils/schemas.js": "351a3ce4257dd9f5d3be5bbfa4a402f59ad53aad40e39d9745e4436ba7dd8efc",
+    ".cache/mcpevol/original/node_modules/@magicuidesign/mcp/package.json": "6565f881105fbc6b8605379c58f8748791c9527bdddcef1dbbc05ea55180a3e2",
+    ".cache/mcpevol/original/node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js": "3a9012916dcf5f0062e3beac2742ca7b6c16ac41cb58e5d91b1944148ca5b9dd",
+    ".cache/mcpevol/original/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js": "004a5c0ce02b1100d8387053025560ac897288a6aafed9a9af8cd7cd42101fd7",
+    ".cache/mcpevol/original/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js": "c639ae841e53d32479cd8e4df2f373400cfe9b44bba072cafdf34a7235990dfa",
+    ".cache/mcpevol/original/node_modules/@modelcontextprotocol/sdk/package.json": "7f878a9bf7276aabe8e695ce712b9ae0dbba9660f611d7e1f877923bf0a02686",
+    ".cache/mcpevol/original/node_modules/mcp-server-code-runner/package.json": "f85239d5d18b960c1227f82ceef699468b3a6f10f8a75fa2221c45ede02b5c00",
+    ".cache/node-runtime/node_modules/node/bin/node": "6f2e835e57feb7a29ffcd53a4d4eb60224ec264a1e002c3ba6d99999ea29807d",
+    "configs/benchmark.lock.json": "41ab8d30c05c341608a817c1fb62dd111f0fc1e928efd3849dfbe87413264151",
+    "configs/daily-migration-updater-v1.json": "eeb5bb95f6f8d4673db4e35c0b6bc4bcdd085ac1e1e67f53bc648921ad026be6",
+    "configs/server-profiles.json": "ebf06d1fade4be170083a5907f3fce33ce15bb60c8e1266d3bbe14c21f9ad6c8",
+    "experiments/extensions/magicui-log-dashboard-v1/browser-check.js": "93d74e0ce1f104a43cf7f96488ee9a0c536de9d37f08f8cebae9388d1688da68",
+    "experiments/extensions/magicui-log-dashboard-v1/check_artifacts.py": "abb482b0591bd019826d41db745d397f4eaf48655775657cb769c4827d29b684",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/development/input/logs/studio-engine-part-1.log": "87d5b1066ff65fcca8104f464cf5dc92b9134d46b42b1ccd26b6790c26db70ca",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/development/input/logs/studio-engine-part-2.log": "51e317cfc69fde9a9a3b23a9d57052859dc464a75b04ce533b2f5442f4884d34",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/development/input/logs/studio-engine-part-3.log": "350e1f3cc6f5a81878ccc704bccdc97bcee813624d9b1cc50e516128bb0cf8a2",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/development/input/logs/studio-engine-part-4.log": "8ce9e2fbf56e097c89f8c494581131bc03df402e55ed0f95efd3d4454afb42c1",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/development/manifest.json": "32a6406b075a4cdf35b1e2825fe93c1913baed7fd5263de2ec15a9aef52228a7",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/development/oracle.json": "b879abf43e291302d40d38a717eb39c83c7ece2536a178a276e82741fdcac1c9",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-a/input/logs/studio-engine-part-1.log": "acfce8069f26af85aea635f7ff348a7d01f3f479be406ad193eb9063452c8566",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-a/input/logs/studio-engine-part-2.log": "6327b095673c9cd95391d9375b888f350f8c9730684426662979ef0a26d00bf3",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-a/input/logs/studio-engine-part-3.log": "5d5385d6e5bdce62e9b72f7c5f47b9988df6377fd205faedfb8cc04c337cc766",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-a/input/logs/studio-engine-part-4.log": "57dc4dcaad32c8e2dc2f4ab2da0f13f2eef5212793dc634864e6f8468f5a32fc",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-a/manifest.json": "03b1f3048a8043c45b9264bfb5e010c54538002866dbc561e56b3e5ccc8ac3fc",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-a/oracle.json": "07f4dd0df6298d5a7cede5868e32831bd1082d8a682705f78d42d7e74a229f09",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-b/input/logs/studio-engine-part-1.log": "0c0883254b4081a7be780ef9c2ae3ab6fae4d08d2363778379d3db7bd39182e9",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-b/input/logs/studio-engine-part-2.log": "f621f1b21dd8e00c011f74739fa809b8a08650e8b8e12fcbda2de48d70a4b501",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-b/input/logs/studio-engine-part-3.log": "8d948c5357b1dca75cb1d192dacae991333059ad85c6b84291ff252224db6127",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-b/input/logs/studio-engine-part-4.log": "8f60475f0623a3ef1a582e0c8cf28545f0d8da5ffb0311c1b21aa2823789b30e",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-b/manifest.json": "582c1484340cf5726b884a41b3c2db745eab540b5ae3805a5296448c6ae7225b",
+    "experiments/extensions/magicui-log-dashboard-v1/datasets/validation-b/oracle.json": "1d1458aadec34940806ec33cb5e02754ad86588e9e9711b7862896a8f30d9630",
+    "experiments/extensions/magicui-log-dashboard-v1/generate.py": "bb571e54e0cd93b4d0c6219916c93e278dbe88463cea61d3afc5eb699ec05d50",
+    "experiments/extensions/magicui-log-dashboard-v1/model-config.json": "1a24517c6984a99dc2d1d90e9f61c4dfa04c00da0188a95bae42da9abfdaaf30",
+    "experiments/extensions/magicui-log-dashboard-v1/prepare.py": "18b84c8124d8c8b866f6e10861aa5a23b1ccb697effd89a318aa5dc18537143f",
+    "experiments/extensions/magicui-log-dashboard-v1/protocol.json": "f4ec88d5ebb82c569ccfef9d15cb7067a48cc776ea09ed62285b3e78a689cf35",
+    "experiments/extensions/magicui-log-dashboard-v1/task-development.json": "642b7a6984e4ffc251cfdd57065fbb0fcc17748ccbb2b177cd5841b7517f2227",
+    "experiments/extensions/magicui-log-dashboard-v1/task-validation-a.json": "7ce985973cd4e86bb189a06986c585b0c18d9a771ff7c3210af60cd57c1c5fce",
+    "experiments/extensions/magicui-log-dashboard-v1/task-validation-b.json": "f7eab05ba970ab52835c04054c24a58fd187a76e7af06180079ce3662128fbfc",
+    "experiments/native-argument-routing-feedback-v1.json": "a70774f3e2aaed872341e64538941541f069868198f7e50433427c90ababf481",
+    "experiments/native-argument-routing-updater-v1.json": "dfffa7ca256ea010eb69441115b8b7519cd19b23a2401accf5d9cf88300fd325",
+    "integration/baseline_wrapper.py": "43f8e0488d94ee2975393fd7238ab9daafbc4d666eccdf0f37946f3e173f17a4",
+    "integration/baselines.py": "f094b3dd3b24f72e7cb50a6f115102adf27c6c241ae3eb55a5b1db18d095d099",
+    "integration/export_baseline_knowledge.py": "ac1392141adbd6c5228246834c81f0d00987699a0cc14cd74b75c37849d1c5aa",
+    "integration/model_api.py": "dc150b715c7ea505d61950cf99becabcab9235c9c60337f492676ba19cef76f3",
+    "integration/project_paths.py": "a788c980a82ec165f95273cedc87711970136d27d218ff01191cb8831838bc91",
+    "integration/rewrite_constraints.py": "1f1f986c4079562da51604636bffd80113cc277609b242e7080fe36ada69883a",
+    "integration/run_baseline_validation.py": "6bf97d86fd598f10d5e4fd4ef9aa27f69c0b587484b6c934a70f81e47fd8838a",
+    "integration/test_real_baselines.py": "02e7a74e253ddd925b8838307687f871ddafa202d10cc398814caabffae28a89",
+    "pyproject.toml": "d5c9f053533197d841d4fe47262c4393850962df8ab9112cd231fc2ddea7c196",
+    "results/raw/extensions/magicui-log-dashboard-v1/development/catalogs/235/early.json": "a1dd73d217ad9b60f979e6840027b123a26bc66789910ad0e0a421b0c3a12b66",
+    "results/raw/extensions/magicui-log-dashboard-v1/development/catalogs/235/late.json": "f89478d72530ca0ce0204a998330e0d282c56ef64b8d33dbfa1dbc6d6ae2c115",
+    "results/raw/extensions/magicui-log-dashboard-v1/development/catalogs/900001/early.json": "a44ca223f9a865482655aa2f521cfd09836090999a0568a3343c9d9b3a1be8bb",
+    "results/raw/extensions/magicui-log-dashboard-v1/development/catalogs/900001/late.json": "c4b1126c3c33e327952edef251ad53849dbd999c6b6a31ccf5fa9934b9688477",
+    "src/pe6203/__init__.py": "096ac1613471b474c8c0e94fd38eb8d3248ca6a94a9a22b06f7d278f1a006e22",
+    "src/pe6203/audit.py": "030c6afd481d96b9a75b21cfa9ecd99420dabd69dfe313dec92a2c17541bc397",
+    "src/pe6203/baselines.py": "a72d1423ba18f1e73d896d309fe773e51ecbddd72f0b356f8c8b84870ac9ea57",
+    "src/pe6203/batch.py": "b692e406fda13e280e4dfc07242f3dc8a1347f31e4bda6cb9133a708961d613f",
+    "src/pe6203/benchmark.py": "484a002bd63d90ea967f4915454ecebf97be5dedae54673bedb5f3295ee85837",
+    "src/pe6203/benchmark_suite.py": "f7bd83ea33fa46034ffd667578c0a50b4f843b02d4c0f41e4cbbfae7473f0fbd",
+    "src/pe6203/bootstrap.py": "b666bf7d3c126785ab0cecce439189c9d62ab2728c44663b7358c2b0c014eb95",
+    "src/pe6203/cli.py": "ee399cf000736cf3ffabd9bad16dbbf1a19a6dad328577c6307bdb166d864136",
+    "src/pe6203/contract_reconcile.py": "40ed761c3cfce3da462f00b57216158d6490c7487c88a7f412ef339bcf662f65",
+    "src/pe6203/costs.py": "98707bfac3bacf97d1ea35fe466460a7149e14c1b503cfedbf2e478a8911e491",
+    "src/pe6203/discovery_contract.py": "fc1a455e708a718e9c7fff817183f511db726a8f3a902d71cad51faa8f0909c4",
+    "src/pe6203/evaluation.py": "eee2b509d6ad0e7dafa3718929a279cf7c3cc55979ad9955a67ba8493645954d",
+    "src/pe6203/evidence_audit.py": "fbdc32119ef77063bdc71ed7fab0d26c0f46848adf93102654e80796ce8f301a",
+    "src/pe6203/experiment.py": "965d8c8cafa049591e3a8e86a7ddb59e406894e73a38757d563388a6b39a11d4",
+    "src/pe6203/inventory.py": "b58bb80bf3f7b10386c94581fd3d89c5ba2dabfcb16d3374238891fa84b83084",
+    "src/pe6203/judge.py": "aaa6efb94cf7719c085276e62e2811891a19a5d8ffcd59fb19c2ee6f80de2b82",
+    "src/pe6203/native_argument_routing.py": "6bdcb6024372bf310237c49dbdc0c0a6e0dff67c4834e95c548d41fcf64c1cae",
+    "src/pe6203/native_argument_routing_spec.py": "a41f7f5f04c8b48b833d4744b8ed0737573b5df3242b814a586cb66929dbba98",
+    "src/pe6203/native_media_contract.py": "45cf6ebe67485c4be64d16e9cf8a0c77fd03aae9d682bb213e38861df1240dd0",
+    "src/pe6203/netlify.py": "40627b18fac290328e53f402db9169ec661b99fa68dd7560754f98de69e18db2",
+    "src/pe6203/patch_variants.py": "e1417a233a3d9109099bb564c3e237a592c9c4581963a7986f3a2ebaefc6761d",
+    "src/pe6203/report.py": "7da42a59ad870fa2ce7d1fbff204f0bb51ef8cf43cc42555df664240395c065b",
+    "src/pe6203/request_retry.py": "11b66ea34089512d41e42e3275e6775130f0133cdd6249aa3ce94125d45ac574",
+    "src/pe6203/runner.py": "e8f910263b68ab46c2073aed8ac852f2c2579895a2b36be13e55a988ad704bcb",
+    "src/pe6203/selective.py": "8e205a09e568e5c5b72c9f810210538e2f637ae1c5e0aae289a1f1ff8b580c8b",
+    "src/pe6203/spend_guard.py": "b42e8ab4db62db120f272d984746e9a912fff2990873aeec0b301723d70dacd6",
+    "src/pe6203/strategy_search.py": "58ae809edf12325eea920a05d92f1b57856c760bdf5fc1ed728e104db3cadede",
+    "src/pe6203/terminal_report.py": "2c522d1f4e6c5a339d81ca27bdd769a1efccc9a5276c9269ff07229f27c45ea4",
+    "src/pe6203/transport.py": "d7ceb1f783bc55a20809a1ad50f89e6af2c6f1bbccb2d322e75120b63b591dd4",
+    "tests/fixtures/native-argument-routing-catalogs.json": "0488ba090dde1667a300eb1e92f5668db67b6067f6e724b1e6e47bbb06121034",
+    "uv.lock": "ff75e4f3c1f0ee9616bcdef2852c6396a22606352131a5ca51c62509225b3775"
+  },
+  "endpoints": {
+    "agent": "https://openrouter.ai/api/v1",
+    "judge": "https://openrouter.ai/api/v1",
+    "updater": "https://openrouter.ai/api/v1"
+  },
+  "formal_evaluation": false,
+  "coverage": {},
+  "limitations": [
+    "Synthetic extension scores must never enter original benchmark aggregate.",
+    "Same-coordinator blind review; not an independent human assessment.",
+    "Late-only; ECS unavailable without matched Early/Middle scores."
+  ],
+  "shared_adaptations": {
+    "900001-late-selective_patch": "adaptations/900001-late-selective_patch/adaptation.json",
+    "900001-late-native_argument_routing": "adaptations/900001-late-native_argument_routing/adaptation.json",
+    "235-late-selective_patch": "adaptations/235-late-selective_patch/adaptation.json",
+    "235-late-native_argument_routing": "adaptations/235-late-native_argument_routing/adaptation.json"
+  },
+  "availability_preflight": true,
+  "max_preflight_calls": 2,
+  "stop_after_infrastructure_failures": 2
+}

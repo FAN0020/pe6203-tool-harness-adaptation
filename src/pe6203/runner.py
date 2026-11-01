@@ -326,7 +326,11 @@ async def run_async(task_id, version, strategy, seed, config):
         if type(config["max_rounds"]) is not int or type(config["judge_runs"]) is not int:
             raise ValueError("Round and judge-run counts must be integers")
         lock, upstream = source(root)
-        task = load_task(upstream, task_id)
+        extension = config.get("extension_tasks", {}).get(str(task_id))
+        task = (load_task(upstream, task_id, root / extension)
+                if extension else load_task(upstream, task_id))
+        if "dataset_kind" in task:
+            result.update(dataset_kind=task["dataset_kind"], extension_id=task["extension_id"])
         if version not in lock["stages"]:
             raise ValueError(f"Unknown version: {version}")
         trace.update(task)
@@ -334,8 +338,9 @@ async def run_async(task_id, version, strategy, seed, config):
         unsupported = sorted(set(task["servers"]) - set(profiles))
         if unsupported:
             raise ValueError(f"Missing reviewed runtime profiles: {', '.join(unsupported)}")
-        if config.get("fixture_dir"):
-            result["fixture"] = prepare_fixture(root / config["fixture_dir"], workspace)
+        fixture = config.get("task_fixture_dirs", {}).get(str(task_id), config.get("fixture_dir"))
+        if fixture:
+            result["fixture"] = prepare_fixture(root / fixture, workspace)
             write_json(output / "fixture-manifest.json", result["fixture"])
         if config.get("adaptation_path"):
             artifact_path = root / config["adaptation_path"]
