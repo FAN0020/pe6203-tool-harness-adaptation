@@ -1,6 +1,6 @@
 {
-  "handoff_version": "course-research-synthesis-delivered-20261101",
-  "purpose": "同一完整Goal；新增9页综合研究报告及离线复现入口。没有新实验或双提升证据；ready_link仍关闭。用户已取消后续幻灯片与讲稿工作。",
+  "handoff_version": "description-factor-generation-closed-20261101",
+  "purpose": "同一完整Goal；完成description_factor v1冻结后的2次LLM更新生成。两阶段均空删除，候选与SP相同，按500字符门槛关闭，不运行原题。报告已交付，展示工作取消。",
   "workspace": {
     "repository": "/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety",
     "branch": "codex/completion-quality-study",
@@ -8,10 +8,10 @@
     "source_thread": "01a19253-fa19-74f2-89ca-eae44eeb98fb",
     "old_goal": "用户已明确授权暂停旧聊天Goal并创建新聊天继续；旧Goal已暂停，未完成。新聊天是研究的唯一执行者。",
     "working_rule": "所有仓库命令显式使用repository作为workdir。不要扫描父目录/home；不要切换分支、创建新worktree或重置文件。保留全部已有文件、原评分、正负结果。",
-    "live_work": "无实验运行。runner7648已exit0，10cells/50judge完成；离线核验exit0，420raw/188source通过。不得重跑旧实验。",
+    "live_work": "无实验运行；description_factor生成session2746已exit0，两次请求结算；离线verify.py通过。不要重跑已关闭候选。",
     "current_thread": "01a19594-5645-7520-bf4f-98de0419fc4e",
     "new_goal": "Goal active，完整目标未完成。",
-    "latest_frozen_execution_commit": "a95ad2d",
+    "latest_frozen_execution_commit": "4a135e3",
     "latest_product_review_commit": "89cfd3d"
   },
   "goal": {
@@ -23,8 +23,8 @@
   },
   "minimum_read_order": [
     "handoff/current.json",
-    "results/evidence/ready-link-20261101/interpretation.json",
-    "results/evidence/ready-link-20261101/decision.json"
+    "results/evidence/description-factor-20261101/decision.json",
+    "results/evidence/description-factor-20261101/research-decision.json"
   ],
   "hard_constraints": [
     "不得加载完整历史、全部轨迹或输出密钥。用户已授权通过ignored.env凭据做只读额度查询、打开env编辑及冻结模型执行；仅内部加载，不输出凭据。备用OPENROUTER_API_KEY_BACKUP已配置但尚未启用。",
@@ -51,6 +51,19 @@
     "ledger_lesson": "prefix-workflow轮错误追加旧ledger后已完整保留合并记录、按响应ID分离并恢复旧字节；不得再复用旧路径。"
   },
   "recent_results": [
+    {
+      "method": "description_factor v1 deletion-only cross-field coverage",
+      "result": "Middle与Late各首次返回deletions空数组，stop；候选逐字段等于SP。各减少0字符，未达到预冻结500字符/阶段干预门槛。",
+      "evidence": "新283静态量化：可变原描述Middle5497/52816模型工具JSON字符；Late10292/62332。此前457短描述结论不能外推。EasyTool固定论文2401.06201v3/JARVIS7624cf3机制借鉴为冗余移除，本实现只准LLM选择删除与保留覆盖证据。",
+      "decision": "关闭具体v1；仅生成准入失败，0actor/0judge/0native，未测试完成率或产物效应，不否定压缩整类方法，不按看到的空结果手工选删或同提示补采。",
+      "cost": "2settledupdaterrequests USD0.00171702,newunknown0；DigitalOcean固定模型/解码/16384updaterbudget；备用未启用。",
+      "verification": "34tests；19source+11rawfiles；2请求与响应/账本ID/费用核对，候选SP全知识相等。",
+      "paths": [
+        "results/evidence/description-factor-20261101/decision.json",
+        "results/evidence/description-factor-20261101/reproduction.txt",
+        "results/evidence/description-factor-20261101/verify.py"
+      ]
+    },
     {
       "method": "ready_link v1 conditional inline and ready-release",
       "result": "原变化正常完成均1/4，coreSP0/4候选2/4但来自同知识133；TF9.8/7.4。项目完成/core均0/2，TF9.8/5.3。235两组完成/core1/1，TF10。",
@@ -276,16 +289,15 @@
     }
   ],
   "next_action": {
-    "state": "completed_original_development_failed",
-    "research_priority": "降低继续精调内联/延期文字规则的优先级。下一机制必须处理可观察的绑定时机或计划生成决策，并先说明合法输入及相对已有实现的决策差异；当前没有新的已冻结候选。不能只追加更优静态调度图或重复模型采样。",
+    "state": "no_new_frozen_candidate",
+    "research_priority": "原题双提升仍为目标。当前generation证明的是严格删除覆盖生成器没有形成干预，不是模型表现结论。先区分合法的新知识决策与已关闭机制，不再精调同一删除提示、绑定调度提示或重复已有试验。此前绑定时机优先是研究假设，不是永久准入禁区。",
     "remaining_questions": [
-      "为何Middle在首个读取后截断",
-      "actor是否能在固定预算内先形成必要记录计划并选择合适写入路线",
-      "何种合法知识表示能改变这种决策，且区别于已关闭的图说明/通用分组提示/两阶段延期"
+      "空删除来自保守规则、模型未找到覆盖，还是描述大多确实含独有信息；当前结果不区分。",
+      "在固定actor预算/信息边界下，是否存在与已有保留替换、失效工具撤销、追加流程说明、删除冗余不同的可检验知识决策。"
     ],
-    "scope": "完整原冻结变化子集双提升及两批验证保持。综合报告与复现入口已交付；因果案例与研究突破仍未完成。展示已结束，不再做slides或speaker scripts。",
-    "do_not": "不重跑closedready_link/observation/DCv1；不重复377或网页账单路线；无新unknown豁免。",
-    "future_execution_note": "控制合成diagnostic_spec计划使用base ./experiment run而非search run；后者实验完成后report访问plan.research会KeyError。当前结果完整，不为修wrapper重跑。"
+    "scope": "完整原冻结子集双提升及两批各自通过；综合报告/复现入口已交付，不能替代研究成功。用户取消后续slides与speaker scripts。",
+    "do_not": "不重跑closeddescription_factor/ready_link/observation/DCv1；不查377/网页账单；不新增unknown豁免。",
+    "future_execution_note": "新actor方案须在已通过生成准入后再次冻结具体知识/10cellplan；本轮未注册actor变体因为生成门槛失败。新费用ledger独立。"
   },
   "on_demand_map": {
     "current_protocol": "experiments/ready-link-v1.json",
@@ -318,7 +330,9 @@
     "latest_development": "results/evidence/ready-link-20261101/decision.json",
     "latest_reproducer": "results/evidence/ready-link-20261101/reproduction.txt",
     "latest_accounting": "results/evidence/ready-link-20261101/accounting-comparison.json",
-    "integrated_report": "reports/course-research/REPRODUCE.md"
+    "integrated_report": "reports/course-research/REPRODUCE.md",
+    "latest_generation": "results/evidence/description-factor-20261101/decision.json",
+    "latest_generation_reproducer": "results/evidence/description-factor-20261101/reproduction.txt"
   },
   "blocked_audit": {
     "status": "blocked",
@@ -357,40 +371,36 @@
     "review": "唯一授权独立agent只读，使用ai-pipeline-evaluation；已完成，不改文件、不跑实验、不操作Goal、不派生agent。主线程唯一写者/实验执行者。",
     "goal": "完整双提升、两批各自通过、TF与保持不降、课程交付均保留；本轮未达标，不标complete。",
     "historical_choices": "旧暂停/审批/优先级不覆盖后续授权；正例依赖仅适用于确实需要正例的机制；保留/删除与LLM参与不是禁区。",
-    "next_candidate": "ready_link v1已按冻结门槛关闭；当前没有新的冻结候选。"
+    "next_candidate": "description_factor v1 generationclosed; no newcandidatefrozen."
   },
   "active_round": {
-    "status": "completed_original_development_failed",
-    "spec": "experiments/ready-link-v1.json",
-    "evidence": "results/evidence/ready-link-20261101",
-    "output": "results/raw/ready-link-pilot-20261101",
-    "cells": 10,
-    "repeats": 1,
-    "candidate": "ready_link v1",
-    "native_calls": 232,
+    "status": "completed_generation_no_intervention",
+    "spec": "experiments/description-factor-v1.json",
+    "evidence": "results/evidence/description-factor-20261101",
+    "candidate": "description_factor v1",
+    "updater_calls": 2,
+    "actor_calls": 0,
+    "judge_calls": 0,
+    "native_calls": 0,
+    "model_calls": 2,
     "session_id": null,
-    "freeze_commit": "a95ad2d",
-    "review_freeze_commit": "89cfd3d",
-    "model_calls": 106,
+    "freeze_commit": "4a135e3",
     "goal_complete": false,
     "validation_started": false,
-    "decision": "close_ready_link_v1_no_validation"
+    "decision": "reject_generation_v1_no_actor_trial"
   },
   "current_recovery_audit": {
-    "status": "progress_completed_required_report_delivery",
+    "status": "progress_completed_new_generation_feasibility_test",
     "blocker": null,
     "same_condition_consecutive_goal_turns": 0,
-    "previous_turn": "credential response and presentation scope update; no new research evidence",
-    "current_turn": "Created and verified9pageintegratedcourse/researchreport plusreproductionentry andindependentnumericrecalculation. Deliveryprogress only; nonewmechanismoutcome.",
+    "current_turn": "新283metadata量化纠正旧457外推；冻结新的删除覆盖机制，34tests后2updatercalls实际生成空候选，按准入门槛关闭。",
     "pending_question": null,
     "goal_status": "active",
     "new_mechanism_frozen": false,
     "not_claimed": [
-      "originalbenchmark dualimprovement",
-      "formalvalidation",
-      "causal SP under-update",
-      "causal over-update harm",
-      "fullcoursecompletion",
+      "Compressionfamilyinvalid",
+      "Originalbenchmarkdual提升",
+      "正式验证",
       "Goalcompletion"
     ]
   },
