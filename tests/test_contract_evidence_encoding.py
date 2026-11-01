@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from pe6203.contract_evidence_encoding import decode, encode, compile_knowledge, normalize
+from pe6203.contract_evidence_encoding import compile_knowledge, decode, encode, normalize
 from pe6203.selective import adapt_result
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,12 +35,13 @@ def test_conflicting_probe_fields_fail_instead_of_silent_drop():
         normalize(observation)
 
 
-def test_only_changed_observed_host_can_receive_encoded_evidence():
+@pytest.mark.parametrize("layout", ["dictionary", "contrastive"])
+def test_only_changed_observed_host_can_receive_encoded_evidence(layout):
     folder = ROOT / "results/raw/observed-contract-pilot-20261031/catalogs/133"
     old = json.loads((folder / "early.json").read_text())
     target = json.loads((folder / "late.json").read_text())
     base = adapt_result(old, target)
-    knowledge, changes = compile_knowledge(base, target, OBS, "dictionary")
+    knowledge, changes = compile_knowledge(base, target, OBS, layout)
     before = {t["tool_id"]: t for t in base["knowledge"]["tools"]}
     after = {t["tool_id"]: t for t in knowledge["tools"]}
     assert [k for k in before if before[k] != after[k]] == ["math-mcp::validate_syntax"]
