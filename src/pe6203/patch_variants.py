@@ -43,6 +43,7 @@ VARIANTS = (
     "capability_withdrawal",
     "native_record_batch",
     "dependency_cut",
+    "observation_coverage",
 )
 
 SUFFICIENCY_RULE = (
@@ -669,6 +670,19 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "observation_coverage":
+        from .observation_coverage import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "certificate": "source/native observation discrimination; changed producer description only",
+            "runtime": "unchanged; observation matrix is static knowledge, no state manager",
+            "edits": len(changes),
+        }}
         return result
     if strategy == "dependency_cut":
         from .dependency_cut import compile_knowledge

@@ -1,6 +1,6 @@
 {
   "handoff_version": "dependency-factorial-completed-a1-20261101",
-  "purpose": "同一完整Goal轻量接续；A1明确获准后完成固定16单元诊断并核验。已知费用0.271760952美元、旧未知1笔；有依赖结构局部收益但原benchmark双提升未达成。无运行实验，无待批准A1。",
+  "purpose": "同一完整Goal；观察覆盖候选已完成30原生检查、66测试和10原题开发知识冻结，准备首次模型执行。上一轮16单元诊断已结束，不再重跑。",
   "workspace": {
     "repository": "/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety",
     "branch": "codex/completion-quality-study",
@@ -8,9 +8,9 @@
     "source_thread": "01a19253-fa19-74f2-89ca-eae44eeb98fb",
     "old_goal": "用户已明确授权暂停旧聊天Goal并创建新聊天继续；旧Goal已暂停，未完成。新聊天是研究的唯一执行者。",
     "working_rule": "所有仓库命令显式使用repository作为workdir。不要扫描父目录/home；不要切换分支、创建新worktree或重置文件。保留全部已有文件、原评分、正负结果。",
-    "live_work": "A1 runner52155已退出0；16actor/16evaluated/80评分槽。无运行实验，不重跑原单元。",
+    "live_work": "10单元观察覆盖原题开发已冻结、尚未模型调用。下一步唯一执行器运行原日程。",
     "current_thread": "01a19594-5645-7520-bf4f-98de0419fc4e",
-    "new_goal": "用户已明确恢复研究；Goal工具先前仍返回blocked且无工具resume入口。继续同一完整目标，不能创建替代Goal或标complete。",
+    "new_goal": "Goal active，完整目标未完成。",
     "latest_frozen_execution_commit": "0c2a249"
   },
   "goal": {
@@ -18,14 +18,13 @@
     "objective": "基于PE6203 Group Project 4 brief与MCPEvol-Bench，设计并验证至少一种符合选择性工具知识适应范围的策略，使其在预先冻结的变化任务验证子集上，相比原Selective Patch取得可复现的正常完成率与任务质量双重改善，同时保持不变任务能力。质量须同时检查官方TF与任务要求的实际产物正确性；不能用PE上升、提前结束、删减要求或选择性展示成功代替改善。复用有效证据，先明确具体机制和验收，固定模型、供应商、解码、单次预算与评分协议。开发与两批独立验证分开，各批完成率与实际质量均须严格优于SP、TF和不变任务能力不下降。原benchmark和受控合成扩展分开报告，合成成功不能证明原benchmark Goal完成。No Update/Full Rewrite保留课程基线。完成还需核对课程要求、报告、复现包和展示材料。所有正负结果、原评分和费用保留；未达双提升，目标保持未完成。",
     "budget": "无总费用/总轨迹硬上限；不得擅自设置新的总token预算。这不取消公平单次预算，也不允许无意义重试。",
     "completion": "仅完整目标经真实证据证明后才能complete；不能把负结果、归档、训练准入或计划当作目标完成。",
-    "current_state": "User resumed research explicitly. Goal tool last returnedblocked; no resume status exists in tool API. Continue authorized work without creating/replacing Goal."
+    "current_state": "get_goal returnedactive on this continuation; full objective unchanged and incomplete."
   },
   "minimum_read_order": [
-    "handoff/current.json：当前目标、完成状态与索引。",
-    "results/evidence/dependency-factorial-20261101/interpretation.json：本轮事实/观察/假说、竞争解释与下一方向。",
-    "results/evidence/dependency-factorial-20261101/decision.json：按需只看groups和单元摘要，不加载全部轨迹。",
-    "results/evidence/dependency-factorial-20261101/native-observation-source-index.json：下一机制的有限来源线索，尚未新候选冻结。",
-    "results/evidence/dependency-factorial-20261101/reproduction.txt：完整离线验证与A1/审查偏差。"
+    "handoff/current.json",
+    "results/evidence/observation-coverage-20261101/research-decision.json",
+    "results/evidence/observation-coverage-20261101/pre-model-review.json",
+    "experiments/observation-coverage-v1.json：按需检查冻结规则，不读取全部历史。"
   ],
   "hard_constraints": [
     "不得加载完整历史聊天、全部轨迹或密钥。不要读取.env；只有真实授权模型执行时通过./experiment或uv --env-file .env内部使用凭据，绝不输出。",
@@ -235,12 +234,10 @@
     }
   ],
   "next_action": {
-    "state": "固定16单元A1诊断已完成、退出0、离线复核通过。无待批准A1，无正在运行模型。",
-    "next": "围绕观察覆盖做一次有界机制查重和任务无关原生验证，再与条件化路线比较；若形成合法可证伪候选，按原133M/L+283M/L及235L冻结开发，严格通过后才两批验证。",
-    "do_not_repeat": "不重跑本诊断或旧v1；不把诊断成功纳入正例池；不重开377；不再索要网页账单；不重新请求已经明确批准的A1。",
-    "remaining_unknowns": "原题规划规模与读回负担的相对影响；观察覆盖知识能否同时改善完成与质量；原133代码正确性。",
-    "accounting": "旧unknown1保留，总实际费用未知；当前key可读usage/remaining，无法用累计值补填缺generationID的请求。备用key变量已添加但未启用。",
-    "goal_status": "用户已恢复研究，保持同一完整Goal；先前工具blocked无resume入口，不创建替代Goal，不标complete。"
+    "state": "observation_coverage v1 frozen before firstmodel call",
+    "run": "./experiment search run --output results/raw/observation-coverage-pilot-20261101 > results/evidence/observation-coverage-20261101/model-run.log 2>&1",
+    "review": "Use collect_blind.py, review10artifacts beforeownofficialscores; unchangedrubrics. No model/source/knowledge editing duringrun.",
+    "promotion": "Originalstrictwholechanged+projectdual gain,TF/235retention; onlyifpass2x30freshvalidation withsameexactcandidate."
   },
   "on_demand_map": {
     "current_protocol": "experiments/dependency-cut-v1.json",
@@ -314,42 +311,26 @@
     "next_candidate": "暂无新冻结候选。原dependency_cut v1关闭；本轮诊断支持有界研究观察覆盖与条件化成本，但不得把合成结果替代原题门槛。"
   },
   "active_round": {
-    "status": "complete_diagnostic_original_goal_incomplete",
-    "spec": "experiments/extensions/dependency-factorial-v1/protocol.json",
-    "output": "results/raw/extensions/dependency-factorial-v1",
-    "evidence": "results/evidence/dependency-factorial-20261101",
-    "source_freeze_commit": "1984654",
-    "cells": 16,
-    "model_calls": 223,
-    "new_candidate": false,
+    "status": "frozen_original_development_before_model",
+    "spec": "experiments/observation-coverage-v1.json",
+    "evidence": "results/evidence/observation-coverage-20261101",
+    "output": "results/raw/observation-coverage-pilot-20261101",
+    "cells": 10,
+    "new_candidate": true,
+    "candidate": "observation_coverage",
+    "native_calls": 30,
+    "updater_calls": 0,
+    "model_calls": 0,
     "validation_started": false,
-    "goal_complete": false,
-    "next": "完成一次有界的观察覆盖机制查重与任务无关原生合同检查，比较条件化成本路线；候选尚未冻结，不得直接复跑旧v1。原题严格门槛不变。",
-    "actor_executed": 16,
-    "evaluated_cells": 16,
-    "judge_incomplete_cells": 0,
-    "not_started_cells": 0,
-    "exact_knowledge_commit": "0c2a249",
-    "artifact_review_commit": "4739ccc",
-    "unknown_charges": 1,
-    "continuation_manifest_sha256": "cc34b7607f9b6b2b00e3bc4be6fa1201739895374e4400f36b2f5b18695faebf",
-    "continuation_executed": true,
-    "continuation_authorization_commit": "0ab3e1b",
-    "preflight_reuse_addendum": "results/evidence/dependency-factorial-20261101/preflight-reuse-addendum.json",
-    "known_usd": "0.271760952",
-    "new_known_usd_after_A1": "0.153673560",
-    "actual_total_usd": null,
-    "review_commit": "f4b81c9",
-    "terminal_session": 52155,
-    "terminal_exit_code": 0
+    "goal_complete": false
   },
   "current_recovery_audit": {
-    "status": "resolved_by_explicit_user_approval_and_completed_execution",
+    "status": "progress_new_native_discrimination_and_frozen_original_dev",
     "blocker": null,
     "same_condition_consecutive_goal_turns": 0,
-    "current_turn": "progress: A1 explicitly approved,37localtests; fixed16cells completed, productreview frozen,649raw/131source/80ratings verified; oldunknown preserved.",
+    "current_turn": "Prior71cca2e wasprogress; currentturn produced30nativeprobes,66tests,183sourcefiles andnew10originalcellfreeze; notGoalcomplete.",
     "pending_question": null,
-    "goal_status": "User resumed research explicitly. Goal tool last returnedblocked; no resume status exists in tool API. Continue authorized work without creating/replacing Goal.",
+    "goal_status": "active",
     "new_mechanism_frozen": false,
     "not_claimed": [
       "original benchmark dual improvement",

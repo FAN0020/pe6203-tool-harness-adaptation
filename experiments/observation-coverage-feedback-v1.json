@@ -1,0 +1,206 @@
+{
+  "observations": [
+    {
+      "stage": "middle",
+      "server": "@pimzino/agentic-tools-mcp",
+      "tool": "create_project",
+      "args": {},
+      "result": {
+        "kind": "observation_coverage_v1",
+        "stage": "middle",
+        "source_native_result_sha256": "ad7243ffe91901ad00b7fcf858e30b33975a950ea8d8cd20a27dfd4440eafd77",
+        "native_plan_sha256": "8543e04cdd9aeed937c1342adde4dd0ee78b24d5139030d6cc869f7204eec07c",
+        "contracts": {
+          "@pimzino/agentic-tools-mcp::create_project": "11cf24c9ebb245cadc94d64c7cafb877db3e4e7125c0b4a09e0aeb1a3171bb86",
+          "@pimzino/agentic-tools-mcp::list_tasks": "884e0bfcb9b63507d441828f09bd245e864f0056ce0c8d308b168977666fd367",
+          "@pimzino/agentic-tools-mcp::create_task": "89b775609e53d9409599ffdc359a99d7bb60a3d9c1c7cb4800a969123a56a6a7",
+          "@pimzino/agentic-tools-mcp::get_task": "3d583b27a9267b3ab57da18fb5d87af29825a8d9d4519d10150c34ff4c33d066",
+          "@pimzino/agentic-tools-mcp::update_task": "44100410a4fc33f6c01250050db1220508bdfca09d46fc5066f0c7842e321801"
+        },
+        "operators": [
+          {
+            "tool": "create_project",
+            "exact": [
+              "project.id",
+              "project.name",
+              "project.description"
+            ],
+            "conditions": "Successful returned persisted project; name/description trimmed, supplied repoUrl/tags are appended to description. No claim about task work."
+          },
+          {
+            "tool": "create_task",
+            "exact": [
+              "task.id",
+              "task.name",
+              "task.parentId",
+              "task.level",
+              "task.details",
+              "task.priority",
+              "task.complexity",
+              "task.status",
+              "task.tags",
+              "task.dependsOn"
+            ],
+            "conditions": "Successful persisted receipt, read actual values; top-level means no parent. Source sets completed=false. estimatedHours only explicit when nonzero; Not set does not establish0. Project membership is the successful call projectId."
+          },
+          {
+            "tool": "update_task",
+            "exact": [
+              "task.id",
+              "task.name",
+              "task.parentId",
+              "task.level",
+              "task.details",
+              "task.priority",
+              "task.complexity",
+              "task.status",
+              "task.completed",
+              "task.tags",
+              "task.dependsOn"
+            ],
+            "conditions": "Successful latest returned state; inspect dependency IDs, not just count. estimatedHours/actualHours0 render Not set and are not explicit numeric witnesses."
+          },
+          {
+            "tool": "get_task",
+            "exact": [
+              "task.id",
+              "task.name",
+              "task.details",
+              "task.completed",
+              "project.name"
+            ],
+            "conditions": "Its displayed Pending/Completed is derived from completed, not the domain status. Does not expose exact parentId,dependsOn,priority,complexity,tags or estimates."
+          },
+          {
+            "tool": "list_tasks flat",
+            "exact": [
+              "project.member_ids",
+              "task.id",
+              "task.name",
+              "task.level",
+              "task.details",
+              "task.tags",
+              "task.status",
+              "task.completed"
+            ],
+            "conditions": "showHierarchy=false,parentId omitted,includeCompleted=true lists unique project members. With parentId it witnesses that parent membership. Nonzero estimatedHours visible; priority/complexity icons are buckets, not exact numbers. No dependency IDs."
+          },
+          {
+            "tool": "list_tasks hierarchy",
+            "exact": [
+              "task.dependency_count"
+            ],
+            "conditions": "showHierarchy=true gives dependency counts,not IDs. Descendants may be repeated in total; do not use occurrence count as unique membership."
+          }
+        ],
+        "freshness": {
+          "accept": "Use only a successful concrete returned field; intended arguments alone are not observed state. Conditions and missing/ambiguous fields remain unknown.",
+          "invalidate": "After a later write,move or deletion affecting that entity, previous receipts for it are stale; task mutations also stale previous membership/hierarchy views. Use the latest successful receipt, or a read that exposes the missing property. External/unobserved changes also invalidate reuse.",
+          "completion": "Compare every required property with its current exact witness. A read whose projection lacks that property cannot establish it by repetition. Keep uncovered properties explicit; do not claim work completed or checks passed from a successful receipt alone. Resolve actual mismatches before reporting. No required work or safety check is removed."
+        },
+        "scope": "Native persisted-record observation contract, not task-solving recipe or evaluator. Data from source and task-free native discriminations only."
+      }
+    },
+    {
+      "stage": "late",
+      "server": "@pimzino/agentic-tools-mcp",
+      "tool": "create_project",
+      "args": {},
+      "result": {
+        "kind": "observation_coverage_v1",
+        "stage": "late",
+        "source_native_result_sha256": "ad7243ffe91901ad00b7fcf858e30b33975a950ea8d8cd20a27dfd4440eafd77",
+        "native_plan_sha256": "8543e04cdd9aeed937c1342adde4dd0ee78b24d5139030d6cc869f7204eec07c",
+        "contracts": {
+          "@pimzino/agentic-tools-mcp::create_project": "22cc8e1f4d92fd2d7f169cee46e386cb86a3eb0f74971fdb69c01a90ceb08c68",
+          "@pimzino/agentic-tools-mcp::list_tasks": "ffb07a809fff8f392f7e16ff54f33859b606cec173cd1fd37eb03a37e245de5a",
+          "@pimzino/agentic-tools-mcp::create_task": "f0107bfd66df15f3454f49fe4a0a565af4e8197b0ebb6cd1c96a45a504596413",
+          "@pimzino/agentic-tools-mcp::get_task": "cb64d4b55ab399f242b22f751863cc50116f234b2cf59a9e6625f5ad3011d611",
+          "@pimzino/agentic-tools-mcp::update_task": "79d975400d35a6176430ae03b53b596ca4741050c08070df957fb7da9c7959d7"
+        },
+        "operators": [
+          {
+            "tool": "create_project",
+            "exact": [
+              "project.id",
+              "project.name",
+              "project.description"
+            ],
+            "conditions": "Successful returned persisted project; name/description trimmed, supplied repoUrl/tags are appended to description. No claim about task work."
+          },
+          {
+            "tool": "create_task",
+            "exact": [
+              "task.id",
+              "task.name",
+              "task.parentId",
+              "task.level",
+              "task.details",
+              "task.priority",
+              "task.complexity",
+              "task.status",
+              "task.tags",
+              "task.dependsOn"
+            ],
+            "conditions": "Successful persisted receipt, read actual values; top-level means no parent. Source sets completed=false. estimatedHours only explicit when nonzero; Not set does not establish0. Project membership is the successful call projectId."
+          },
+          {
+            "tool": "update_task",
+            "exact": [
+              "task.id",
+              "task.name",
+              "task.parentId",
+              "task.level",
+              "task.details",
+              "task.priority",
+              "task.complexity",
+              "task.status",
+              "task.completed",
+              "task.tags",
+              "task.dependsOn"
+            ],
+            "conditions": "Successful latest returned state; inspect dependency IDs, not just count. estimatedHours/actualHours0 render Not set and are not explicit numeric witnesses."
+          },
+          {
+            "tool": "get_task",
+            "exact": [
+              "task.id",
+              "task.name",
+              "task.details",
+              "task.completed",
+              "project.name"
+            ],
+            "conditions": "Its displayed Pending/Completed is derived from completed, not the domain status. Does not expose exact parentId,dependsOn,priority,complexity,tags or estimates."
+          },
+          {
+            "tool": "list_tasks flat",
+            "exact": [
+              "project.member_ids",
+              "task.id",
+              "task.name",
+              "task.level",
+              "task.details",
+              "task.tags",
+              "task.status",
+              "task.completed"
+            ],
+            "conditions": "showHierarchy=false,parentId omitted,includeCompleted=true lists unique project members. With parentId it witnesses that parent membership. Nonzero estimatedHours visible; priority/complexity icons are buckets, not exact numbers. No dependency IDs."
+          },
+          {
+            "tool": "list_tasks hierarchy",
+            "exact": [
+              "task.dependency_count"
+            ],
+            "conditions": "showHierarchy=true gives dependency counts,not IDs. Descendants may be repeated in total; do not use occurrence count as unique membership."
+          }
+        ],
+        "freshness": {
+          "accept": "Use only a successful concrete returned field; intended arguments alone are not observed state. Conditions and missing/ambiguous fields remain unknown.",
+          "invalidate": "After a later write,move or deletion affecting that entity, previous receipts for it are stale; task mutations also stale previous membership/hierarchy views. Use the latest successful receipt, or a read that exposes the missing property. External/unobserved changes also invalidate reuse.",
+          "completion": "Compare every required property with its current exact witness. A read whose projection lacks that property cannot establish it by repetition. Keep uncovered properties explicit; do not claim work completed or checks passed from a successful receipt alone. Resolve actual mismatches before reporting. No required work or safety check is removed."
+        },
+        "scope": "Native persisted-record observation contract, not task-solving recipe or evaluator. Data from source and task-free native discriminations only."
+      }
+    }
+  ]
+}
