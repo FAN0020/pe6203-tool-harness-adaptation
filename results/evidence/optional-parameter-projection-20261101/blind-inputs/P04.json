@@ -1,0 +1,52 @@
+{
+  "id": "P04",
+  "question": "How can I ensure secure mathematical operations in my Python codebase by validating expressions and getting security recommendations following OWASP guidelines?",
+  "answer": "## What I ran\n\n| Check | Input | Result |\n|---|---|---|\n| Syntax validation | `(a + b) * 2 / (c - 1)` | ✅ syntactically valid (variables allowed) |\n| Evaluation | `2 + 3 * (4 - 1)` | ✅ `11` (number) |\n| Syntax validation | `__import__(\"os\").system(\"rm -rf /\")` | ❌ rejected at line 1, col 16 — `_` is not in the math grammar |\n\nThat third result is the whole idea in miniature: **a strict grammar that can't express attribute access, calls, or underscore identifiers structurally cannot reach `os.system`.** Note it rejected the payload *lexically*, before any \"is this dangerous?\" logic ran — that's the layer you want working for you, not a name blocklist. The tool above is only layer 1; you still need the rest.\n\n---\n\n## Why `eval()` for math is the wrong primitive\n\n`eval()` is not a calculator. Given `eval(user_input)` with default globals you hand over:\n\n- **Arbitrary code execution** — `__import__('os').system('id')`\n- **Sandbox escape via introspection** — `().__class__.__base__.__subclasses__()` reaches `object`'s subclass list, and from there file handles, `subprocess.Popen`, warning machinery. This defeats `{\"__builtins__\": None}` entirely.\n- **Denial of service** — `9**9**9` is a ~370-million-digit integer; `\"a\"*10**9` and `[0]*10**9` allocate GBs; `lambda: 1` defers work.\n- **Unbounded compute** — deep nesting or big factorial loops burn CPU inside your request thread.\n\nTwo traps people fall into:\n\n1. `sympy.sympify()` / `sympy.parse_expr()` internally use `eval`. Passing request data there is the same vulnerability with extra steps.\n2. `eval(expr, {\"__builtins__\": {}})` is **not** a sandbox — it's a speed bump. CPython has no supported in-process sandbox.\n\n---\n\n## The layered model\n\n```\n untrusted input\n   │\n   ▼ L1  Edge limits ........ max body size, rate limit, content-type (proxy/app)\n   ▼ L2  Lexical/grammar ..... length cap + ast.parse(mode=\"eval\"); no statements\n   ▼ L3  Static AST audit .... node-type allowlist, name allowlist, node/depth budget\n   ▼ L4  Numeric cost guards . pow/exponent/bit-length caps, finite results\n   ▼ L5  Isolation ........... subprocess + RLIMIT_CPU/RLIMIT_AS + timeout\n   ▼ L6  Failure handling .... generic 400, no traceback, structured rejection log\n```\n\nL3 and L4 must run **before** evaluation. If you validate the result *after* computing `9**9**9`, you've already hung.\n\n---\n\n## Reference implementation\n\n```python\nimport ast\nimport math\nimport operator\n\nclass ExpressionRejected(ValueError):\n    \"\"\"Raised for anything outside the accepted expression language.\"\"\"\n\nMAX_SOURCE_LEN = 256      # L2: cheap rejection before parsing\nMAX_NODES      = 100      # L3: term/operator budget\nMAX_DEPTH      = 12       # L3: nesting budget\nMAX_BITS       = 4096     # L4: integer magnitude cap (~1233 decimal digits)\n\n_ALLOWED_BINOPS = {\n    ast.Add: operator.add,      ast.Sub: operator.sub,\n    ast.Mult: operator.mul,     ast.Div: operator.truediv,\n    ast.FloorDiv: operator.floordiv, ast.Mod: operator.mod,\n    ast.Pow: operator.pow,\n}\n_ALLOWED_UNARY = {ast.UAdd: operator.pos, ast.USub: operator.neg}\n_ALLOWED_CMP   = {ast.Lt: operator.lt, ast.LtE: operator.le,\n                  ast.Gt: operator.gt, ast.GtE: operator.ge,\n                  ast.Eq: operator.eq, ast.NotEq: operator.ne}\n\n# Explicitly enumerated callables only. Never expose getattr, open, input,\n# __import__, globals, locals, vars, compile, or anything returning an object.\n_ALLOWED_FUNCS = {\n    \"abs\": abs, \"min\": min, \"max\": max, \"round\": round,\n    \"sqrt\": math.sqrt, \"log\": math.log, \"exp\": math.exp,\n}\n```\n\n### L2 + L3 — static audit\n\n```python\ndef _max_depth(root: ast.AST, limit: int) -> int:\n    deepest, stack = 0, [(root, 1)]\n    while stack:\n        node, depth = stack.pop()\n        deepest = max(deepest, depth)\n        if deepest > limit:\n            return deepest\n        for child in ast.iter_child_nodes(node):\n            stack.append((child, depth + 1))\n    return deepest\n\n\ndef parse_checked(source: str) -> ast.Expression:\n    if not isinstance(source, str):\n        raise ExpressionRejected(\"expression must be text\")\n    if len(source) > MAX_SOURCE_LEN:\n        raise ExpressionRejected(\"expression too long\")\n    if \"\\x00\" in source:\n        raise ExpressionRejected(\"invalid character\")\n\n    try:\n        # mode=\"eval\" rejects statements: \"x = 1\", \"import os\", \"a; b\"\n        tree = ast.parse(source, mode=\"eval\")\n    except (SyntaxError, ValueError):\n        raise ExpressionRejected(\"syntax error\") from None\n\n    if sum(1 for _ in ast.walk(tree)) > MAX_NODES:\n        raise ExpressionRejected(\"expression too complex\")\n    if _max_depth(tree, MAX_DEPTH) > MAX_DEPTH:\n        raise ExpressionRejected(\"expression nested too deeply\")\n\n    for node in ast.walk(tree):\n        # Default-deny: any node type not listed here is illegal.\n        if isinstance(node, (ast.Attribute, ast.Subscript, ast.Lambda,\n                             ast.comprehension, ast.Starred, ast.Await,\n                             ast.NamedExpr, ast.FormattedValue)):\n            raise ExpressionRejected(\"construct not allowed\")\n\n        if isinstance(node, ast.Call):\n            if not isinstance(node.func, ast.Name):\n                raise ExpressionRejected(\"only direct calls to known functions\")\n            if node.func.id not in _ALLOWED_FUNCS:\n                raise ExpressionRejected(\"function not allowed\")\n            if node.keywords:\n                raise ExpressionRejected(\"keyword arguments not allowed\")\n\n        if isinstance(node, ast.Constant):\n            v = node.value\n            # bool is an int subclass — reject it explicitly.\n            if isinstance(v, bool) or not isinstance(v, (int, float)):\n                raise ExpressionRejected(\"only numeric literals allowed\")\n\n    return tree\n```\n\n### L4 + evaluation\n\n```python\ndef _guard_number(value):\n    if isinstance(value, int) and value.bit_length() > MAX_BITS:\n        raise ExpressionRejected(\"result too large\")\n    if isinstance(value, float) and not math.isfinite(value):\n        raise ExpressionRejected(\"non-finite result\")\n    return value\n\n\ndef _guard_pow(base, exponent):\n    # Runs BEFORE the exponentiation so 9**9**9 is never computed.\n    if isinstance(base, int) and isinstance(exponent, int) and exponent > 0:\n        if base not in (-1, 0, 1) and exponent * base.bit_length() > MAX_BITS:\n            raise ExpressionRejected(\"result too large\")\n    elif isinstance(exponent, float) and abs(exponent) > 1000:\n        raise ExpressionRejected(\"exponent too large\")\n\n\ndef _eval(node",
+  "calls": [
+    {
+      "tool": "security-hardening-prompt-builder__b65756357998",
+      "arguments": "{\"codeContext\":\"Python service that evaluates user-supplied mathematical expressions (e.g., from a web API or config file) using eval()/exec() or a custom parser. Risks include arbitrary code execution, sandbox escapes, DoS via pathological expressions (deep nesting, huge exponents like 9**9**9), resource exhaustion, and unsafe deserialization of expression inputs. Evaluation occurs on input from untrusted clients.\",\"securityFocus\":\"security-hardening\",\"language\":\"python\",\"framework\":\"Python 3.11+ / ast module / simpleeval or asteval\",\"complianceStandards\":[\"OWASP-Top-10\",\"NIST-Cybersecurity-Framework\"],\"analysisScope\":[\"input-validation\",\"api-security\",\"configuration-security\",\"error-handling\",\"logging-monitoring\",\"dependency-security\"],\"securityRequirements\":[\"Never use eval()/exec() on untrusted input\",\"Allowlist AST node types instead of blocklisting names\",\"Enforce length and complexity limits before parsing\",\"Cap computational cost (exponent size, recursion depth, term count)\",\"Return generic errors without leaking stack traces\",\"Run evaluation in a resource-limited context\"],\"riskTolerance\":\"low\",\"includeCodeExamples\":true,\"includeMitigations\":true,\"includeTestCases\":true,\"includeReferences\":true,\"outputFormat\":\"detailed\",\"prioritizeFindings\":true,\"provider\":\"gpt-5\"}",
+      "result_outer_isError": false,
+      "result_chars": 20298
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"(a + b) * 2 / (c - 1)\",\"allow_variables\":true,\"detailed\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"2 + 3 * (4 - 1)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"2 + 3 * (4 - 1)\",\n  \"result\": 11,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"__import__(\\\"os\\\").system(\\\"rm -rf /\\\")\",\"allow_variables\":true,\"detailed\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 16: Unexpected character '_' at line 1, column 1"
+          }
+        ],
+        "isError": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,253 @@
+{
+  "id": "P02",
+  "question": "How can I ensure secure mathematical operations in my Python codebase by validating expressions and getting security recommendations following OWASP guidelines?",
+  "answer": "## What the live probes actually prove\n\nI ran your exact scenario through a strict-grammar validator and got a result that should reframe the question:\n\n| Expression | Syntax verdict | Real-world meaning |\n|---|---|---|\n| `2 + 3 * (4 - 1)` | ✅ valid | Legitimate |\n| `__import__(\"os\").system(\"rm -rf /\")` | ❌ rejected | Blocked — but only because of the underscore |\n| `os.system(\"id\")` | ❌ rejected | Blocked — but only because of the `.` |\n| `x.__class__.__bases__[0].__subclasses__()` | ❌ rejected | Blocked by character rules |\n| **`eval(\"1+1\")`** | **✅ valid** | **Accepted** |\n| **`open(\"/etc/passwd\")`** | **✅ valid** | **Accepted** |\n| **`getattr(1, \"real\")`** | **✅ valid** | **Accepted** |\n| `9**9**9**9` | ❌ rejected | Rejected as syntax, not as a DoS |\n| `1/0` and `0/0` | ✅ valid → result `null` | **Silent failure, no exception** |\n| 35 nested parentheses with `max_depth=5` | ✅ valid | **Depth limit not enforced** |\n\nThree lessons fall out of this, and they are the whole answer:\n\n1. **Syntax validation is not security validation.** `eval(\"1+1\")` parses perfectly as an arithmetic function call. A grammar that permits `identifier(...)` permits `eval`, `exec`, `compile`, `open`, `getattr`, `breakpoint`, and `__builtins__` reachability. Character blacklists (`_`, `.`, `[`) are defeated by the next encoding trick.\n2. **Limits you configure are not limits that run.** `max_depth=5` accepted 35 nested parens. Limits must be *measured on the parse tree you built*, not requested from a flag.\n3. **`1/0` returned `null` instead of raising.** In a billing path, `null` gets coerced to `0`, or propagates as `None` into a total. Silent numeric failure is a correctness *and* integrity bug, not just a UX one.\n\nThe controls must be: **allowlist the AST node types, never `eval`/`exec`, bound the computation, and fail closed.**\n\n---\n\n## The hardened evaluator\n\nDefault-deny over `ast`. Every node type not explicitly named below is rejected. This is the only structural approach that survives `eval`, `getattr`, and dunder-traversal payloads, because the *call target is checked by identity*, not by string matching.\n\n```python\nimport ast\nimport math\nimport operator\nfrom decimal import Decimal, DivisionByZero, InvalidOperation\nfrom typing import Mapping\n\n\nclass UnsafeExpression(ValueError):\n    \"\"\"Raised for any expression failing validation. Callers must treat as 400.\"\"\"\n\n\nMAX_LENGTH      = 512\nMAX_NODES       = 200\nMAX_DEPTH       = 20\nMAX_LITERAL     = 10 ** 15\nMAX_EXPONENT    = 64\nMAX_BASE        = 10 ** 12\n\n_BINOPS = {\n    ast.Add: operator.add,\n    ast.Sub: operator.sub,\n    ast.Mult: operator.mul,\n    ast.Div: operator.truediv,\n    ast.FloorDiv: operator.floordiv,\n    ast.Mod: operator.mod,\n}\n_UNARYOPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}\n\n# Fixed, named, arity-checked. Nothing here can reach the filesystem or the\n# interpreter internals.\n_FUNCS = {\n    \"abs\": (abs, 1), \"round\": (round, 1), \"min\": (min, 2), \"max\": (max, 2),\n    \"sqrt\": (math.sqrt, 1), \"log\": (math.log, 1), \"exp\": (math.exp, 1),\n    \"sin\": (math.sin, 1), \"cos\": (math.cos, 1), \"tan\": (math.tan, 1),\n    \"floor\": (math.floor, 1), \"ceil\": (math.ceil, 1),\n}\n\n\ndef evaluate(expr: str, symbols: Mapping[str, Decimal] | None = None,\n             *, max_symbols: int = 50) -> Decimal:\n    if not isinstance(expr, str):\n        raise UnsafeExpression(\"expression must be a string\")\n    if len(expr) > MAX_LENGTH:\n        raise UnsafeExpression(\"expression exceeds maximum length\")\n\n    try:\n        tree = ast.parse(expr, mode=\"eval\")\n    except (SyntaxError, ValueError, MemoryError, RecursionError):\n        raise UnsafeExpression(\"malformed expression\") from None\n\n    if sum(1 for _ in ast.walk(tree)) > MAX_NODES:\n        raise UnsafeExpression(\"expression exceeds maximum complexity\")\n\n    symbols = symbols or {}\n    if len(symbols) > max_symbols:\n        raise UnsafeExpression(\"too many symbols in scope\")\n\n    try:\n        result = _eval(tree.body, symbols, depth=0)\n    except UnsafeExpression:\n        raise\n    except DivisionByZero:\n        raise UnsafeExpression(\"division by zero\") from None\n    except (InvalidOperation, OverflowError, ValueError):\n        raise UnsafeExpression(\"arithmetic domain error\") from None\n\n    if not result.is_finite():\n        raise UnsafeExpression(\"non-finite result\")\n    return result\n\n\ndef _eval(node: ast.AST, symbols: Mapping[str, Decimal], depth: int) -> Decimal:\n    if depth > MAX_DEPTH:\n        raise UnsafeExpression(\"expression nesting too deep\")\n\n    # --- numeric literals only -------------------------------------------\n    if isinstance(node, ast.Constant):\n        v = node.value\n        if isinstance(v, bool) or not isinstance(v, (int, float)):\n            raise UnsafeExpression(\"only numeric literals are permitted\")\n        if isinstance(v, float) and not math.isfinite(v):\n            raise UnsafeExpression(\"non-finite literal\")\n        if abs(v) > MAX_LITERAL:\n            raise UnsafeExpression(\"literal out of range\")\n        return Decimal(str(v))\n\n    # --- symbol table lookup ---------------------------------------------\n    if isinstance(node, ast.Name):\n        if node.id not in symbols:\n            raise UnsafeExpression(\"unknown symbol\")\n        return symbols[node.id]\n\n    # --- unary +/- --------------------------------------------------------\n    if isinstance(node, ast.UnaryOp):\n        op = _UNARYOPS.get(type(node.op))\n        if op is None:\n            raise UnsafeExpression(\"unsupported unary operator\")\n        return op(_eval(node.operand, symbols, depth + 1))\n\n    # --- binary arithmetic ------------------------------------------------\n    if isinstance(node, ast.BinOp):\n        if isinstance(node.op, ast.Pow):\n            base = _eval(node.left, symbols, depth + 1)\n            exp = _eval(node.right, symbols, depth + 1)\n            if exp != exp.to_integral_value():\n                raise UnsafeExpression(\"non-integer exponent\")\n            e = int(exp)\n            if abs(e) > MAX_EXPONENT:\n                raise UnsafeExpression(\"exponent too large\")\n            if abs(base) > MAX_BASE:\n                raise UnsafeExpression(\"power base too large\")\n            return base ** e\n\n        op = _BINOPS.get(type(node.op))\n        if op is None:\n            raise UnsafeExpression(\"unsupported operator\")\n\n        left = _eval(node.left, symbols, depth + 1)\n        right = _eval(node.right, symbols, depth + 1)\n\n        if op in (operator.truediv, operator.floordiv, operator.mod) and right == 0:\n            raise UnsafeExpression(\"division by zero\")\n        if op is operator.truediv:\n            # Decimal context can throw on pathological scales; catch upstream.\n            return left / right\n        return op(left, right)\n\n    # --- allowlisted function calls only ----------------------------------\n    if isinstance(node, ast.Call):\n        if not isinstance(node.func, ast.Name):\n            raise UnsafeExpression(\"only direct calls to known functions\")\n        entry = _FUNCS.get(node.func.id)\n        if entry is None:\n            raise UnsafeExpression(\"function not permitted\")\n        fn, arity = entry\n        if node.keywords:\n            raise UnsafeExpression(\"keyword arguments not permitted\")\n        if not (arity == 1 or arity <= len(node.args) <= 4):\n            if len(node.args) != arity:\n                raise UnsafeExpression(\"wrong argument count\")\n        args = [_eval(a, symbols, depth + 1) for a in node.args]\n        return fn(*args)\n\n    # --- default deny ------------------------------------------------------\n    raise UnsafeExpression(f\"node type not permitted: {type(node).__name__}\")\n```\n\nWhy this closes the holes from the probe table:\n\n- `open(\"/etc/passwd\")` → `ast.Call` whose `func` is a `Name` **not in `_FUNCS`** → rejected. The check is on the resolved allowlist entry, not on spelling.\n- `eval(\"1+1\")` → same path → rejected.\n- `getattr(1, \"real\")` → rejected, and `ast.Attribute` isn't in the allowlist at all, so `x.__class__...` dies before evaluation.\n- `9**9**9**9` → `Pow` requires integer exponent ≤ 64 and base ≤ 10¹². Rejected by measurement, not by grammar.\n- 35 nested parens → `depth` counter increments on every recursive descent → `MAX_DEPTH` trip.\n- `1/0` → explicit `right == 0` guard → `UnsafeExpression`, not `None`.\n\nNote `**` is common in formulas, so I kept it *with* guards rather than removing it. The guard pair (exponent magnitude **and** base magnitude) is what matters — either one alone is bypassable (`1e-300 ** 1e15` still explodes in cost terms).\n\n---\n\n",
+  "calls": [
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"2 + 3 * (4 - 1)\",\"allow_variables\":false,\"detailed\":true,\"show_ast\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"__import__(\\\"os\\\").system(\\\"rm -rf /\\\")\",\"allow_variables\":false,\"detailed\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 16: Unexpected character '_' at line 1, column 1"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"eval(\\\"1+1\\\")\",\"allow_variables\":false,\"detailed\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"(a + b) * (a + b)\",\"allow_variables\":true,\"detailed\":true}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "security-hardening-prompt-builder__b65756357998",
+      "arguments": "{\"codeContext\":\"A Python service that accepts user-supplied mathematical expressions (formulas from a web form and a REST API), evaluates them with Python's eval()/exec() inside a dict of local variables, and returns the numeric result. Expressions may contain variable references looked up from a per-request symbol table. The service runs in a container alongside other tenant workloads and results feed into billing calculations.\",\"securityFocus\":\"security-hardening\",\"language\":\"python\",\"framework\":\"Python 3 / FastAPI / Docker\",\"complianceStandards\":[\"OWASP-Top-10\",\"NIST-Cybersecurity-Framework\"],\"analysisScope\":[\"input-validation\",\"authentication\",\"authorization\",\"error-handling\",\"logging-monitoring\",\"configuration-security\",\"dependency-security\"],\"securityRequirements\":[\"Never pass untrusted input to eval/exec or to ast.literal_eval for arithmetic\",\"Enforce a strict allowlist grammar: numeric literals, + - * / ** %, parentheses, and a fixed set of math functions\",\"Hard limits on expression length, nesting depth, token count, and variable-reference count\",\"Block attribute access, subscripts, comprehensions, lambdas, imports, and dunder traversal\",\"Bound computational cost: no unbounded exponentiation (DoS), timeouts and memory caps per evaluation\",\"Reject NaN/Infinity results and handle ZeroDivisionError without leaking internals\",\"Audit-log every rejected expression with a correlation ID for detection and forensics\"],\"riskTolerance\":\"low\",\"outputFormat\":\"detailed\",\"includeCodeExamples\":true,\"includeMitigations\":true,\"includeTestCases\":true,\"prioritizeFindings\":true,\"includePitfalls\":true,\"includeReferences\":true}",
+      "result_outer_isError": false,
+      "result_chars": 18488
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"open(\\\"/etc/passwd\\\")\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"os.system(\\\"id\\\")\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 3: Expected semicolon or newline after statement\nLine 1, Column 3: Expected expression\nLine 1, Column 3: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"1/0\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"9**9**9**9\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 3: Expected expression\nLine 1, Column 3: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"(((((((1+2)))))))\",\"max_depth\":5}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"x.__class__.__bases__[0].__subclasses__()\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 18: Unexpected character '_' at line 1, column 3"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "batch_evaluate__59d51f1760fa",
+      "arguments": "{\"expressions\":[\"2**10 + sqrt(16)\",\"100/(2+3)\",\"(1+2)*(3+4)\",\"2 + 3 * (4 - 1)\"],\"stop_on_error\":false}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Error: this.toolHandlers.handleBatchEvaluate is not a function"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"getattr(1, \\\"real\\\")\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"(((((((1+2)))))))\",\"max_depth\":3}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"2**10 + 100/(2+3)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 3: Expected expression\nLine 1, Column 3: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"1/0\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"1/0\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "set_variable__b4e6856a10df",
+      "arguments": "{\"expression\":\"100/(2+3)\",\"name\":\"unit_price\"}",
+      "result_outer_isError": false,
+      "result_chars": 93
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"((((((((((((((((((((((((((((((((((((1+2))))))))))))))))))))))))))))))))))))\",\"max_depth\":5}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"0/0\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"0/0\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"allow_variables\":false,\"expression\":\"2 ** 10\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 4: Expected expression\nLine 1, Column 4: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    }
+  ]
+}
