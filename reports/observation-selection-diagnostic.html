@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PE6203 · 观察选择诊断</title><style>
+body{font:16px/1.7 system-ui,sans-serif;max-width:1120px;margin:40px auto;padding:0 24px;color:#1b2938;background:#fafbfc}
+h1{font-size:29px}h2{font-size:21px;margin-top:32px}a{color:#075ba6}table{border-collapse:collapse;width:100%;background:#fff;font-size:14px}
+th,td{padding:9px;border-bottom:1px solid #d6dfe8;text-align:left}th{background:#edf2f7}.scroll{overflow-x:auto}
+.decision{padding:18px;border-left:5px solid #a96a00;background:#fff4e5}.muted{color:#526171;font-size:14px}code{background:#eef1f4}
+</style><body><p class="muted">PE6203 · 2026-11-01 · 独立编号的受控合成诊断</p>
+<h1>观察覆盖知识是否改变证据选择？</h1>
+<div class="decision">观察选择诊断未发现预定的跨区组收益，结束该诊断并降低现有 v1 路线的优先级。 原题 observation_coverage v1 开发失败保持不变；没有启动正式验证，完整 Goal 未完成。</div>
+<h2>为何进行这项诊断</h2>
+<p>上一轮原题四个项目运行均没有 get_task 调用，因而不能把局部项目收益解释成减少该工具的读取。
+本次将“证据覆盖差异是否影响行为”与“actor 自选项目计划负担”分开检验。完全复用原 283 Late 的 SP 和候选知识，不追加提示、不修改模型或执行器，不把旧失败改成成功。</p>
+<p>沿用 <a href="https://arxiv.org/html/2304.11477v1">LLM+P 固定 v1</a> 与官方源码
+<a href="https://github.com/Cranial-XIX/llm-pddl/tree/f5f897ccabfb19d5158e5a7ac4cb36517cd4c2e0">f5f897cc</a> 的显式事实/效应表示借鉴。
+本项目的字段观察覆盖与失效条件是扩展，不等于完整 LLM+P。未引入规划器、benchmark 答案或训练轨迹。</p>
+<h2>冻结设计与输入检查</h2>
+<p>原生规则提交 <code>3249cfd</code>，全部模型输入与 136 个源文件冻结于 <code>4e15061</code>。
+7 次原生调用生成真实创建回执及修改前后状态：名称从 Larch checkpoint 改为 Cedar checkpoint，优先级从 3 改为 7。
+get_task 显示名称而不显示数值优先级；推荐工具可显示这个单一待办任务的数值优先级。4 次只读检查均未改变存储。</p>
+<p>四种条件为新鲜/过期回执 × 名称/优先级，各由两种方法执行两次，共 16 个单元。所有条件使用同一历史回执，双方共享相同预置存储。
+新鲜性由题目明确保证或否定，不声称测试了自主识别外部修改。只读任务禁止通过修改记录获取回执；工具仍全部可用，未加运行时过滤。
+答案仅用于评测，不输入 updater。固定模型、DigitalOcean、温度 0、单次 4096 token、12 轮和原五槽评分协议不变；独立费用账本。</p>
+<h2>实际结果</h2>
+<div class="scroll"><table><thead><tr><th>任务</th><th>条件</th><th>方法</th><th>正常完成</th><th>完整质量</th><th>TF</th><th>PE</th><th>平均工具调用</th></tr></thead><tbody><tr><td>902001</td><td>fresh / name</td><td>selective_patch</td><td>2/2</td><td>2/2</td><td>10.00</td><td>10.00</td><td>2.5</td></tr><tr><td>902001</td><td>fresh / name</td><td>observation_coverage</td><td>2/2</td><td>2/2</td><td>10.00</td><td>8.60</td><td>3.0</td></tr><tr><td>902002</td><td>fresh / priority</td><td>selective_patch</td><td>2/2</td><td>2/2</td><td>9.90</td><td>8.70</td><td>3.5</td></tr><tr><td>902002</td><td>fresh / priority</td><td>observation_coverage</td><td>2/2</td><td>1/2</td><td>9.90</td><td>7.40</td><td>3.5</td></tr><tr><td>902003</td><td>stale / name</td><td>selective_patch</td><td>2/2</td><td>0/2</td><td>10.00</td><td>9.30</td><td>3.0</td></tr><tr><td>902003</td><td>stale / name</td><td>observation_coverage</td><td>2/2</td><td>2/2</td><td>10.00</td><td>9.10</td><td>3.0</td></tr><tr><td>902004</td><td>stale / priority</td><td>selective_patch</td><td>2/2</td><td>1/2</td><td>9.80</td><td>5.80</td><td>5.5</td></tr><tr><td>902004</td><td>stale / priority</td><td>observation_coverage</td><td>2/2</td><td>1/2</td><td>8.70</td><td>6.00</td><td>5.5</td></tr></tbody></table></div>
+<p>两组均正常完成8/8，全部存储保持不变、没有修改调用。原SP正确给出当前请求值8/8，候选7/8；完整质量主判为5/8与6/8，候选的局部优势来自过期名称条件中更谨慎的附带陈述，并不代表优先级核查或完成率提升。原SP总调用29次，候选30次；新鲜条件读取12次与13次。</p>
+<p>“非字段证据读取”指该次返回不直接显示所请求字段；它不自动等于无用，部分读取用于身份确认。
+“新鲜条件读取”只计已有保证有效回执时发生的读取，不将省略必要核查当作收益。完整质量同时要求状态保持、当前值、有效证据和真实陈述。</p>
+<div class="scroll"><table><thead><tr><th>审查</th><th>区组</th><th>任务</th><th>方法</th><th>停止状态</th><th>质量</th><th>调用</th><th>非字段证据读取</th><th>新鲜条件读取</th></tr></thead><tbody><tr><td>S15</td><td>1</td><td>902001</td><td>selective_patch</td><td>completed</td><td>通过</td><td>3</td><td>1</td><td>3</td></tr><tr><td>S01</td><td>1</td><td>902001</td><td>observation_coverage</td><td>completed</td><td>通过</td><td>3</td><td>1</td><td>3</td></tr><tr><td>S02</td><td>1</td><td>902004</td><td>observation_coverage</td><td>completed</td><td>通过</td><td>7</td><td>6</td><td>0</td></tr><tr><td>S16</td><td>1</td><td>902003</td><td>selective_patch</td><td>completed</td><td>未通过</td><td>3</td><td>1</td><td>0</td></tr><tr><td>S12</td><td>1</td><td>902002</td><td>selective_patch</td><td>completed</td><td>通过</td><td>3</td><td>3</td><td>3</td></tr><tr><td>S08</td><td>1</td><td>902002</td><td>observation_coverage</td><td>completed</td><td>通过</td><td>3</td><td>3</td><td>3</td></tr><tr><td>S04</td><td>1</td><td>902004</td><td>selective_patch</td><td>completed</td><td>通过</td><td>5</td><td>4</td><td>0</td></tr><tr><td>S07</td><td>1</td><td>902003</td><td>observation_coverage</td><td>completed</td><td>通过</td><td>3</td><td>1</td><td>0</td></tr><tr><td>S13</td><td>2</td><td>902004</td><td>observation_coverage</td><td>completed</td><td>未通过</td><td>4</td><td>4</td><td>0</td></tr><tr><td>S14</td><td>2</td><td>902001</td><td>observation_coverage</td><td>completed</td><td>通过</td><td>3</td><td>1</td><td>3</td></tr><tr><td>S10</td><td>2</td><td>902003</td><td>observation_coverage</td><td>completed</td><td>通过</td><td>3</td><td>1</td><td>0</td></tr><tr><td>S03</td><td>2</td><td>902002</td><td>observation_coverage</td><td>completed</td><td>未通过</td><td>4</td><td>4</td><td>4</td></tr><tr><td>S05</td><td>2</td><td>902001</td><td>selective_patch</td><td>completed</td><td>通过</td><td>2</td><td>1</td><td>2</td></tr><tr><td>S09</td><td>2</td><td>902004</td><td>selective_patch</td><td>completed</td><td>未通过</td><td>6</td><td>5</td><td>0</td></tr><tr><td>S06</td><td>2</td><td>902002</td><td>selective_patch</td><td>completed</td><td>通过</td><td>4</td><td>3</td><td>4</td></tr><tr><td>S11</td><td>2</td><td>902003</td><td>selective_patch</td><td>completed</td><td>未通过</td><td>3</td><td>1</td><td>0</td></tr></tbody></table></div>
+<h2>判别结果与下一步</h2>
+<p>本轮直接否定了“该固定知识能在这些条件下稳定节省读取或提高过期优先级核查质量”的预测。两组均能在部分运行中选择真实的只读替代证据；候选一次误将特定投影不显示该字段扩大为所有获准读取均不可观测，另一次错误声称只有写工具能回显优先级。它在名称条件中限制无关字段断言的现象值得保留，但不能据此推断原题项目局部收益的原因。</p>
+<p>在揭盲前记录的宽松解释将原SP的S16和S09两份答复改判通过时，完整质量为SP7/8、候选6/8；过期优先级SP2/2、候选1/2。主判与宽松解释均不满足预定机制支持条件，因此停止决定不依赖这两处文字争议。</p>
+<p>不重复原题v1，不继续为该知识追加同类合成审计，也不把替代读取提示直接包装为新候选。后续研究优先处理原题执行收尾与最终产物语义；任何新方案仍需实际机制差异和合法信息来源。当前没有新的已冻结候选；最终课程综合交付仍需补齐，但不替代未完成的研究突破。</p>
+<p>事先规定的支持条件要求：两个区组的过期优先级条件均有完整质量增益且其他条件不退化，或全部质量通过并在两个区组均减少过期优先级的非字段证据读取及新鲜条件读取。未根据结果修改门槛、删除失败或补采样。</p>
+<h2>复现、成本与结论边界</h2>
+<p>658 个原始文件、136 个源文件及 80 个原评分槽已离线核验。
+133 笔请求结算 USD <strong>0.112388832</strong>，新增未知费用 0，updater 调用 0。
+旧 factorial 未知费用仍在独立历史账本中。准备脚本字段名错误发生于任何模型调用前，原部分复制文件和修复证据均保留。</p>
+<p>同一协调者先审产物再揭方法/评分，非独立人工或严格方法盲评；工作目录包含 cell 编号。
+两个区组是新进程/工作区中的重复执行，不代表未见任务或统计独立保证。合成审计不能替代原 benchmark 的完整开发门槛与两批验证。
+NU/FR 历史课程基线保持不变，最终课程综合报告和展示仍待完成。</p>
+<p><a href="../results/evidence/observation-selection-20261101/research-decision.json">准入与候选比较</a> · <a href="../results/evidence/observation-selection-20261101/native-decision.json">原生检查</a> · <a href="../results/evidence/observation-selection-20261101/decision.json">全部指标与门槛</a> · <a href="../results/evidence/observation-selection-20261101/interpretation.json">判断与限制</a> · <a href="../results/evidence/observation-selection-20261101/review-freeze.json">审查冻结</a> · <a href="../results/evidence/observation-selection-20261101/sensitivity-before-unblinding.json">争议判断敏感性</a> · <a href="../results/evidence/observation-selection-20261101/reproduction.txt">复现说明</a></p></body></html>
