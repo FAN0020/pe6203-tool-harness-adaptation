@@ -50,6 +50,7 @@ VARIANTS = (
     "instruction_scope",
     "instruction_scope_quote",
     "active_contract_probing",
+    "shared_contract_refs",
 )
 
 SUFFICIENCY_RULE = (
@@ -676,6 +677,19 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "shared_contract_refs":
+        from .shared_contract_refs import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(old, target)
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "source": "exact same-host property/presence equivalence and protected declaration anchors",
+            "scope": "changed descriptive fields only; expansion recovers exact SP; native schemas/routes/order unchanged",
+            "edits": len(changes),
+        }}
         return result
     if strategy == "active_contract_probing":
         from .active_contract_probing import frozen_knowledge
