@@ -39,6 +39,8 @@ VARIANTS = (
     "semantic_contract_direct",
     "semantic_contract_closure",
     "optional_parameter_projection",
+    "capability_warning",
+    "capability_withdrawal",
 )
 
 SUFFICIENCY_RULE = (
@@ -665,6 +667,22 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy in ("capability_warning", "capability_withdrawal"):
+        from .capability_withdrawal import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(
+            base, target, context.get("feedback", []),
+            withdraw=strategy == "capability_withdrawal",
+        )
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "certificate": "fixed source/native certificate and exact field allowlist",
+            "native_runtime": "unchanged; static model-facing knowledge only",
+            "edits": len(changes),
+        }}
         return result
     if strategy in ("semantic_contract_direct", "semantic_contract_closure", "optional_parameter_projection"):
         from .semantic_contract_maintenance import frozen_patch
