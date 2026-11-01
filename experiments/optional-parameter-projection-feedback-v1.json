@@ -1,0 +1,206 @@
+{
+  "kind": "frozen_semantic_corrections_plus_optional_omission_certificate",
+  "semantic_review": "required_before_actor",
+  "input_sha256": "7f6b857faba33f2180d74a1a98b82482ec4e5d531a797a018f33739b82ad67cc",
+  "observations": [
+    {
+      "stage": "middle",
+      "server": "math-mcp",
+      "tool": "validate_syntax",
+      "args": {},
+      "result": {
+        "kind": "semantic_contract_maintenance_v1",
+        "proposal": {
+          "edges": [],
+          "edits": [
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.detailed.description",
+              "before": "If true, return a more detailed validation result when supported",
+              "after": "Accepted but ignored: validation output is unchanged whether this is true or false",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "middle-source-1",
+                "middle-source-2",
+                "middle-syntax-probes"
+              ],
+              "reason": "Server defaults detailed but handleValidateSyntax never reads it; probe with detailed:true returned the same output. The 'when supported' hedge implies possible effect, which source contradicts."
+            },
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.allow_variables.description",
+              "before": "If true, allow variable references during validation when supported",
+              "after": "Accepted but ignored: variable references such as q+1 validate the same whether this is true or false",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "middle-source-1",
+                "middle-source-2",
+                "middle-syntax-probes"
+              ],
+              "reason": "Server defaults allow_variables but handler never reads it; probes show q+1 valid with both false and true. Ordinary grammar validation still occurs."
+            }
+          ]
+        },
+        "evidence_ids": [
+          "middle-source-1",
+          "middle-source-2",
+          "middle-syntax-probes"
+        ],
+        "old_sha256": "90ce138ddfe36236d27c8179834d22c921521b430c2e3a7b4213d162a3583006",
+        "target_sha256": "09329ceb1f8cacc379dbaa4fb5888bc49206b92ea7e844befd364306ad62eeb7",
+        "projection_certificate": {
+          "kind": "source_certified_optional_projection_v1",
+          "handler_sha256": "fe63b22756354f3249c450dbf113ccd8f24579654debf3e4412c3ce971ea2c39",
+          "server_sha256": "881897c762485ab29df7432ac7ffd60c4564428a2b820c0d96d7f990a0efdb66",
+          "handler_reads": [
+            "expression"
+          ],
+          "erase": [
+            "detailed",
+            "allow_variables"
+          ],
+          "omission_equivalence_passed": true,
+          "native_results_sha256": "1aa531d12f560a7cce4c87c1f84a9a3f5e9fa7a9edb3221ae8e2b92a97f215c7"
+        }
+      }
+    },
+    {
+      "stage": "late",
+      "server": "math-mcp",
+      "tool": "validate_syntax",
+      "args": {},
+      "result": {
+        "kind": "semantic_contract_maintenance_v1",
+        "proposal": {
+          "edges": [],
+          "edits": [
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.detailed.description",
+              "before": "If true, return a more detailed validation result when supported",
+              "after": "Accepted boolean (default false). The current handler ignores it: the output is the same as without it, so it does not change the validation result.",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "late-source-2",
+                "late-source-1",
+                "late-syntax-probes"
+              ],
+              "reason": "Server validates it is a boolean and passes it through, but handleValidateSyntax only destructures expression and never reads detailed; probe with detailed=true returns the same text as without it, so no more detailed result is produced."
+            },
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.allow_variables.description",
+              "before": "Explicitly specify whether variable references are allowed during validation",
+              "after": "Required boolean that must be explicitly provided (the server rejects calls where it is missing or non-boolean). The current handler does not use its value: expressions with variable references, such as q+1, validate the same whether it is true or false.",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "late-source-2",
+                "late-source-1",
+                "late-syntax-probes"
+              ],
+              "reason": "Server requires allow_variables as a boolean. handleValidateSyntax ignores all flags, and probes show q+1 validates identically with true and false, so it does not gate variable acceptance. Grammatical variable references are still checked by the grammar parser."
+            },
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.show_ast.description",
+              "before": "If true, include the abstract syntax tree (AST) structure in the validation result",
+              "after": "Accepted boolean (default false). The current handler ignores it: no abstract syntax tree is included in the result; output is the validity message or syntax errors as usual.",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "late-source-2",
+                "late-source-1",
+                "late-syntax-probes"
+              ],
+              "reason": "Server passes show_ast through, but handleValidateSyntax never reads it; probe with show_ast=true returns only 'Expression is syntactically valid.' with no AST."
+            },
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.check_balanced.description",
+              "before": "If true, perform additional validation to ensure all brackets and parentheses are properly balanced",
+              "after": "Accepted boolean (default true). The current handler ignores it: no additional bracket/parenthesis balance check is performed based on this flag; whatever balance-related errors the grammar parser reports occur regardless.",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "late-source-2",
+                "late-source-1"
+              ],
+              "reason": "Server defaults it to true and passes it, but handleValidateSyntax does not read it; no additional balance validation is implemented in the handler. Ordinary grammar parsing still occurs."
+            },
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.max_depth.description",
+              "before": "Maximum allowed nesting depth for expressions (e.g., nested parentheses or function calls). If specified, validation fails if depth exceeds this limit",
+              "after": "Optional integer between 1 and 100 (schema-enforced; server rejects non-integers and out-of-range values). The current handler ignores its value: no nesting-depth limit is applied, and deeply nested expressions such as sin(sin(1)) with max_depth=1 still validate.",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "late-source-2",
+                "late-source-1",
+                "late-syntax-probes"
+              ],
+              "reason": "Schema and server enforce type/range, but handleValidateSyntax never reads max_depth; probe with sin(sin(1)) and max_depth=1 returns valid, so validation does not fail on depth. Schema still governs type and range."
+            },
+            {
+              "tool_id": "math-mcp::batch_evaluate",
+              "path": "description",
+              "before": "Evaluate multiple mathematical expressions in a single batch operation",
+              "after": "Not functional in the current release: calling this tool returns an error that the batch handler is not a function. To evaluate expressions individually, use the evaluate tool once per expression.",
+              "basis": "math-mcp::batch_evaluate",
+              "evidence": [
+                "late-source-2",
+                "late-batch-probes"
+              ],
+              "reason": "Server routes batch_evaluate to this.toolHandlers.handleBatchEvaluate, which is not defined in the handlers source; probe returns isError with 'handleBatchEvaluate is not a function'. Individual evaluate calls succeeded in probes."
+            },
+            {
+              "tool_id": "math-mcp::batch_evaluate",
+              "path": "parameters.properties.expressions.description",
+              "before": "Array of mathematical expressions to evaluate",
+              "after": "Array of expression strings accepted by the schema for batch_evaluate. The current batch_evaluate handler is not implemented, so this argument cannot be processed and the call fails with an error; use evaluate individually instead.",
+              "basis": "math-mcp::batch_evaluate",
+              "evidence": [
+                "late-source-2",
+                "late-batch-probes"
+              ],
+              "reason": "Schema declares a string array, but the batch handler is missing so no expression is actually evaluated; probes confirm the tool errors out. Schema still governs the argument type."
+            },
+            {
+              "tool_id": "math-mcp::batch_evaluate",
+              "path": "parameters.properties.stop_on_error.description",
+              "before": "If true, stop processing on first error; if false, continue and report all results",
+              "after": "Accepted boolean (default false) in the schema, but it has no effect: the current batch_evaluate handler is not implemented, so the call fails regardless of this value.",
+              "basis": "math-mcp::batch_evaluate",
+              "evidence": [
+                "late-source-2",
+                "late-batch-probes"
+              ],
+              "reason": "Server defaults stop_on_error to false and passes it, but handleBatchEvaluate does not exist; probe with stop_on_error=false returns a handler-missing error, so no stop/continue behavior is implemented."
+            }
+          ]
+        },
+        "evidence_ids": [
+          "late-source-1",
+          "late-source-2",
+          "late-syntax-probes",
+          "late-batch-probes"
+        ],
+        "old_sha256": "90ce138ddfe36236d27c8179834d22c921521b430c2e3a7b4213d162a3583006",
+        "target_sha256": "689bcfcc0321c6c3b28da19ea90e43b974ce8aa120c4c2aa4e9b35683a5c6b7d",
+        "projection_certificate": {
+          "kind": "source_certified_optional_projection_v1",
+          "handler_sha256": "fe63b22756354f3249c450dbf113ccd8f24579654debf3e4412c3ce971ea2c39",
+          "server_sha256": "96a4f655eda70b22aa1d31192a5a72f507d52eeaa4799d3a6bfaff4e9a60c8be",
+          "handler_reads": [
+            "expression"
+          ],
+          "erase": [
+            "detailed",
+            "show_ast",
+            "check_balanced",
+            "max_depth"
+          ],
+          "omission_equivalence_passed": true,
+          "native_results_sha256": "1aa531d12f560a7cce4c87c1f84a9a3f5e9fa7a9edb3221ae8e2b92a97f215c7"
+        }
+      }
+    }
+  ]
+}

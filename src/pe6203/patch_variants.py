@@ -38,6 +38,7 @@ VARIANTS = (
     "prefix_workflow_memory",
     "semantic_contract_direct",
     "semantic_contract_closure",
+    "optional_parameter_projection",
 )
 
 SUFFICIENCY_RULE = (
@@ -665,19 +666,26 @@ def adapt_result(old, target, strategy, context=None):
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
         return result
-    if strategy in ("semantic_contract_direct", "semantic_contract_closure"):
+    if strategy in ("semantic_contract_direct", "semantic_contract_closure", "optional_parameter_projection"):
         from .semantic_contract_maintenance import frozen_patch
 
         result["knowledge"], annotations = frozen_patch(
             old, target, context.get("feedback", []), strategy == "semantic_contract_closure"
         )
         result["changes"].extend({"operation": "frozen_semantic_edit", **a} for a in annotations)
+        if strategy == "optional_parameter_projection":
+            from .optional_parameter_projection import project_optional
+
+            result["knowledge"], erasures = project_optional(old, target, context.get("feedback", []))
+            result["changes"].extend(erasures)
         result["cost"].update(seconds=perf_counter() - started,
                               update_operations=len(result["changes"]))
         result["validation"] = {"errors": [], "checks": {
             "compiled_annotation_edits": len(annotations),
             "semantic_review": "external_frozen_knowledge_review_required",
             "generation_cost": "separate_unique_updater_audits_not_double_counted_on_reuse",
+            "projection": "only source-certified optional properties; native schema unchanged"
+            if strategy == "optional_parameter_projection" else "none",
         }}
         return result
     if strategy == "prefix_workflow_memory":
