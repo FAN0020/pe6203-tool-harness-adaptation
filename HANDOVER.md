@@ -24,7 +24,11 @@
 
 交接时没有正在运行的实验或renderer。研究结果基点为`ac4c328`，本次交接不改任何旧结果。交接前仅出现EasyTool/Play2Prompt/工具描述重写的搜索线索，尚未完成原文与固定源码核对，也没有新候选或新模型调用；不能当作已完成研究。新聊天创建同一完整目标的Goal后自主推进，旧聊天不再并发研究。
 
-### 当前最新断点：新聊天已接手；三条接口学习线索经准入复盘仍无新候选
+### 当前最新状态：Goal 已阻塞，目标未完成
+
+同一机制准入障碍在本聊天连续三轮存在；最后两轮没有新进展。已核对干净的`f445fa5`、未准入候选及训练失败门槛，Goal工具已返回`blocked`。完整目标、研究边界和全部结果保留，不把阻塞当完成。具体三轮审计和恢复所需的新证据见`handoff/current.json`的`blocked_audit`。没有新模型调用或未完成实验；不要自动重跑已关闭方案或重复文献归档。
+
+### 最近实质进展：新聊天接手并完成接口学习线索准入复盘
 
 - 本聊天`01a19594-5645-7520-bf4f-98de0419fc4e`已按同一完整objective创建active Goal，无总token预算；旧Goal仍暂停。直接使用`codex/completion-quality-study`，未切分支或新建worktree。
 - 新证据见`results/evidence/interface-mechanism-review-20261101/bounded-review.json`与`reports/interface-mechanism-admission.html`。核读EasyTool2401.06201v3、Play2Prompt2503.14432v2、Trace-Free+2602.20426v2（亦读v1相关段），固定三个作者仓库SHA及定向源码。没有执行作者程序或模型。
