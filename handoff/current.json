@@ -10,7 +10,7 @@
     "working_rule": "所有仓库命令显式使用repository作为workdir。不要扫描父目录/home；不要切换分支、创建新worktree或重置文件。保留全部已有文件、原评分、正负结果。",
     "live_work": "模型进程session52841已退出2；不要重启旧run_model_trial.py。先读interruption与A2；现阶段无新模型调用。",
     "current_thread": "01a19594-5645-7520-bf4f-98de0419fc4e",
-    "new_goal": "Goal active，完整目标未完成。",
+    "new_goal": "Goal blocked（A2/单笔结算依赖）；完整目标未完成。",
     "latest_frozen_execution_commit": "029a937",
     "latest_product_review_commit": "818ba09",
     "latest_native_diagnostic_freeze": "353073c",
@@ -21,7 +21,7 @@
     "objective": "基于PE6203 Group Project 4 brief与MCPEvol-Bench，设计并验证至少一种符合选择性工具知识适应范围的策略，使其在预先冻结的变化任务验证子集上，相比原Selective Patch取得可复现的正常完成率与任务质量双重改善，同时保持不变任务能力。质量须同时检查官方TF与任务要求的实际产物正确性；不能用PE上升、提前结束、删减要求或选择性展示成功代替改善。复用有效证据，先明确具体机制和验收，固定模型、供应商、解码、单次预算与评分协议。开发与两批独立验证分开，各批完成率与实际质量均须严格优于SP、TF和不变任务能力不下降。原benchmark和受控合成扩展分开报告，合成成功不能证明原benchmark Goal完成。No Update/Full Rewrite保留课程基线。完成还需核对课程要求、报告、复现包和展示材料。所有正负结果、原评分和费用保留；未达双提升，目标保持未完成。",
     "budget": "无总费用/总轨迹硬上限；不得擅自设置新的总token预算。这不取消公平单次预算，也不允许无意义重试。",
     "completion": "仅完整目标经真实证据证明后才能complete；不能把负结果、归档、训练准入或计划当作目标完成。",
-    "current_state": "get_goal active; complete objective unmet. Latest user removes slide/speaker-script edits because presentation ended; report/repro/research remain."
+    "current_state": "Goal blocked confirmed by tool; original objective incomplete. No slide/speaker-script edits per latest user."
   },
   "minimum_read_order": [
     "handoff/current.json",
@@ -415,7 +415,7 @@
     }
   ],
   "next_action": {
-    "status": "unknown_charge_stop_a2_prepared_not_authorized",
+    "status": "blocked_awaiting_a2_or_request_settlement",
     "rule": "5evaluated+1blocked+4unstarted；53settled+1unknown。不得把429或累计余额当作单笔结算，也不能扩大旧A1。A2只允许未启动4格，保留第6格失败，无严格晋级。先处理明确例外决定，不重跑或更改候选。",
     "presentation": "No slides/scripts."
   },
@@ -526,20 +526,41 @@
     "continuation_authorized": false
   },
   "current_recovery_audit": {
-    "status": "second_turn_same_unknown_charge_stop_with_offline_product_audit",
-    "same_condition_consecutive_goal_turns": 2,
+    "status": "blocked_confirmed_by_update_goal",
+    "same_condition_consecutive_goal_turns": 3,
     "blocker": "新unknowncharge无generationID；原冻结规则不允许沿用旧A1。现有actor无恢复检查点。",
     "pending_question": "是否批准A2：只续跑原剩余4格、保留未知费用与第6格失败，不进入验证。",
-    "goal_status": "active",
+    "goal_status": "blocked",
     "new_mechanism_frozen": true,
-    "current_turn": "A2未收到明确批准；原账本54请求及5+1+4状态不变。新增离线第6格产物审查：18tasks，CSV8/log6子任务，visualization/integration0；3引用调用路径正确，anchor调用0，不证明机制有效。",
+    "current_turn": "无新研究进展。A2授权仍缺失，54请求账本逐字不变；原session52841已不存在。不是活跃进程等待，不能将自动Goal续接视为A2批准。",
     "not_claimed": [
       "双提升",
       "正式验证",
       "整类机制无效",
       "Goal完成"
     ],
-    "previous_goal_turn_classification": "progress: archived actual interrupted trial, reconciled aggregate usage, froze five reviews, and implemented/tested concrete A2; not a live-process wait."
+    "previous_goal_turn_classification": "progress: archived actual interrupted trial, reconciled aggregate usage, froze five reviews, and implemented/tested concrete A2; not a live-process wait.",
+    "current_turn_classification": "no_progress",
+    "confirmed_by": "update_goal returned blocked; updatedAt1793542920",
+    "turn_evidence": [
+      {
+        "turn": 1,
+        "classification": "progress",
+        "evidence": "3571a57：中断证据、费用核对、5产物审查和A2具体方案；同一unknown阻塞首次出现。"
+      },
+      {
+        "turn": 2,
+        "classification": "progress",
+        "evidence": "9bb9dfa：新增第6格离线产物/引用调用审查；A2仍未获批。"
+      },
+      {
+        "turn": 3,
+        "classification": "no_progress",
+        "evidence": "授权文件缺失，原账本哈希不变，session52841返回Unknownprocessid；可用离线审查已完成，没有值得重复的检查。"
+      }
+    ],
+    "resume_condition": "用户明确批准当前哈希锁定A2，或提供该笔请求可验证的单笔结算证据后按原规则恢复；不得把旧A1或自动Goal消息视为新批准。",
+    "independent_work_exhausted_for_this_blocker": "已保存原始记录、完成可用产物审查和参数兼容性检查、准备并测试剩余4格方案；没有新的因果证据支持另造候选或绕过费用停止。报告及复现不替代完整Goal。"
   },
   "latest_user_scope_update": {
     "source": "User update 2026-11-01: no need for slides and script edits; the presentation has ended.",
