@@ -42,6 +42,7 @@ VARIANTS = (
     "capability_warning",
     "capability_withdrawal",
     "native_record_batch",
+    "dependency_cut",
 )
 
 SUFFICIENCY_RULE = (
@@ -668,6 +669,19 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "dependency_cut":
+        from .dependency_cut import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "certificate": "fixed source/native record-link equivalence; changed producer description only",
+            "runtime": "unchanged; graph is static knowledge, not an executor",
+            "edits": len(changes),
+        }}
         return result
     if strategy == "native_record_batch":
         from .native_record_batch import compile_knowledge
