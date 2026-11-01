@@ -1,0 +1,162 @@
+[
+  {
+    "task_id": 133,
+    "stage": "middle",
+    "edits": [
+      {
+        "operation": "consolidate_equivalent_capability",
+        "tool_id": "math-mcp::validate_syntax",
+        "representative": "math-mcp::evaluate",
+        "before": {
+          "tool_id": "math-mcp::validate_syntax",
+          "server_id": "math-mcp",
+          "version": "middle",
+          "name": "validate_syntax",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "expression": {
+                "type": "string",
+                "description": "Mathematical expression to validate"
+              },
+              "detailed": {
+                "type": "boolean",
+                "description": "If true, return a more detailed validation result when supported",
+                "default": false
+              },
+              "allow_variables": {
+                "type": "boolean",
+                "description": "If true, allow variable references during validation when supported",
+                "default": false
+              }
+            },
+            "required": [
+              "expression"
+            ]
+          },
+          "description": "Validate mathematical expression syntax against grammar",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "math-mcp",
+            "tool_name": "validate_syntax"
+          }
+        },
+        "evidence": "e5d327d73ddd3909158dde03c2f335d4e116be6d8fb009eaf182c165f7c5da7b"
+      },
+      {
+        "operation": "annotate_certified_representative_mode",
+        "tool_id": "math-mcp::evaluate",
+        "after": "Source-certified syntax capability consolidation: for syntax checking use this existing evaluate tool with validate_only=true; use the expression unchanged. This mode calls the same native parser and returns the same syntax result as the retired model-facing validate_syntax capability on its valid argument domain, without numerical evaluation. The former allow_variables/detailed options did not add their advertised semantic controls in the released handler. Syntax acceptance is not evaluation or verification of Python runtime/security. The ordinary evaluate mode remains available with validate_only=false. Invalid argument diagnostics are not claimed equivalent.",
+        "mapping": "use the expression unchanged",
+        "evidence": "e5d327d73ddd3909158dde03c2f335d4e116be6d8fb009eaf182c165f7c5da7b"
+      }
+    ],
+    "SP_sha256": "335e6feadb144b869a4849da993727ed40a8b6e78d5cd4823310172d8f25c005",
+    "candidate_sha256": "40ba4774b40c59bd54a611ca7c0e17951ca835a6fc2542e5173bbdf2c2047eb5",
+    "SP_model_tool_chars": 76880,
+    "candidate_model_tool_chars": 76976
+  },
+  {
+    "task_id": 133,
+    "stage": "late",
+    "edits": [
+      {
+        "operation": "consolidate_equivalent_capability",
+        "tool_id": "math-mcp::validate_syntax",
+        "representative": "math-mcp::evaluate",
+        "before": {
+          "tool_id": "math-mcp::validate_syntax",
+          "server_id": "math-mcp",
+          "version": "late",
+          "name": "validate_syntax",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "expression": {
+                "type": "string",
+                "description": "Mathematical expression to validate",
+                "minLength": 1
+              },
+              "detailed": {
+                "type": "boolean",
+                "description": "If true, return a more detailed validation result when supported",
+                "default": false
+              },
+              "allow_variables": {
+                "type": "boolean",
+                "description": "Explicitly specify whether variable references are allowed during validation"
+              },
+              "show_ast": {
+                "type": "boolean",
+                "description": "If true, include the abstract syntax tree (AST) structure in the validation result",
+                "default": false
+              },
+              "check_balanced": {
+                "type": "boolean",
+                "description": "If true, perform additional validation to ensure all brackets and parentheses are properly balanced",
+                "default": true
+              },
+              "max_depth": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "description": "Maximum allowed nesting depth for expressions (e.g., nested parentheses or function calls). If specified, validation fails if depth exceeds this limit"
+              }
+            },
+            "required": [
+              "expression",
+              "allow_variables"
+            ]
+          },
+          "description": "Validate mathematical expression syntax against grammar",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "math-mcp",
+            "tool_name": "validate_syntax"
+          }
+        },
+        "evidence": "e5d327d73ddd3909158dde03c2f335d4e116be6d8fb009eaf182c165f7c5da7b"
+      },
+      {
+        "operation": "annotate_certified_representative_mode",
+        "tool_id": "math-mcp::evaluate",
+        "after": "Source-certified syntax capability consolidation: for syntax checking use this existing evaluate tool with validate_only=true; trim the nonempty expression first. This mode calls the same native parser and returns the same syntax result as the retired model-facing validate_syntax capability on its valid argument domain, without numerical evaluation. The former allow_variables/detailed options/show_ast/check_balanced/max_depth did not add their advertised semantic controls in the released handler. Syntax acceptance is not evaluation or verification of Python runtime/security. The ordinary evaluate mode remains available with validate_only=false. Invalid argument diagnostics are not claimed equivalent.",
+        "mapping": "trim the nonempty expression first",
+        "evidence": "e5d327d73ddd3909158dde03c2f335d4e116be6d8fb009eaf182c165f7c5da7b"
+      }
+    ],
+    "SP_sha256": "f15acc5bf0d4c8f5b4e53cc10026e9158ed73c98af8c699332adf98771753d95",
+    "candidate_sha256": "4df17a287f7b5c7575de2a2cec4b13cab861c75c586915d720874874294a1e47",
+    "SP_model_tool_chars": 80529,
+    "candidate_model_tool_chars": 80080
+  },
+  {
+    "task_id": 283,
+    "stage": "middle",
+    "edits": [],
+    "SP_sha256": "b4d2eecaafda726d28e584dffd43f1cd16c1f59b7fdf6164146b51f190c7675f",
+    "candidate_sha256": "b4d2eecaafda726d28e584dffd43f1cd16c1f59b7fdf6164146b51f190c7675f",
+    "SP_model_tool_chars": 52816,
+    "candidate_model_tool_chars": 52816
+  },
+  {
+    "task_id": 283,
+    "stage": "late",
+    "edits": [],
+    "SP_sha256": "bf9f8e614c8d1d7ec9dd510fc8454e1be39f135606266155b33d0689ea25e1b7",
+    "candidate_sha256": "bf9f8e614c8d1d7ec9dd510fc8454e1be39f135606266155b33d0689ea25e1b7",
+    "SP_model_tool_chars": 62332,
+    "candidate_model_tool_chars": 62332
+  },
+  {
+    "task_id": 235,
+    "stage": "late",
+    "edits": [],
+    "SP_sha256": "a1dd73d217ad9b60f979e6840027b123a26bc66789910ad0e0a421b0c3a12b66",
+    "candidate_sha256": "a1dd73d217ad9b60f979e6840027b123a26bc66789910ad0e0a421b0c3a12b66",
+    "SP_model_tool_chars": 66941,
+    "candidate_model_tool_chars": 66941
+  }
+]

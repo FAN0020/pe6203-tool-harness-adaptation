@@ -53,6 +53,7 @@ VARIANTS = (
     "shared_contract_refs",
     "observed_dictionary",
     "observed_contrastive",
+    "capability_consolidation",
 )
 
 SUFFICIENCY_RULE = (
@@ -812,6 +813,19 @@ def adapt_result(old, target, strategy, context=None):
         result["validation"] = {"errors": [], "checks": {
             "certificate": "exact source/native certificate; changed producer usage_rules only",
             "native_runtime": "unchanged; no new macro executor or automatic tool calls",
+            "edits": len(changes),
+        }}
+        return result
+    if strategy == "capability_consolidation":
+        from .capability_consolidation import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "certificate": "valid-domain source/native equivalence; changed capability and retained representative",
+            "native_runtime": "unchanged; static model knowledge only",
             "edits": len(changes),
         }}
         return result

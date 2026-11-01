@@ -1,0 +1,199 @@
+{
+  "cell_id": "task235-middle-selective_patch-r0",
+  "task_id": 235,
+  "stage": "middle",
+  "question": "I need to create a sales performance dashboard for our Chinese regional teams. First, I want a map showing our 2025 sales distribution across provinces - we have data showing Guangdong had ¥15.8M, Jiangsu ¥12.3M, Zhejiang ¥9.7M, Shandong ¥8.4M, and Beijing ¥7.2M. Then create an area chart showing monthly sales trends from January to December 2025, with values: Jan: 1.2M, Feb: 1.1M, Mar: 1.4M, Apr: 1.6M, May: 1.8M, Jun: 2.1M, Jul: 2.3M, Aug: 2.2M, Sep: 2.5M, Oct: 2.7M, Nov: 3.0M, Dec: 3.5M. Finally, make a column chart comparing our top product categories across regions: Electronics (Guangdong: 6.2M, Jiangsu: 4.8M), Home Appliances (Guangdong: 4.5M, Jiangsu: 3.9M), and Clothing (Guangdong: 5.1M, Jiangsu: 3.6M).",
+  "answer": "Your sales performance dashboard is ready — all three charts were generated successfully:\n\n**1. 2025 Provincial Sales Distribution Map (2025年各省销售额分布)**\nA China regional map shading provinces by sales volume (in ¥ millions):\n- Guangdong: ¥15.8M (highest)\n- Jiangsu: ¥12.3M\n- Zhejiang: ¥9.7M\n- Shandong: ¥8.4M\n- Beijing: ¥7.2M\n\n**2. Monthly Sales Trend Area Chart (2025年月度销售额趋势)**\nShows a clear upward trajectory through 2025 — starting at ¥1.2M in January, dipping slightly in February (¥1.1M), then climbing steadily to a peak of ¥3.5M in December. That's roughly a 3× increase year-over-year, with the strongest acceleration in Q4 (Oct–Dec).\n\n**3. Product Category Comparison by Region (各区域主要产品类别销售额对比)**\nGrouped column chart comparing Guangdong vs. Jiangsu across three categories:\n- **Electronics**: Guangdong ¥6.2M vs. Jiangsu ¥4.8M\n- **Home Appliances**: Guangdong ¥4.5M vs. Jiangsu ¥3.9M\n- **Clothing**: Guangdong ¥5.1M vs. Jiangsu ¥3.6M\n\nGuangdong leads in every category, with its largest gap in Clothing (+¥1.5M) and Electronics (+¥1.4M). Electronics is the top category in both regions.\n\nA few notes on the data: all values were converted to units of ¥ millions (百万元) for consistency across the charts. The map only shades the five provinces you provided — other provinces will appear in the default fill color without data. If you'd like, I can add the remaining provinces, switch the map to a specific region view, or build a combined KPI summary table to round out the dashboard.",
+  "trace_sha256": "2fe4b30ed349517c3a2183fdd68436fb19718ef4358b1282e2d26e66c5a1d49d",
+  "calls": [
+    {
+      "tool": "generate_district_map__fd0c2fca542d",
+      "arguments": "{\"title\": \"2025年各省销售额分布\", \"data\": {\"name\": \"中国\", \"showAllSubdistricts\": true, \"dataLabel\": \"销售额\", \"dataType\": \"number\", \"dataValueUnit\": \"百万元\", \"colors\": [\"#F0884D\"], \"subdistricts\": [{\"name\": \"广东省\", \"dataValue\": \"15.8\"}, {\"name\": \"江苏省\", \"dataValue\": \"12.3\"}, {\"name\": \"浙江省\", \"dataValue\": \"9.7\"}, {\"name\": \"山东省\", \"dataValue\": \"8.4\"}, {\"name\": \"北京市\", \"dataValue\": \"7.2\"}]}, \"width\": 1000, \"height\": 800}",
+      "result": {
+        "meta": {
+          "description": "This is the chart's spec and configuration, which can be renderred to corresponding chart by AntV GPT-Vis chart components.",
+          "spec": {
+            "type": "district-map",
+            "title": "2025年各省销售额分布",
+            "data": {
+              "name": "中国",
+              "showAllSubdistricts": true,
+              "dataLabel": "销售额",
+              "dataType": "number",
+              "dataValueUnit": "百万元",
+              "colors": [
+                "#F0884D"
+              ],
+              "subdistricts": [
+                {
+                  "name": "广东省",
+                  "dataValue": "15.8"
+                },
+                {
+                  "name": "江苏省",
+                  "dataValue": "12.3"
+                },
+                {
+                  "name": "浙江省",
+                  "dataValue": "9.7"
+                },
+                {
+                  "name": "山东省",
+                  "dataValue": "8.4"
+                },
+                {
+                  "name": "北京市",
+                  "dataValue": "7.2"
+                }
+              ]
+            },
+            "width": 1000,
+            "height": 800
+          }
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "```vis-chart\n{\"type\":\"district-map\",\"title\":\"2025年各省销售额分布\",\"data\":{\"name\":\"中国\",\"showAllSubdistricts\":true,\"dataLabel\":\"销售额\",\"dataType\":\"number\",\"dataValueUnit\":\"百万元\",\"colors\":[\"#F0884D\"],\"subdistricts\":[{\"name\":\"广东省\",\"dataValue\":\"15.8\"},{\"name\":\"江苏省\",\"dataValue\":\"12.3\"},{\"name\":\"浙江省\",\"dataValue\":\"9.7\"},{\"name\":\"山东省\",\"dataValue\":\"8.4\"},{\"name\":\"北京市\",\"dataValue\":\"7.2\"}]},\"width\":1000,\"height\":800}\n```"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "generate_area_chart__d845cd7f0398",
+      "arguments": "{\"title\": \"2025年月度销售额趋势\", \"axisXTitle\": \"月份\", \"axisYTitle\": \"销售额（百万元）\", \"data\": [{\"time\": \"1月\", \"value\": 1.2}, {\"time\": \"2月\", \"value\": 1.1}, {\"time\": \"3月\", \"value\": 1.4}, {\"time\": \"4月\", \"value\": 1.6}, {\"time\": \"5月\", \"value\": 1.8}, {\"time\": \"6月\", \"value\": 2.1}, {\"time\": \"7月\", \"value\": 2.3}, {\"time\": \"8月\", \"value\": 2.2}, {\"time\": \"9月\", \"value\": 2.5}, {\"time\": \"10月\", \"value\": 2.7}, {\"time\": \"11月\", \"value\": 3}, {\"time\": \"12月\", \"value\": 3.5}], \"style\": {\"lineWidth\": 3}, \"width\": 800, \"height\": 450}",
+      "result": {
+        "meta": {
+          "description": "This is the chart's spec and configuration, which can be renderred to corresponding chart by AntV GPT-Vis chart components.",
+          "spec": {
+            "type": "area",
+            "title": "2025年月度销售额趋势",
+            "axisXTitle": "月份",
+            "axisYTitle": "销售额（百万元）",
+            "data": [
+              {
+                "time": "1月",
+                "value": 1.2
+              },
+              {
+                "time": "2月",
+                "value": 1.1
+              },
+              {
+                "time": "3月",
+                "value": 1.4
+              },
+              {
+                "time": "4月",
+                "value": 1.6
+              },
+              {
+                "time": "5月",
+                "value": 1.8
+              },
+              {
+                "time": "6月",
+                "value": 2.1
+              },
+              {
+                "time": "7月",
+                "value": 2.3
+              },
+              {
+                "time": "8月",
+                "value": 2.2
+              },
+              {
+                "time": "9月",
+                "value": 2.5
+              },
+              {
+                "time": "10月",
+                "value": 2.7
+              },
+              {
+                "time": "11月",
+                "value": 3
+              },
+              {
+                "time": "12月",
+                "value": 3.5
+              }
+            ],
+            "style": {
+              "lineWidth": 3
+            },
+            "width": 800,
+            "height": 450
+          }
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "```vis-chart\n{\"type\":\"area\",\"title\":\"2025年月度销售额趋势\",\"axisXTitle\":\"月份\",\"axisYTitle\":\"销售额（百万元）\",\"data\":[{\"time\":\"1月\",\"value\":1.2},{\"time\":\"2月\",\"value\":1.1},{\"time\":\"3月\",\"value\":1.4},{\"time\":\"4月\",\"value\":1.6},{\"time\":\"5月\",\"value\":1.8},{\"time\":\"6月\",\"value\":2.1},{\"time\":\"7月\",\"value\":2.3},{\"time\":\"8月\",\"value\":2.2},{\"time\":\"9月\",\"value\":2.5},{\"time\":\"10月\",\"value\":2.7},{\"time\":\"11月\",\"value\":3},{\"time\":\"12月\",\"value\":3.5}],\"style\":{\"lineWidth\":3},\"width\":800,\"height\":450}\n```"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "generate_column_chart__a4583028c097",
+      "arguments": "{\"title\": \"各区域主要产品类别销售额对比\", \"axisXTitle\": \"产品类别\", \"axisYTitle\": \"销售额（百万元）\", \"group\": true, \"data\": [{\"category\": \"电子产品\", \"value\": 6.2, \"group\": \"广东\"}, {\"category\": \"电子产品\", \"value\": 4.8, \"group\": \"江苏\"}, {\"category\": \"家用电器\", \"value\": 4.5, \"group\": \"广东\"}, {\"category\": \"家用电器\", \"value\": 3.9, \"group\": \"江苏\"}, {\"category\": \"服装\", \"value\": 5.1, \"group\": \"广东\"}, {\"category\": \"服装\", \"value\": 3.6, \"group\": \"江苏\"}], \"width\": 800, \"height\": 450}",
+      "result": {
+        "meta": {
+          "description": "This is the chart's spec and configuration, which can be renderred to corresponding chart by AntV GPT-Vis chart components.",
+          "spec": {
+            "type": "column",
+            "title": "各区域主要产品类别销售额对比",
+            "axisXTitle": "产品类别",
+            "axisYTitle": "销售额（百万元）",
+            "group": true,
+            "data": [
+              {
+                "category": "电子产品",
+                "value": 6.2,
+                "group": "广东"
+              },
+              {
+                "category": "电子产品",
+                "value": 4.8,
+                "group": "江苏"
+              },
+              {
+                "category": "家用电器",
+                "value": 4.5,
+                "group": "广东"
+              },
+              {
+                "category": "家用电器",
+                "value": 3.9,
+                "group": "江苏"
+              },
+              {
+                "category": "服装",
+                "value": 5.1,
+                "group": "广东"
+              },
+              {
+                "category": "服装",
+                "value": 3.6,
+                "group": "江苏"
+              }
+            ],
+            "width": 800,
+            "height": 450
+          }
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "```vis-chart\n{\"type\":\"column\",\"title\":\"各区域主要产品类别销售额对比\",\"axisXTitle\":\"产品类别\",\"axisYTitle\":\"销售额（百万元）\",\"group\":true,\"data\":[{\"category\":\"电子产品\",\"value\":6.2,\"group\":\"广东\"},{\"category\":\"电子产品\",\"value\":4.8,\"group\":\"江苏\"},{\"category\":\"家用电器\",\"value\":4.5,\"group\":\"广东\"},{\"category\":\"家用电器\",\"value\":3.9,\"group\":\"江苏\"},{\"category\":\"服装\",\"value\":5.1,\"group\":\"广东\"},{\"category\":\"服装\",\"value\":3.6,\"group\":\"江苏\"}],\"width\":800,\"height\":450}\n```"
+          }
+        ],
+        "isError": false
+      }
+    }
+  ],
+  "artifacts": []
+}

@@ -57,6 +57,7 @@ def review_index(folder):
     aliases = {
         "completion-quality-v1-20261031": "completion-quality-20261031",
         "paired-pilot-20261031": "budget-contract-20261031",
+        "artifact-contract-pilot-ready-20261031": "artifact-contract-pilot-20261031",
         "artifact-contract-pilot-runtime-20261031": "artifact-contract-runtime-pilot-20261031",
         "semantic-claim-repair-pilot-20261101-exec": "semantic-claim-repair-20261101",
         "native-record-batch-pilot-20261101": "native-batch-knowledge-20261101",
@@ -72,6 +73,17 @@ def review_index(folder):
         extension = folder.parent.name if folder.name == "development" else folder.name
         evidence = ROOT / "results/evidence" / aliases.get(extension, "extensions/" + extension)
     found = {}
+    if folder.name == "paired-extension-20261031":
+        p = ROOT / "results/evidence/matched-existing-20261031/quality-review.json"
+        for row in read(p, {}).get("cells", []):
+            member = row.get("evidence", {}).get("trajectory_member", "")
+            if not member.startswith(folder.name + "/cells/"):
+                continue
+            props = normalized_properties(row)
+            if props:
+                found[row["cell_id"]] = {"properties": props,
+                    "core_pass": all(v == "pass" for v in props.values()),
+                    "review_source":str(p.relative_to(ROOT)), "review_source_sha256":sha(p)}
     for name in ["quality-review.json", "reviews.json", "decision.json", "decision-after-a2.json",
                  "validation-verification.json", "verification.json", "trial-verification.json"]:
         p = evidence / name
@@ -105,6 +117,20 @@ def review_index(folder):
                 if props:
                     found[cell] = {"properties": props, "core_pass": all(v == "pass" for v in props.values()),
                                    "review_source": str(p.relative_to(ROOT)), "review_source_sha256": sha(p)}
+    # New supplemental reviews remain separately sourced. Never replace an old
+    # property decision or silently turn post-hoc review into blinded validation.
+    supplemental = OUT / "historical-products" / folder.name
+    for p in (supplemental / "reviews").glob("*.json"):
+        d = read(p)
+        rid = d["cell_id"]
+        packet = supplemental / (rid + ".json")
+        trace = folder / "cells" / rid / "run/raw_trace.json"
+        assert sha(packet) == d["input_sha256"] and sha(trace) == d["trace_sha256"]
+        if rid not in found:
+            props = normalized_properties(d)
+            found[rid] = {"properties":props, "core_pass":all(v == "pass" for v in props.values()),
+                          "review_source":str(p.relative_to(ROOT)), "review_source_sha256":sha(p),
+                          "review_phase":"supplemental_posthoc_scores_exposed"}
     return found
 
 
@@ -141,7 +167,10 @@ def inspect_cell(folder, plan, cell, reviews):
            "repeat": cell.get("seed"), "status": result.get("status", "not_started"),
            "execution_status": result.get("execution_status", "not_started"),
            "core_pass": None, "properties": None, "review_source": None, "audit_errors": []}
-    row.update(reviews.get(cell["id"], {}))
+    # Preparation-only plans can share cell IDs with a later executed cohort.
+    # They must never inherit its product judgment.
+    if result:
+        row.update(reviews.get(cell["id"], {}))
     means, slots, errors = judge_scores(run, cell["task_id"], result)
     row.update(means, judge_slots=slots)
     row["audit_errors"].extend(errors)
@@ -287,7 +316,7 @@ def main():
                      "No complete-cohort metric is imputed from available cases.",
                      "No cross-task ranking. Actor/judge receipt costs exclude shared updater/preflight costs pending global accounting.",
                      "Outer tool error flags do not capture inner semantic failure; task-specific audit remains necessary.",
-                     "Original Top5 record not yet located; do not invent list.",
+                     "Top5 provenance supplied by user; fifth item explicitly names shared_contract_refs but leaves its other recent members unspecified.",
                      "No new model, benchmark, judge or MCP calls."]}
     write("audit.json",audit)
     print(json.dumps(audit,ensure_ascii=False))

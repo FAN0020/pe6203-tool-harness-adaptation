@@ -1,6 +1,6 @@
 import json
 
-from scripts.research_reaudit import judge_scores, normalized_properties
+from scripts.research_reaudit import inspect_cell, judge_scores, normalized_properties
 
 
 def test_historical_optional_unknown_is_not_a_new_requirement():
@@ -25,3 +25,15 @@ def test_duplicate_judge_slot_cannot_count_as_complete(tmp_path):
     means, count, errors = judge_scores(tmp_path, 1, {"judge_status": "complete"})
     assert "five_slots_missing_or_duplicated" in errors
     assert count == 0 and means == {"TF": None, "PE": None}
+
+
+def test_unexecuted_plan_does_not_inherit_sibling_review(tmp_path, monkeypatch):
+    import scripts.research_reaudit as audit
+    monkeypatch.setattr(audit, "ROOT", tmp_path)
+    folder = tmp_path / "unexecuted"
+    folder.mkdir()
+    cell = {"id": "cell-001", "task_id": 235, "version": "late", "strategy": "artifact_contract"}
+    row, receipts = inspect_cell(folder, {}, cell, {"cell-001": {
+        "core_pass": True, "properties": {"charts": "pass"}, "review_source": "sibling"}})
+    assert row["status"] == "not_started" and row["review_source"] is None
+    assert row["core_pass"] is None and receipts == []
