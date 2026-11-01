@@ -1,0 +1,82 @@
+{
+  "episode": "P04",
+  "task_id": 900401,
+  "execution_status": "completed",
+  "answer": "## Saved Project\n\n**Cobalt planning ledger** — ID `6d725e08-5131-45a6-b3a4-37eee6f7b548`\nDescription: *Fictional project for exact preservation of supplied work records and references.*\n\n### Record counts\n- **Total records: 6**\n- **Root records: 2** — R01, R02\n- **Non-root records: 4** — R03, R04, R05, R06\n\n### Stored records (all `pending`, none completed)\n\n| Key | Name | Task ID | Priority | Complexity | Est. hrs | Tags | Parent | Depends on |\n|---|---|---|---|---|---|---|---|---|\n| R01 | Cobalt record R01 | `3a90b762-ae20-4bc6-9586-aa19e8771a4e` | 8 | 4 | 11 | synthetic, group1 | — (root) | — |\n| R02 | Cobalt record R02 | `ecc3fe14-a6b6-44b7-aed3-4b4b5bce9f4f` | 8 | 5 | 7 | synthetic, group2 | — (root) | — |\n| R03 | Cobalt record R03 | `10de3766-d7cd-4e72-90e8-cfc18efc0863` | 6 | 4 | 5 | synthetic, group1 | R01 | — |\n| R04 | Cobalt record R04 | `b354b5ed-3a18-43b0-a366-bd8e583b099d` | 2 | 5 | 12 | synthetic, group2 | R02 | R03 |\n| R05 | Cobalt record R05 | `f84f4045-3cd9-4404-bfa8-5bd680234af9` | 4 | 2 | 12 | synthetic, group1 | R01 | R04 |\n| R06 | Cobalt record R06 | `7f0a29d9-d0c3-428d-9548-0fb5e17be673` | 3 | 6 | 5 | synthetic, group2 | R02 | R05 |\n\nEvery supplied name, details text (including each ledger marker: 52322, 75898, 67768, 73376, 42609, 17731), priority, complexity, estimatedHours, tag list and `pending` status was written verbatim, and nothing was redesigned or substituted.\n\n### Relationships — saved successfully\nBoth relationship types were resolved from the input's symbolic keys to the real stored task IDs, and both were verified after writing:\n\n- **Parent/child links — 4 of 4 saved.** R01 → {R03, R05} and R02 → {R04, R06}. Confirmed by filtering the hierarchy under each root: R01 returned exactly R03 and R05; R02 returned exactly R04 and R06.\n- **Dependencies — 3 of 3 saved.** R04 → R03, R05 → R04, R06 → R05. Each dependent record reported its dependency count at creation with the resolved ID of the correct sibling record, and the hierarchy view shows a dependency on precisely those three records (R01, R02, R03 correctly show none).\n\n### Verification notes\n- All 6 tasks were confirmed present under the single project, all at `pending` with 0 completed, and each retains its `synthetic` tag plus its `group1`/`group2` tag.\n- Two tool-side reporting quirks encountered, neither affecting stored data: the project-wide hierarchy listing repeats child records in its trailing flat section (it prints \"Total: 10 tasks\" while only 6 unique task IDs exist), and `review_project_status` failed with an internal error (`storage.getTasksByProject is not a function`). Counts above are based on the 6 distinct task IDs and on per-parent hierarchy filters, not on the duplicated listing.",
+  "properties": {
+    "records": "pass",
+    "fields": "pass",
+    "structure": "pass"
+  },
+  "expected_counts": {
+    "total_records": 6,
+    "root_records": 2,
+    "non_root_records": 4
+  },
+  "project": [
+    {
+      "id": "6d725e08-5131-45a6-b3a4-37eee6f7b548",
+      "name": "Cobalt planning ledger",
+      "description": "Fictional project for exact preservation of supplied work records and references.",
+      "createdAt": "2026-11-01T09:03:32.434Z",
+      "updatedAt": "2026-11-01T09:03:32.434Z"
+    }
+  ],
+  "store_path": "review-artifacts/P04/tasks.json",
+  "store_sha256": "97e3fee534e6e0ebd99f73bf76063b8340dcb857b855ad7854b30e82a4228847",
+  "trace_sha256": "ca6ad6ccad582a45aef00b321e00103116e754ba7a0a52a7718eaf7333f2345d",
+  "calls": [
+    {
+      "native_tool": "create_project",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "list_tasks",
+      "isError": false
+    },
+    {
+      "native_tool": "get_task",
+      "isError": false
+    },
+    {
+      "native_tool": "get_task",
+      "isError": false
+    },
+    {
+      "native_tool": "list_tasks",
+      "isError": false
+    },
+    {
+      "native_tool": "review_project_status",
+      "isError": true
+    },
+    {
+      "native_tool": "list_tasks",
+      "isError": false
+    }
+  ]
+}
