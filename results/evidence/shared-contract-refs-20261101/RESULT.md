@@ -36,3 +36,9 @@
 ## 复现证据
 
 `source-prefreeze.tar.gz` 保存 228 个原冻结文件；`raw-at-stop.tar.gz` 保存 243 个中断时文件（包含所有原输出、错误、评分和账本）；`partial-review-lock.json` 保存 5 份产物审查及输入哈希。`interruption.json` 区分直接证据、推断和未知项；`accounting-after-stop.json` 保存脱敏 API 用量快照。此归档用于保留证据，不作为研究突破或完整目标完成的替代物。
+
+## 中断产物补充审查（零新调用）
+
+`interrupted-cell006-review.json` 与 `audit_interrupted_cell.py` 核对原归档哈希后确认：第6格保存18项任务，CSV有8个子任务、日志6个，可视化和集成里程碑均尚无子任务；7条依赖有效且无环。完整产物仍不通过，未完成的拆分不能归因为候选本身，因为actor遭遇外部中断。
+
+3次涉及引用描述的调用均传入正确工作目录，未调用锚点update_project。唯一原生错误是review_workspace_health返回缺少memoryStorage.listMemories方法，与稍后的HTTP429分开记录。这提供有限的参数兼容性观察，但不能证明actor实际通过引用恢复了知识，其他上下文或模型先验同样可以解释。没有配对效应、完成率或质量提升结论，也没有新增费用。A2问题继续待答，不重复发问。
