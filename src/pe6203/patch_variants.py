@@ -51,6 +51,8 @@ VARIANTS = (
     "instruction_scope_quote",
     "active_contract_probing",
     "shared_contract_refs",
+    "observed_dictionary",
+    "observed_contrastive",
 )
 
 SUFFICIENCY_RULE = (
@@ -677,6 +679,22 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy in ("observed_dictionary", "observed_contrastive"):
+        from .contract_evidence_encoding import compile_knowledge
+
+        result["knowledge"], edits = compile_knowledge(
+            base, target, context.get("feedback", []),
+            "dictionary" if strategy == "observed_dictionary" else "contrastive",
+        )
+        result["changes"].extend(edits)
+        result["validation"] = validate_adaptation(
+            result["knowledge"], old, target, base["diff"], {e["tool_id"] for e in edits}
+        )
+        if result["validation"]["errors"]:
+            raise ValueError("Encoded evidence changed a protected contract")
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
         return result
     if strategy == "shared_contract_refs":
         from .shared_contract_refs import compile_knowledge

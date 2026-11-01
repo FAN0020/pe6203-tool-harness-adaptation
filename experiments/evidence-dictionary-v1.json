@@ -1,0 +1,216 @@
+{
+  "id": "evidence-dictionary-v1",
+  "status": "freeze_before_any_model_call",
+  "objective": "Test lossless outcome-dictionary encoding of all16 existing task-free empirical observations against original SP on the full frozen original changed subset. This is new encoding, not re-running observed_contract.",
+  "champion": "selective_patch",
+  "candidates": [
+    "observed_dictionary"
+  ],
+  "model_config": "configs/evidence-dictionary-dev-v1.json",
+  "updater_config": "configs/daily-migration-updater-v1.json",
+  "feedback_probes": "experiments/observed-contract-probes-v1.json",
+  "development": {
+    "tasks": [
+      133,
+      283,
+      235
+    ],
+    "stages": [
+      "middle",
+      "late"
+    ],
+    "task_stage_pairs": [
+      [
+        133,
+        "middle"
+      ],
+      [
+        133,
+        "late"
+      ],
+      [
+        283,
+        "middle"
+      ],
+      [
+        283,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "observed_dictionary"
+    ],
+    "repeats": 1,
+    "opaque_cell_ids": true
+  },
+  "quality_cases": [
+    {
+      "task_id": 133,
+      "properties": [
+        {
+          "id": "validation",
+          "required": "Provide meaningful expression validation, correctly interpret returned text, and distinguish syntax validity from actual evaluation and Python runtime/security verification."
+        },
+        {
+          "id": "guidance",
+          "required": "Provide usable Python-focused OWASP-related security recommendations: restricted inputs/allowed operations, avoid executing untrusted text as Python, and bound resource use. Do not claim that ignored tool flags establish these controls."
+        },
+        {
+          "id": "implementation_consistency",
+          "required": "Any code recommended as the solution must handle stated benign arithmetic and enforce its declared restrictions; do not use tool checks as proof that generated code was run. No code is required by the task if actionable recommendations suffice."
+        }
+      ],
+      "review": "Use actual calls/observations/final answer. Static AST inspection of generated Python; never execute untrusted generated code. Any unestablished required property is unknown, not pass. Additional nonessential prose is not a new requirement."
+    },
+    {
+      "task_id": 283,
+      "properties": [
+        {
+          "id": "coverage",
+          "required": "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work."
+        },
+        {
+          "id": "structure_and_scope",
+          "required": "Persisted task IDs are nonempty and unique; parent/dependency references exist and are acyclic. Concrete executable leaves have bounded scope; oversized required work is genuinely decomposed. Milestone containers are distinguished from executable leaves. Material unresolved executable work or unassessable scope does not pass merely because it is disclosed."
+        },
+        {
+          "id": "delivery_truth",
+          "required": "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations. A nonempty delivery identifies the actual project and work; absent final delivery is unknown, never pass."
+        },
+        {
+          "id": "scope_preserved",
+          "required": "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings."
+        }
+      ],
+      "prior_rubric": {
+        "task_id": 283,
+        "split": "exposed_changed_task_regression",
+        "provenance": "Original analytics dashboard planning request; archived task store, calls and final answer",
+        "required_properties": [
+          "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work.",
+          "Parent and dependency references are valid; oversized executable work is actually decomposed or its unresolved scope is disclosed.",
+          "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations.",
+          "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings."
+        ],
+        "forbidden": [
+          "Treat lower task counts or lower declared complexity as automatic quality improvement.",
+          "Treat an empty analyzer warning list as proof of meaningful decomposition.",
+          "Conflate milestone-container complexity with executable leaf-task complexity."
+        ],
+        "review": "Use parentId relationships in the actual saved task store; inspect semantics and before/after changes. Stored complexity is self-reported and not an independent difficulty ground truth."
+      },
+      "clarification_before_new_execution": "Same four substantive dimensions as prior283 review; explicitly treat unresolved material executable scope as fail/unknown rather than permitting disclosure alone to pass. No mandatory task count, numeric complexity threshold or hours cap. Do not equate an analyzer label with independent difficulty evidence. Apply equally to both arms.",
+      "review": "Hide methods/TF/PE until all property judgments frozen. Read actual task store and per-mutation states/calls, check concrete coverage, valid references and final claims. Same coordinator, not independent human reviewer."
+    },
+    {
+      "task_id": 235,
+      "properties": [
+        {
+          "id": "charts",
+          "required": "Three requested chart types returned successfully with source values, ordering, provinces/categories and monetary units preserved."
+        },
+        {
+          "id": "summary",
+          "required": "Any substantive final claim about these data matches the inputs; source totals if stated are exact."
+        }
+      ],
+      "review": "Frozen question and actual chart payloads; rendering remains unknown for both arms and is not added as a requirement."
+    }
+  ],
+  "evaluation": {
+    "normal_completion": "Runner execution_status==completed; truncation/max_rounds/error are not normal even if TF high.",
+    "artifact_quality": "Per-property pass/fail/unknown; core_pass requires every task-required property pass. Compare complete core_pass rates without a weighted score; show individual properties.",
+    "pilot_gate": "Strict completion AND all-required-product gain on affected133M/L AND full133+283 M/L; TF nondecrease on those same sets;235Late completion/core/TF nondecrease. Full-cohort means only; any missing score prevents promotion. No project-specific strict-gain requirement:283 has byte-identical knowledge, included as the frozen changed-task regression, not claimed as treated.",
+    "success_gate": "Both fresh independent blocks separately meet every same gate; no modification after validation starts.",
+    "review_blinding": "Opaque product packets; same coordinator, not independent human. All product reviews frozen before arm/score summary. Paths may imperfectly reveal identity; disclose. No hidden reasoning read.",
+    "other_metrics": "Per-task/stage normal/core/TF/PE, error classifications, n and actual cost. No weighted rank or cross-task rank.",
+    "historical_gate": "Old observed_contract weaker pilot gate and both negative validation conclusions unchanged."
+  },
+  "validation_schedule": {
+    "blocks": 2,
+    "repeats_per_block_per_condition": 3,
+    "task_stage_pairs": [
+      [
+        133,
+        "middle"
+      ],
+      [
+        133,
+        "late"
+      ],
+      [
+        283,
+        "middle"
+      ],
+      [
+        283,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "observed_dictionary"
+    ],
+    "total_validation_trajectories": 60,
+    "independence": "Fresh actor requests and empty isolated workspaces, no shared actor memory; exact same task families and knowledge. Execution replication on exposed tasks, not unseen-task or provider statistical independence. Pre-register before any validation. Both blocks run even if first adverse unless infrastructure stop.",
+    "knowledge": "Byte-identical dictionary candidate; no score-based edits/replacement/resampling."
+  },
+  "confirmation": {
+    "tasks": [
+      133,
+      283,
+      235
+    ],
+    "stages": [
+      "middle",
+      "late"
+    ],
+    "task_stage_pairs": [
+      [
+        133,
+        "middle"
+      ],
+      [
+        133,
+        "late"
+      ],
+      [
+        283,
+        "middle"
+      ],
+      [
+        283,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "observed_dictionary"
+    ],
+    "repeats": 3,
+    "opaque_cell_ids": true
+  },
+  "authorization": {
+    "approved": true,
+    "source": "User2026-11-02 explicit audit and2-5new-mechanism rounds; samebranch solewriter localonly",
+    "total_cost_limit_usd": null,
+    "preflight_calls_max": 2
+  },
+  "stop_rule": "One fixed10-cell trial. Existing retry/judge-slot policy only. Any unknown_charge stops new requests; keep all failed/unknown cells and original receipts. No identical actor reruns. A version that fails dual development closes. Conditional next mechanism is contrastive argument deltas, to be separately frozen after interpreting this result; not automatic same-version resampling.",
+  "input_boundary": "Compiler only old/current catalogs and the original frozen16 task-free probe observations. No benchmark text, answers, scored trajectories or manual answer recipes.",
+  "fairness": "Original question hashes, released tools, current fixedmodel/provider/decode/budgets/judge; only changed observed tool usage_rules appended. All133/283/235 original, nofixture and no377.",
+  "mechanism": "Represent identical result envelopes once, reference them from every original input record, share identical caution once; exact decoder recovers normalized complete original evidence in order. No record selection, claim synthesis, rewritten annotations or inference that a positive native call is task success."
+}
