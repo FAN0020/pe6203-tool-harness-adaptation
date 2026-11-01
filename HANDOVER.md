@@ -26,7 +26,7 @@
 
 ### 当前最新状态：16 单元因子诊断中断，已冻结具体恢复提案
 
-- 同一完整 Goal active、未完成；主线程唯一执行者，无运行实验。原 dependency_cut v1 仍关闭，未进入正式验证。
+- 同一完整 Goal 已由工具确认 **blocked、未完成**：A1明确例外决定连续3轮仍缺失。主线程唯一执行者，无运行实验。原 dependency_cut v1 仍关闭，未进入正式验证。
 - 报告 [`reports/dependency-factorial-interruption.html`](reports/dependency-factorial-interruption.html)；只读最新 `partial-decision.json`、`interpretation-at-stop.json` 与 `continuation-a1.json`，均在 `results/evidence/dependency-factorial-20261101/`。
 - 1984654 冻结独立合成四条件（8记录、2根、6子；依赖0/7 × 正文128/1920字符）；0c2a249 冻结原283Late SP/候选精确知识。16单元两区组，同模型/供应商/预算/工具/评分。不是新候选、训练或原题成功。
 - 7 actor 执行，6正常、5产物全项通过；6完整评分、F07仅2/5槽。第一block7/8，第二0/8，不比较不平衡总胜率。短链候选6轮成功，SP12轮空答复但保存正确；长链候选混合路线漏1依赖；长浅树均成功。门槛尚无支持。

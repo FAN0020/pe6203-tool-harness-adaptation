@@ -10,7 +10,7 @@
     "working_rule": "所有仓库命令显式使用repository作为workdir。不要扫描父目录/home；不要切换分支、创建新worktree或重置文件。保留全部已有文件、原评分、正负结果。",
     "live_work": "runner81214退出2，无运行实验。7actor/6evaluated/1judge_incomplete；9未启动。A1仅提案，待用户明确同意单一费用停止例外。",
     "current_thread": "01a19594-5645-7520-bf4f-98de0419fc4e",
-    "new_goal": "工具确认同一Goal active且未完成。本轮真实诊断和恢复机制验证为实质进展，不累计旧阻塞。",
+    "new_goal": "同一完整Goal blocked，非complete；连续3轮A1例外未决定，无新实验或费用。",
     "latest_frozen_execution_commit": "0c2a249"
   },
   "goal": {
@@ -18,7 +18,7 @@
     "objective": "基于PE6203 Group Project 4 brief与MCPEvol-Bench，设计并验证至少一种符合选择性工具知识适应范围的策略，使其在预先冻结的变化任务验证子集上，相比原Selective Patch取得可复现的正常完成率与任务质量双重改善，同时保持不变任务能力。质量须同时检查官方TF与任务要求的实际产物正确性；不能用PE上升、提前结束、删减要求或选择性展示成功代替改善。复用有效证据，先明确具体机制和验收，固定模型、供应商、解码、单次预算与评分协议。开发与两批独立验证分开，各批完成率与实际质量均须严格优于SP、TF和不变任务能力不下降。原benchmark和受控合成扩展分开报告，合成成功不能证明原benchmark Goal完成。No Update/Full Rewrite保留课程基线。完成还需核对课程要求、报告、复现包和展示材料。所有正负结果、原评分和费用保留；未达双提升，目标保持未完成。",
     "budget": "无总费用/总轨迹硬上限；不得擅自设置新的总token预算。这不取消公平单次预算，也不允许无意义重试。",
     "completion": "仅完整目标经真实证据证明后才能complete；不能把负结果、归档、训练准入或计划当作目标完成。",
-    "current_state": "get_goal确认当前线程同一Goal active；不要新建，不标complete。"
+    "current_state": "同一Goal已由update_goal确认blocked，未完成；不得创建替代Goal。用户明确批准A1后继续原剩余任务。"
   },
   "minimum_read_order": [
     "handoff/current.json：完整目标、最新中断与待决定例外。",
@@ -221,7 +221,7 @@
     }
   ],
   "next_action": {
-    "state": "原16cell诊断中断；同Goal active未完成，A1提案待用户明确失败处理例外许可。不要根据提供备用key或登录推定批准。",
+    "state": "原16cell诊断中断；同Goal blocked未完成，A1待用户明确例外授权；不要将自动续行/备用key填写当批准。",
     "proposal": "results/evidence/dependency-factorial-20261101/continuation-a1.json，sha256 cc34b7607f9b6b2b00e3bc4be6fa1201739895374e4400f36b2f5b18695faebf",
     "if_approved": "将用户明确批准文本与manifest_sha256写入独立continuation-authorization.json，approved=true；先只读check，再用同文件accounting_continuation.py --run。它保留未知ledger/原outcome，按原评分2logical/1transport界恢复F07slot3/4/5，原顺序008–016，无actor重跑。",
     "if_not_approved": "保留不完整诊断，不运行模型；报告已排除/未知项，不等待个人网站或要求老师登录。",
@@ -292,7 +292,7 @@
     ],
     "resume_condition": "需要新的、具体且范围内的机制证据或用户给出的新研究方向，使失败依据→方法/固定源码→可执行知识差异→冻结验证链能够成立。单纯重复相同搜索/采样不构成解除阻塞。",
     "preserved": "完整objective、原评分、正负结果、固定模型/供应商/解码/单次预算/评分协议不变。",
-    "superseded_for_current_work": "历史blocked记录保留。用户恢复后多轮实质进展；当前Goal active。此次诊断真实执行与恢复方案验证为进展；尚不满足连续3轮新阻塞阈值。"
+    "superseded_for_current_work": "此字段保留旧机制准入阻塞历史。当前阻塞是新的A1失败停止例外缺少明确决定；连续3轮已审计，update_goal确认blocked，见current_recovery_audit。"
   },
   "current_round_authority": {
     "source": "用户2026-11-01同一Goal研究路径与执行授权；课程DOCX SHA256 6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d；分项来源见review-decision.json。",
@@ -302,7 +302,7 @@
     "next_candidate": "dependency_cut v1已闭环且失败；无下一冻结候选。具体版本失败不泛化为整类方法无效。"
   },
   "active_round": {
-    "status": "interrupted_pending_concrete_failure_policy_exception",
+    "status": "blocked_pending_concrete_A1_exception",
     "spec": "experiments/extensions/dependency-factorial-v1/protocol.json",
     "output": "results/raw/extensions/dependency-factorial-v1",
     "evidence": "results/evidence/dependency-factorial-20261101",
@@ -325,17 +325,18 @@
   },
   "current_recovery_audit": {
     "blocker": "Explicit decision on the frozen A1 unknown-charge failure-policy exception is still missing. The original ledger remains stopped.",
-    "same_condition_consecutive_goal_turns": 2,
+    "same_condition_consecutive_goal_turns": 3,
     "previous_turn": "progress: cd7b097 verified7executions and archived the interruption; implemented/tested/froze A1; requested a concrete exception.",
-    "current_turn": "no_progress: clean samebranch/HEAD, proposal hash/files match and authorization absent. No live experiment; no model/native calls or key switch. Waiting for conversation input is not a verified wait on a live job.",
+    "current_turn": "no_progress: third consecutive goal turn with the same pending A1 decision; authorization absent, frozen proposal intact, ledger still91requests/known0.118087392/unknown1. No model/native calls or key change.",
     "pending_question": "Approve A1 retaining the one unknown cost and fixed remaining schedule, or keep this diagnostic stopped.",
-    "goal_status": "active; threshold of3consecutiveblockedgoalturns not yet met.",
+    "goal_status": "blocked; confirmed by update_goal tool after the3-turn audit. Objective incomplete and unchanged.",
     "not_claimed": [
       "new research evidence",
       "method class exhausted",
       "original dual improvement",
       "validation complete",
       "Goal complete"
-    ]
+    ],
+    "resume_condition": "Explicit user approval of the frozen A1 exception, or another explicit change that resolves this exact frozen failure-policy blocker."
   }
 }
