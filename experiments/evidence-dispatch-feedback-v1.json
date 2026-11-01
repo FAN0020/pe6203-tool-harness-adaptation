@@ -1,0 +1,598 @@
+{
+  "kind": "frozen_evidence_typed_operations",
+  "sources": {
+    "claim_repair": "experiments/semantic-claim-repair-feedback-v2.json",
+    "coverage": "experiments/reviewed-coverage-feedback-v1.json"
+  },
+  "observations": [
+    {
+      "stage": "middle",
+      "server": "math-mcp",
+      "tool": "validate_syntax",
+      "args": {},
+      "result": {
+        "kind": "semantic_contract_maintenance_v1",
+        "proposal": {
+          "edges": [],
+          "edits": [
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.detailed.description",
+              "before": "If true, return a more detailed validation result when supported",
+              "after": "Accepted but ignored: validation output is unchanged whether this is true or false",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "middle-source-1",
+                "middle-source-2",
+                "middle-syntax-probes"
+              ],
+              "reason": "Server defaults detailed but handleValidateSyntax never reads it; probe with detailed:true returned the same output. The 'when supported' hedge implies possible effect, which source contradicts."
+            },
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.allow_variables.description",
+              "before": "If true, allow variable references during validation when supported",
+              "after": "Accepted but ignored: variable references such as q+1 validate the same whether this is true or false",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "middle-source-1",
+                "middle-source-2",
+                "middle-syntax-probes"
+              ],
+              "reason": "Server defaults allow_variables but handler never reads it; probes show q+1 valid with both false and true. Ordinary grammar validation still occurs."
+            }
+          ]
+        },
+        "evidence_ids": [
+          "middle-source-1",
+          "middle-source-2",
+          "middle-syntax-probes"
+        ],
+        "old_sha256": "90ce138ddfe36236d27c8179834d22c921521b430c2e3a7b4213d162a3583006",
+        "target_sha256": "09329ceb1f8cacc379dbaa4fb5888bc49206b92ea7e844befd364306ad62eeb7"
+      }
+    },
+    {
+      "stage": "late",
+      "server": "math-mcp",
+      "tool": "validate_syntax",
+      "args": {},
+      "result": {
+        "kind": "semantic_contract_maintenance_v1",
+        "proposal": {
+          "edges": [],
+          "edits": [
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.detailed.description",
+              "before": "If true, return a more detailed validation result when supported",
+              "after": "Accepted boolean (default false). The current handler ignores it: the output is the same as without it, so it does not change the validation result.",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "late-source-2",
+                "late-source-1",
+                "late-syntax-probes"
+              ],
+              "reason": "Server validates it is a boolean and passes it through, but handleValidateSyntax only destructures expression and never reads detailed; probe with detailed=true returns the same text as without it, so no more detailed result is produced."
+            },
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.allow_variables.description",
+              "before": "Explicitly specify whether variable references are allowed during validation",
+              "after": "Required boolean that must be explicitly provided (the server rejects calls where it is missing or non-boolean). The current handler does not use its value: expressions with variable references, such as q+1, validate the same whether it is true or false.",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "late-source-2",
+                "late-source-1",
+                "late-syntax-probes"
+              ],
+              "reason": "Server requires allow_variables as a boolean. handleValidateSyntax ignores all flags, and probes show q+1 validates identically with true and false, so it does not gate variable acceptance. Grammatical variable references are still checked by the grammar parser."
+            },
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.show_ast.description",
+              "before": "If true, include the abstract syntax tree (AST) structure in the validation result",
+              "after": "Accepted boolean (default false). The current handler ignores it: no abstract syntax tree is included in the result; output is the validity message or syntax errors as usual.",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "late-source-2",
+                "late-source-1",
+                "late-syntax-probes"
+              ],
+              "reason": "Server passes show_ast through, but handleValidateSyntax never reads it; probe with show_ast=true returns only 'Expression is syntactically valid.' with no AST."
+            },
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.check_balanced.description",
+              "before": "If true, perform additional validation to ensure all brackets and parentheses are properly balanced",
+              "after": "Accepted boolean (default true). The current handler ignores it: no additional bracket/parenthesis balance check is performed based on this flag; whatever balance-related errors the grammar parser reports occur regardless.",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "late-source-2",
+                "late-source-1"
+              ],
+              "reason": "Server defaults it to true and passes it, but handleValidateSyntax does not read it; no additional balance validation is implemented in the handler. Ordinary grammar parsing still occurs."
+            },
+            {
+              "tool_id": "math-mcp::validate_syntax",
+              "path": "parameters.properties.max_depth.description",
+              "before": "Maximum allowed nesting depth for expressions (e.g., nested parentheses or function calls). If specified, validation fails if depth exceeds this limit",
+              "after": "Optional integer between 1 and 100 (schema-enforced; server rejects non-integers and out-of-range values). The current handler ignores its value: no nesting-depth limit is applied, and deeply nested expressions such as sin(sin(1)) with max_depth=1 still validate.",
+              "basis": "math-mcp::validate_syntax",
+              "evidence": [
+                "late-source-2",
+                "late-source-1",
+                "late-syntax-probes"
+              ],
+              "reason": "Schema and server enforce type/range, but handleValidateSyntax never reads max_depth; probe with sin(sin(1)) and max_depth=1 returns valid, so validation does not fail on depth. Schema still governs type and range."
+            },
+            {
+              "tool_id": "math-mcp::batch_evaluate",
+              "path": "description",
+              "before": "Evaluate multiple mathematical expressions in a single batch operation",
+              "after": "Not functional in the current release: calling this tool returns an error that the batch handler is not a function. To evaluate expressions individually, use the evaluate tool once per expression.",
+              "basis": "math-mcp::batch_evaluate",
+              "evidence": [
+                "late-source-2",
+                "late-batch-probes"
+              ],
+              "reason": "Server routes batch_evaluate to this.toolHandlers.handleBatchEvaluate, which is not defined in the handlers source; probe returns isError with 'handleBatchEvaluate is not a function'. Individual evaluate calls succeeded in probes."
+            },
+            {
+              "tool_id": "math-mcp::batch_evaluate",
+              "path": "parameters.properties.expressions.description",
+              "before": "Array of mathematical expressions to evaluate",
+              "after": "Array of expression strings accepted by the schema for batch_evaluate. The current batch_evaluate handler is not implemented, so this argument cannot be processed and the call fails with an error; use evaluate individually instead.",
+              "basis": "math-mcp::batch_evaluate",
+              "evidence": [
+                "late-source-2",
+                "late-batch-probes"
+              ],
+              "reason": "Schema declares a string array, but the batch handler is missing so no expression is actually evaluated; probes confirm the tool errors out. Schema still governs the argument type."
+            },
+            {
+              "tool_id": "math-mcp::batch_evaluate",
+              "path": "parameters.properties.stop_on_error.description",
+              "before": "If true, stop processing on first error; if false, continue and report all results",
+              "after": "Accepted boolean (default false) in the schema, but it has no effect: the current batch_evaluate handler is not implemented, so the call fails regardless of this value.",
+              "basis": "math-mcp::batch_evaluate",
+              "evidence": [
+                "late-source-2",
+                "late-batch-probes"
+              ],
+              "reason": "Server defaults stop_on_error to false and passes it, but handleBatchEvaluate does not exist; probe with stop_on_error=false returns a handler-missing error, so no stop/continue behavior is implemented."
+            }
+          ]
+        },
+        "evidence_ids": [
+          "late-source-1",
+          "late-source-2",
+          "late-syntax-probes",
+          "late-batch-probes"
+        ],
+        "old_sha256": "90ce138ddfe36236d27c8179834d22c921521b430c2e3a7b4213d162a3583006",
+        "target_sha256": "689bcfcc0321c6c3b28da19ea90e43b974ce8aa120c4c2aa4e9b35683a5c6b7d"
+      }
+    },
+    {
+      "stage": "middle",
+      "server": "@modelcontextprotocol/server-sequential-thinking",
+      "tool": "__reviewed_document_coverage__",
+      "result": {
+        "kind": "reviewed_coverage_v1",
+        "stage": "middle",
+        "contracts": {
+          "@modelcontextprotocol/server-sequential-thinking::parallel-thinking": "752cc7cb1bf438d0811b847e585718fa722800098d5fe19544991fde68f05eea",
+          "@modelcontextprotocol/server-sequential-thinking::sequentialthinking": "be6a1e16ce167704e83fdeac72366da549cbfeb2fcc8deff8e4e5dd6f6a46e4e"
+        },
+        "deletions": [
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::sequentialthinking",
+            "line": 39,
+            "text": "- isRevision: A boolean indicating if this thought revises previous thinking",
+            "evidence": {
+              "kind": "property",
+              "parameter": "isRevision",
+              "schema": {
+                "type": "boolean",
+                "description": "Whether this revises previous thinking"
+              }
+            },
+            "reason": "Boolean type and whether previous thinking is revised are explicit in the same property schema."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 23,
+            "text": "- thought: Current thinking step within this path",
+            "evidence": {
+              "kind": "property",
+              "parameter": "thought",
+              "schema": {
+                "type": "string",
+                "description": "Current thinking step within this path"
+              }
+            },
+            "reason": "The property description repeats the current thinking step within this path."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 25,
+            "text": "- totalPaths: Total number of paths being explored",
+            "evidence": {
+              "kind": "property",
+              "parameter": "totalPaths",
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Total number of paths being explored"
+              }
+            },
+            "reason": "The property description repeats the total number of paths being explored."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 26,
+            "text": "- thoughtInPath: Which thought number within this specific path",
+            "evidence": {
+              "kind": "property",
+              "parameter": "thoughtInPath",
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Thought number within this specific path"
+              }
+            },
+            "reason": "Which thought number and thought number denote the same value within the specific path; no extra qualifier is removed."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 27,
+            "text": "- pathStatus: Status of this path (\"active\", \"completed\", \"abandoned\", \"merged\")",
+            "evidence": {
+              "kind": "property",
+              "parameter": "pathStatus",
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "completed",
+                  "abandoned",
+                  "merged"
+                ],
+                "description": "Status of this path"
+              }
+            },
+            "reason": "The property description and exact enum preserve the status and all four listed values."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 29,
+            "text": "- convergenceDetected: Whether this path is converging with others",
+            "evidence": {
+              "kind": "property",
+              "parameter": "convergenceDetected",
+              "schema": {
+                "type": "boolean",
+                "description": "Whether converging with other paths"
+              },
+              "context_property": {
+                "parameter": "pathId",
+                "schema": {
+                  "type": "string",
+                  "description": "Identifier for the current reasoning path"
+                }
+              }
+            },
+            "reason": "The boolean describes convergence with other paths. The same tool pathId property identifies the current reasoning path, preserving the omitted grammatical subject this path."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 30,
+            "text": "- needsNewPath: Whether a new parallel path should be created",
+            "evidence": {
+              "kind": "property",
+              "parameter": "needsNewPath",
+              "schema": {
+                "type": "boolean",
+                "description": "Whether to create a new parallel path"
+              }
+            },
+            "reason": "Whether to create a new parallel path and whether a new parallel path should be created express the same creation decision; the object and modality are preserved."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::sequentialthinking",
+            "line": 18,
+            "text": "- You can question or revise previous thoughts",
+            "evidence": {
+              "kind": "description",
+              "line": 47,
+              "text": "2. Feel free to question or revise previous thoughts"
+            },
+            "reason": "Both explicitly permit questioning or revising previous thoughts; the later permission survives."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 15,
+            "text": "- Each path can have its own chain of thoughts",
+            "evidence": {
+              "kind": "description",
+              "line": 35,
+              "text": "2. Develop each path independently with its own reasoning chain"
+            },
+            "reason": "The surviving instruction explicitly gives each path its own independent reasoning chain, preserving the per-path chain information."
+          }
+        ],
+        "authority": "Predeclared researcher-authored source coverage, not a generated model edit or a universal entailment proof. Exact contract hashes are mandatory; all other knowledge is preserved."
+      }
+    },
+    {
+      "stage": "late",
+      "server": "@modelcontextprotocol/server-sequential-thinking",
+      "tool": "__reviewed_document_coverage__",
+      "result": {
+        "kind": "reviewed_coverage_v1",
+        "stage": "late",
+        "contracts": {
+          "@modelcontextprotocol/server-sequential-thinking::convergent-synthesis": "5babc04f5cb6f38dc23c0a3d3b26451960c186f38aa779e6e45467a48c72c5b9",
+          "@modelcontextprotocol/server-sequential-thinking::parallel-thinking": "c492c0efa31fd92f56301c0d6fa56d5a2a3c6cdaf08970cf308fa906a8c555f6",
+          "@modelcontextprotocol/server-sequential-thinking::sequentialthinking": "1b786b0710933b6106cc5d49cc8bace9895dda65232c374d0915b4394804a91e"
+        },
+        "deletions": [
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::sequentialthinking",
+            "line": 40,
+            "text": "- isRevision: A boolean indicating if this thought revises previous thinking",
+            "evidence": {
+              "kind": "property",
+              "parameter": "isRevision",
+              "schema": {
+                "type": "boolean",
+                "description": "Whether this revises previous thinking"
+              }
+            },
+            "reason": "Boolean type and whether previous thinking is revised are explicit in the same property schema."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::convergent-synthesis",
+            "line": 21,
+            "text": "- synthesisId: Unique identifier for this synthesis session",
+            "evidence": {
+              "kind": "property",
+              "parameter": "synthesisId",
+              "schema": {
+                "type": "string",
+                "description": "Unique identifier for this synthesis session"
+              }
+            },
+            "reason": "The property description repeats the unique synthesis-session identifier."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::convergent-synthesis",
+            "line": 24,
+            "text": "- contradictions: Points where reasoning paths conflict or disagree",
+            "evidence": {
+              "kind": "property",
+              "parameter": "contradictions",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "point": {
+                      "type": "string"
+                    },
+                    "conflictingPaths": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "point",
+                    "conflictingPaths"
+                  ],
+                  "additionalProperties": false
+                },
+                "description": "Points where reasoning paths conflict"
+              }
+            },
+            "reason": "Conflict or disagreement denotes the same conflict relation here; the schema explicitly retains conflict points and the conflicting path IDs."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::convergent-synthesis",
+            "line": 27,
+            "text": "- synthesizedConclusion: The unified final answer or conclusion",
+            "evidence": {
+              "kind": "property",
+              "parameter": "synthesizedConclusion",
+              "schema": {
+                "type": "string",
+                "description": "The unified final answer or conclusion"
+              }
+            },
+            "reason": "The property description repeats the unified final answer or conclusion."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::convergent-synthesis",
+            "line": 28,
+            "text": "- confidenceLevel: Confidence in the synthesized conclusion (\"high\", \"moderate\", \"low\")",
+            "evidence": {
+              "kind": "property",
+              "parameter": "confidenceLevel",
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "high",
+                  "moderate",
+                  "low"
+                ],
+                "description": "Confidence in the synthesized conclusion"
+              }
+            },
+            "reason": "The same-property description and exact high/moderate/low enum preserve the whole line."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::convergent-synthesis",
+            "line": 29,
+            "text": "- traceability: Mapping of conclusion elements back to source paths",
+            "evidence": {
+              "kind": "property",
+              "parameter": "traceability",
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": "Mapping of conclusion elements to source paths"
+              }
+            },
+            "reason": "Both descriptions map conclusion elements to source paths; back describes that same direction, not an extra inverse mapping."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::convergent-synthesis",
+            "line": 30,
+            "text": "- openQuestions: Any remaining uncertainties or areas needing further exploration",
+            "evidence": {
+              "kind": "property",
+              "parameter": "openQuestions",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Remaining uncertainties or areas needing exploration"
+              }
+            },
+            "reason": "Remaining uncertainties or areas needing exploration preserves the need for further exploration; remaining already establishes that it is outstanding."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 23,
+            "text": "- thought: Current thinking step within this path",
+            "evidence": {
+              "kind": "property",
+              "parameter": "thought",
+              "schema": {
+                "type": "string",
+                "description": "Current thinking step within this path"
+              }
+            },
+            "reason": "The property description repeats the current thinking step within this path."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 25,
+            "text": "- totalPaths: Total number of paths being explored",
+            "evidence": {
+              "kind": "property",
+              "parameter": "totalPaths",
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Total number of paths being explored"
+              }
+            },
+            "reason": "The property description repeats the total number of paths being explored."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 26,
+            "text": "- thoughtInPath: Which thought number within this specific path",
+            "evidence": {
+              "kind": "property",
+              "parameter": "thoughtInPath",
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Thought number within this specific path"
+              }
+            },
+            "reason": "Which thought number and thought number denote the same value within the specific path; no extra qualifier is removed."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 27,
+            "text": "- pathStatus: Status of this path (\"active\", \"completed\", \"abandoned\", \"merged\")",
+            "evidence": {
+              "kind": "property",
+              "parameter": "pathStatus",
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "completed",
+                  "abandoned",
+                  "merged"
+                ],
+                "description": "Status of this path"
+              }
+            },
+            "reason": "The property description and exact enum preserve the status and all four listed values."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 29,
+            "text": "- convergenceDetected: Whether this path is converging with others",
+            "evidence": {
+              "kind": "property",
+              "parameter": "convergenceDetected",
+              "schema": {
+                "type": "boolean",
+                "description": "Whether converging with other paths"
+              },
+              "context_property": {
+                "parameter": "pathId",
+                "schema": {
+                  "type": "string",
+                  "description": "Identifier for the current reasoning path"
+                }
+              }
+            },
+            "reason": "The boolean describes convergence with other paths. The same tool pathId property identifies the current reasoning path, preserving the omitted grammatical subject this path."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 30,
+            "text": "- needsNewPath: Whether a new parallel path should be created",
+            "evidence": {
+              "kind": "property",
+              "parameter": "needsNewPath",
+              "schema": {
+                "type": "boolean",
+                "description": "Whether to create a new parallel path"
+              }
+            },
+            "reason": "Whether to create a new parallel path and whether a new parallel path should be created express the same creation decision; the object and modality are preserved."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::sequentialthinking",
+            "line": 19,
+            "text": "- You can question or revise previous thoughts",
+            "evidence": {
+              "kind": "description",
+              "line": 48,
+              "text": "2. Feel free to question or revise previous thoughts"
+            },
+            "reason": "Both explicitly permit questioning or revising previous thoughts; the later permission survives."
+          },
+          {
+            "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+            "line": 15,
+            "text": "- Each path can have its own chain of thoughts",
+            "evidence": {
+              "kind": "description",
+              "line": 35,
+              "text": "2. Develop each path independently with its own reasoning chain"
+            },
+            "reason": "The surviving instruction explicitly gives each path its own independent reasoning chain, preserving the per-path chain information."
+          }
+        ],
+        "authority": "Predeclared researcher-authored source coverage, not a generated model edit or a universal entailment proof. Exact contract hashes are mandatory; all other knowledge is preserved."
+      }
+    }
+  ]
+}
