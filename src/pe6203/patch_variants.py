@@ -49,6 +49,7 @@ VARIANTS = (
     "evidence_dispatch",
     "instruction_scope",
     "instruction_scope_quote",
+    "active_contract_probing",
 )
 
 SUFFICIENCY_RULE = (
@@ -675,6 +676,19 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "active_contract_probing":
+        from .active_contract_probing import frozen_knowledge
+
+        result["knowledge"], changes = frozen_knowledge(old, target, context.get("feedback", []))
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "source": "reviewed model-designed native probes and exact claim inventory",
+            "scope": "direct changed/added descriptive fields only; schemas/routes/order protected",
+            "edits": len(changes),
+        }}
         return result
     if strategy in ("instruction_scope", "instruction_scope_quote"):
         from .instruction_scope import compile_knowledge
