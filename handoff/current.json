@@ -1,5 +1,5 @@
 {
-  "handoff_version": "2026-11-01-new-chat-1",
+  "handoff_version": "2026-11-01-interface-review-2",
   "purpose": "在干净的新聊天继续同一个研究目标，按需读取磁盘证据；不继承完整旧对话，不重新开始研究。",
   "workspace": {
     "repository": "/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety",
@@ -8,7 +8,9 @@
     "source_thread": "01a19253-fa19-74f2-89ca-eae44eeb98fb",
     "old_goal": "用户已明确授权暂停旧聊天Goal并创建新聊天继续；旧Goal已暂停，未完成。新聊天是研究的唯一执行者。",
     "working_rule": "所有仓库命令显式使用repository作为workdir。不要扫描父目录/home；不要切换分支、创建新worktree或重置文件。保留全部已有文件、原评分、正负结果。",
-    "live_work": "交接时无正在运行的模型实验或renderer；此前runner84029、15339及相关服务均已结束，本轮进程检查无匹配研究进程。不要因为看到旧lock/state文件就重启实验。"
+    "live_work": "交接时无正在运行的模型实验或renderer；此前runner84029、15339及相关服务均已结束，本轮进程检查无匹配研究进程。不要因为看到旧lock/state文件就重启实验。",
+    "current_thread": "01a19594-5645-7520-bf4f-98de0419fc4e",
+    "new_goal": "已创建active，同一完整objective，无总token预算；旧Goal未恢复。"
   },
   "goal": {
     "create_in_new_chat": true,
@@ -19,8 +21,9 @@
   "minimum_read_order": [
     "HANDOVER.md：只读顶部“新聊天接手入口”、新版Goal和当前最新断点，遇到“已归档”即停止；不要cat整个文件。",
     "handoff/current.json：本文件，保存全部关键用户约束与按需索引。",
-    "results/evidence/experience-gated-learning-20261101/bounded-review.json：最新五类复盘、GEPA/ExpeL版本和机制边界。",
-    "results/evidence/experience-gated-learning-20261101/decision.json：只读顶层结论和必要行；无需再运行已通过的复算或打开原始轨迹。"
+    "results/evidence/interface-mechanism-review-20261101/bounded-review.json：最新有边界文献/源码核对与设计准入结论。",
+    "results/evidence/interface-mechanism-review-20261101/diagnostic.json：只需核对精确catalog变化或四条调用投影时读取；无需无故重复复算。",
+    "最近实际模型实验仍为experience-gated-learning；其bounded-review/decision仅按需读取。"
   ],
   "hard_constraints": [
     "不得加载完整历史聊天、全部轨迹或密钥。不要读取.env；只有真实授权模型执行时通过./experiment或uv --env-file .env内部使用凭据，绝不输出。",
@@ -48,41 +51,77 @@
   },
   "recent_results": [
     {
+      "method": "interface mechanism admission review",
+      "result": "完成交接三条文献线索原文/固定作者源码核对；新catalog/四条调用投影否决当前压缩和新增工具隔离前提。无候选、无模型或原生调用、无新性能结果；Goal未完成。",
+      "paths": [
+        "reports/interface-mechanism-admission.html",
+        "results/evidence/interface-mechanism-review-20261101/bounded-review.json",
+        "results/evidence/interface-mechanism-review-20261101/diagnostic.json"
+      ]
+    },
+    {
       "method": "experience_gated_local_replacement 的训练准入",
       "ids": "900201/900202，种子800201/800202，各2次SP；模型前72ba610，审查先于揭分117f654，归档ac4c328",
       "result": "4/4 evaluated，完成0/4、core0/4、TF1.35/PE6.75、ECSnull；43请求USD0.032424492。没有正例，更新器0调用，未形成候选知识；原题开发/两批验证未启动。此采集方案已关闭，不能重跑或缩题抽到正例。",
       "mechanism_evidence": "四例只有单页占位封面，set_page/add_page实际0次；completion均4096，reasoning3242–4096；最后prompt7626–11610。3个封面可渲染，1个自选主题缺失。不能仅归因于大上下文。外层isError全false但一次load内部success=false；投影未送updater。",
-      "paths": ["reports/experience-gated-learning-admission.html", "results/evidence/experience-gated-learning-20261101/decision.json", "results/evidence/experience-gated-learning-20261101/mechanism-projection.json"]
+      "paths": [
+        "reports/experience-gated-learning-admission.html",
+        "results/evidence/experience-gated-learning-20261101/decision.json",
+        "results/evidence/experience-gated-learning-20261101/mechanism-projection.json"
+      ]
     },
     {
       "method": "prefix_workflow_memory",
       "result": "原生40调用/18页成功没有转化为actor写正文。原457Middle/Late：SP与候选完成均0/2、core均0/2，TF2.3/1.8；235完成均1/1、TF10，core SP1/1/候选0/1且K0相同。具体版本失败，不运行条件验证。",
-      "paths": ["reports/prefix-workflow-memory-development.html", "results/evidence/prefix-workflow-pilot-20261101/decision.json"]
+      "paths": [
+        "reports/prefix-workflow-memory-development.html",
+        "results/evidence/prefix-workflow-pilot-20261101/decision.json"
+      ]
     },
     {
       "method": "更早机制，避免重复",
       "result": "document_sequence已有完整小型Markdown参数例与set0→load→theme顺序；artifact_contract已有正文写入替代说明；prefix已有逐页循环；budget_contract已有4096/12轮/先完整后美化提示；verified_component_memory已有真实组件源码缓存但agent仍取大类别，合成完成/core均0。不要将上述搬到别处当新机制。weather_provenance曾core0/2→1/2但两组完成已2/2且保持未通过；局部收益并非双提升。",
-      "paths": ["src/pe6203/patch_variants.py", "results/evidence/method-learning-20261101/failure-matrix.json", "results/evidence/method-learning-20261101/method-review.json", "results/evidence/workflow-memory-learning-20261101/bounded-review.json"]
+      "paths": [
+        "src/pe6203/patch_variants.py",
+        "results/evidence/method-learning-20261101/failure-matrix.json",
+        "results/evidence/method-learning-20261101/method-review.json",
+        "results/evidence/workflow-memory-learning-20261101/bounded-review.json"
+      ]
     }
   ],
   "next_action": {
-    "state": "当前没有已准入新候选；不需要等待旧任务，没有未完成实验。上一实质轮是progress；本次只为用户要求交接。",
-    "research_direction": "需从已证明的停止条件与产物缺失建立有实质差别、范围内的机制；原生成功不等于actor采用；短上下文训练也截断，不可只断言大返回导致失败。先比对已有实现，再做小范围原论文/作者源码学习。",
-    "last_unfinished_reading_only": "交接前仅搜索到EasyTool(2401.06201; microsoft/JARVIS/easytool)、Play2Prompt、Learning to Rewrite Tool Descriptions(2602.20426)等线索。尚未完成原文/固定源码核对，未下载新源码，未设计或冻结候选，未启动调用；不能把这些搜索命中当已验证依据。",
+    "state": "当前无准入候选，无未完成实验。新聊天已继续同一Goal；本轮完成新的原论文/作者源码核对及设计前提诊断，没有模型执行。",
+    "research_direction": "当前障碍是尚未得到区别于旧方案、在固定actor/updater/反馈边界内且有具体证据的知识适应机制。不要将已读三文献的重新搜索或准入记录重复归档当作进展。未来新实验必须先建立新机制证据；当前结论不等于方法空间穷尽。",
     "do_not_repeat": "document_sequence已经提供Markdown实例；单纯再加简短Markdown例子不构成新机制。GEPA/ExpeL训练准入已失败，不重跑同一4样本；不通过改小任务取得正例。",
-    "required_next_progress": "完整的失败依据→原论文/固定源码→不同机制→可执行冻结与实际验证；如当前无法建立新机制，具体说明证据/范围障碍，不伪称完成或循环检查。"
+    "required_next_progress": "完整的失败依据→原论文/固定源码→不同机制→可执行冻结与实际验证；如当前无法建立新机制，具体说明证据/范围障碍，不伪称完成或循环检查。",
+    "completed_reading": "EasyTool2401.06201v3/JARVIS7624cf3、Play2Prompt2503.14432v2/124c026、Trace-Free+2602.20426v2/tool-optimizerc86928d已核读相关段与固定源码；细节见最新bounded-review。Less-is-More/ToolScope仅初筛，不当作固定实现依据。"
   },
   "on_demand_map": {
     "current_protocol": "experiments/extensions/experience-brief-training-v1/protocol.json",
     "current_reproducer": "results/evidence/experience-gated-learning-20261101/verify_training.py（已通过，不必无故重跑）",
     "original457_rubric_and_strict_gates": "experiments/prefix-workflow-memory-v1.json",
     "prior_method_matrix": "results/evidence/method-learning-20261101/failure-matrix.json",
-    "literature_records": ["results/evidence/method-learning-20261101/method-review.json", "results/evidence/workflow-memory-learning-20261101/bounded-review.json", "results/evidence/experience-gated-learning-20261101/bounded-review.json"],
+    "literature_records": [
+      "results/evidence/method-learning-20261101/method-review.json",
+      "results/evidence/workflow-memory-learning-20261101/bounded-review.json",
+      "results/evidence/experience-gated-learning-20261101/bounded-review.json"
+    ],
     "complete_catalog_fixture": "tests/fixtures/prefix-workflow-catalogs.json（457 early/middle/late及235；仅需检查实际字段时读）",
-    "runner_and_learning": ["src/pe6203/runner.py", "src/pe6203/experiment.py", "src/pe6203/strategy_search.py", "src/pe6203/patch_variants.py"],
+    "runner_and_learning": [
+      "src/pe6203/runner.py",
+      "src/pe6203/experiment.py",
+      "src/pe6203/strategy_search.py",
+      "src/pe6203/patch_variants.py"
+    ],
     "course_requirements": "experiments/course-completion-plan.json（其中历史优先级/旧可选研究结论不能覆盖新版Goal和用户要求）",
     "original_brief": "/Users/fanysmacpro/Documents/Graduate_learning/PE6203-BoAn/group_project/PE6203 Group Project 4 - Tool Harness Adaptation under Environment Change.docx",
-    "course_and_baseline_evidence": ["results/evidence/course-v1.3-20261031/reproduction.json", "results/evidence/daily-migration-pilot-20261031/reproduction.json", "reports/course-completion-plan.html"],
-    "large_archives": "各results/evidence下tar.gz仅复现需要时按manifest定向提取，不整体展开或加载。results/raw是旧原始执行，不能全量扫描内容。"
+    "course_and_baseline_evidence": [
+      "results/evidence/course-v1.3-20261031/reproduction.json",
+      "results/evidence/daily-migration-pilot-20261031/reproduction.json",
+      "reports/course-completion-plan.html"
+    ],
+    "large_archives": "各results/evidence下tar.gz仅复现需要时按manifest定向提取，不整体展开或加载。results/raw是旧原始执行，不能全量扫描内容。",
+    "latest_admission_review": "results/evidence/interface-mechanism-review-20261101/bounded-review.json",
+    "latest_diagnostic": "results/evidence/interface-mechanism-review-20261101/diagnostic.json"
   }
 }

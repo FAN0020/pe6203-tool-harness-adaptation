@@ -24,7 +24,16 @@
 
 交接时没有正在运行的实验或renderer。研究结果基点为`ac4c328`，本次交接不改任何旧结果。交接前仅出现EasyTool/Play2Prompt/工具描述重写的搜索线索，尚未完成原文与固定源码核对，也没有新候选或新模型调用；不能当作已完成研究。新聊天创建同一完整目标的Goal后自主推进，旧聊天不再并发研究。
 
-### 当前最新断点：经验驱动局部替换的训练准入失败，尚未产生候选知识
+### 当前最新断点：新聊天已接手；三条接口学习线索经准入复盘仍无新候选
+
+- 本聊天`01a19594-5645-7520-bf4f-98de0419fc4e`已按同一完整objective创建active Goal，无总token预算；旧Goal仍暂停。直接使用`codex/completion-quality-study`，未切分支或新建worktree。
+- 新证据见`results/evidence/interface-mechanism-review-20261101/bounded-review.json`与`reports/interface-mechanism-admission.html`。核读EasyTool2401.06201v3、Play2Prompt2503.14432v2、Trace-Free+2602.20426v2（亦读v1相关段），固定三个作者仓库SHA及定向源码。没有执行作者程序或模型。
+- 定向离线复算：457 Early/Middle均19工具，description均1113字符；Late21工具/1732字符。bulk在Early已存在、描述三阶段均74字符，Middle仅其parameters改变。最近原457的W02/W04/W05/W06均0bulk、0set_page/add_page调用。字符不等于token；未排除schema/观察负担或定义暴露影响，未建立截断原因。
+- 不准入单纯描述压缩/再加示例（新机制依据不足）、Play2Prompt直接移植（问答/ground-truth调用进入反思，与当前边界不兼容）、Trace-Free+发布权重（替换冻结更新器；复制提示不等于其学习机制）。初步“隔离新增bulk”前提错误，未形成候选。不是否定整类方法，也不是方法空间穷尽。
+- 新agent/judge/updater/native调用均0，新模型费用0；未生成候选、未开启开发/验证。离线诊断脚本只读固定fixture和四份既有review输入，五个输入哈希保留；原评分、全部结果及执行代码未改。
+- 交接三条文献线索已完成本轮必要阅读，不要重复搜索/归档当进展。下一实验须有不同、范围内、可反驳的新机制和具体证据；没有则如实保留机制证据不足，不重开旧训练、不缩题、不修改模型/预算、不重跑到赢。Goal仍未完成；课程报告/复现/展示及失败案例最终核对仍有工作。
+
+### 上一实质实验断点：经验驱动局部替换的训练准入失败，尚未产生候选知识
 
 - 同一Goal/分支/全部旧文件、正负结果保留。新报告 `reports/experience-gated-learning-admission.html` 完成“已有失败→原始论文/固定源码→不同学习机制→四次实际训练准入”的链条；未重启旧程序/预算提示，也未重开377日志路线。
 - 复用五类失败矩阵、此前局部收益和ACE/A-MEM/Reflexion等阅读。新增GEPA2507.19457v2（2026-02-14），官方SHA`8c7b697a71977980afc7537dac0881e784eef99f`；反思、候选评估、Pareto选择和MCP适配器关键位置与许可在`results/evidence/experience-gated-learning-20261101/`。复核ExpeL2308.10144v3、SHA`e41ec9a24823e7b560c561ab191441b56d9bcefc`的task_critique/parse_rules/update_rules。官方GEPA的两次调用执行器及含问题/最终输出的反思输入不符合当前公平边界，因此未直接采用；不声称完整复现GEPA/ExpeL。
