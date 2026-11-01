@@ -1,0 +1,385 @@
+{
+  "projects": [
+    {
+      "id": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "name": "Analytics Dashboard Platform",
+      "description": "Unified analytics dashboard that ingests customer CSV data, analyzes application log files, and presents both in interactive visualization components.\n\nScope:\n1. Customer CSV ingestion — parsing, validation, normalization, deduplication into an analytics-ready store.\n2. Log analysis — ingestion, parsing, severity aggregation, error/trend metrics from application logs.\n3. Visualization layer — reusable chart components, dashboard layout, filtering and drill-down.\n4. Integration, testing, and deployment.\n\nPlanning constraint: every task must be independently executable — no task may exceed a complexity of 5/10. Milestones are tracked as top-level tasks; the work under each is broken into small, bounded deliverables with clear completion criteria.\n\nTags: analytics, dashboard, data-pipeline, visualization, greenfield",
+      "createdAt": "2026-11-01T14:10:48.656Z",
+      "updatedAt": "2026-11-01T14:10:48.656Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "92f0904d-7ef1-49c8-8fba-c24b7aa35e81",
+      "name": "M1 — Customer CSV Data Pipeline",
+      "details": "MILESTONE 1 of 4.\n\nGoal: Turn raw, inconsistent customer CSV exports into clean, deduplicated, analytics-ready records.\n\nExit criteria:\n- Documented CSV schema contract covering every consumed column.\n- Streaming parser that handles large files (100MB+) without loading fully into memory.\n- Validation layer that quarantines bad rows with a machine-readable rejection report.\n- Normalized records persisted to the analytics store and queryable.\n- Automated test suite with representative fixture data.\n\nDecomposition rule: this milestone is delivered only through its child tasks. No child task may exceed complexity 5.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "completed": false,
+      "createdAt": "2026-11-01T14:10:57.582Z",
+      "updatedAt": "2026-11-01T14:10:57.582Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "data-ingestion"
+      ],
+      "level": 0
+    },
+    {
+      "id": "9bbbf0ab-20a0-4116-8b34-39ec8d19bad9",
+      "name": "M2 — Application Log Analysis Pipeline",
+      "details": "MILESTONE 2 of 4.\n\nGoal: Convert application log files into structured, aggregated operational metrics (error rates, severity distribution, time-based trends).\n\nExit criteria:\n- Documented log format specification plus a sample log corpus for testing.\n- Parser handling known line templates, multiline stack traces, and unparseable garbage.\n- Canonical normalized event model (timestamp, level, service, message, trace id).\n- Aggregations computed per time window: counts by severity, top errors, error rate.\n- Metrics persisted to the same analytics store used by the CSV pipeline.\n\nDecomposition rule: delivered only through child tasks, none exceeding complexity 5.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "completed": false,
+      "createdAt": "2026-11-01T14:10:57.586Z",
+      "updatedAt": "2026-11-01T14:10:57.586Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "log-analysis"
+      ],
+      "level": 0
+    },
+    {
+      "id": "1b7ebf56-537c-466b-97c3-73f251765580",
+      "name": "M3 — Visualization Components",
+      "details": "MILESTONE 3 of 4.\n\nGoal: Deliver a library of reusable, tested chart and dashboard components that render both customer metrics and log metrics.\n\nExit criteria:\n- Charting library and design tokens selected and documented.\n- Reusable components: line chart, bar chart, KPI tile, sortable data table.\n- Global filter bar with date-range state shared across tiles.\n- Responsive dashboard layout grid.\n- Loading, empty, and error states for every data-bound component.\n- Component tests plus at least baseline visual regression coverage.\n\nDecomposition rule: delivered only through child tasks, none exceeding complexity 5.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "completed": false,
+      "createdAt": "2026-11-01T14:10:57.589Z",
+      "updatedAt": "2026-11-01T14:10:57.589Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "frontend",
+        "visualization"
+      ],
+      "level": 0
+    },
+    {
+      "id": "5b3fe3d8-c13f-420c-9193-bf0217736853",
+      "name": "M4 — Integration, Testing &amp; Deployment",
+      "details": "MILESTONE 4 of 4.\n\nGoal: Connect pipelines to the dashboard, prove the whole flow works end to end, and ship it.\n\nExit criteria:\n- Query API serving both customer and log metrics to the frontend.\n- Frontend tiles wired to live API data (no mock data remaining).\n- One end-to-end test covering CSV ingest → store → API → rendered dashboard.\n- Performance validated against a realistic data volume.\n- CI pipeline running lint, unit, and e2e suites.\n- Deployment procedure and operational runbook written.\n\nDecomposition rule: delivered only through child tasks, none exceeding complexity 5.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "completed": false,
+      "createdAt": "2026-11-01T14:10:57.592Z",
+      "updatedAt": "2026-11-01T14:10:57.592Z",
+      "dependsOn": [],
+      "priority": 7,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "integration",
+        "devops"
+      ],
+      "level": 0
+    },
+    {
+      "id": "c137f4e3-f578-414f-94d8-5f2750681c25",
+      "name": "1.1 Document customer CSV column contract",
+      "details": "Produce a written spec of every column the pipeline consumes from customer CSV exports.\n\nDeliverable: docs/csv-schema.md containing, per column: canonical name, expected type, nullable?, allowed values/enum, example value, and which dashboard metric depends on it.\n\nAlso capture known export quirks discovered in real files (delimiter variants, BOM, quoted commas, inconsistent date formats, blank trailing columns).\n\nDone when: every column the dashboard needs is listed with a type and an example, and the doc has been reviewed against two real anonymized sample files.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "92f0904d-7ef1-49c8-8fba-c24b7aa35e81",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:10.318Z",
+      "updatedAt": "2026-11-01T14:11:10.318Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 2,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "spec"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "aa62cbab-a987-4c9d-8b07-4e3693ce77c3",
+      "name": "1.2 Implement streaming CSV reader",
+      "details": "Build the file-reading layer that feeds the parser.\n\nScope (bounded): open a file, detect delimiter and encoding (incl. UTF-8 BOM), emit header row and then one raw row at a time as a stream. No validation, no normalization, no database writes — those are separate tasks.\n\nMust handle: 100MB+ files without loading into memory, quoted fields containing commas and newlines, and CRLF line endings.\n\nDeliverable: reader module plus a unit test that streams a generated 50MB fixture and asserts constant memory behavior.\n\nDone when: reader streams a large file row-by-row and all reader unit tests pass.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "92f0904d-7ef1-49c8-8fba-c24b7aa35e81",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:10.322Z",
+      "updatedAt": "2026-11-01T14:11:23.936Z",
+      "dependsOn": [
+        "c137f4e3-f578-414f-94d8-5f2750681c25"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "implementation"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "9af2445a-1035-40a1-9dae-3f5eb60ead56",
+      "name": "1.3 Add row validation with rejection report",
+      "details": "Validate each streamed row against the 1.1 column contract and quarantine bad rows instead of aborting the run.\n\nScope (bounded): required-field presence, type parse checks, enum membership, max-length checks. Collect failures into a structured report: file name, line number, column, rule violated, offending value.\n\nDo not implement cleanup/repair of bad values — rejected rows are simply reported and skipped.\n\nDeliverable: validator module + JSON rejection report writer + tests covering one failure per rule.\n\nDone when: a deliberately corrupted fixture produces a complete, accurate rejection report and the run still completes.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "92f0904d-7ef1-49c8-8fba-c24b7aa35e81",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:10.325Z",
+      "updatedAt": "2026-11-01T14:11:23.939Z",
+      "dependsOn": [
+        "aa62cbab-a987-4c9d-8b07-4e3693ce77c3"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "validation"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "e3bdd620-6668-4291-843e-d61249b2fd4e",
+      "name": "1.4 Normalize and type-coerce customer fields",
+      "details": "Map validated raw rows into the canonical customer record shape.\n\nScope (bounded): trim whitespace, canonicalize header aliases to canonical names, parse dates into ISO-8601 UTC, coerce numeric/currency strings, normalize country codes and emails to lowercase.\n\nExplicitly out of scope: deduplication (1.5) and persistence (1.6).\n\nDeliverable: transform module + table-driven tests using one input/output pair per transformation rule.\n\nDone when: every contract column has a documented transformation and the transform tests pass.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "92f0904d-7ef1-49c8-8fba-c24b7aa35e81",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:10.327Z",
+      "updatedAt": "2026-11-01T14:11:23.940Z",
+      "dependsOn": [
+        "9af2445a-1035-40a1-9dae-3f5eb60ead56"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "transformation"
+      ],
+      "estimatedHours": 6,
+      "level": 1
+    },
+    {
+      "id": "a5837a1d-6a43-43c4-833e-c9128d6b0b66",
+      "name": "1.5 Implement customer record deduplication",
+      "details": "Collapse duplicate customer rows that appear across and within export files.\n\nScope (bounded): define the match key (e.g. normalized email, falling back to customer_id), define a deterministic survivorship rule (most recent updated_at wins, tie-break by source file order), and emit a count of records merged.\n\nSingle strategy only — do not build fuzzy matching or ML entity resolution.\n\nDeliverable: dedup module + tests for exact duplicate, same-key-different-values, and distinct-customers cases.\n\nDone when: dedup produces exactly one record per customer for the fixture corpus and merge counts are reported.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "92f0904d-7ef1-49c8-8fba-c24b7aa35e81",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:10.329Z",
+      "updatedAt": "2026-11-01T14:11:23.942Z",
+      "dependsOn": [
+        "e3bdd620-6668-4291-843e-d61249b2fd4e"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "transformation"
+      ],
+      "estimatedHours": 6,
+      "level": 1
+    },
+    {
+      "id": "45830c8e-2456-41ae-acc0-7d5f306b980c",
+      "name": "1.6 Load normalized customers into analytics store",
+      "details": "Persist canonical customer records into the analytics store used by the dashboard.\n\nScope (bounded): define the customers table schema (columns from 1.1 plus ingested_at and source_file), write in batches, upsert on the dedup key so re-runs are idempotent.\n\nOut of scope: query API endpoints and dashboard rendering.\n\nDeliverable: schema migration + batch upsert loader + integration test asserting row counts and idempotency on a second run.\n\nDone when: loading the same file twice leaves the table unchanged in row count.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "92f0904d-7ef1-49c8-8fba-c24b7aa35e81",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:10.331Z",
+      "updatedAt": "2026-11-01T14:11:23.944Z",
+      "dependsOn": [
+        "a5837a1d-6a43-43c4-833e-c9128d6b0b66"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "storage"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "fdc2c2b0-e85f-4750-b591-4bf9dada9842",
+      "name": "1.7 Build CSV pipeline test suite and fixtures",
+      "details": "Assemble the regression suite that guards the whole CSV path.\n\nScope (bounded): create a committed fixture corpus covering clean data, encoding edge cases, malformed rows, duplicates, and an empty file; write an orchestrating test that runs reader → validate → normalize → dedup → load and asserts final table contents.\n\nDo not add performance benchmarking here (handled in 4.5).\n\nDeliverable: fixtures directory + pipeline integration test + CI-runnable command documented in README.\n\nDone when: suite runs green locally and fails loudly if any stage's behavior regresses.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "92f0904d-7ef1-49c8-8fba-c24b7aa35e81",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:10.332Z",
+      "updatedAt": "2026-11-01T14:11:23.945Z",
+      "dependsOn": [
+        "45830c8e-2456-41ae-acc0-7d5f306b980c"
+      ],
+      "priority": 7,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "testing"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "b4b199e3-f732-4e37-96a0-156d8d398731",
+      "name": "1.8 Add CSV pipeline run metrics and logging",
+      "details": "Make each pipeline run observable.\n\nScope (bounded): emit a single end-of-run summary (structured log + metrics event) with rows read, rows rejected, rows merged as duplicates, rows written, and duration per stage. Emit a clear error log on fatal failure.\n\nOut of scope: dashboards/alerts for these metrics (future work), retries.\n\nDeliverable: logging calls wired into each stage + a test asserting the summary object shape.\n\nDone when: one run of the fixture corpus prints a complete, accurate summary line.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "92f0904d-7ef1-49c8-8fba-c24b7aa35e81",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:10.334Z",
+      "updatedAt": "2026-11-01T14:11:23.946Z",
+      "dependsOn": [
+        "45830c8e-2456-41ae-acc0-7d5f306b980c"
+      ],
+      "priority": 6,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "observability"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "dc259e48-57ff-4f7c-a715-f671aac03621",
+      "name": "2.1 Document log format spec and assemble sample corpus",
+      "details": "Capture exactly what our application logs look like and collect real examples to test against.\n\nDeliverable: docs/log-format.md listing each line template (severity, timestamp format, service field, message, trace id, stack trace block) with annotated real samples.\n\nAlso collect 5-10 anonymized sample log files into a fixtures folder covering: normal traffic, an error burst, a multiline stack trace, and a file with truncated/garbage lines.\n\nDone when: every template the parser must support is documented with a real example, and the sample corpus is committed.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "9bbbf0ab-20a0-4116-8b34-39ec8d19bad9",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:23.948Z",
+      "updatedAt": "2026-11-01T14:11:23.948Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 2,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "spec"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "c9d0065d-3cfd-4e63-b616-0047c000d5de",
+      "name": "2.2 Implement single-line log parser",
+      "details": "Parse individual log lines into raw structured fields.\n\nScope (bounded): one matcher per template defined in 2.1, applied in order; extract timestamp string, severity token, service, message, and trace id into a plain object.\n\nOut of scope: multiline stack traces (2.4), malformed-line handling (2.5), type normalization (2.3).\n\nDeliverable: parser module + unit tests with one asserted case per template.\n\nDone when: every documented template parses correctly and unknown templates return an explicit \"no match\" rather than throwing.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "9bbbf0ab-20a0-4116-8b34-39ec8d19bad9",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:23.949Z",
+      "updatedAt": "2026-11-01T14:11:23.949Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "implementation"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "fdcf9151-8aa8-49ac-8e8a-e51340be0932",
+      "name": "2.3 Define canonical log event model and normalization",
+      "details": "Convert parsed fields into the canonical event shape shared with downstream aggregation.\n\nScope (bounded): define the event type (timestamp UTC ISO, level enum, service, message, trace_id, raw_line); map severity aliases (WARN/warning, ERR/ERROR, FATAL/critical) to the enum; parse timestamps across the formats found in 2.1.\n\nDeliverable: model definition + normalizer module + tests for each severity alias and each timestamp format.\n\nDone when: all sample-corpus lines that parse normalize into valid canonical events with no null timestamps or levels.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "9bbbf0ab-20a0-4116-8b34-39ec8d19bad9",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:23.950Z",
+      "updatedAt": "2026-11-01T14:11:23.950Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "data-model"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "24b01875-c468-416c-a12b-eaac55f9044d",
+      "name": "2.4 Join multiline stack traces to their parent event",
+      "details": "Continuation lines (indented stack frames, chained causes) must attach to the preceding log event instead of being parsed as separate entries.\n\nScope (bounded): detect continuation lines by indent/pattern, buffer them, and append to the parent event's stack_trace field. Cap stored trace length (e.g. first 50 frames) to bound memory.\n\nDeliverable: line-assembly layer + tests with a multi-frame trace, a chained \"Caused by\", and a trace at EOF.\n\nDone when: a log file with interleaved stack traces yields the same event count as the same file without traces, and each trace is intact.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "9bbbf0ab-20a0-4116-8b34-39ec8d19bad9",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:23.951Z",
+      "updatedAt": "2026-11-01T14:11:23.951Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "implementation"
+      ],
+      "estimatedHours": 6,
+      "level": 1
+    },
+    {
+      "id": "547f54f5-7d37-4a35-99fc-61cc768f5375",
+      "name": "2.5 Handle malformed and truncated log lines",
+      "details": "The pipeline must survive garbage input.\n\nScope (bounded): count and sample unparseable lines (first N examples per run), never throw on bad input, and record the count in the run summary. Truncated final line at EOF is expected and must not be counted as an error.\n\nDeliverable: guard logic in the parse loop + tests with binary junk, truncated lines, and an empty file.\n\nDone when: a deliberately corrupted log file completes with an accurate unparsed-line count and no exception.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "9bbbf0ab-20a0-4116-8b34-39ec8d19bad9",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:23.953Z",
+      "updatedAt": "2026-11-01T14:11:23.953Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "robustness"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "32b0208a-c14e-411f-93e9-579891e8c292",
+      "name": "2.6 Compute windowed log aggregations",
+      "details": "Roll canonical events up into the numbers the dashboard displays.\n\nScope (bounded): per time bucket (hourly and daily) and per service, compute total events, counts by severity, error+critical rate, and top-10 most frequent error messages (normalized message keys).\n\nDeliverable: aggregation module + tests on a hand-built event list with known expected totals.\n\nDone when: aggregations match hand-computed expectations on the sample corpus.",
+      "projectId": "90f341fc-9072-4543-a471-1559e1a29ed6",
+      "parentId": "9bbbf0ab-20a0-4116-8b34-39ec8d19bad9",
+      "completed": false,
+      "createdAt": "2026-11-01T14:11:23.954Z",
+      "updatedAt": "2026-11-01T14:11:23.954Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "aggregation"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    }
+  ],
+  "subtasks": [],
+  "migration": {
+    "version": "1.8.1"
+  }
+}
