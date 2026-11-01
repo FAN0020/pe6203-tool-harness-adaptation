@@ -1,0 +1,82 @@
+{
+  "agent": {
+    "model": "deepseek/deepseek-v4.1-flash-1017",
+    "base_url_env": "AGENT_BASE_URL",
+    "api_key_env": "AGENT_API_KEY",
+    "temperature": 0.0,
+    "max_completion_tokens": 4096,
+    "extra_body": {
+      "provider": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      }
+    }
+  },
+  "judge": {
+    "model": "deepseek/deepseek-v4.1-flash-1017",
+    "base_url_env": "JUDGE_BASE_URL",
+    "api_key_env": "JUDGE_API_KEY",
+    "temperature": 0.0,
+    "max_completion_tokens": 4096,
+    "extra_body": {
+      "reasoning": {
+        "enabled": false
+      },
+      "response_format": {
+        "type": "json_object"
+      },
+      "provider": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      }
+    }
+  },
+  "judge_runs": 5,
+  "max_rounds": 12,
+  "request_timeout_seconds": 120,
+  "run_timeout_seconds": 900,
+  "tool_timeout_seconds": 30,
+  "send_model_seed": false,
+  "tool_name_policy": "namespaced",
+  "request_retry": {
+    "max_retries": 1,
+    "backoff_seconds": 2
+  },
+  "judge_recovery": {
+    "max_attempts": 2,
+    "stop_after_transport_failures": 2,
+    "format": "concise-counts-v1"
+  },
+  "spend_guard": {
+    "ledger": "results/raw/parameter-coverage-validation-1-costs-20261101/spend-ledger.json",
+    "limit_usd": null,
+    "model": "deepseek/deepseek-v4.1-flash-1017",
+    "context_tokens": 1048576,
+    "prompt_per_million": "0.3",
+    "completion_per_million": "1.2",
+    "max_completion_tokens": 4096,
+    "provider_route": {
+      "only": [
+        "digitalocean"
+      ],
+      "order": [
+        "digitalocean"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true
+    },
+    "expected_provider": "DigitalOcean"
+  }
+}
