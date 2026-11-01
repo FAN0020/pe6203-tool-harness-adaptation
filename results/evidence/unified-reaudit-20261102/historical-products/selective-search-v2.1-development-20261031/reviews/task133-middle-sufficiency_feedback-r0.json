@@ -1,0 +1,29 @@
+{
+  "cell_id": "task133-middle-sufficiency_feedback-r0",
+  "task_id": 133,
+  "input_sha256": "821ea9e2744fd0e6e8202d2491be3e5fc5b0ed2b2ba8cfaa2c157c3b4ea524da",
+  "trace_sha256": "fec0442070e7f9816efca82f97d48c5a35132f2561184899a5250f695f2c6159",
+  "properties": {
+    "validation": "pass",
+    "guidance": "fail",
+    "implementation_consistency": "fail"
+  },
+  "core_pass": false,
+  "evidence": {
+    "validation": "Sample syntax/evaluation results match including null for division by zero; distinguishes syntax acceptance and evaluator namespace.",
+    "guidance": "Useful AST advice is undermined by suggesting parse_expr with empty global_dict/evaluate=False as untrusted-input alternative. Official SymPy1.14 docs warn parse_expr uses eval; evaluate=False suppresses simplification, not execution.",
+    "implementation_consistency": "Root numeric constant and function-return branches bypass declared magnitude/finite checks; 1e309 returns Infinity directly, and abs(1e309) also bypasses bound. Function domain/arity errors escape declared ExpressionError."
+  },
+  "python_blocks_parse": [
+    true,
+    true
+  ],
+  "generated_code_executed": false,
+  "review_phase": "supplemental_posthoc_scores_exposed",
+  "review_source": "scripts/review_reaudit_gap_math.py",
+  "limitations": [
+    "Static inspection only; no exhaustive security proof.",
+    "Same coordinator with scores exposed; not independent validation."
+  ],
+  "primary_source": "https://docs.sympy.org/1.14.0/modules/parsing.html#sympy.parsing.sympy_parser.parse_expr"
+}

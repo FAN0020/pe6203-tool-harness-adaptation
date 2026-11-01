@@ -54,7 +54,7 @@ def main():
     ledger_files += sorted((ROOT / "results/evidence").glob("*/*ledger*.json"))
     ledger_reports, unresolved = [], {}
     for p in ledger_files:
-        if any(n in str(p) for n in ("evidence-dictionary", "evidence-contrastive")):
+        if any(n in str(p) for n in ("evidence-dictionary", "evidence-contrastive", "capability-consolidation")):
             continue  # New round has its own independent accounting.
         d = read(p)
         if not isinstance(d, dict) or not isinstance(d.get("requests"), list):
@@ -84,7 +84,7 @@ def main():
     audits += sorted((ROOT / "results/evidence").glob("*/*updater*audit*.json"))
     audits += sorted((ROOT / "results/evidence").glob("*/recovery/*audit*.json"))
     for p in audits:
-        if any(n in str(p) for n in ("evidence-dictionary", "evidence-contrastive")):
+        if any(n in str(p) for n in ("evidence-dictionary", "evidence-contrastive", "capability-consolidation")):
             continue
         for r in response_projection(read(p)):
             add(r["id"],r["known_usd"],str(p.relative_to(ROOT)),"updater_receipt")
@@ -102,7 +102,7 @@ def main():
                      "Union is a known lower bound, not a settled total; earliest failed requests may lack ledger/response IDs.",
                      "Broader ledgers include course, generation-only and diagnostic work beyond the36 registry candidates.",
                      "Unknown reservations are neither actual charges nor hard upper bounds.",
-                     "Current dictionary/contrastive rounds excluded and reported separately.",
+                     "Current dictionary/contrastive/consolidation rounds excluded and reported separately.",
                      "Updater audit extraction exports only response IDs and usage.cost, never messages or hidden reasoning."]}
     (OUT / "cost-receipts.json").write_text(json.dumps(list(receipts.values()),indent=2)+"\n")
     (OUT / "cost-audit.json").write_text(json.dumps(out,ensure_ascii=False,indent=2)+"\n")

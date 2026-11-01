@@ -1,0 +1,47 @@
+{
+  "cell_id": "task133-early-selective_patch-r0",
+  "task_id": 133,
+  "input_sha256": "b712843f2d808db048de11c6c431d9e9d865c20bb82c6dbb60c5603430221e99",
+  "trace_sha256": "7d883c6997ffdf7f503d6fe83fac46119452a318ae02745629e9a34ff59dbe4c",
+  "properties": {
+    "validation": "fail",
+    "guidance": "pass",
+    "implementation_consistency": "fail"
+  },
+  "core_pass": false,
+  "evidence": {
+    "validation": "Recorded individual probes correct, but claims parser rejects everything except pure arithmetic; finite rejection probes do not establish that and native grammar accepts names/calls/strings.",
+    "guidance": "Actionable allowlist, OWASP mapping, input/resource controls and logging.",
+    "implementation_consistency": "Main safe_eval still maps Pow to unguarded operator.pow; separate guard_pow is never connected. Its own rejection test expects power bomb rejection, and handle catches ValueError but not division errors."
+  },
+  "python_blocks_static_parse": [
+    {
+      "parses": true,
+      "closed_fence": true,
+      "sha256": "320fd48b355fd3dd0368e6cdd79ff9a25e0c29ef5c5545008fa64a7c0ed68c6d"
+    },
+    {
+      "parses": true,
+      "closed_fence": true,
+      "sha256": "2c6222412dddfe1428936079b3ae1a0f4acfc004e48c66bbc4e4bd846077546a"
+    },
+    {
+      "parses": true,
+      "closed_fence": true,
+      "sha256": "76c195bc8a3ed1337390c64545474f8619873df6da94d46a12340414ca9c078d"
+    },
+    {
+      "parses": true,
+      "closed_fence": true,
+      "sha256": "6c89de63c660f60721b6c905662868826120195794162c71cd6f0df53b96e268"
+    }
+  ],
+  "generated_code_executed": false,
+  "review_phase": "supplemental_posthoc_scores_exposed",
+  "review_source": "scripts/review_confirmation_math.py",
+  "limitations": [
+    "Static consistency review, not exhaustive security certification.",
+    "Original scores/labels exposed; not independent validation.",
+    "New dated supplement; original conclusions preserved."
+  ]
+}

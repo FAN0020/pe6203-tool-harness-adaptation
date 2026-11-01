@@ -1,0 +1,39 @@
+{
+  "cell_id": "task133-middle-selective_patch-r2",
+  "task_id": 133,
+  "input_sha256": "d9ce6d633c0d4b10234de55337abf1e37ca00302a35b4d89a1d59038052fcfe8",
+  "trace_sha256": "a43fce1b2315aa36e08e2c4d5bf6e9b1bc859d382201116f93a3d0b12bdb3ead",
+  "properties": {
+    "validation": "fail",
+    "guidance": "pass",
+    "implementation_consistency": "fail"
+  },
+  "core_pass": false,
+  "evidence": {
+    "validation": "Claims sqrt(16) rejected/no functions, but only compound2**3+sqrt(16) was rejected; cannot attribute rejection to sqrt. Arithmetic/null/modulo observations otherwise match.",
+    "guidance": "Actionable allowlist, numeric/resource and OWASP recommendations.",
+    "implementation_consistency": "Main code has illegal assignment expression to budget[0], a SyntaxError; auxiliary Decimal snippet references unimported InvalidOperation."
+  },
+  "python_blocks_static_parse": [
+    {
+      "parses": false,
+      "line": 22,
+      "error": "cannot use assignment expressions with subscript",
+      "closed_fence": true,
+      "sha256": "998b80fe5be22a9f06a2b065d17d609876cc278cc8cd83f87b9021e2b6847f4d"
+    },
+    {
+      "parses": true,
+      "closed_fence": true,
+      "sha256": "0afec4dc30579ec479309f288f3979cf92f199da1c51716c0d1d6b872c21663e"
+    }
+  ],
+  "generated_code_executed": false,
+  "review_phase": "supplemental_posthoc_scores_exposed",
+  "review_source": "scripts/review_confirmation_math.py",
+  "limitations": [
+    "Static consistency review, not exhaustive security certification.",
+    "Original scores/labels exposed; not independent validation.",
+    "New dated supplement; original conclusions preserved."
+  ]
+}

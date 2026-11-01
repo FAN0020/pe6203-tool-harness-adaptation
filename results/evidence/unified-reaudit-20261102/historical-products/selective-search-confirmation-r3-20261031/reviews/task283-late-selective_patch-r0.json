@@ -1,0 +1,114 @@
+{
+  "cell_id": "task283-late-selective_patch-r0",
+  "task_id": 283,
+  "input_sha256": "0b67477abba4fd77138986b08b2643082591c3b1e3a1fa0abfdd5f856e599774",
+  "trace_sha256": "f4c7ae76816261de39ef1851ceb064b2430ee65fee6008f26466923fc724c6ff",
+  "properties": {
+    "coverage": "pass",
+    "structure_and_scope": "pass",
+    "delivery_truth": "unknown",
+    "scope_preserved": "pass"
+  },
+  "core_pass": false,
+  "evidence": {
+    "coverage": "Saved tasks cover CSV processing, log analysis and visualization; domain names and concrete work descriptions reviewed.",
+    "structure_and_scope": "Unique linked records and valid parent graph; substantive executable decomposition distinguished from milestone containers. No arbitrary numeric effort cutoff.",
+    "scope_preserved": "Required work retained; parent estimates after real child decomposition are not treated as scope hiding.",
+    "delivery_truth": "No final answer; persisted partial work cannot establish completed delivery."
+  },
+  "graph_facts": {
+    "tasks": 32,
+    "unique_ids": 32,
+    "duplicate_ids": [],
+    "roots": 5,
+    "leaves": 27,
+    "dependency_edges": 48,
+    "dependency_field_missing": [],
+    "dangling_parents": [],
+    "dangling_dependencies": [],
+    "parent_cycle": false,
+    "dependency_cycle": false
+  },
+  "scope_relevant_mutations": [
+    {
+      "tool": "update_task__e40dd373c4ac",
+      "args": {
+        "complexity": 4,
+        "details": "Parse the structured (JSON) application log format into the canonical log_event schema: normalize timestamps to UTC, map level/service/request id/status/latency, and preserve the raw payload for debugging. Malformed JSON lines are counted as unparseable rather than failing the batch. Deliverable: parser module + fixture tests asserting >= 99% parse success on real JSON samples. Covers the JSON source only; plaintext formats handled separately.",
+        "estimatedHours": 6,
+        "id": "6d09ac7f-1293-41fd-b273-d75f09c3b494",
+        "name": "JSON log parser with UTC timestamp normalization"
+      },
+      "has_children": false,
+      "initial_arguments": {
+        "projectId": "f5a0e71e-ffd7-47f1-a636-735e47f57b7f",
+        "parentId": "2a9c2190-9890-4e4b-9166-fff99f531fa5",
+        "name": "Structured log parser for JSON and plaintext sources",
+        "details": "Parse each inventoried format into the canonical log_event schema: timestamp normalization to UTC, level, service, request id, status code, latency, message. Handle multi-line stack traces by attributing them to the preceding record, and count unparseable lines instead of failing the batch. Deliverable: parser module + fixtures tests asserting parse success rate >= 99% on real samples.",
+        "priority": 9,
+        "complexity": 5,
+        "estimatedHours": 8,
+        "tags": [
+          "logs",
+          "implementation"
+        ]
+      }
+    },
+    {
+      "tool": "update_task__e40dd373c4ac",
+      "args": {
+        "complexity": 4,
+        "details": "Compose the traffic and performance half of the operational panel from existing primitives and query hooks: request volume over time, latency percentile band (p50/p95/p99), and an error-rate trend with a configurable threshold line. Deliverable: view section + component tests with mocked queries. Reuses primitives; no new chart types.",
+        "estimatedHours": 5,
+        "id": "2fc7073b-1983-4f13-92e4-7b280c69f52f",
+        "name": "Operational view: traffic, latency and error-rate panels"
+      },
+      "has_children": false,
+      "initial_arguments": {
+        "projectId": "f5a0e71e-ffd7-47f1-a636-735e47f57b7f",
+        "parentId": "c9fb67a3-0b6e-472c-ae24-5e4a7a31faae",
+        "name": "Operational health view (traffic, errors, latency, top signatures)",
+        "details": "Compose the log-derived panel: request volume, error-rate trend with threshold line, latency percentile band, and a ranked table of error signatures with anomaly badges. Deliverable: view route + component tests with mocked queries, reusing the same primitives as the customer view.",
+        "priority": 8,
+        "complexity": 4,
+        "estimatedHours": 6,
+        "tags": [
+          "visualization",
+          "observability"
+        ]
+      }
+    },
+    {
+      "tool": "update_task__e40dd373c4ac",
+      "args": {
+        "complexity": 4,
+        "details": "Lay out the assembled dashboard page: responsive grid placing the customer and operational views, a global date-range/segment filter bar that all panels read from, and a last-refreshed timestamp. Deliverable: `/dashboard` route rendering both views against seeded data with the global filter wired through.",
+        "estimatedHours": 5,
+        "id": "d4f06bf0-b5be-460b-8b62-306ff2e77e28",
+        "name": "Dashboard layout and global filter bar"
+      },
+      "has_children": false,
+      "initial_arguments": {
+        "projectId": "f5a0e71e-ffd7-47f1-a636-735e47f57b7f",
+        "parentId": "c9fb67a3-0b6e-472c-ae24-5e4a7a31faae",
+        "name": "Dashboard assembly: layout, global filters and refresh",
+        "details": "Assemble both views into a single dashboard page with a responsive grid layout, a global date-range/segment filter that all panels react to, last-refreshed indicator, and a manual refresh action. Add empty/error handling when the store has no data. Deliverable: `/dashboard` route + an end-to-end smoke test loading the page against seeded data.",
+        "priority": 8,
+        "complexity": 5,
+        "estimatedHours": 8,
+        "tags": [
+          "visualization",
+          "dashboard"
+        ]
+      }
+    }
+  ],
+  "review_phase": "supplemental_posthoc_scores_exposed",
+  "review_source": "scripts/review_reaudit_gap_projects.py",
+  "limitations": [
+    "Same coordinator; prior scores exposed, not independent validation.",
+    "Qualitative scope is not measured implementation effort.",
+    "Analyzer heuristics and stored complexity fields are different quantities.",
+    "Missing dependency fields remain unknown, not zero."
+  ]
+}
