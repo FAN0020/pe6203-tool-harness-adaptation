@@ -1,0 +1,105 @@
+"""Render the completed original development result from verified evidence."""
+import html
+import json
+from pathlib import Path
+
+E = Path(__file__).resolve().parent
+ROOT = E.parents[2]
+d = json.loads((E / "decision.json").read_text())
+account = json.loads((E / "accounting-comparison.json").read_text())
+esc = html.escape
+
+
+def link(name, label):
+    return f'<a href="../results/evidence/observation-coverage-20261101/{esc(name)}">{esc(label)}</a>'
+
+
+rows = []
+for r in d["rows"]:
+    rows.append(
+        f'<tr><td>{r["review_id"]}</td><td>{r["task_id"]} {r["stage"]}</td>'
+        f'<td>{esc(r["strategy"])}</td><td>{esc(r["execution_status"])}</td>'
+        f'<td>{"通过" if r["core_pass"] else "未通过"}</td>'
+        f'<td>{r["TF"]:.2f}</td><td>{r["PE"]:.2f}</td>'
+        f'<td>{r["rounds"]}</td><td>{r["tool_calls"]}</td></tr>'
+    )
+
+metrics = []
+for group, label in [("project", "283 项目子集"), ("changed", "原冻结变化子集 133 + 283"), ("retention", "235 不变任务")]:
+    for method, name in [("selective_patch", "原 SP"), ("observation_coverage", "候选")]:
+        m = d["metrics"][method][group]
+        metrics.append(f'<tr><td>{label}</td><td>{name}</td><td>{m["completed"]}/{m["n"]}</td>'
+                       f'<td>{m["core_pass"]}/{m["n"]}</td><td>{m["TF"]:.2f}</td><td>{m["PE"]:.2f}</td></tr>')
+
+page = f'''<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PE6203 · Observation Coverage 原题开发结果</title>
+<style>
+body{{font:16px/1.7 system-ui,sans-serif;margin:40px auto;padding:0 24px;max-width:1120px;color:#182330;background:#fafbfc}}
+h1{{font-size:30px;line-height:1.35}}h2{{font-size:21px;margin-top:36px}}a{{color:#095aa6}}p{{max-width:1000px}}
+table{{border-collapse:collapse;width:100%;font-size:14px;background:white}}th,td{{padding:9px 11px;text-align:left;border-bottom:1px solid #d7e0e8}}
+th{{background:#eaf0f6}}.scroll{{overflow-x:auto}}.decision{{padding:18px 22px;border-left:5px solid #b15900;background:#fff5e7}}
+.muted{{color:#4e5b69;font-size:14px}}code{{background:#edf1f5;padding:2px 4px}}li{{margin:8px 0}}
+@media print{{body{{margin:0;max-width:none}}h2{{break-after:avoid}}tr{{break-inside:avoid}}}}
+</style><body>
+<p class="muted">PE6203 · 同一研究 Goal · 2026-11-01 · 原 benchmark 开发实验，不是正式验证</p>
+<h1>局部项目双提升，完整开发门槛未通过</h1>
+<div class="decision"><strong>关闭 observation_coverage v1，不进入两批验证。</strong>
+项目子集完成与完整质量均从 0/2 升至 1/2；整个冻结变化子集的质量仍为 1/4，不变任务 TF 从 10 降至 9.8。
+不删除失败、不补采样、不更改门槛。完整 Goal 仍未完成。</div>
+
+<h2>失败证据 → 新机制</h2>
+<p>此前四个 SP 合成链式运行已保存正确状态，却达到 12 轮而没有最终交付；原题项目任务也反复出现空交付。
+这支持调查证据解释与收尾之间的关系，尚不能证明重复读取是原因。既有 sufficiency、workflow、project_state 和 dependency_cut 已分别覆盖一般复用规则、工作流、部分输出陷阱和创建/链接调度，不能换名重试。</p>
+<p>本次区别是<strong>字段级观察覆盖与失效条件</strong>：哪些字段可以由某类成功返回值证明，哪些字段在 get_task/list_tasks 中不可见，以及后续写入何时使旧观察失效。
+30 次无题目原生检查显示：依赖、优先级和复杂度改变后，若干读取投影仍不变，而最新写入回执能区分状态；两个负控制未改变存储。零时长显示为 “Not set”，不能当作明确数值证据。</p>
+
+<h2>论文与源码依据</h2>
+<p><a href="https://arxiv.org/html/2304.11477v1">LLM+P，固定 v1</a> 使用专家提供的动作领域、LLM 问题翻译、经典规划与计划验证。
+官方 <a href="https://github.com/Cranial-XIX/llm-pddl/tree/f5f897ccabfb19d5158e5a7ac4cb36517cd4c2e0">仓库固定 SHA f5f897c</a> 的
+<code>domains/blocksworld/domain.pddl:8–31</code> 明确前置条件和增删效应，<code>main.py:527–559</code> 调用规划器，<code>validate_plans.py:33–38</code> 验证计划。
+这里只借鉴结构化动作事实和保守失效处理；观察覆盖是本项目扩展。没有加入规划器、benchmark 问题翻译、额外 actor 尝试或作者任务示例。该 SHA 的结果转自然语言代码块被注释。</p>
+
+<h2>冻结与公平边界</h2>
+<p>原生检查冻结 <code>f6a37cf</code>，模型前冻结 <code>7314799</code>，全部产物判断先于揭分提交 <code>6a489bb</code>。
+只改实际变化的 create_project 描述；283 其余知识受保护，133/235 与 SP 知识逐字节一致。更新器只读原生契约与无题目检查，LLM updater 调用为零。</p>
+<p>10 个开发单元：133 Middle/Late、283 Middle/Late、235 Late，各有 SP 同期对照与候选各一次。
+DeepSeek v4.1 Flash、DigitalOcean、温度 0、4096 单次 token、12 轮及工具/评分协议均保持不变。
+开发要求项目子集与整个变化子集严格双提升、TF 不下降、不变任务保持；通过后才可运行预定两批各 30 个新执行，候选知识跨批固定。
+任务族重叠，独立执行不等于未见任务或供应商统计独立。377 路线保持关闭。</p>
+
+<h2>实际结果</h2>
+<div class="scroll"><table><thead><tr><th>范围</th><th>方法</th><th>正常完成</th><th>完整产物质量</th><th>TF</th><th>PE</th></tr></thead><tbody>{''.join(metrics)}</tbody></table></div>
+<p>完整质量要求所有冻结属性通过；unknown 不算通过。TF/PE 为原五槽评分均值，ECS 因无匹配三阶段而为 null。
+全变化子集 TF 精确均值持平 9.70，不能把浮点显示尾差写成改善。项目的局部收益不满足完整研究目标。</p>
+<div class="scroll"><table><thead><tr><th>审查</th><th>任务</th><th>方法</th><th>停止状态</th><th>质量</th><th>TF</th><th>PE</th><th>轮次</th><th>工具调用</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>
+
+<h2>哪些解释得到支持，哪些没有</h2>
+<ul>
+<li><strong>事实：</strong>3/4 项目运行达到 12 轮，末响应仍请求工具；全 10 次运行没有 finish_reason=length。停止字段证明轮数截断，不证明根因。</li>
+<li><strong>反证：</strong>四个项目运行都没有 get_task 调用；成功的候选 Middle 还有一次最终 list_tasks。因而不能把此次成功解释成减少多余读取。</li>
+<li><strong>观察：</strong>Middle 候选创建 25 条记录并用 9 轮正确交付；SP 创建 46 条记录，12 轮空答复。Late 候选 41 条记录、74 次调用，且移除了具体解析器/图表工作而未建立替代任务。计划规模、依赖构建和后期修改仍是竞争解释；少建任务本身不是质量标准。</li>
+<li><strong>产物事实：</strong>三份数学指导未满足全部要求，包含未落实的安全限制；两个 235 答复都含错误的数据总结。高 TF 和成功原生调用不能替代这些验收。</li>
+<li><strong>测量限制：</strong>133/235 两组知识相同而结果不同，不能归因于知识更新。每条件只有一次 actor 执行；50 评分槽并非 50 次独立 actor 运行。同一协调者审查，工作目录含 cell 编号，非独立人工或严格方法盲评；全部判断先于方法映射与官方分数。</li>
+</ul>
+<p>下一项有区分力的选项是另行冻结无 benchmark 内容的观察选择诊断：交叉“字段可见/不可见”与“回执新鲜/过期”，同时包含可以复用和必须补取观察的情况。
+它能区分知识表示是否影响证据选择与原题计划负担是否掩盖作用。尚未冻结或执行；不能充当开发通过、训练答案或正式验证。</p>
+
+<h2>成本、复现与课程交付</h2>
+<p>本轮 114 笔请求全部结算，费用 <strong>USD {d['known_usd']}</strong>，新增未知费用 0；原生调用 30 次、更新器模型调用 0。
+通过 ignored .env 中 AGENT_API_KEY 查询到该 key 累计 USD {account['key_cumulative_usage_usd']}，剩余 <strong>USD {account['key_remaining_usd']}</strong>。
+累计用量差不是逐请求账单，旧 factorial 超时请求仍单独保留 unknown，不推断其费用为零。备用变量 OPENROUTER_API_KEY_BACKUP 未启用。</p>
+<p>420 个原始文件、183 个源文件、50 评分槽与知识/产物/账本哈希离线核验通过；66 项针对性测试通过。
+准备阶段遗漏 env 和离线输出重定向错误均已保留并修正，没有额外重跑 actor。</p>
+<p>历史 NU/FR 及阶段基线保持原样，不能冒充本轮同期对照。最终课程综合报告、复现包、展示与排练仍需完成；严格因果 under/over-update 案例证据仍有限。
+这些交付服务于研究，不能替代未完成的双提升 Goal。只完成了本轮实验及其结果归档。</p>
+<p>{link('research-decision.json','候选与约束来源')} · {link('native-decision.json','原生机制检查')} ·
+{link('decision.json','逐单元评分与门槛')} · {link('interpretation.json','五类失败与结论边界')} ·
+{link('review-freeze.json','产物审查冻结')} · {link('behavior-projection.json','可见行为与元数据')} ·
+{link('accounting-comparison.json','费用核对')} · {link('reproduction.txt','复现说明')}</p>
+<p class="muted">保留全部正负结果。无 push、部署或对外消息。完整 Goal 未标 complete。</p>
+</body></html>'''
+
+out = ROOT / "reports/observation-coverage-development.html"
+out.write_text(page)
+print(out)
