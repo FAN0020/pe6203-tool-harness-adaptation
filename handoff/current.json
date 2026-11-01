@@ -1,6 +1,6 @@
 {
-  "handoff_version": "description-factor-generation-closed-20261101",
-  "purpose": "同一完整Goal；完成description_factor v1冻结后的2次LLM更新生成。两阶段均空删除，候选与SP相同，按500字符门槛关闭，不运行原题。报告已交付，展示工作取消。",
+  "handoff_version": "description-factor-control-closed-20261101",
+  "purpose": "同一完整 Goal。冻结并完成 8 次合成覆盖诊断：正例 3/4、负例 2/4，3 次删除独有信息；结构引用校验不足，具体版本关闭。不晋级原 benchmark。报告已交付，用户已取消后续幻灯片和讲稿修改。",
   "workspace": {
     "repository": "/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety",
     "branch": "codex/completion-quality-study",
@@ -8,10 +8,10 @@
     "source_thread": "01a19253-fa19-74f2-89ca-eae44eeb98fb",
     "old_goal": "用户已明确授权暂停旧聊天Goal并创建新聊天继续；旧Goal已暂停，未完成。新聊天是研究的唯一执行者。",
     "working_rule": "所有仓库命令显式使用repository作为workdir。不要扫描父目录/home；不要切换分支、创建新worktree或重置文件。保留全部已有文件、原评分、正负结果。",
-    "live_work": "无实验运行；description_factor生成session2746已exit0，两次请求结算；离线verify.py通过。不要重跑已关闭候选。",
+    "live_work": "无实验运行；description-factor-control session 1517 已 exit 0，8 次请求全部结算。独立离线核验通过。不要重跑完成的诊断。",
     "current_thread": "01a19594-5645-7520-bf4f-98de0419fc4e",
     "new_goal": "Goal active，完整目标未完成。",
-    "latest_frozen_execution_commit": "4a135e3",
+    "latest_frozen_execution_commit": "bc089f9",
     "latest_product_review_commit": "89cfd3d"
   },
   "goal": {
@@ -23,8 +23,8 @@
   },
   "minimum_read_order": [
     "handoff/current.json",
-    "results/evidence/description-factor-20261101/decision.json",
-    "results/evidence/description-factor-20261101/research-decision.json"
+    "results/evidence/description-factor-control-20261101/decision.json",
+    "results/evidence/description-factor-control-20261101/interpretation.json"
   ],
   "hard_constraints": [
     "不得加载完整历史、全部轨迹或输出密钥。用户已授权通过ignored.env凭据做只读额度查询、打开env编辑及冻结模型执行；仅内部加载，不输出凭据。备用OPENROUTER_API_KEY_BACKUP已配置但尚未启用。",
@@ -51,6 +51,20 @@
     "ledger_lesson": "prefix-workflow轮错误追加旧ledger后已完整保留合并记录、按响应ID分离并恢复旧字节；不得再复用旧路径。"
   },
   "recent_results": [
+    {
+      "method": "description_factor unchanged updater: elementary synthetic coverage controls",
+      "result": "8 次结构校验首次通过；重复删除正例 3/4、独有条件保留负例 2/4。control-01/03/04 删除独有信息；前两次公开 JSON 理由与实际删除数组矛盾。",
+      "evidence": "四类构造 metadata，各两次：描述完全重复、schema 完全覆盖、独有尾部限制、schema 近似但未覆盖限制。冻结相同提示、模型、供应商、解码和编译器；标签/答案未送入 updater。",
+      "decision": "未满足预定 4+4 全通过门槛，关闭该诊断。不把结构有效当语义完整，不否定所有压缩/LLM 方法。上一原始候选仍为空且关闭；0 actor/native/judge，无正式验证。",
+      "cost": "8 settled requests, USD 0.001363560, unknown 0；未启用备用 key。此数不是新的账户余额查询。",
+      "verification": "独立标准库只读核验 12 source files、10 raw files、8 请求/响应/账本及逐项产物验收。",
+      "paths": [
+        "results/evidence/description-factor-control-20261101/decision.json",
+        "results/evidence/description-factor-control-20261101/interpretation.json",
+        "results/evidence/description-factor-control-20261101/reproduction.txt",
+        "results/evidence/description-factor-control-20261101/verify.py"
+      ]
+    },
     {
       "method": "description_factor v1 deletion-only cross-field coverage",
       "result": "Middle与Late各首次返回deletions空数组，stop；候选逐字段等于SP。各减少0字符，未达到预冻结500字符/阶段干预门槛。",
@@ -290,14 +304,15 @@
   ],
   "next_action": {
     "state": "no_new_frozen_candidate",
-    "research_priority": "原题双提升仍为目标。当前generation证明的是严格删除覆盖生成器没有形成干预，不是模型表现结论。先区分合法的新知识决策与已关闭机制，不再精调同一删除提示、绑定调度提示或重复已有试验。此前绑定时机优先是研究假设，不是永久准入禁区。",
+    "research_priority": "保留原题双提升目标。先通过无题目真实 metadata 判断独立覆盖验证或提案/执行一致性机制能否形成足量合法干预；有新机制和完整依赖才冻结下一模型试验。不重复当前删除提示、同一诊断或旧开发。",
     "remaining_questions": [
-      "空删除来自保守规则、模型未找到覆盖，还是描述大多确实含独有信息；当前结果不区分。",
-      "在固定actor预算/信息边界下，是否存在与已有保留替换、失效工具撤销、追加流程说明、删除冗余不同的可检验知识决策。"
+      "真实文档是否存在足量可由确定性覆盖证明安全删除的内容；当前合成结果没有回答。",
+      "独立语义校验或操作一致性检查能否改善更新准入，而不把已暴露诊断当新验证。",
+      "即便更新合法且非空，静态知识改动能否跨越原任务完成与产物质量双门槛仍未检验。"
     ],
-    "scope": "完整原冻结子集双提升及两批各自通过；综合报告/复现入口已交付，不能替代研究成功。用户取消后续slides与speaker scripts。",
-    "do_not": "不重跑closeddescription_factor/ready_link/observation/DCv1；不查377/网页账单；不新增unknown豁免。",
-    "future_execution_note": "新actor方案须在已通过生成准入后再次冻结具体知识/10cellplan；本轮未注册actor变体因为生成门槛失败。新费用ledger独立。"
+    "scope": "完整原冻结子集双提升及两批各自通过；课程报告/复现入口已交付，不能替代研究成功。展示已结束，不编辑 slides 或 speaker scripts。",
+    "do_not": "不重跑已关闭 description_factor/ready_link/observation/DC 版本；不补采当前诊断；不查 377/网页账单；不新增 unknown 豁免。",
+    "future_execution_note": "新候选/新验证规则需独立前置冻结。对当前 8 例追加校验只属事后分析；原题 actor 前须合法非空知识、完整输入和新 10-cell plan，再用独立费用 ledger。"
   },
   "on_demand_map": {
     "current_protocol": "experiments/ready-link-v1.json",
@@ -332,7 +347,8 @@
     "latest_accounting": "results/evidence/ready-link-20261101/accounting-comparison.json",
     "integrated_report": "reports/course-research/REPRODUCE.md",
     "latest_generation": "results/evidence/description-factor-20261101/decision.json",
-    "latest_generation_reproducer": "results/evidence/description-factor-20261101/reproduction.txt"
+    "latest_generation_reproducer": "results/evidence/description-factor-20261101/reproduction.txt",
+    "description_factor_control": "results/evidence/description-factor-control-20261101/interpretation.json"
   },
   "blocked_audit": {
     "status": "blocked",
@@ -374,34 +390,35 @@
     "next_candidate": "description_factor v1 generationclosed; no newcandidatefrozen."
   },
   "active_round": {
-    "status": "completed_generation_no_intervention",
-    "spec": "experiments/description-factor-v1.json",
-    "evidence": "results/evidence/description-factor-20261101",
-    "candidate": "description_factor v1",
-    "updater_calls": 2,
+    "status": "completed_diagnostic_failed_control_gate",
+    "spec": "results/evidence/description-factor-control-20261101/plan.json",
+    "evidence": "results/evidence/description-factor-control-20261101",
+    "candidate": "unchanged description_factor v1 updater diagnostic",
+    "updater_calls": 8,
     "actor_calls": 0,
     "judge_calls": 0,
     "native_calls": 0,
-    "model_calls": 2,
+    "model_calls": 8,
     "session_id": null,
-    "freeze_commit": "4a135e3",
+    "freeze_commit": "bc089f9",
     "goal_complete": false,
     "validation_started": false,
-    "decision": "reject_generation_v1_no_actor_trial"
+    "decision": "closed_failed_elementary_control_gate"
   },
   "current_recovery_audit": {
-    "status": "progress_completed_new_generation_feasibility_test",
+    "status": "progress_completed_discriminating_control_diagnostic",
     "blocker": null,
     "same_condition_consecutive_goal_turns": 0,
-    "current_turn": "新283metadata量化纠正旧457外推；冻结新的删除覆盖机制，34tests后2updatercalls实际生成空候选，按准入门槛关闭。",
+    "current_turn": "合成干预反驳更新器总是空删除的解释；发现引用有效仍删除独有信息，以及两次公开理由与执行数组矛盾。既定 8 次全部完成，按冻结规则关闭。",
     "pending_question": null,
     "goal_status": "active",
     "new_mechanism_frozen": false,
     "not_claimed": [
-      "Compressionfamilyinvalid",
-      "Originalbenchmarkdual提升",
+      "原真实文档空删除的根因已确定",
+      "所有压缩或 LLM 更新无效",
+      "原 benchmark 双提升",
       "正式验证",
-      "Goalcompletion"
+      "Goal 完成"
     ]
   },
   "latest_user_scope_update": {
