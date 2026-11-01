@@ -1,0 +1,636 @@
+FFFFFFFFFFFFFFFF                                                         [100%]
+=================================== FAILURES ===================================
+_______ test_single_program_description_and_unchanged_contracts[middle] ________
+
+stage = 'middle'
+
+    @pytest.mark.parametrize("stage", ["middle", "late"])
+    def test_single_program_description_and_unchanged_contracts(stage):
+        old, new, context = inputs(stage)
+        pristine = deepcopy((old, new, context))
+>       knowledge, changes, cost = adapt(old, new, "prefix_workflow_memory", context)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_prefix_workflow_memory.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory'
+context = {'feedback': [{'args': {}, 'result': {'kind': 'prefix_workflow_training_v1', 'trace': [{'arguments': {...}, 'artifact_...5edc65fad2f9a4ae7d77bd79f', 'case': 'train', 'checks': [], ...}, ...]}, 'server': 'slidev-mcp', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+________ test_single_program_description_and_unchanged_contracts[late] _________
+
+stage = 'late'
+
+    @pytest.mark.parametrize("stage", ["middle", "late"])
+    def test_single_program_description_and_unchanged_contracts(stage):
+        old, new, context = inputs(stage)
+        pristine = deepcopy((old, new, context))
+>       knowledge, changes, cost = adapt(old, new, "prefix_workflow_memory", context)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_prefix_workflow_memory.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory'
+context = {'feedback': [{'args': {}, 'result': {'kind': 'prefix_workflow_training_v1', 'trace': [{'arguments': {...}, 'artifact_...5edc65fad2f9a4ae7d77bd79f', 'case': 'train', 'checks': [], ...}, ...]}, 'server': 'slidev-mcp', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+____________ test_only_exact_verified_training_is_accepted[missing] ____________
+
+mutation = 'missing'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+        with pytest.raises(ValueError, match="training"):
+>           adapt(old, new, "prefix_workflow_memory", context)
+
+tests/test_prefix_workflow_memory.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory'
+context = {'feedback': [{'args': {}, 'result': {'kind': 'prefix_workflow_training_v1', 'trace': [{'arguments': {...}, 'artifact_...dc65fad2f9a4ae7d77bd79f', 'case': 'train', 'checks': [], ...}, ...]}, 'server': 'slidev-mcp', 'stage': 'middle', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'missing'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+>       with pytest.raises(ValueError, match="training"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'training'
+E         Actual message: 'Unsupported strategy: prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:57: AssertionError
+___________ test_only_exact_verified_training_is_accepted[duplicate] ___________
+
+mutation = 'duplicate'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+        with pytest.raises(ValueError, match="training"):
+>           adapt(old, new, "prefix_workflow_memory", context)
+
+tests/test_prefix_workflow_memory.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory'
+context = {'feedback': [{'args': {}, 'result': {'kind': 'prefix_workflow_training_v1', 'trace': [{'arguments': {...}, 'artifact_...5edc65fad2f9a4ae7d77bd79f', 'case': 'train', 'checks': [], ...}, ...]}, 'server': 'slidev-mcp', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'duplicate'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+>       with pytest.raises(ValueError, match="training"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'training'
+E         Actual message: 'Unsupported strategy: prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:57: AssertionError
+____________ test_only_exact_verified_training_is_accepted[failed] _____________
+
+mutation = 'failed'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+        with pytest.raises(ValueError, match="training"):
+>           adapt(old, new, "prefix_workflow_memory", context)
+
+tests/test_prefix_workflow_memory.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory'
+context = {'feedback': [{'args': {}, 'result': {'kind': 'prefix_workflow_training_v1', 'trace': [{'arguments': {...}, 'artifact_...5edc65fad2f9a4ae7d77bd79f', 'case': 'train', 'checks': [], ...}, ...]}, 'server': 'slidev-mcp', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'failed'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+>       with pytest.raises(ValueError, match="training"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'training'
+E         Actual message: 'Unsupported strategy: prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:57: AssertionError
+_____________ test_only_exact_verified_training_is_accepted[body] ______________
+
+mutation = 'body'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+        with pytest.raises(ValueError, match="training"):
+>           adapt(old, new, "prefix_workflow_memory", context)
+
+tests/test_prefix_workflow_memory.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory'
+context = {'feedback': [{'args': {}, 'result': {'kind': 'prefix_workflow_training_v1', 'trace': [{'arguments': {...}, 'artifact_...5edc65fad2f9a4ae7d77bd79f', 'case': 'train', 'checks': [], ...}, ...]}, 'server': 'slidev-mcp', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'body'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+>       with pytest.raises(ValueError, match="training"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'training'
+E         Actual message: 'Unsupported strategy: prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:57: AssertionError
+_____________ test_only_exact_verified_training_is_accepted[stage] _____________
+
+mutation = 'stage'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+        with pytest.raises(ValueError, match="training"):
+>           adapt(old, new, "prefix_workflow_memory", context)
+
+tests/test_prefix_workflow_memory.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory'
+context = {'feedback': [{'args': {}, 'result': {'kind': 'prefix_workflow_training_v1', 'trace': [{'arguments': {...}, 'artifact_...dc65fad2f9a4ae7d77bd79f', 'case': 'train', 'checks': [], ...}, ...]}, 'server': 'slidev-mcp', 'stage': 'middle', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'stage'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+>       with pytest.raises(ValueError, match="training"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'training'
+E         Actual message: 'Unsupported strategy: prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:57: AssertionError
+____________ test_only_exact_verified_training_is_accepted[heldout] ____________
+
+mutation = 'heldout'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+        with pytest.raises(ValueError, match="training"):
+>           adapt(old, new, "prefix_workflow_memory", context)
+
+tests/test_prefix_workflow_memory.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory'
+context = {'feedback': [{'args': {}, 'result': {'kind': 'prefix_workflow_training_v1', 'trace': [{'arguments': {...}, 'artifact_...5edc65fad2f9a4ae7d77bd79f', 'case': 'train', 'checks': [], ...}, ...]}, 'server': 'slidev-mcp', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'heldout'
+
+    @pytest.mark.parametrize("mutation", ["missing", "duplicate", "failed", "body", "stage", "heldout"])
+    def test_only_exact_verified_training_is_accepted(mutation):
+        old, new, context = inputs()
+        rows = context["feedback"]
+        if mutation == "missing": rows.pop()
+        elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+        elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+        elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+        elif mutation == "stage": rows[-1]["stage"] = "middle"
+        else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+>       with pytest.raises(ValueError, match="training"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'training'
+E         Actual message: 'Unsupported strategy: prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:57: AssertionError
+_________________ test_early_and_retention_are_exact_baseline __________________
+
+    def test_early_and_retention_are_exact_baseline():
+        for stage, task in [("early", 457), ("late", 235)]:
+            old, new, _ = inputs(stage, task)
+>           assert adapt(old, new, "prefix_workflow_memory", {})[0] == base_patch(old, new)["knowledge"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_prefix_workflow_memory.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory', context = {}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+________________________ test_unknown_contract_rejected ________________________
+
+    def test_unknown_contract_rejected():
+        old, new, context = inputs()
+        next(t for t in new["tools"] if t["tool_id"] == "slidev-mcp::add_page")["parameters"]["required"].append("new_param")
+        with pytest.raises(ValueError, match="contract"):
+>           adapt(old, new, "prefix_workflow_memory", context)
+
+tests/test_prefix_workflow_memory.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory'
+context = {'feedback': [{'args': {}, 'result': {'kind': 'prefix_workflow_training_v1', 'trace': [{'arguments': {...}, 'artifact_...5edc65fad2f9a4ae7d77bd79f', 'case': 'train', 'checks': [], ...}, ...]}, 'server': 'slidev-mcp', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+    def test_unknown_contract_rejected():
+        old, new, context = inputs()
+        next(t for t in new["tools"] if t["tool_id"] == "slidev-mcp::add_page")["parameters"]["required"].append("new_param")
+>       with pytest.raises(ValueError, match="contract"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'contract'
+E         Actual message: 'Unsupported strategy: prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:70: AssertionError
+_______________________ test_task_answer_never_accepted ________________________
+
+    def test_task_answer_never_accepted():
+        old, new, context = inputs()
+        context["question"] = "forbidden task material"
+        with pytest.raises(ValueError, match="task and score inputs are forbidden"):
+>           adapt(old, new, "prefix_workflow_memory", context)
+
+tests/test_prefix_workflow_memory.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_compatibility': [{'normalized': {'exclusiveMi......], 'server': '@sylphlab/pdf-reader-mcp', ...}], 'schema_version': '1.0', 'source': 'live_released_mcp_servers', ...}
+strategy = 'prefix_workflow_memory'
+context = {'feedback': [{'args': {}, 'result': {'kind': 'prefix_workflow_training_v1', 'trace': [{'arguments': {...}, 'artifact_...ain', 'checks': [], ...}, ...]}, 'server': 'slidev-mcp', 'stage': 'late', ...}], 'question': 'forbidden task material'}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: prefix_workflow_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+    def test_task_answer_never_accepted():
+        old, new, context = inputs()
+        context["question"] = "forbidden task material"
+>       with pytest.raises(ValueError, match="task and score inputs are forbidden"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'task and score inputs are forbidden'
+E         Actual message: 'Unsupported strategy: prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:77: AssertionError
+____________________ test_extra_edit_rejected[description] _____________________
+
+field = 'description'
+
+    @pytest.mark.parametrize("field", ["description", "parameters", "routing", "usage_rules"])
+    def test_extra_edit_rejected(field):
+>       from pe6203.prefix_workflow_memory import validate_workflow
+E       ModuleNotFoundError: No module named 'pe6203.prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:83: ModuleNotFoundError
+_____________________ test_extra_edit_rejected[parameters] _____________________
+
+field = 'parameters'
+
+    @pytest.mark.parametrize("field", ["description", "parameters", "routing", "usage_rules"])
+    def test_extra_edit_rejected(field):
+>       from pe6203.prefix_workflow_memory import validate_workflow
+E       ModuleNotFoundError: No module named 'pe6203.prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:83: ModuleNotFoundError
+______________________ test_extra_edit_rejected[routing] _______________________
+
+field = 'routing'
+
+    @pytest.mark.parametrize("field", ["description", "parameters", "routing", "usage_rules"])
+    def test_extra_edit_rejected(field):
+>       from pe6203.prefix_workflow_memory import validate_workflow
+E       ModuleNotFoundError: No module named 'pe6203.prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:83: ModuleNotFoundError
+____________________ test_extra_edit_rejected[usage_rules] _____________________
+
+field = 'usage_rules'
+
+    @pytest.mark.parametrize("field", ["description", "parameters", "routing", "usage_rules"])
+    def test_extra_edit_rejected(field):
+>       from pe6203.prefix_workflow_memory import validate_workflow
+E       ModuleNotFoundError: No module named 'pe6203.prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:83: ModuleNotFoundError
+________ test_induced_program_expansion_matches_reserved_native_actions ________
+
+    def test_induced_program_expansion_matches_reserved_native_actions():
+>       from pe6203.prefix_workflow_memory import expand_workflow, induce_workflow
+E       ModuleNotFoundError: No module named 'pe6203.prefix_workflow_memory'
+
+tests/test_prefix_workflow_memory.py:94: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/test_prefix_workflow_memory.py::test_single_program_description_and_unchanged_contracts[middle]
+FAILED tests/test_prefix_workflow_memory.py::test_single_program_description_and_unchanged_contracts[late]
+FAILED tests/test_prefix_workflow_memory.py::test_only_exact_verified_training_is_accepted[missing]
+FAILED tests/test_prefix_workflow_memory.py::test_only_exact_verified_training_is_accepted[duplicate]
+FAILED tests/test_prefix_workflow_memory.py::test_only_exact_verified_training_is_accepted[failed]
+FAILED tests/test_prefix_workflow_memory.py::test_only_exact_verified_training_is_accepted[body]
+FAILED tests/test_prefix_workflow_memory.py::test_only_exact_verified_training_is_accepted[stage]
+FAILED tests/test_prefix_workflow_memory.py::test_only_exact_verified_training_is_accepted[heldout]
+FAILED tests/test_prefix_workflow_memory.py::test_early_and_retention_are_exact_baseline
+FAILED tests/test_prefix_workflow_memory.py::test_unknown_contract_rejected
+FAILED tests/test_prefix_workflow_memory.py::test_task_answer_never_accepted
+FAILED tests/test_prefix_workflow_memory.py::test_extra_edit_rejected[description]
+FAILED tests/test_prefix_workflow_memory.py::test_extra_edit_rejected[parameters]
+FAILED tests/test_prefix_workflow_memory.py::test_extra_edit_rejected[routing]
+FAILED tests/test_prefix_workflow_memory.py::test_extra_edit_rejected[usage_rules]
+FAILED tests/test_prefix_workflow_memory.py::test_induced_program_expansion_matches_reserved_native_actions
+16 failed in 0.30s
