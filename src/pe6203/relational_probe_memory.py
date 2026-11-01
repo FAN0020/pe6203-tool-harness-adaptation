@@ -181,6 +181,7 @@ def observation_note(data, proposal, rows):
     for actual, token in sorted(substitutions.items(), key=lambda item: -len(item[0])):
         text = text.replace(actual, token)
     text = re.sub(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z", "<timestamp>", text)
+    text = re.sub(r"\d{1,2}/\d{1,2}/\d{4},\s+\d{1,2}:\d{2}:\d{2}\s+[AP]M", "<timestamp>", text)
     if len(text) > 24000:
         raise ValueError("Evidence exceeds frozen whole-sequence admission size; no truncation")
     return "Observed state-linked contract evidence: " + text

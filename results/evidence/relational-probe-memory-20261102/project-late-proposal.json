@@ -1,0 +1,45 @@
+{
+  "steps": [
+    {
+      "id": "P1",
+      "tool": "create_project",
+      "arguments": {
+        "workingDirectory": "$WORKSPACE",
+        "name": "SyntheticLabelA",
+        "description": "Synthetic contract probe with optional metadata.",
+        "owner": "SynthOwnerA",
+        "dueDate": "2026-02-02",
+        "tags": [
+          "synth-tag-a",
+          "synth-tag-b"
+        ]
+      },
+      "question": "Does create_project return a project id that is also persisted, with owner, dueDate, and tags present in the created record?"
+    },
+    {
+      "id": "P2",
+      "tool": "get_project",
+      "arguments": {
+        "workingDirectory": "$WORKSPACE",
+        "id": "$P1.project_id"
+      },
+      "question": "Does the canonical project record expose the same id, name, description, and the optional owner/dueDate/tags just supplied?"
+    },
+    {
+      "id": "P3",
+      "tool": "create_task",
+      "arguments": {
+        "workingDirectory": "$WORKSPACE",
+        "name": "SyntheticLabelTaskA",
+        "details": "Synthetic task under the newly created project.",
+        "projectId": "$P1.project_id",
+        "priority": 4,
+        "tags": [
+          "synth-task-tag"
+        ],
+        "status": "pending"
+      },
+      "question": "Does the new project id function as a valid projectId for creating a child task, and is that task id exported and retrievable?"
+    }
+  ]
+}

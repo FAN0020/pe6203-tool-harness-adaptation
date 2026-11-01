@@ -167,3 +167,13 @@ def test_other_hosts_identical_to_sp():
     data = next(j["data"] for j in INPUTS["jobs"] if j["id"] == "math-middle")
     base = adapt_result(data["old"], data["target"])
     assert compile_knowledge(base, data["target"], []) == (base["knowledge"], [])
+
+
+def test_incidental_native_locale_timestamps_removed_but_due_date_retained():
+    evidence = rows()
+    evidence[0]["result"]["content"][0]["text"] += "\nCreated: 11/2/2026, 2:41:25 AM"
+    plan = proposal()
+    plan["steps"][0]["arguments"]["description"] = "Target date 2026-02-02"
+    note = observation_note(DATA, plan, evidence)
+    assert "11/2/2026, 2:41:25 AM" not in note
+    assert "2026-02-02" in note

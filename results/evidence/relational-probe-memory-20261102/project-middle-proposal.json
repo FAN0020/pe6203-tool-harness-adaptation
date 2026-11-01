@@ -1,0 +1,51 @@
+{
+  "steps": [
+    {
+      "id": "P1",
+      "tool": "create_project",
+      "arguments": {
+        "workingDirectory": "$WORKSPACE",
+        "name": "SyntheticDelta",
+        "description": "Synthetic fixture project.",
+        "repoUrl": "https://example.invalid/delta",
+        "tags": [
+          "synthetic",
+          "delta"
+        ]
+      },
+      "question": "Does create_project return a newID and persist a project with the supplied name, description, repoUrl, and tags observable via receipt and list_tasks?"
+    },
+    {
+      "id": "P2",
+      "tool": "get_project",
+      "arguments": {
+        "workingDirectory": "$WORKSPACE",
+        "id": "$P1.project_id"
+      },
+      "question": "Can a consumer read back the created project by the exported project_id and observe the supplied metadata fields as persisted?"
+    },
+    {
+      "id": "P3",
+      "tool": "create_task",
+      "arguments": {
+        "workingDirectory": "$WORKSPACE",
+        "name": "SyntheticTaskOne",
+        "details": "Synthetic fixture record; not a plan or answer.",
+        "projectId": "$P1.project_id",
+        "tags": [
+          "synthetic"
+        ]
+      },
+      "question": "Can a task be created against the exported project_id, and does its receipt newID appear in persisted state?"
+    },
+    {
+      "id": "P4",
+      "tool": "list_tasks",
+      "arguments": {
+        "workingDirectory": "$WORKSPACE",
+        "projectId": "$P1.project_id"
+      },
+      "question": "Does listing tasks for the exported project_id show the created task and confirm project association persisted?"
+    }
+  ]
+}
