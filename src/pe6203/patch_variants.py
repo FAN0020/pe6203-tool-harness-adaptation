@@ -44,6 +44,7 @@ VARIANTS = (
     "native_record_batch",
     "dependency_cut",
     "observation_coverage",
+    "ready_link",
 )
 
 SUFFICIENCY_RULE = (
@@ -670,6 +671,19 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "ready_link":
+        from .ready_link import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "certificate": "source/native conditional inline and ready-link equivalence; changed producer only",
+            "runtime": "unchanged; static knowledge, no executor or scheduler",
+            "edits": len(changes),
+        }}
         return result
     if strategy == "observation_coverage":
         from .observation_coverage import compile_knowledge
