@@ -94,7 +94,7 @@ The original benchmark commit is
 `888c779a0fe735f612ca62bdd1fdd7c9e6bf8701`; dataset revision is
 `162e3ffbea1717ac8a20fe9b26465e29117229e4`.
 
-For the latest development, consult `experiments/ready-link-v1.json`, model
+At the integrated report snapshot, consult `experiments/ready-link-v1.json`, model
 freeze `a95ad2d`, product-review freeze `89cfd3d` and final archive `ed329e5`.
 The exact knowledge, original tasks, isolated task-state directories, fixed
 provider/model/decoding, 4096-token single response limit, 12 rounds, scoring
@@ -116,3 +116,27 @@ mechanism tests, with explicit unresolved causal cases. It is not a claim that
 every course requirement is satisfied. No repository push, deployment or
 external submission was performed. The report and this reproduction entry are
 local deliverables; the original strict dual-improvement Goal remains active.
+
+## Later research addendum: instruction-scope, 2026-11-01
+
+The subsequent15-cell original development is recorded in
+[the instruction-scope result](../../results/evidence/instruction-scope-20261101/RESULT.md)
+and [offline reproduction index](../../results/evidence/instruction-scope-20261101/reproduction.json).
+Main candidate changed-task completion was1/4 versus SP2/4; actual product core
+was0/4 for both. The project subset remained0/2 on both measures. Full TF and
+retention TF also declined. The candidate was closed without validation;
+the quote control was ineligible for promotion. Cost: USD0.308363940,171 settled
+requests; all15 product reviews committed before unblinding. This addendum does
+not rewrite the dated integrated-report cohort or substitute for the unmet Goal.
+
+Offline, with no model calls or credentials:
+
+```sh
+uv run python results/evidence/instruction-scope-20261101/verify_development.py
+uv run python results/evidence/instruction-scope-20261101/audit_execution.py
+```
+
+The verifier documents one reporting-only native-call label correction, with the
+original frozen source and output preserved. Source/raw archives, judgments,
+all scores and dedicated costs remain available. No slides or speaker-script
+edits: the user stated that the presentation has ended.
