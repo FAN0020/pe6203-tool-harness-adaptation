@@ -24,7 +24,19 @@
 
 交接时没有正在运行的实验或renderer。研究结果基点为`ac4c328`，本次交接不改任何旧结果。交接前仅出现EasyTool/Play2Prompt/工具描述重写的搜索线索，尚未完成原文与固定源码核对，也没有新候选或新模型调用；不能当作已完成研究。新聊天创建同一完整目标的Goal后自主推进，旧聊天不再并发研究。
 
-### 当前最新状态：无效可选参数投影完成9条开发，质量增益失败
+### 当前最新状态：失效能力撤下完成6条开发，未双提升
+
+- 同一完整Goal active、未完成；本轮是实际机制检验，不是阻塞轮。原分支未切换，无新agent/worktree、push、部署或外发。
+- 报告[`reports/capability-withdrawal-development.html`](reports/capability-withdrawal-development.html)，离线复核`python3 results/evidence/capability-withdrawal-20261101/verify_archive.py`。
+- 复用ExpeL v3及e41ec9a规则撤回源码机制，明确为本项目扩展：三个有源码+独立原生失败证据的Late工具从静态知识撤下，清理五处直接推荐。SP/警告诊断/撤下主候选，原283Late+235Late各一次，共6条。原生工具/执行器/模型/4096与12轮/评分和验收不变；34->31模型可见工具。
+- `78f2b27`冻结协议和实现（57测试）；`23b4df6`冻结全部知识及审查ID；runner95975退出0，6/6 evaluated、30原评分。`1389af4`保存全部评审后读单元映射。**偏差：runner自动打印分组均分时，最后两份235评审尚未写入；不能称六份严格盲审。** 全部283判断此前已保存。
+- 原283Late：三组完成/全项质量都0/1；SP TF9.8/PE9.6/calls77，警告9.2/8.6/72，主候选9.8/8.6/43。实际保存54/43/36有效任务，最终答复均为空；都12轮耗尽，末轮finish_reason=tool_calls而非length。主候选首轮12008tokens对SP14903，降低输入/调用未转化为交付。被撤下3工具在SP也0调用，故避免失效调用中介未激活。
+- 235知识逐字相同；均完成，TF SP10/警告10/主候选9.8；质量0/1、1/1、1/1。不能把相同K0波动归因适应。C04/C05措辞与C03结构未知敏感性均不改变拒绝。主候选关闭，两批各12条验证未启动，警告组不能事后晋级。
+- 新费用74请求（42actor/30judge/2preflight）USD0.135451632，未知0/未结0；updater0，原生探针直接复用未重采。260原始文件和351源码文件离线核验通过。
+- 新源码排除证据：securitybuilder的22本地模块、models.yaml、package.json三阶段相同，无支持改变它的依赖边；不声称全外部运行时证明。workspacehealth只条件失效，保留可能成功分支，不作全局无效工具撤下。
+- 无下一已准入候选。不重跑本版本、不简单换删除子集或重复预算提示；下轮须有不同且可证伪的机制依据。课程最终综合报告/复现/展示及严格完整Goal继续保留，不能用本轮负结果标complete。
+
+### 已结束上一轮：无效可选参数投影完成9条开发，质量增益失败
 
 - 同一完整Goal当前工具状态为active，目标未完成。本轮是实质进展，没有新阻塞计数；沿用分支，未新建agent/worktree、未push/部署/外发。
 - 报告见[`reports/optional-parameter-projection-development.html`](reports/optional-parameter-projection-development.html)。复用固定EasyTool论文/作者源码；本项目扩展为从模型知识schema移除源码证明无效的可选字段，区别于继续改写描述。原生server/schema、必需参数、有效能力、执行器和单次预算均保持。
