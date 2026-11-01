@@ -1,0 +1,87 @@
+[
+  {
+    "id": "P1",
+    "question": "Does validate_syntax accept a variable reference when allow_variables is explicitly true?",
+    "basis": "math-mcp::validate_syntax",
+    "tool_id": "math-mcp::validate_syntax",
+    "arguments": {
+      "expression": "x + 1",
+      "allow_variables": true
+    },
+    "attempts": 1,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Expression is syntactically valid."
+        }
+      ],
+      "isError": false
+    }
+  },
+  {
+    "id": "P2",
+    "question": "Does validate_syntax reject the same variable reference when allow_variables is explicitly false?",
+    "basis": "math-mcp::validate_syntax",
+    "tool_id": "math-mcp::validate_syntax",
+    "arguments": {
+      "expression": "x + 1",
+      "allow_variables": false
+    },
+    "attempts": 1,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Expression is syntactically valid."
+        }
+      ],
+      "isError": false
+    }
+  },
+  {
+    "id": "P3",
+    "question": "Does validate_syntax enforce max_depth by failing on nesting depth exceeding the specified limit?",
+    "basis": "math-mcp::validate_syntax",
+    "tool_id": "math-mcp::validate_syntax",
+    "arguments": {
+      "expression": "((1+2))",
+      "allow_variables": true,
+      "max_depth": 1,
+      "check_balanced": true
+    },
+    "attempts": 1,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Expression is syntactically valid."
+        }
+      ],
+      "isError": false
+    }
+  },
+  {
+    "id": "P4",
+    "question": "Does batch_evaluate return per-expression results for a valid multi-expression batch?",
+    "basis": "math-mcp::batch_evaluate",
+    "tool_id": "math-mcp::batch_evaluate",
+    "arguments": {
+      "expressions": [
+        "1+1",
+        "2+2"
+      ],
+      "stop_on_error": false
+    },
+    "attempts": 1,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Error: this.toolHandlers.handleBatchEvaluate is not a function"
+        }
+      ],
+      "isError": true
+    }
+  }
+]

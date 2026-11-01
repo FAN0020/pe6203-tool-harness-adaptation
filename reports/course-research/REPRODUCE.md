@@ -140,3 +140,24 @@ The verifier documents one reporting-only native-call label correction, with the
 original frozen source and output preserved. Source/raw archives, judgments,
 all scores and dedicated costs remain available. No slides or speaker-script
 edits: the user stated that the presentation has ended.
+
+## Later research addendum: active contract probing, 2026-11-01
+
+[This generation experiment](../../results/evidence/active-contract-probing-20261101/RESULT.md)
+let the updater choose actual native probes before making local knowledge decisions.
+The original reference-encoding failure and one frozen recovery are both retained.
+The recovery reused every first proposal without new probe-plan sampling:14 native
+probes and4 update requests produced9 edits. One edit copied a probe example despite
+the frozen representation rule, so the whole version was not admitted. Eight
+operational facts overlap previously exposed knowledge; one adds a state-dependent
+error condition. No original actor development or validation ran.
+
+All13 model requests cost USD0.025601028, unknown charges0. Both ledgers match the
+key aggregate increment. Offline reproduction checks345 unique source/raw files:
+
+```sh
+uv run python results/evidence/active-contract-probing-20261101/verify_generation.py
+```
+
+This is evidence about probe selection and local updating, not evidence of original
+benchmark dual improvement. No slides or speaker scripts were edited.
