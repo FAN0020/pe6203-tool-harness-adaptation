@@ -1,0 +1,268 @@
+{
+  "review_id": "R03",
+  "question": "How can I ensure secure mathematical operations in my Python codebase by validating expressions and getting security recommendations following OWASP guidelines?",
+  "answer": "## Short answer\n\n**A syntax validator is not a security control.** I proved this live: the tool flagged `open('secret.txt') + os + eval + exec` as *\"syntactically valid.\"* So the secure path is **never call `eval()`/`exec()` on user input** — instead parse the string with Python's `ast`, walk it, and allow only numeric literals and a fixed set of arithmetic operators. That directly addresses **OWASP A03: Injection**, with **A04 (Insecure Design)** and **A09 (Logging)** for resource limits and monitoring.\n\nBelow is what the validator tools actually do, then a drop‑in safe evaluator, then the OWASP checklist.\n\n---\n\n## 1. What the expression tools actually enforce (live results)\n\n| Expression | `allow_variables=false` result | Meaning |\n|---|---|---|\n| `(2 + 3) * 4 - 10 / 2` | ✅ valid → evaluates to **15** | Arithmetic + parens OK |\n| `2 ^ 10` | ✅ valid → **1024** | This grammar uses `^` for **power** |\n| `2 ** 3` | ❌ *Expected expression* at col 4 | `**` is **not** supported here |\n| `10 % 3 + sqrt(16)` | ✅ valid | `%` and `sqrt()` OK |\n| `(1 + 2` | ❌ *Expected ')'* | Bracket balancing works |\n| `principal * 2` | ✅ valid **even with variables off** | ⚠️ flag doesn't block identifiers |\n| `open('secret.txt') + os + eval + exec` | ✅ \"syntactically valid\" | 🚨 **proves it is grammar-only, not a sandbox** |\n| `10 / 0`, `sqrt(-1)`, `2 ^ 100000` | returns `null` (no crash) | domain/overflow cases yield no result |\n\n**Takeaways:**\n- ✅ Use these tools to check *well‑formedness* and to sanity‑check a grammar before parsing.\n- 🚨 Do **not** rely on `allow_variables` or the validator as your security boundary — it accepts dangerous, merely‑grammatical input.\n- ⚠️ Note the `^` vs `**` mismatch: this validator treats `^` as power, but **Python itself treats `^` as bitwise XOR** and `**` as power. Define and document your grammar explicitly or you'll silently return wrong results.\n\n---\n\n## 2. The secure pattern: an AST whitelist evaluator (no `eval`)\n\nThis is the OWASP‑recommended way: parse to an AST, whitelist node/operator types, enforce limits, fail closed.\n\n```python\nimport ast\nimport operator\nimport logging\nfrom decimal import Decimal, InvalidOperation\n\nlogger = logging.getLogger(\"math.eval\")\n\nMAX_EXPR_LEN  = 256      # truncate DoS via huge strings\nMAX_DEPTH     = 20       # guard nesting\nMAX_EXPONENT  = 1_000    # guard 2**10_000_000 blowups\n\n_BINOPS = {\n    ast.Add: operator.add,   ast.Sub: operator.sub,\n    ast.Mult: operator.mul,  ast.Div: operator.truediv,\n    ast.FloorDiv: operator.floordiv, ast.Mod: operator.mod,\n    ast.Pow: operator.pow,\n}\n_UNARYOPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}\n\nclass UnsafeExpression(ValueError):\n    \"\"\"Raised for anything that is not plain arithmetic.\"\"\"\n\ndef _check_depth(node, depth=0):\n    if depth > MAX_DEPTH:\n        raise UnsafeExpression(\"expression too deeply nested\")\n    for child in ast.iter_child_nodes(node):\n        _check_depth(child, depth + 1)\n\ndef _eval(node):\n    if isinstance(node, ast.Expression):\n        return _eval(node.body)\n\n    if isinstance(node, ast.Constant):                 # numbers only\n        v = node.value\n        if isinstance(v, bool) or not isinstance(v, (int, float)):\n            raise UnsafeExpression(\"only numeric constants allowed\")\n        return v\n\n    if isinstance(node, ast.BinOp):\n        op = _BINOPS.get(type(node.op))\n        if op is None:\n            raise UnsafeExpression(\"operator not allowed\")\n        left, right = _eval(node.left), _eval(node.right)\n        if isinstance(node.op, ast.Pow) and abs(right) > MAX_EXPONENT:\n            raise UnsafeExpression(\"exponent too large\")\n        if isinstance(node.op, (ast.Div, ast.FloorDiv, ast.Mod)) and right == 0:\n            raise ZeroDivisionError(\"division by zero\")\n        return op(left, right)\n\n    if isinstance(node, ast.UnaryOp):\n        op = _UNARYOPS.get(type(node.op))\n        if op is None:\n            raise UnsafeExpression(\"unary operator not allowed\")\n        return op(_eval(node.operand))\n\n    # Rejects Name, Call, Attribute, Subscript, List, Dict, Lambda, etc.\n    raise UnsafeExpression(f\"disallowed node: {type(node).__name__}\")\n\ndef safe_eval(expression: str):\n    if not isinstance(expression, str):\n        raise UnsafeExpression(\"expression must be a string\")\n    if len(expression) > MAX_EXPR_LEN:\n        raise UnsafeExpression(\"expression too long\")\n    try:\n        tree = ast.parse(expression, mode=\"eval\")\n    except SyntaxError:\n        raise UnsafeExpression(\"invalid expression syntax\")   # generic msg\n    _check_depth(tree)\n    return _eval(tree)\n```\n\n**Wire it into an endpoint with generic errors + logging:**\n\n```python\ndef compute(raw: str) -> float:\n    try:\n        return safe_eval(raw)\n    except (UnsafeExpression, ZeroDivisionError):\n        # Log the *attempt* (A09), never echo internals to the client\n        logger.warning(\"rejected expression\", extra={\"expr\": raw[:200]})\n        raise ValueError(\"Invalid expression\")   # same message for all failures\n```\n\n**Before / after (A03 Injection):**\n\n```python\n# ❌ VULNERABLE — remote code execution\nresult = eval(request.form[\"expr\"])          # \"%s\" % \"__import__('os').system('id')\"\nresult = eval(user_input, {\"__builtins__\": {}})  # still bypassable — do not trust\n\n# ✅ SAFE — AST whitelist, no code execution path at all\nresult = safe_eval(request.form[\"expr\"])\n```\n\n---\n\n## 3. Defense‑in‑depth guardrails\n\n- **Precision:** for money/finance use `Decimal`, not `float` (avoid binary rounding). Parse numeric `Constant`s into `Decimal(str(v))`.\n- **Overflow/DoS:** cap length, nesting depth, and exponent (all above). Python big‑ints make `2**10_000_000` a CPU/memory bomb.\n- **Division/domain:** catch `ZeroDivisionError` and `sqrt(negative)`; return a clean error, never a traceback.\n- **Grammar clarity:** if end users write `^` for power, **translate `^`→`**` before parsing**, or document that `^` is XOR. Pick one — don't guess.\n- **Prefer proven libs** for complex needs: `simpleeval`, `asteval`, `numexpr`, or `sympy` with explicit symbol/function whitelists. Keep them patched (A06).\n- **Rate‑limit** the endpoint to blunt brute‑force/resource abuse.\n\n---\n\n## 4. OWASP Top 10 mapping\n\n| OWASP | Relevance to math input | Control |\n|---|---|---|\n| **A03 Injection** | `eval`/`exec`/`compile` on input = arbitrary code exec | AST whitelist; ban `eval`; CWE‑95 |\n| **A04 Insecure Design** | Unbounded length/depth/exponent | Input caps + defense in depth |\n| **A05 Misconfiguration** | Debug tracebacks leaking paths | Generic errors, hardened runtime |\n| **A06 Vulnerable Components** | Stale parser libs | Pin + patch dependencies |\n| **A09 Logging Failures** | No record of rejected/malicious input | Structured logs + alerts |\n| **A08 Data Integrity** | Untrusted expression sources | Validate at trust boundary |\n\n---\n\n## 5. Security test cases (ship these with the code)\n\n```python\ngood = {\n    \"1 + 1\": 2, \"(2+3)*4\": 20, \"2 ** 10\": 1024,\n    \"10 % 3\": 1, \"7 / 2\": 3.5,\n}\nbad = [\n    \"__import__('os').system('id')\",  # RCE\n    \"open('secret.txt').read()\",       # file read\n    \"().__class__.__bases__[0]\",       # sandbox escape\n    \"lambda: 1\",                        # disallowed node\n    \"2 ** 999999999\",                   # exponent DoS\n    \"(\" * 5000 + \"1\" + \")\" * 5000,      # depth bomb\n    \"x\" * 10000,                        # length bomb\n    \"10 / 0\",                           # zero division\n]\n```\n\nAssert every `bad` entry raises `UnsafeExpression`/`ZeroDivisionError` and returns only the generic message.\n\n---\n\n## 6. Quick checklist\n\n- [ ] Grep the codebase: `grep -rn \"eval(\\|exec(\\|compile(\" .` — remove all on untrusted input.\n- [ ] Replace with `safe_eval` (AST whitelist).\n- [ ] Add `MAX_EXPR_LEN`, `MAX_DEPTH`, `MAX_EXPONENT`.\n- [ ] Use `Decimal` for financial math.\n- [ ] Return generic errors; log rejected input (A09).\n- [ ] Rate‑limit the endpoint.\n- [ ] Pin/scan dependencies (A06).\n- [ ] Add the `good`/`bad` test suite to CI as a security gate.\n\nI also generated a full OWASP‑aligned security‑assessment prompt (mapping to NIST CSF and ISO 27001, with remediation and test‑case scaffolds) that you can run against the actual source files for a line‑by‑line review. Want me to tailor that prompt to a specific file or endpoint (e.g., your Flask/FastAPI route) next?",
+  "calls": [
+    {
+      "arguments": "{\"codeContext\":\"A Python codebase that accepts user-supplied mathematical expressions (from web forms, API endpoints, or config files) and evaluates them to compute results. The system currently may use eval()/exec() or Python's built-in compile() to process expression strings of arbitrary length, including arithmetic operators (+ - * / ** %), parentheses, and potentially variable names or function calls.\",\"securityFocus\":\"vulnerability-analysis\",\"language\":\"python\",\"framework\":\"Python 3 / standard library (ast, decimal) with optional FastAPI or Flask input layer\",\"riskTolerance\":\"low\",\"analysisScope\":[\"input-validation\",\"api-security\",\"error-handling\",\"logging-monitoring\",\"dependency-security\",\"configuration-security\"],\"securityRequirements\":[\"Never pass untrusted input to eval() or exec()\",\"Restrict evaluation to a safe AST whitelist of arithmetic node types only\",\"Reject variable names, attribute access, subscripts, and function calls in expressions\",\"Enforce input length and nesting-depth limits to prevent CPU/memory exhaustion (ReDoS/DoS)\",\"Protect against division by zero and numeric overflow\",\"Return generic error messages that do not leak stack traces or internal paths\",\"Log rejected/malicious expressions for security monitoring\"],\"complianceStandards\":[\"OWASP-Top-10\",\"NIST-Cybersecurity-Framework\",\"ISO-27001\"],\"outputFormat\":\"detailed\",\"includeCodeExamples\":true,\"includeMitigations\":true,\"includeTestCases\":true,\"prioritizeFindings\":true,\"techniques\":[\"chain-of-thought\",\"few-shot\"],\"provider\":\"gpt-5\",\"style\":\"markdown\"}",
+      "tool": "security-hardening-prompt-builder__b65756357998",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "---\n# Note: Dropped unknown tools: security-scanner\nmode: 'agent'\nmodel: GPT-5-Codex\ntools: ['codebase', 'editFiles']\ndescription: 'Security vulnerability analysis analysis and hardening recommendations'\n---\n## 🛡️ Security Hardening Prompt Template\n\n### Metadata\n- Updated: 2026-11-01\n- Source tool: mcp_ai-agent-guid_security-hardening-prompt-builder\n- Suggested filename: security-hardening-vulnerability-analysis-prompt.prompt.md\n\n\n# Security Vulnerability Analysis Prompt\n\nPerform comprehensive security analysis of python code with focus on vulnerability analysis\n\n## Code Context\nA Python codebase that accepts user-supplied mathematical expressions (from web forms, API endpoints, or config files) and evaluates them to compute results. The system currently may use eval()/exec() or Python's built-in compile() to process expression strings of arbitrary length, including arithmetic operators (+ - * / ** %), parentheses, and potentially variable names or function calls.\n\n## Security Requirements\n1. Never pass untrusted input to eval() or exec()\n2. Restrict evaluation to a safe AST whitelist of arithmetic node types only\n3. Reject variable names, attribute access, subscripts, and function calls in expressions\n4. Enforce input length and nesting-depth limits to prevent CPU/memory exhaustion (ReDoS/DoS)\n5. Protect against division by zero and numeric overflow\n6. Return generic error messages that do not leak stack traces or internal paths\n7. Log rejected/malicious expressions for security monitoring\n\n## Compliance Standards\nEvaluate against:\n- OWASP Top 10\n- NIST Cybersecurity Framework\n- ISO 27001\n\n## Analysis Scope\nFocus on these security areas:\n- Input Validation\n- Api Security\n- Error Handling\n- Logging Monitoring\n- Dependency Security\n- Configuration Security\n\n\n### Python-Specific Security Checks\n\n**Common python Vulnerabilities to Check:**\n- SQL injection via string concatenation\n- Pickle deserialization attacks\n- Command injection through os.system() or subprocess\n- Path traversal vulnerabilities\n- Insecure deserialization with eval() or exec()\n\n**Specific Checks for python Code:**\n- Check for SQL queries using string concatenation instead of parameterized queries\n- Review all uses of pickle.loads() for untrusted data\n- Validate file paths to prevent directory traversal\n- Check for eval(), exec(), or compile() on user input\n- Review subprocess calls for shell injection vulnerabilities\n\n**python Security Best Practices:**\n- Use parameterized queries or ORMs (SQLAlchemy, Django ORM)\n- Avoid pickle for untrusted data; use JSON instead\n- Use subprocess with shell=False and argument lists\n- Implement proper input validation using Pydantic or similar\n\n\n### Framework-Specific Security Considerations\n\nConsider Python 3 / standard library (ast, decimal) with optional FastAPI or Flask input layer-specific security patterns and best practices in your analysis.\n\n\n### Context-Aware Vulnerability Analysis\n\nBased on the provided code context, pay special attention to:\n\n**Authentication & Authorization:**\n- Verify password storage uses strong hashing (bcrypt, Argon2, PBKDF2)\n- Check for insecure direct object references (IDOR)\n- Validate session management and timeout configurations\n- Review token generation for sufficient entropy and secure storage\n- Ensure proper role-based access control (RBAC) implementation\n\n**API Security:**\n- Validate all input parameters with strict type and format checking\n- Implement rate limiting to prevent abuse and DoS attacks\n- Check for proper authentication on all endpoints (not just client-side)\n- Review CORS configuration for overly permissive origins\n- Ensure sensitive data is not exposed in error messages or responses\n\n**File Upload Security:**\n- Validate file types using content inspection, not just extensions\n- Implement file size limits to prevent DoS attacks\n- Sanitize file names to prevent path traversal attacks\n- Store uploaded files outside the web root\n- Scan uploaded files for malware if possible\n\n**Input Validation:**\n- Implement whitelist validation, not just blacklist filtering\n- Validate data types, formats, lengths, and ranges\n- Sanitize output to prevent XSS (context-aware escaping)\n- Never trust client-side validation alone; always validate server-side\n- Use established validation libraries appropriate for the language/framework\n\n\n### Tailored Compliance Analysis\n\n**OWASP Top 10 Specific Checks:**\n- **A01:2021 – Broken Access Control**: Verify proper authorization checks on all sensitive operations\n- **A02:2021 – Cryptographic Failures**: Check for weak cryptography or unencrypted sensitive data\n- **A03:2021 – Injection**: Review for SQL, NoSQL, OS, and LDAP injection vulnerabilities\n- **A04:2021 – Insecure Design**: Assess threat modeling and security design patterns\n- **A05:2021 – Security Misconfiguration**: Check security headers, error handling, and defaults\n- **A06:2021 – Vulnerable Components**: Identify outdated or vulnerable dependencies\n- **A07:2021 – Authentication Failures**: Review authentication implementation and session management\n- **A08:2021 – Software and Data Integrity**: Validate CI/CD pipeline and update mechanisms\n- **A09:2021 – Logging Failures**: Ensure adequate security event logging and monitoring\n- **A10:2021 – Server-Side Request Forgery**: Check for SSRF vulnerabilities in external requests\n\n**NIST Cybersecurity Framework:**\n- **Identify**: Asset inventory and risk assessment\n- **Protect**: Access control, data security, and protective technology\n- **Detect**: Security monitoring and anomaly detection\n- **Respond**: Incident response procedures and communications\n- **Recover**: Recovery planning and improvements\n\n**ISO 27001 Information Security Controls:**\n- **A.9**: Access control and user access management\n- **A.10**: Cryptography and key management\n- **A.12**: Operations security and malware protection\n- **A.14**: Secure development lifecycle practices\n- **A.18**: Compliance with legal and contractual requirements\n\n## Core Security Checks (includes OWASP Top 10)\n- [OWASP-A01] Broken Access Control: Verify authorization on sensitive operations and enforce least privilege.\n- [OWASP-A02] Cryptographic Failures: Ensure strong encryption for data in transit and at rest with proper key handling.\n- [OWASP-A03] Injection: Check for SQL/NoSQL/OS/LDAP injection and require parameterized inputs.\n- [OWASP-A04] Insecure Design: Confirm threat modeling, secure defaults, and defense-in-depth patterns.\n- [OWASP-A05] Security Misconfiguration: Validate headers, error handling, TLS, and hardened runtime configuration.\n- [OWASP-A06] Vulnerable and Outdated Components: Review dependencies for CVEs and enforce supply-chain security checks.\n- [OWASP-A07] Identification and Authentication Failures: Assess credential handling, MFA, session controls, and brute-force protections.\n- [OWASP-A08] Software and Data Integrity Failures: Verify code signing, update validation, and integrity of pipelines and artifacts.\n- [OWASP-A09] Security Logging and Monitoring Failures: Ensure security events are logged, monitored, and trigger alerting with retention.\n- [OWASP-A10] Server-Side Request Forgery: Check SSRF protections on outbound calls, allowlists, and metadata service access.\n- [SCOPE-1] Input Validation Review: Evaluate Input Validation controls within the provided context.\n- [SCOPE-2] Api Security Review: Evaluate Api Security controls within the provided context.\n- [SCOPE-3] Error Handling Review: Evaluate Error Handling controls within the provided context.\n- [SCOPE-4] Logging Monitoring Review: Evaluate Logging Monitoring controls within the provided context.\n- [SCOPE-5] Dependency Security Review: Evaluate Dependency Security controls within the provided context.\n- [SCOPE-6] Configuration Security Review: Evaluate Configuration Security controls within the provided context.\n\n## Recommendations\n- Mitigate Broken Access Control: Provide remediation guidance, validation steps, and test cases addressing Verify authorization on sensitive operations and enforce least privilege.\n- Mitigate Cryptographic Failures: Provide remediation guidance, validation steps, and test cases addressing Ensure strong encryption for data in transit and at rest with proper key handling.\n- Mitigate Injection: Provide remediation guidance, validation steps, and test cases addressing Check for SQL/NoSQL/OS/LDAP injection and require parameterized inputs.\n- Mitigate Insecure Design: Provide remediation guidance, validation steps, and test cases addressing Confirm threat modeling, secure defaults, and defense-in-depth patterns.\n- Mitigate Security Misconfiguration: Provide remediation guidance, validation steps, and test cases addressing Validate headers, error handling, TLS, and hardened runtime configuration.\n- Mitigate Vulnerable and Outdated Components: Provide remediation guidance, validation steps, and test cases addressing Review dependencies for CVEs and enforce supply-chain security checks.\n- Mitigate Identification and Authentication Failures: Provide remediation guidance, validation steps, and test cases addressing Assess credential handling, MFA, session controls, and brute-force protections.\n- Mitigate Software and Data Integrity Failures: Provide remediation guidance, validation steps, and test cases addressing Verify code signing, update validation, and integrity of pipelines and artifacts.\n- Mitigate Security Logging and Monitoring Failures: Provide remediation guidance, validation steps, and test cases addressing Ensure security events are logged, monitored, and trigger alerting with retention.\n- Mitigate Server-Side Request Forgery: Provide remediation guidance, validation steps, and test cases addressing Check SSRF protections on outbound calls, allowlists, and metadata service access.\n- Mitigate Input Validation Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Input Validation controls within the provided context.\n- Mitigate Api Security Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Api Security controls within the provided context.\n- Mitigate Error Handling Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Error Handling controls within the provided context.\n- Mitigate Logging Monitoring Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Logging Monitoring controls within the provided context.\n- Mitigate Dependency Security Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Dependency Security controls within the provided context.\n- Mitigate Configuration Security Review: Provide remediation guidance, validation steps, and test cases addressing Evaluate Configuration Security controls within the provided context.\n\n## Compliance Controls\n- OWASP-Top-10: Map findings to OWASP Top 10 risks; Validate coverage across authentication, access control, and injection (Context: A Python codebase that accepts user-supplied mathematical expressions (from web forms, API endpoints, or config files) and evaluates them to compute results. Th)\n- NIST-Cybersecurity-Framework: Identify assets and risks; protect with layered controls; Detect anomalies, respond to incidents, and recover operations (Context: A Python codebase that accepts user-supplied mathematical expressions (from web forms, API endpoints, or config files) and evaluates them to compute results. Th)\n- ISO-27001: Apply ISMS controls for access, cryptography, and operations; Maintain compliance and continuous improvement cycles (Context: A Python codebase that accepts user-supplied mathematical expressions (from web forms, API endpoints, or config files) and evaluates them to compute results. Th)\n\n## Security Analysis Framework\n\n### 1. Vulnerability Identification\n- Scan for common vulnerability patterns (OWASP Top 10)\n- Identify insecure coding practices\n- Check for hardcoded secrets and credentials\n- Analyze input validation and sanitization\n\n### 2. Risk Assessment\n- Rate findings by severity (Critical/High/Medium/Low)\n- Assess likelihood of exploitation (Very High/High/Medium/Low/Very Low)\n- Evaluate impact on confidentiality, integrity, and availability\n- Consider attack vectors and threat scenarios\n- Document risk exposure and likelihood\n- Apply OWASP Risk Rating methodology (Impact × Likelihood)\n\n### 3. Security Controls Evaluation\n- Review authentication mechanisms\n- Validate authorization and access controls\n- Check encryption and data protection\n- Assess logging and monitoring coverage\n\n### 4. Remediation Guidance\n- Provide specific fix recommendations\n- Suggest secure coding alternatives\n- Include implementation best practices\n- Reference security libraries and frameworks\n\n## Output Format\n\nProvide a comprehensive security assessment report including:\n- **Executive Summary**: High-level security posture overview\n- **Findings**: Detailed vulnerability descriptions with severity and likelihood ratings\n- **Risk Analysis**: OWASP-based impact × likelihood assessment with risk matrix position\n- **Recommendations**: Prioritized remediation steps with implementation guidance\n- **Code Examples**: Before/after code snippets showing secure implementations\n- **Test Cases**: Security test scenarios to validate fixes\n\n## OWASP Risk Assessment Framework\nFollow OWASP Risk Rating Methodology using Impact vs Likelihood matrix:\n\n### Risk Calculation: Overall Risk = Likelihood × Impact\n\n**Likelihood Factors:**\n- Threat Agent (skill level, motive, opportunity, population size)\n- Vulnerability (ease of discovery, exploit, awareness, intrusion detection)\n\n**Impact Factors:**\n- Technical Impact (loss of confidentiality, integrity, availability, accountability)\n- Business Impact (financial damage, reputation damage, non-compliance, privacy violation)\n\n### Risk Matrix Visualization\n\n```mermaid\nquadrantChart\n    title Security Risk Assessment Matrix\n    x-axis Low Impact --> High Impact\n    y-axis Low Likelihood --> High Likelihood\n    quadrant-1 Monitor & Review (High Impact, Low Likelihood)\n    quadrant-2 Immediate Action Required (High Impact, High Likelihood)\n    quadrant-3 Accept Risk (Low Impact, Low Likelihood)\n    quadrant-4 Mitigate When Possible (Low Impact, High Likelihood)\n```\n\n\n## Risk Tolerance\nApply low risk tolerance:\n- Accept minimal risk only (Low Impact × Low Likelihood)\n- Flag all potential security issues, even minor ones\n- Recommend defense-in-depth approaches\n- Prioritize security over convenience\n- Require mitigation for Medium+ risk findings\n\n## Prioritization Criteria\n1. **Critical**: Immediate threats with high exploitability\n2. **High**: Significant security risks requiring prompt attention\n3. **Medium**: Important improvements with moderate risk\n4. **Low**: Best practice recommendations with minimal risk\n# Approach\n\nThink through this problem step-by-step:\n\n1. Analyze the current state:\n   - Review the context: A Python codebase that accepts user-supplied mathematical expressions (from web forms, API endpoints, or config files) and evaluates them to compute results. The system currently may use eval()/exec() or Python's built-in compile() to process expression strings of arbitrary length, including arithmetic operators (+ - * / ** %), parentheses, and potentially variable names or function calls.\n\n2. Break down the goal:\n   - Main objective: Security vulnerability analysis analysis\n   - Key requirements to address:\n     1. Never pass untrusted input to eval() or exec()\n     2. Restrict evaluation to a safe AST whitelist of arithmetic node types only\n     3. Reject variable names, attribute access, subscripts, and function calls in expressions\n     4. Enforce input length and nesting-depth limits to prevent CPU/memory exhaustion (ReDoS/DoS)\n     5. Protect against division by zero and numeric overflow\n     6. Return generic error messages that do not leak stack traces or internal paths\n     7. Log rejected/malicious expressions for security monitoring\n\n3. Plan your approach:\n   - Identify the main components or modules involved\n   - Determine the sequence of changes needed\n   - Consider dependencies and potential impacts\n\n4. Execute step-by-step:\n   - Address each requirement methodically\n   - Explain your reasoning for each decision\n   - Validate each step before proceeding\n\n# Examples\n\nHere are examples of how to approach similar tasks. Follow these patterns:\n\n**Example 1: Security Analysis**\n```\nTask: Analyze authentication security\nApproach:\n1. Review authentication mechanisms (JWT, session-based, OAuth)\n2. Identify potential vulnerabilities (weak tokens, session fixation)\n3. Assess password policies and storage (hashing, salting, complexity)\n4. Check for secure transmission (HTTPS, secure cookies)\n5. Recommend security improvements with code examples\nOutput: Security assessment with prioritized recommendations and fixes\n```\n\n# Model-Specific Tips\n\n- Prefer Markdown with clear headings and sections\n- Place instructions at the beginning (and optionally re-assert at the end) in long contexts\n- Use explicit step numbering for CoT where helpful\n\n- Preferred Style: MARKDOWN\n\n```md\n# Instructions\n...your task...\n\n# Context\n...data...\n\n# Output Format\nJSON fields ...\n```\n\n# Pitfalls to Avoid\n\n- Vague instructions → replace with precise, positive directives\n- Forced behaviors (e.g., 'always use a tool') → say 'Use tools when needed'\n- Context mixing → separate Instructions vs Data clearly\n- Limited examples → vary few-shot examples to avoid overfitting\n- Repetitive sample phrases → add 'vary language naturally'\n- Negative instructions → state what to do, not just what not to do\n\n\n## Security-Specific Pitfalls to Avoid\n\n- Over-relying on client-side validation → implement server-side validation\n- Ignoring principle of least privilege → restrict access to minimum required\n- Using deprecated cryptographic algorithms → use current security standards\n- Hardcoding sensitive configuration → use secure configuration management\n- Insufficient logging of security events → implement comprehensive audit trails\n- Assuming internal networks are secure → implement zero-trust principles\n\n\n\n## Further Reading\n\n*The following resources are provided for informational and educational purposes only. Their inclusion does not imply endorsement, affiliation, or guarantee of accuracy. Information may change over time; please verify current information with official sources.*\n\n- **[OWASP Top 10](https://owasp.org/www-project-top-ten/)**: Standard awareness document for web application security risks\n- **[NIST Cybersecurity Framework](https://www.nist.gov/cyberframework)**: Comprehensive framework for managing cybersecurity risk\n- **[SANS Secure Coding Practices](https://reports.weforum.org/docs/WEF_Global_Cybersecurity_Outlook_2025.pdf)**: Quick reference guide for secure software development\n- **[CWE Top 25 Most Dangerous Weaknesses](https://cwe.mitre.org/top25/archive/2023/2023_top25_list.html)**: Most widespread and critical software weaknesses\n- **[OWASP Code Review Guide](https://owasp.org/www-project-code-review-guide/)**: Comprehensive guide for security-focused code reviews\n\n\n\n## Disclaimer\n- Security recommendations are based on common best practices and may need customization for your specific environment\n- Always validate security measures with penetration testing and security audits\n- Compliance requirements may vary by jurisdiction and industry\n- Keep security tools and dependencies up to date\n"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"(2 + 3) * 4 ** 2 - 10 / 2\",\"allow_variables\":false,\"check_balanced\":true,\"show_ast\":true,\"max_depth\":10,\"detailed\":true}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 14: Expected expression\nLine 1, Column 14: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"__import__('os').system('rm -rf /')\",\"allow_variables\":false,\"check_balanced\":true}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 14: Expected expression\nLine 1, Column 14: Expected expression\nLine 1, Column 14: Unexpected character '_' at line 1, column 1"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"(2 + 3) * 4 - 10 / 2\",\"allow_variables\":false}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"2 ** 3\",\"allow_variables\":false}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 4: Expected expression\nLine 1, Column 4: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"2 ^ 3\",\"allow_variables\":false}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"10 % 3 + sqrt(16)\",\"allow_variables\":false}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"(2 + 3) * 4 - 10 / 2\",\"allow_variables\":true}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"(2 + 3) * 4 - 10 / 2\"}",
+      "tool": "evaluate__7722fb090eee",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"(2 + 3) * 4 - 10 / 2\",\n  \"result\": 15,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"name\":\"principal\",\"expression\":\"1000 * 1.05 ^ 10\"}",
+      "tool": "set_variable__b4e6856a10df",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Variable 'principal' set to: 1628.8946267774413"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"allow_variables\":true,\"expression\":\"principal * 2\"}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"allow_variables\":false,\"expression\":\"principal * 2\"}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"allow_variables\":true,\"check_balanced\":true,\"expression\":\"((((((((((1))))))))))\",\"max_depth\":5}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"allow_variables\":false,\"expression\":\"(1 + 2\"}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 7: Expected ')' after expression\nLine 1, Column 7: Expected ')' after expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"2 ^ 10\"}",
+      "tool": "evaluate__7722fb090eee",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"2 ^ 10\",\n  \"result\": 1024,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"allow_variables\":false,\"expression\":\"open('secret.txt') + os + eval + exec\"}",
+      "tool": "validate_syntax__b7e42007400a",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"10 / 0\"}",
+      "tool": "evaluate__7722fb090eee",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"10 / 0\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"sqrt(-1)\"}",
+      "tool": "evaluate__7722fb090eee",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"sqrt(-1)\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expression\":\"2 ^ 100000\"}",
+      "tool": "evaluate__7722fb090eee",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"2 ^ 100000\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "arguments": "{\"expressions\":[\"2 + 3 * 4\",\"(1 + 2) * (3 + 4)\",\"2 ^ 8 % 5\",\"sqrt(81) / 3\"],\"stop_on_error\":false}",
+      "tool": "batch_evaluate__59d51f1760fa",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Error: this.toolHandlers.handleBatchEvaluate is not a function"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "artifacts": []
+}
