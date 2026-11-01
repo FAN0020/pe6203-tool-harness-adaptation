@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PE6203 · 原生批量路线的完整成本诊断</title><style>body{font:16px/1.75 system-ui,sans-serif;color:#17273c;background:#f5f7fa;margin:0}main{max-width:980px;margin:auto;padding:30px 22px 60px}h1{font-size:30px;line-height:1.3}h2{font-size:22px;margin-top:30px}a{color:#075aa8;overflow-wrap:anywhere}code{overflow-wrap:anywhere}table{border-collapse:collapse;width:100%;background:white}th,td{padding:10px;border:1px solid #d7dee8;text-align:left;vertical-align:top}.scroll{overflow-x:auto}.notice{background:#e5effa;padding:16px 20px;border-left:5px solid #266296}li{margin:8px 0}@media(max-width:600px){main{padding:20px 15px}h1{font-size:25px}}</style></head><body><main>
+<p>PE6203 · 2026-11-01 · 同一 Goal · 受控合成原生诊断</p>
+<h1>批量写入的收益取决于字段和依赖结构</h1>
+<p class="notice">冻结的三个结构、八条路径、69 次原生调用已完成，所有最终状态逐字段一致。默认平铺记录能省调用；完整字段的浅层计划不能省调用或依赖轮次；长链有取舍。本轮不调用模型，不计作开发通过、原 benchmark 成功或独立验证。Goal 仍未完成。</p>
+<h2>为什么需要这项诊断</h2>
+<p>上一版 native_record_batch 在原 283 Late 上未被采用，候选和 SP 的正常完成/产物全项通过均为 0/1。这个结果不能说明正确采用批量路线仍无效。此前 12 次原生准入只证明短段落可以一次保存多个记录，没有检验补齐字段和依赖后的完整成本。</p>
+<p>此次定向核算上轮两份既有调用：候选 29 条、SP 47 条记录都显式填写优先级、复杂度、工时和标签；原生 parse_prd 不能原样指定这些字段，且初始没有层级/依赖。候选 28/29、SP 37/47 的文本可以形成 ≤500 字符的 ASCII 段落；没有超出 500 UTF-16 单元的段落。不能把未采用解释为所有文本都不适合导入，也不能从这些观察读出模型的选择动机。投影不进入任何更新器。</p>
+<h2>机制依据及冻结条件</h2>
+<p>复用 <a href="https://arxiv.org/html/2401.06201v3">EasyTool 2401.06201v3</a> 的调用验证思路和作者仓库 SHA <code>7624cf388b47334ff8a0868e7d862dde18cfda86</code>，关键实现仍为 data_process.py:29、<a href="https://github.com/microsoft/JARVIS/blob/7624cf388b47334ff8a0868e7d862dde18cfda86/easytool/easytool/toolbench.py#L140">toolbench.py:140</a>。本轮是项目自身对完整操作成本的诊断，不是原作者 actor 的复现。原生解析器哈希 <code>d84ed2420bd56f9c648fe6a730fa61b9a12a3ab01254acbad86b5626859c338d</code>，其余创建、更新、存储、列表源码也在冻结协议中固定。</p>
+<p><code>68493fe</code> 在调用前冻结三组独立合成输入（900301–900303）、顺序、字段验收、两种普通路径与批量路径、失败处理和零模型费用 ledger。模型、供应商、预算、actor、原生工具和原 benchmark 规则均未改。课程允许工具知识适应；严格双提升及两批验证仍来自用户要求，诊断不降低该门槛。</p>
+<ul><li><strong>普通直接创建：</strong>按依赖顺序创建，已知 parent/dependency ID 在创建时填写。</li><li><strong>普通延后补链接：</strong>先创建全部记录，使用创建收据返回的 ID，再集中补层级/依赖。</li><li><strong>批量导入：</strong>一次导入正文，列表取得 ID；完整字段情形再逐条恢复标量字段和链接，不重发已保存名称/正文。</li></ul>
+<p>后续调用的 ID 全部从原生收据或列表提取，磁盘状态仅用于评测。逐字段核对完整正文、名称、优先级、复杂度、工时、标签、状态、完成标志、层级和依赖；只排除随机 ID、时间戳。没有为了省调用删减产物要求。</p>
+<h2>实际结果</h2>
+<div class="scroll"><table><tr><th>固定结构</th><th>普通直接：调用 / 依赖轮次</th><th>普通延后：调用 / 依赖轮次</th><th>批量：调用 / 依赖轮次</th><th>最终状态</th></tr>
+<tr><td>900301：3 条默认兼容平铺记录</td><td>5 / 3</td><td>与直接路径相同，未重复</td><td>3 / 3</td><td>全部一致</td></tr>
+<tr><td>900302：6 条完整字段、浅层树</td><td>8 / 4</td><td>12 / 4</td><td>10 / 5</td><td>全部一致</td></tr>
+<tr><td>900303：6 条完整字段、依赖长链</td><td>8 / 8</td><td>13 / 4</td><td>10 / 5</td><td>全部一致</td></tr></table></div>
+<p><strong>轮次是每种指定算法的依赖下界，不是实际模型轮次。</strong>它假定独立调用可放进同一回复，没有检验 4096 token 是否容纳这些参数，也未搜索所有混合算法。原生运行耗时和 UTF-8 字节数不能代替模型 token/推理预算；原请求字节数还包含工作目录名长度。</p>
+<p>完整字段情形下，普通直接路径需 N+2 次调用，批量需 N+4 次：批量写入省去的逐条创建，被逐条字段恢复抵消，并增加一次导入和取 ID 列表。长链中，批量相对直接路径少三个依赖轮次，却相对延后补链接多一个轮次。不存在本测试范围内统一占优的批量路线。</p>
+<h2>决定与结论边界</h2>
+<p>不再优先修改上一版批量提示的措辞、位置或名称。“一次写多条”不能直接推出“完整任务更省预算”，这次测量改变了后续优化的依据。未观察模型采用、推理分配或最终质量，不能宣称已找到上轮不采用或截断的根因。</p>
+<p>另一个方向是按字段判断是否保留旧知识，而非整条记录覆盖。<em>盲目恢复全部旧描述</em>已有反证：Early list_tasks 宣称可跨项目浏览，但原生要求 projectId；旧 sequentialthinking 也含不成立的保证。这些事实只排除无校验的整体回退，不否定逐字段、经源码检查的保留机制。它尚未形成下一项冻结候选，不因未证有效而要求额外审批。</p>
+<p>下一机制仍须在现有信息边界内，改变真实知识决策并能被公平检验。没有把本诊断当作成功策略，也没有宣布合法方法空间穷尽。两批独立验证未启动。</p>
+<h2>可复核材料与成本</h2>
+<p>新增费用 <strong>USD 0</strong>：69 次原生调用、8 次工具目录读取；actor/updater/judge 调用和模型 token 均为 0。204 个归档成员逐字节校验通过，独立脚本从原始收据与实际任务存储复算全部状态、调用和依赖下界。全部原始成功/失败字段、stdout/stderr、工作区和固定源码保留，无重采。</p>
+<p>离线执行：<code>python3 results/evidence/native-batch-cost-diagnostic-20261101/verify.py</code>。无需凭据、网络、SDK 或解包；重新执行原生环境需要主仓库已有的固定运行依赖。</p>
+<p><a href="../experiments/native-batch-cost-diagnostic-v1.json">冻结协议</a> · <a href="../results/evidence/native-batch-cost-diagnostic-20261101/decision.json">结果</a> · <a href="../results/evidence/native-batch-cost-diagnostic-20261101/interpretation.json">判断与未知</a> · <a href="../results/evidence/native-batch-cost-diagnostic-20261101/verification.json">离线核验</a> · <a href="../results/evidence/native-batch-cost-diagnostic-20261101/reproduction.txt">复现说明</a></p>
+<p>NU/FR、所有历史评分和费用继续保留。最终课程报告、复现包与展示仍需整合；原 benchmark 双提升和两批验证仍未完成。研究目标保持原范围。</p>
+</main></body></html>

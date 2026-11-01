@@ -24,7 +24,20 @@
 
 交接时没有正在运行的实验或renderer。研究结果基点为`ac4c328`，本次交接不改任何旧结果。交接前仅出现EasyTool/Play2Prompt/工具描述重写的搜索线索，尚未完成原文与固定源码核对，也没有新候选或新模型调用；不能当作已完成研究。新聊天创建同一完整目标的Goal后自主推进，旧聊天不再并发研究。
 
-### 当前最新状态：原生批量路线完成4条开发，未被采用、未双提升
+### 当前最新状态：批量路线完整成本诊断完成，不能普遍节省预算
+
+- 同一 Goal active、未完成；本轮为实质诊断进展。无新 agent/worktree、模型调用、push、部署或外发，无运行实验。
+- 报告 [`reports/native-batch-cost-diagnostic.html`](reports/native-batch-cost-diagnostic.html)；离线命令 `python3 results/evidence/native-batch-cost-diagnostic-20261101/verify.py`。
+- `68493fe` 在任何新原生调用前冻结3个独立合成结构（900301-303）、8路径、69调用。比较直接创建、先创建后补链接、原生批量导入后恢复字段；ID仅从原生收据/列表取，磁盘状态仅评测。runner65881退出0。
+- 所有正文、优先级、复杂度、工时、标签、状态、层级和依赖逐字段一致。默认平铺3：direct5调用/3理论轮次，batch3/3；完整字段浅树6：direct8/4，deferred12/4，batch10/5；完整字段长链6：direct8/8，deferred13/4，batch10/5。
+- 理论轮次仅是所指定算法的数据依赖下界，假定独立参数无限容纳；不是实际actor轮次，不保证4096tokens能装下，也非所有混合算法最优。Native walltime/UTF8字节不等于模型预算；请求字节含目录名差异。
+- 新证据否定“fanout必然释放模型轮次”的泛化：完整字段需要逐条恢复；浅树batch调用/轮次都更差，长链有取舍。上轮候选28/29、SP37/47正文满足短ASCII域，不能主要归因全部文本不适用；每条都设置非文本字段。该投影从既有输出取得，仅回顾分析、不进updater。
+- 不再优先调整同一batch提示/位置/名称。未测实际actor采用与reasoning分配，不能声称找到截断根因。原native_record_batch四单元结果不改，开发失败、两批验证仍未开始。
+- 另一方向：逐字段判断旧知识是否保留。只排除无校验的整体回退：Early list_tasks的跨项目说明及旧思考工具保证不成立。不能以这些错误否定所有源证据约束的字段保留；目前无下一已冻结模型候选。
+- 新模型calls/tokens/USD全0；69原生调用+8目录读取保留在独立native ledger。204归档成员含全部收据/状态/工作区/stdout/stderr和固定源码，离线复算通过；未重采。
+- 合成诊断不算原benchmark成功或独立验证。NU/FR、所有正负评分费用保留；最终课程综合报告/复现/展示与完整双提升Goal继续未完成。
+
+### 已结束上一轮：原生批量路线完成4条开发，未被采用、未双提升
 
 - 同一完整 Goal active、未完成；本轮为真实机制试验，不是阻塞轮。主线程唯一写者/实验执行者；无新 agent/worktree、push、部署或外发。
 - 报告 [`reports/native-record-batch-development.html`](reports/native-record-batch-development.html)，离线复核 `python3 results/evidence/native-batch-knowledge-20261101/verify_archive.py`。
