@@ -1,6 +1,6 @@
 {
-  "handoff_version": "verified-coverage-generation-closed-20261101",
-  "purpose": "同一完整 Goal。真实 metadata 字面整行覆盖为零；冻结独立遗漏检查与程序编辑选择新机制。Middle 两次关系提案含无效引用，Late 空关系，3 次请求后按规则关闭。检查器尚未实际执行，无原题新成绩。",
+  "handoff_version": "parameter-coverage-generation-closed-20261101",
+  "purpose": "同一完整 Goal。程序构造参数/schema 对后首次实际执行独立语义遗漏检查：Middle 删除323字符、Late366，全部11项删除经审查安全，但均低于冻结500门槛。发现至少两项与显式enum相矛盾的误否决。按规则关闭，不运行原题。",
   "workspace": {
     "repository": "/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety",
     "branch": "codex/completion-quality-study",
@@ -8,10 +8,10 @@
     "source_thread": "01a19253-fa19-74f2-89ca-eae44eeb98fb",
     "old_goal": "用户已明确授权暂停旧聊天Goal并创建新聊天继续；旧Goal已暂停，未完成。新聊天是研究的唯一执行者。",
     "working_rule": "所有仓库命令显式使用repository作为workdir。不要扫描父目录/home；不要切换分支、创建新worktree或重置文件。保留全部已有文件、原评分、正负结果。",
-    "live_work": "无实验运行；verified-coverage session 17794 已 exit 0，3 次 updater 请求全部结算；无 checker/actor/judge/native 调用。",
+    "live_work": "无实验运行；parameter-coverage session18857 已exit0。2次checker请求均结算，无repair或transport retry；独立离线核验通过。",
     "current_thread": "01a19594-5645-7520-bf4f-98de0419fc4e",
     "new_goal": "Goal active，完整目标未完成。",
-    "latest_frozen_execution_commit": "a174fa1",
+    "latest_frozen_execution_commit": "af5e5b2",
     "latest_product_review_commit": "89cfd3d"
   },
   "goal": {
@@ -23,8 +23,8 @@
   },
   "minimum_read_order": [
     "handoff/current.json",
-    "results/evidence/verified-coverage-20261101/generation-decision.json",
-    "results/evidence/verified-coverage-20261101/interpretation.json"
+    "results/evidence/parameter-coverage-20261101/generation-decision.json",
+    "results/evidence/parameter-coverage-20261101/interpretation.json"
   ],
   "hard_constraints": [
     "不得加载完整历史、全部轨迹或输出密钥。用户已授权通过ignored.env凭据做只读额度查询、打开env编辑及冻结模型执行；仅内部加载，不输出凭据。备用OPENROUTER_API_KEY_BACKUP已配置但尚未启用。",
@@ -51,6 +51,21 @@
     "ledger_lesson": "prefix-workflow轮错误追加旧ledger后已完整保留合并记录、按响应ID分离并恢复旧字节；不得再复用旧路径。"
   },
   "recent_results": [
+    {
+      "method": "parameter_coverage v1: host same-field join plus fixed semantic gap checker",
+      "result": "18/28对全部输入；Middle选5条减323字符，Late选6条减366字符；11项语义审查均pass，两个阶段均不满足500字符准入。",
+      "evidence": "首次实际触及checker；Late confidenceLevel/pathStatus把schema已列举enum说成缺失；相同pathStatus输入对在不同批次上下文中一过一否，原因未隔离。",
+      "decision": "关闭本版；不改门槛、不人工修正当前候选、不补采。下一应区分checker过度否决与安全压缩本身对原题无效，不再只是重写检查提示。",
+      "cost": "2 settled requests USD0.00152082，unknown0；备用未启用，0 actor/judge/native。",
+      "verification": "56 tests；22 source+10 raw；独立重建SP及全部候选字段、11项审查覆盖、2请求/响应/ledger核对。",
+      "paths": [
+        "results/evidence/parameter-coverage-20261101/generation-decision.json",
+        "results/evidence/parameter-coverage-20261101/semantic-review.json",
+        "results/evidence/parameter-coverage-20261101/checker-audit.json",
+        "results/evidence/parameter-coverage-20261101/interpretation.json",
+        "results/evidence/parameter-coverage-20261101/reproduction.txt"
+      ]
+    },
     {
       "method": "verified_coverage v1: relation proposal, independent missing-claim veto, deterministic witness protection",
       "result": "Middle 首次及唯一结构修复均 50 relations，各 14 个关系结构无效；Late 首次返回空关系。独立 checker 未执行，两阶段均未通过生成准入，0 actor。",
@@ -318,15 +333,15 @@
   ],
   "next_action": {
     "state": "no_new_frozen_candidate",
-    "research_priority": "不要重跑关系生成器。研究由程序预构造合法 claim/evidence pairs 后让固定 LLM 仅判断遗漏，是否能检验当前未触及的独立反馈机制；先用真实 metadata 按统一规则检查候选覆盖数量/来源，不从失败模型输出手挑。",
+    "research_priority": "优先区分checker过度否决与安全压缩本身无助于原题。若建立新的源文本覆盖判定/可验证证书，应按统一规则先确定真实metadata的安全可删范围，再决定是否有足量、合法的新候选进入原题；不要继续仅换checker措辞或把归档当进展。",
     "remaining_questions": [
-      "程序定位来源能否消除本轮可见的引用失败，且让两个阶段都有足量安全覆盖。",
-      "独立 missing-claim checker 实际能否否决语义不完整的覆盖；本轮未调用，不能断言有效或无效。",
-      "安全非空压缩是否改善固定原任务完成与实际质量，仍未检验。"
+      "完整来源允许的安全压缩上限是否明显高于当前323/366字符；不能把现有checker输出当上限。",
+      "独立来源裁定或确定性覆盖证书能否避开显式enum误否决并保持全部独有信息；新版本须先冻结。",
+      "即使安全且非空，固定actor预算下原题完成与实际质量双增仍完全未验证。"
     ],
-    "scope": "原冻结子集双提升和两批各自通过仍必需。报告和复现入口已交付；展示已结束，不改 slides 或 speaker scripts。",
-    "do_not": "不再采样 verified_coverage v1 / description_factor v1；不筛选失败提案中局部有效关系，不降低500字符或语义门槛，不查377/网页账单，不新增 unknown 豁免。",
-    "future_execution_note": "任何不同来源构造器/反馈方案均需新版本与前置冻结。原题开发仍需全部生成准入通过和精确知识/10cell冻结；费用 ledger 独立。"
+    "scope": "原冻结子集双提升、官方TF及保持不下降、两批各自通过仍必需。报告/复现已交付；不再编辑slides与speaker scripts。",
+    "do_not": "不重跑parameter_coverage v1/verified_coverage v1/description_factor v1；不事后降500门槛或把人工修正当同一候选；不查377/网页账单，不新增unknown豁免。",
+    "future_execution_note": "任何新裁定规则或来源编译机制必须新版本前置冻结。500字符只是当前系列的实现准入，不是永久研究法则；不能为挽救已看结果而改当前规则。下一新原题实验须精确知识和10cell plan冻结，并用独立ledger。"
   },
   "on_demand_map": {
     "current_protocol": "experiments/ready-link-v1.json",
@@ -360,10 +375,12 @@
     "latest_reproducer": "results/evidence/ready-link-20261101/reproduction.txt",
     "latest_accounting": "results/evidence/ready-link-20261101/accounting-comparison.json",
     "integrated_report": "reports/course-research/REPRODUCE.md",
-    "latest_generation": "results/evidence/verified-coverage-20261101/generation-decision.json",
-    "latest_generation_reproducer": "results/evidence/verified-coverage-20261101/reproduction.txt",
+    "latest_generation": "results/evidence/parameter-coverage-20261101/generation-decision.json",
+    "latest_generation_reproducer": "results/evidence/parameter-coverage-20261101/reproduction.txt",
     "description_factor_control": "results/evidence/description-factor-control-20261101/interpretation.json",
-    "verified_coverage_research": "results/evidence/verified-coverage-20261101/research-decision.json"
+    "verified_coverage_research": "results/evidence/verified-coverage-20261101/research-decision.json",
+    "parameter_coverage_research": "results/evidence/parameter-coverage-20261101/research-decision.json",
+    "latest_checker_audit": "results/evidence/parameter-coverage-20261101/checker-audit.json"
   },
   "blocked_audit": {
     "status": "blocked",
@@ -405,36 +422,37 @@
     "next_candidate": "description_factor v1 generationclosed; no newcandidatefrozen."
   },
   "active_round": {
-    "status": "completed_generation_admission_failed",
-    "spec": "experiments/verified-coverage-v1.json",
-    "evidence": "results/evidence/verified-coverage-20261101",
-    "candidate": "verified_coverage v1",
-    "updater_calls": 3,
-    "checker_calls": 0,
+    "status": "completed_generation_below_frozen_size_gate",
+    "spec": "experiments/parameter-coverage-v1.json",
+    "evidence": "results/evidence/parameter-coverage-20261101",
+    "candidate": "parameter_coverage v1",
+    "updater_calls": 2,
+    "checker_calls": 2,
     "actor_calls": 0,
     "judge_calls": 0,
     "native_calls": 0,
-    "model_calls": 3,
+    "model_calls": 2,
     "session_id": null,
-    "freeze_commit": "a174fa1",
+    "freeze_commit": "af5e5b2",
     "goal_complete": false,
     "validation_started": false,
-    "decision": "reject_generation_v1_no_original_trial"
+    "decision": "reject_generation_v1_below_frozen_size_gate"
   },
   "current_recovery_audit": {
-    "status": "progress_new_generation_test_identified_unreached_checker",
+    "status": "progress_checker_executed_with_safe_small_patch_and_false_veto_evidence",
     "blocker": null,
     "same_condition_consecutive_goal_turns": 0,
-    "current_turn": "真实文档 exact inventory 排除纯字面删除；冻结并执行新关系/独立反馈机制，发现 Middle 引用定位失败与 Late 空图，明确 checker 仍未测试。",
+    "current_turn": "主程序替代模型定位来源，2次checker真实执行。安全但小的补丁未过原门槛，且枚举误否决直接证实不能只凭结构有效相信保留判断。",
     "pending_question": null,
     "goal_status": "active",
     "new_mechanism_frozen": false,
     "not_claimed": [
-      "独立 checker 无效",
-      "已有安全非空候选",
-      "原 benchmark 双提升",
+      "所有否决均错误",
+      "checker总体准确率",
+      "原任务压缩必然有效或无效",
+      "原benchmark双提升",
       "正式验证",
-      "Goal 完成"
+      "Goal完成"
     ]
   },
   "latest_user_scope_update": {
