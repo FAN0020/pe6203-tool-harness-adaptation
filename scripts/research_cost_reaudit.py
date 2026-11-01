@@ -54,7 +54,7 @@ def main():
     ledger_files += sorted((ROOT / "results/evidence").glob("*/*ledger*.json"))
     ledger_reports, unresolved = [], {}
     for p in ledger_files:
-        if any(n in str(p) for n in ("evidence-dictionary", "evidence-contrastive", "capability-consolidation", "relational-probe-memory")):
+        if any(n in str(p) for n in ("evidence-dictionary", "evidence-contrastive", "capability-consolidation", "relational-probe-memory", "pruned-episode-memory")):
             continue  # New round has its own independent accounting.
         d = read(p)
         if not isinstance(d, dict) or not isinstance(d.get("requests"), list):
@@ -84,7 +84,7 @@ def main():
     audits += sorted((ROOT / "results/evidence").glob("*/*updater*audit*.json"))
     audits += sorted((ROOT / "results/evidence").glob("*/recovery/*audit*.json"))
     for p in audits:
-        if any(n in str(p) for n in ("evidence-dictionary", "evidence-contrastive", "capability-consolidation", "relational-probe-memory")):
+        if any(n in str(p) for n in ("evidence-dictionary", "evidence-contrastive", "capability-consolidation", "relational-probe-memory", "pruned-episode-memory")):
             continue
         for r in response_projection(read(p)):
             add(r["id"],r["known_usd"],str(p.relative_to(ROOT)),"updater_receipt")

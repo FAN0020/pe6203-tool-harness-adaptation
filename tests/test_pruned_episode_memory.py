@@ -1,10 +1,18 @@
 """Counterfactual replay admission, independent of benchmark content."""
 
+import json
 from copy import deepcopy
+from pathlib import Path
 
 import pytest
 
-from pe6203.pruned_episode_memory import schedules, state_signature, select_replay
+from pe6203.pruned_episode_memory import (
+    compile_knowledge,
+    schedules,
+    select_replay,
+    state_signature,
+)
+from pe6203.selective import adapt_result
 
 
 def plan():
@@ -104,3 +112,29 @@ def test_select_requires_every_prescheduled_replay_and_equivalence():
         t["rows"][-1]["after_state"]["tasks"][0]["name"] = "Mismatch"
     with pytest.raises(ValueError, match="equivalent"):
         select_replay(p, rows(), trials)
+
+
+def test_only_direct_changed_producer_knowledge_is_edited():
+    root = Path(__file__).resolve().parents[1]
+    feedback = json.loads(
+        (root / "experiments/pruned-episode-memory-feedback-v1.json").read_text()
+    )["observations"]
+    for row in feedback:
+        data = row["result"]["inventory"]
+        base = adapt_result(data["old"], data["target"])
+        original = deepcopy(base)
+        knowledge, edits = compile_knowledge(base, data["target"], feedback)
+        assert base == original and len(edits) == 1
+        for a, b in zip(base["knowledge"]["tools"], knowledge["tools"], strict=True):
+            if a["tool_id"].endswith("::create_project"):
+                assert len(b["usage_rules"]) == len(a["usage_rules"]) + 1
+                b = deepcopy(b)
+                b["usage_rules"] = a["usage_rules"]
+            assert a == b
+        bad = deepcopy(feedback)
+        for item in bad:
+            item["result"]["semantic_review"] = "pending"
+        with pytest.raises(ValueError, match="Unreviewed"):
+            compile_knowledge(base, data["target"], bad)
+        unchanged = adapt_result(data["old"], data["old"])
+        assert compile_knowledge(unchanged, data["old"], []) == (unchanged["knowledge"], [])

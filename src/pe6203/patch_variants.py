@@ -55,6 +55,7 @@ VARIANTS = (
     "observed_contrastive",
     "capability_consolidation",
     "relational_probe_memory",
+    "pruned_episode_memory",
 )
 
 SUFFICIENCY_RULE = (
@@ -814,6 +815,19 @@ def adapt_result(old, target, strategy, context=None):
         result["validation"] = {"errors": [], "checks": {
             "certificate": "exact source/native certificate; changed producer usage_rules only",
             "native_runtime": "unchanged; no new macro executor or automatic tool calls",
+            "edits": len(changes),
+        }}
+        return result
+    if strategy == "pruned_episode_memory":
+        from .pruned_episode_memory import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "certificate": "reviewed finite replay-equivalent pruned program and record witness",
+            "scope": "direct changed create_project usage_rules only; other knowledge protected",
             "edits": len(changes),
         }}
         return result
