@@ -1,0 +1,71 @@
+{
+  "status": "incomplete_infrastructure_stop",
+  "freeze_commit": "029a937",
+  "evaluated_cells": 5,
+  "blocked_cells": [
+    "cell-006"
+  ],
+  "unstarted_cells": [
+    "cell-007",
+    "cell-008",
+    "cell-009",
+    "cell-010"
+  ],
+  "settled_requests": 53,
+  "unknown_requests": 1,
+  "known_cost_usd": "0.125071608",
+  "unknown_reserved_usd": "0.319488",
+  "unknown_reserve_is_actual_charge_or_guaranteed_upper_bound": false,
+  "unknown_request": {
+    "status": "unknown_charge",
+    "started_at": "2026-11-01T14:11:23.956250+00:00",
+    "model": "deepseek/deepseek-v4.1-flash-1017",
+    "max_completion_tokens": 4096,
+    "request_sha256": "cb86f6e783e6e2fe792ab099ae0d01e7b679976117f3dfc09757a872f6fbbfe2",
+    "provider": {
+      "only": [
+        "digitalocean"
+      ],
+      "order": [
+        "digitalocean"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true
+    },
+    "reserved_usd": "0.319488",
+    "actual_usd": null,
+    "finished_at": "2026-11-01T14:11:25.367371+00:00",
+    "error_type": "RateLimitError"
+  },
+  "direct_evidence": [
+    "events.jsonl: round6 HTTP429 RateLimitError;retry delay2s;then BudgetStopped before transport retry could be sent.",
+    "Five successful actor rounds and native work preceded stop. No execution-checkpoint.json exists; raw_trace.json and events.jsonl persist.",
+    "result.json terminal classification execution/BudgetStopped masks the antecedent HTTP429; both facts are retained.",
+    "GET /key usage delta equals known settled total exactly; regular inference key, not management key. No unknown request generation ID/body/headers recorded."
+  ],
+  "inference_not_proven": [
+    "429 and zero residual key usage are consistent with a request rejection without charge, but neither is a request-specific settlement receipt.",
+    "Cause and frequency of provider throttling are unknown. This one interruption cannot establish candidate failure or benefit."
+  ],
+  "sources": [
+    {
+      "url": "https://openrouter.ai/docs/api_reference/errors-and-debugging",
+      "use": "HTTP and body-level errors differ; no-content responses can still have processing charges; not an invoice for this request."
+    },
+    {
+      "url": "https://openrouter.ai/docs/api/api-reference/api-keys/get-current-api-key",
+      "use": "Authenticated aggregate usage/remaining limit."
+    },
+    {
+      "url": "https://openrouter.ai/docs/api/api-reference/analytics/get-user-activity",
+      "use": "Activity endpoint requires management key; no website/login route or key solicitation repeated."
+    }
+  ],
+  "recovery_constraints": [
+    "Frozen failure_handling explicitly stops new unknown charges and excludes oldA1 exception.",
+    "Original actor has no checkpoint resume; blocked cell must remain failed, without resampling.",
+    "Existing runner can skip terminal cells and run untouched cells. Its redundant preflight would exceed fixed2calls; reuse exact2successful receipts without newpreflight."
+  ],
+  "decision": "No new model/native calls. Concrete single-request A2 amendment prepared, not executed. Missing cell006 TF stays missing; strict developmental promotion is not established even if remaining4 finish.",
+  "goal_complete": false
+}
