@@ -1,0 +1,18 @@
+SPOKEN SCRIPT (about 85 seconds)
+
+This is our QI-V2 upgrade. The program and the LLM have different jobs.
+
+We start at the top left with the old knowledge and the new tool information.
+The program compares them. It finds changes in tool names, inputs and descriptions. It also checks direct references in the old rules.
+
+At the top right, the LLM checks the wider impact. It reviews all tool records, including ones the program did not select. It uses the old and new information as evidence.
+Then, moving down, the LLM proposes local changes to the usage rules. Tool names and input formats still come from the server information.
+
+The program checks the patch. It checks schemas, routes and the records that should stay unchanged. We also test example calls for changed and unchanged tools. If a check fails, we keep the audit and do not publish that patch.
+
+Finally, we keep the accepted knowledge fixed. The agent uses it to choose tools and inputs. We save the calls, ratings and audit records.
+The results on the following slides come from our original program-only version.
+
+Presenter reference (not spoken): QI-V2 defaults to hybrid_v2. Semantic review covers all surviving records in bounded batches. The LLM can edit usage_rules only; program validation cannot guarantee semantic completeness. Targeted argument cases are schema regressions, not real MCP behavioral tests. Implementation tests and a bounded real-LLM synthetic smoke passed; the full V2 benchmark has not been run. Historical V1 results and costs are unchanged.
+
+Sources: QI-V2 src/pe6203/hybrid_selective.py; tests/test_hybrid_selective.py; scripts/accept_hybrid_patch.py; results/qi-v2/live-smoke-02/acceptance.json. Historical benchmark: submission/evidence/recomputed/metrics.json.

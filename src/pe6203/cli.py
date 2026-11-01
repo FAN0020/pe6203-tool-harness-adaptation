@@ -192,13 +192,23 @@ def main():
     p.add_argument("--format", choices=["text", "json", "html"], default="text")
     p.add_argument("--details", action="store_true", help="Include tool calls and saved state")
     p.add_argument("--output", type=Path, help="Write to a new file without overwriting")
-    p = sub.add_parser("adapt", help="Build baseline knowledge; Full Rewrite uses an LLM")
+    p = sub.add_parser("adapt", help="Build knowledge; Full Rewrite and hybrid Patch use an LLM")
     p.add_argument(
         "--strategy", choices=["no_update", "full_rewrite", "selective_patch"], required=True
     )
     p.add_argument("--old-knowledge", type=Path, required=True)
     p.add_argument("--new-metadata", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument(
+        "--selective-mode",
+        choices=["hybrid_v2", "deterministic_v1"],
+        default="hybrid_v2",
+        help="QI-V2 hybrid is the default; V1 is retained for historical comparisons",
+    )
+    p.add_argument("--patch-budget", type=Path, help="Hybrid request/time limits JSON")
+    p.add_argument(
+        "--validation-cases", type=Path, help="Independent argument regression cases JSON"
+    )
     p.add_argument(
         "--updater-config", type=Path, help="Updater JSON settings; use env names for secrets"
     )
@@ -277,10 +287,15 @@ def main():
                 args.strategy,
                 args.output,
                 context={
+                    "selective_mode": args.selective_mode,
+                    "patch_budget": read_json(args.patch_budget) if args.patch_budget else {},
+                    "validation_cases": read_json(args.validation_cases)
+                    if args.validation_cases
+                    else [],
                     "updater": {
                         **(read_json(args.updater_config) if args.updater_config else {}),
                         "allow_metadata_api": args.allow_metadata_api,
-                    }
+                    },
                 },
             )
         elif args.command == "bootstrap":

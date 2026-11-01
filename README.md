@@ -1,5 +1,7 @@
 # PE6203 · 工具变化下的 Harness 适应
 
+> **QI-V2 分支更新（2026-11-01）**：当前公共入口 `selective_patch` 默认采用“程序检测 → LLM 全目录语义检查 → LLM 局部规则修改 → 程序验证与参数回归”的 `hybrid_v2`。已完成实现验收和小型真实 LLM 合成样例检查；完整 V2 benchmark 未运行。**下方课程成绩、零更新 LLM 成本和冻结交付均属于历史 `deterministic_v1`，不能当成 V2 效果。** 原版本通过 `--selective-mode deterministic_v1` 保留。[新版流程、运行与验收](docs/qi-v2-selective-patch.md)。
+
 **当前目标：完成可复现、可辩护的课程项目。** 采用「最小实验 → 验证与交付 → 获批后才扩展」。策略搜索已暂停；任何新增实验、API 探测或重跑都先获用户批准。
 
 **已核实的比较结论：Selective Patch 的 PE 最高，但尚无整体优于两个 baseline 的证据。** 每格一次执行，仅报告观察差异，不宣称统计显著性。
