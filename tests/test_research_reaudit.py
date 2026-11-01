@@ -37,3 +37,18 @@ def test_unexecuted_plan_does_not_inherit_sibling_review(tmp_path, monkeypatch):
         "core_pass": True, "properties": {"charts": "pass"}, "review_source": "sibling"}})
     assert row["status"] == "not_started" and row["review_source"] is None
     assert row["core_pass"] is None and receipts == []
+
+
+def test_direct_blind_review_without_map_is_reused(tmp_path, monkeypatch):
+    import scripts.research_reaudit as audit
+    monkeypatch.setattr(audit, 'ROOT', tmp_path)
+    monkeypatch.setattr(audit, 'OUT', tmp_path/'audit')
+    raw=tmp_path/'results/raw/extensions/example/development'
+    raw.mkdir(parents=True)
+    evidence=tmp_path/'results/evidence/extensions/example/blind-review'
+    evidence.mkdir(parents=True)
+    (evidence/'cell-001-review.json').write_text(json.dumps({
+        'cell':'cell-001','properties':{'parser_persisted':False},'method_and_scores_hidden':True}))
+    found=audit.review_index(raw)
+    assert found['cell-001']['properties']=={'parser_persisted':'fail'}
+    assert found['cell-001']['review_source'].endswith('cell-001-review.json')

@@ -6,14 +6,14 @@
 
 **Top 5来源已由用户补齐。** 明确名称为sufficiency_feedback、observed_contract、discovery_contract、budget_feedback、shared_contract_refs；第5项原文为“shared_contract_refs等最近候选”，未指明的集合成员不擅自补列。budget_feedback与observed_contract合并后无需新增重复项。版本和原记录见top5-provenance.json。以下36项按登记顺序列出，不是排名。
 
-离线复算：45个队列、775计划格、517已执行格、2555有效评分槽；411格已有可映射的逐属性产品判断。原始槽与TF/PE均值不符0，冻结知识文件哈希不符0。未执行格与缺失判断不计成功。
+离线复算：45个队列、775计划格、517已执行格、2555有效评分槽；445格已有可映射的逐属性产品判断。原始槽与TF/PE均值不符0，冻结知识文件哈希不符0。未执行格与缺失判断不计成功。
 
 | 登记候选 | Actor/5槽评分格 | 已有逐属性审查格 | 原题 / 固定fixture原题 / 合成 | 版本与证据边界 |
 |---|---:|---:|---|---|
-| `delta_notes` | 6/6 | 0 | 6 / 0 / 0 | 协议：selective-search-v1, selective-search-v1.1 |
-| `linked_notes` | 6/6 | 0 | 6 / 0 / 0 | 协议：selective-search-v1, selective-search-v1.1 |
-| `feedback_notes` | 6/6 | 0 | 6 / 0 / 0 | 协议：selective-search-v1, selective-search-v1.1 |
-| `sufficiency_notes` | 6/6 | 0 | 6 / 0 / 0 | 协议：selective-search-v2, selective-search-v2.1 |
+| `delta_notes` | 6/6 | 6 | 6 / 0 / 0 | 协议：selective-search-v1, selective-search-v1.1 |
+| `linked_notes` | 6/6 | 6 | 6 / 0 / 0 | 协议：selective-search-v1, selective-search-v1.1 |
+| `feedback_notes` | 6/6 | 6 | 6 / 0 / 0 | 协议：selective-search-v1, selective-search-v1.1 |
+| `sufficiency_notes` | 6/6 | 6 | 6 / 0 / 0 | 协议：selective-search-v2, selective-search-v2.1 |
 | `workflow_notes` | 0/0 | 0 | 0 / 0 / 0 | v2生成后语义拒绝；没有actor结果 |
 | `sufficiency_feedback` | 39/39 | 39 | 39 / 0 / 0 | 完整108格四臂确认；供应商未固定；SP/SF54格产品补审已完成，非当前Goal通过 |
 | `budget_feedback` | 34/32 | 34 | 34 / 0 / 0 | v3开发、两次中断108格计划、后续固定供应商复查；不得称108已完成 |
@@ -28,7 +28,7 @@
 | `contract_reconcile` | 3/3 | 3 | 3 / 0 / 0 | 协议：contract-reconcile-v1 |
 | `native_media_contract` | 3/3 | 3 | 3 / 0 / 0 | 协议：native-media-contract-v1 |
 | `discovery_contract` | 21/21 | 21 | 21 / 0 / 0 | 原题pilot6格；验证36格=两批各18格；两批均失败 |
-| `native_argument_routing` | 2/2 | 0 | 1 / 0 / 1 | 原377缺输入未执行；actor证据来自独立合成扩展及235保持 |
+| `native_argument_routing` | 2/2 | 2 | 1 / 0 / 1 | 原377缺输入未执行；actor证据来自独立合成扩展及235保持 |
 | `verified_component_memory` | 2/2 | 2 | 1 / 0 / 1 | 原生准入及共同运行依赖通过后仅合成扩展actor；不能替代原377 |
 | `prefix_workflow_memory` | 3/3 | 3 | 1 / 2 / 0 | 协议：prefix-workflow-memory-v1 |
 | `semantic_contract_direct` | 6/6 | 6 | 6 / 0 / 0 | v1生成拒绝；v2主张修复与后续optional_projection共同对照分开记录 |
@@ -204,7 +204,7 @@
 
 其中匹配队列actor/judge收据USD 6.9149795745；较广历史账本USD 4.753494864；updater收据USD 0.161608292。三者有重叠，**不可相加**。较广账本含课程基线、准入、原生诊断相关模型请求等。保留3笔未决账本请求；另有早期失败actor请求缺ID，不能仅用网页/key累计额度补记为0。
 
-`cost-receipts.json`给出去重来源；`cost-audit.json`给出账本原数、复算、范围和未知。新字典、差分与能力合并轮费用在独立账本另报，不混入以上历史快照。
+`cost-receipts.json`给出去重来源；`cost-audit.json`给出账本原数、复算、范围和未知。新字典、差分、能力合并与关系探测轮费用在独立账本另报，不混入以上历史快照。
 
 ## 已推进的新机制
 
@@ -228,7 +228,7 @@
 
 独立24调用parser状态诊断发现无效调用保留旧诊断与位置，后续有效调用清空。最初怀疑的fresh-invalid崩溃未发生；不把状态现象写成产物错误根因。此诊断$0，不算开发通过。
 
-三项新开发已知费用合计$0.714163524，加历史去重下界$7.2084398105，共$7.9226033345；历史未知费用仍未结清。
+四项新机制含关系探测生成费用合计$0.915632808，加历史去重下界$7.2084398105，共$8.1240726185；历史未知费用仍未结清。
 
 ## 复算
 
@@ -247,4 +247,12 @@ uv run python scripts/research_cost_reaudit.py
 uv run python scripts/render_reaudit_report.py
 ```
 
-上述均不调用模型、judge或MCP。离线哈希/分数复算不能替代语义产品审查；原生工具错误、模型输运错误、产品错误与审查代码错误必须分开记录。Top5名称已核实且候选自身逐属性审查覆盖完整：sufficiency_feedback39/39、budget_feedback34/34、observed_contract21/21、discovery_contract21/21、shared_contract_refs5/5。同队列SP缺口也已补审。其他登记项仍有明确标注的历史审查缺口；新方向及后续轮次仍待完成。新补的历史审查标注posthoc_scores_exposed，不能冒充盲态验证。审计映射修正见audit-corrections.json：不向未执行的准备计划挂载同ID后续产物审查。
+上述均不调用模型、judge或MCP。离线哈希/分数复算不能替代语义产品审查；原生工具错误、模型输运错误、产品错误与审查代码错误必须分开记录。Top5名称已核实且候选自身逐属性审查覆盖完整：sufficiency_feedback39/39、budget_feedback34/34、observed_contract21/21、discovery_contract21/21、shared_contract_refs5/5。同队列SP缺口也已补审。36登记项所有已执行候选臂的逐属性审查映射均已补齐（未执行项不虚构审查）；其他基线臂并非517格全部补审。新方向及后续轮次仍待完成。新补的历史审查标注posthoc_scores_exposed，不能冒充盲态验证。审计映射修正见audit-corrections.json：不向未执行的准备计划挂载同ID后续产物审查。
+
+## 第三方向：状态关联探测
+
+relational_probe_memory v1完成10格原题开发：283正常完成0/2→0/2、完整产物0/2→0/2、TF9.7→8.4；全变化正常1/4→1/4、产物均0/4、TF9.75→9.0。开发失败，无验证。生成3笔+开发117笔共$0.201469284，新增未知0。知识源冻结327374b，审查bed4560。最后两份产品审查前意外暴露两臂汇总分数，此偏离与原冻结复算器均保留；数值门槛本身也失败。详见../relational-probe-memory-20261102/RESULT.md。
+
+四个版本分属三个机制方向：无损表示2轮、能力合并1轮、状态关联1轮。尚未满足用户每个获选方向2–5个新机制版本的全部迭代要求，不能把版本计数或负结果当成Goal完成。
+
+补审复算还包括prepare_registry_gaps.py、review_registry_charts.py、review_registry_projects.py、review_registry_math.py。原扩展直接cell-N-review.json映射已修正，优先复用原盲审，不以新事后审查覆盖原判定。

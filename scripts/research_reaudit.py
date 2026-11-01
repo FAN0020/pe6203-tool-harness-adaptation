@@ -117,9 +117,23 @@ def review_index(folder):
                 if props:
                     found[cell] = {"properties": props, "core_pass": all(v == "pass" for v in props.values()),
                                    "review_source": str(p.relative_to(ROOT)), "review_source_sha256": sha(p)}
+    # Some original extension reviews use cell IDs directly and have no map.
+    # Read only the exact derived cohort evidence directory; preserve originals.
+    if not mapping:
+        for base in ["blind-review", "blind-reviews"]:
+            for p in (evidence / base).glob("cell-*-review.json"):
+                d = read(p)
+                cell = d.get("cell", d.get("cell_id"))
+                props = normalized_properties(d)
+                if cell and p.name == cell + "-review.json" and props and cell not in found:
+                    found[cell] = {"properties": props,
+                                   "core_pass": all(v == "pass" for v in props.values()),
+                                   "review_source": str(p.relative_to(ROOT)),
+                                   "review_source_sha256": sha(p)}
     # New supplemental reviews remain separately sourced. Never replace an old
     # property decision or silently turn post-hoc review into blinded validation.
-    supplemental = OUT / "historical-products" / folder.name
+    supplemental_name = "registry-development" if folder == ROOT / "results/raw/extensions/magicui-log-dashboard-v1/development" else folder.name
+    supplemental = OUT / "historical-products" / supplemental_name
     for p in (supplemental / "reviews").glob("*.json"):
         d = read(p)
         rid = d["cell_id"]
