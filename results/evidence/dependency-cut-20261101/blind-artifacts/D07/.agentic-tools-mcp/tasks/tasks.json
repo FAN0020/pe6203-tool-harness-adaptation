@@ -1,0 +1,1074 @@
+{
+  "projects": [
+    {
+      "id": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "name": "Analytics Dashboard Platform",
+      "description": "Build an analytics dashboard platform that unifies three data domains: (1) customer data processing from CSV file uploads, (2) application log analysis for operational and behavioral insight, and (3) a reusable visualization component layer that renders metrics from both sources. Delivery is structured as sequential milestones so that data contracts are settled before ingestion, ingestion before analysis, and analysis before visualization. All work is decomposed into tasks sized at complexity 5 or below to keep each unit independently executable and reviewable.\n\nTags: analytics, dashboard, data-processing, csv, log-analysis, visualization",
+      "createdAt": "2026-11-01T09:15:07.379Z",
+      "updatedAt": "2026-11-01T09:15:07.379Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "ab81cc79-1102-49cb-8a26-ff3c176275f1",
+      "name": "M1 — Discovery, Scope &amp; Data Contracts",
+      "details": "MILESTONE (container — decomposed into leaf tasks; this row tracks aggregate progress only).\n\nGoal: settle the unknowns that would otherwise force rework in ingestion, analysis, and visualization. This milestone produces three artifacts that everything downstream depends on: a scoped metric catalogue, a versioned schema contract for customer CSV data, and a versioned schema contract for application log records.\n\nExit criteria: metric catalogue reviewed and signed off; both schema contracts committed to the repo with sample fixtures; no open questions about field semantics, units, or timezone handling.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:18.915Z",
+      "updatedAt": "2026-11-01T09:15:18.915Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 7,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "discovery"
+      ],
+      "estimatedHours": 30,
+      "level": 0
+    },
+    {
+      "id": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "name": "M2 — Customer CSV Ingestion Pipeline",
+      "details": "MILESTONE (container — decomposed into leaf tasks; this row tracks aggregate progress only).\n\nGoal: turn arbitrary customer CSV uploads into validated, typed, deduplicated records persisted in a queryable store, with a dead-letter path for rejected rows and observable run metadata.\n\nExit criteria: a CSV upload flows end-to-end through validation into the warehouse; row-level rejects land in a quarantine table with a reason code; an ingestion run is re-runnable idempotently; reconciliation count report matches source row count.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:18.919Z",
+      "updatedAt": "2026-11-01T09:15:27.351Z",
+      "dependsOn": [
+        "ab81cc79-1102-49cb-8a26-ff3c176275f1"
+      ],
+      "priority": 9,
+      "complexity": 7,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "csv",
+        "ingestion"
+      ],
+      "estimatedHours": 80,
+      "level": 0
+    },
+    {
+      "id": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "name": "M3 — Application Log Analysis Pipeline",
+      "details": "MILESTONE (container — decomposed into leaf tasks; this row tracks aggregate progress only).\n\nGoal: parse raw application logs into structured events, derive session and error signals, and materialise the aggregate metrics the dashboard will chart.\n\nExit criteria: log lines parse into structured events with a documented failure rate; hourly aggregates for traffic, error rate, and latency percentiles are queryable; a backfill over retained history completes without manual intervention.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:18.921Z",
+      "updatedAt": "2026-11-01T09:15:27.353Z",
+      "dependsOn": [
+        "ab81cc79-1102-49cb-8a26-ff3c176275f1"
+      ],
+      "priority": 9,
+      "complexity": 7,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "log-analysis",
+        "metrics"
+      ],
+      "estimatedHours": 80,
+      "level": 0
+    },
+    {
+      "id": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "name": "M4 — Visualization Component Library",
+      "details": "MILESTONE (container — decomposed into leaf tasks; this row tracks aggregate progress only).\n\nGoal: deliver a small, reusable set of chart and layout components with a documented props contract, built against fixture data so it does not block on pipeline readiness.\n\nExit criteria: each component renders correctly in a component explorer with loading, empty, and error states; accessibility checks pass for keyboard navigation and color contrast; a shared formatting layer handles numbers, currency, and timestamps consistently.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:18.923Z",
+      "updatedAt": "2026-11-01T09:15:27.355Z",
+      "dependsOn": [
+        "ab81cc79-1102-49cb-8a26-ff3c176275f1"
+      ],
+      "priority": 8,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "visualization",
+        "frontend"
+      ],
+      "estimatedHours": 70,
+      "level": 0
+    },
+    {
+      "id": "e5bbe72a-1b5b-4380-bb66-d9b6750ad480",
+      "name": "M5 — Dashboard Assembly &amp; Integration",
+      "details": "MILESTONE (container — decomposed into leaf tasks; this row tracks aggregate progress only).\n\nGoal: compose the component library onto real pipeline output behind a query API, producing the actual dashboard screens with filters, drill-downs, and saved views.\n\nExit criteria: every catalogued metric is rendered from live data end-to-end; global date-range and segment filters propagate to all panels; p95 dashboard load is within the agreed budget.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:18.925Z",
+      "updatedAt": "2026-11-01T09:15:27.357Z",
+      "dependsOn": [
+        "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+        "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+        "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66"
+      ],
+      "priority": 8,
+      "complexity": 7,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "integration",
+        "dashboard"
+      ],
+      "estimatedHours": 70,
+      "level": 0
+    },
+    {
+      "id": "8f6605ef-535e-4273-9337-60405cd6bc7d",
+      "name": "M6 — Hardening, Testing &amp; Release Readiness",
+      "details": "MILESTONE (container — decomposed into leaf tasks; this row tracks aggregate progress only).\n\nGoal: prove the platform is correct and operable before it becomes a dependency for stakeholders: automated tests, data-quality alarms, access control, runbook, and staged rollout.\n\nExit criteria: CI runs the full test suite green; data-quality alarms fire on seeded anomalies; a stakeholder has walked through the runbook and restored from a backup in a drill; dashboard is live for the pilot group.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:18.927Z",
+      "updatedAt": "2026-11-01T09:15:27.359Z",
+      "dependsOn": [
+        "e5bbe72a-1b5b-4380-bb66-d9b6750ad480"
+      ],
+      "priority": 7,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "testing",
+        "release"
+      ],
+      "estimatedHours": 60,
+      "level": 0
+    },
+    {
+      "id": "69a462fc-0d9e-4bcf-8efd-015cf6495fbf",
+      "name": "M1.1 Run stakeholder interviews and capture metric request log",
+      "details": "Interview the 3-5 named dashboard consumers (sales ops, support lead, engineering on-call) using a fixed question set: what decision does each chart drive, what time granularity is needed, what would make the number untrustworthy.\n\nDeliverable: a single request-log spreadsheet with one row per requested metric, its requester, the decision it supports, and priority.\n\nAcceptance: every request has a named owner and a stated decision; no metric accepted without both. Open questions captured explicitly rather than resolved by assumption.\n\nOut of scope: choosing chart types or writing SQL.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "ab81cc79-1102-49cb-8a26-ff3c176275f1",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:36.874Z",
+      "updatedAt": "2026-11-01T09:15:36.874Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 2,
+      "status": "pending",
+      "tags": [
+        "discovery",
+        "requirements"
+      ],
+      "estimatedHours": 3,
+      "level": 1
+    },
+    {
+      "id": "44aca87a-2930-4602-8f51-cf12c1cd4e69",
+      "name": "M1.2 Draft v1 metric catalogue with explicit definitions and formulas",
+      "details": "Convert the request log into a metric catalogue. For each metric record: business definition in one sentence, exact computation formula, source (customer CSV or logs), grain (per-customer / per-hour / per-request), unit, and known edge cases.\n\nDeliverable: `metrics/catalogue-v1.md` plus a machine-readable companion file for later use by the query API.\n\nAcceptance: an engineer who has never seen the project could implement any metric from the catalogue alone; every metric traces back to a request-log row; anything deferred is listed in an explicit \"not in v1\" section.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "ab81cc79-1102-49cb-8a26-ff3c176275f1",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:36.877Z",
+      "updatedAt": "2026-11-01T09:15:36.877Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "discovery",
+        "metrics"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "f8e7d766-6117-43d2-94ea-56b78984eedb",
+      "name": "M1.3 Define customer CSV schema contract v1",
+      "details": "Specify the accepted customer CSV shape as a versioned contract: required vs optional columns, types, nullable rules, allowed enums, max lengths, date format, encoding, and the primary key that identifies a customer across files.\n\nDeliverable: `contracts/customer-csv-v1.json` (schema) + `contracts/customer-csv-v1.md` (human notes), plus 3 sample files: valid, partially invalid, and malformed-header.\n\nAcceptance: contract names a canonical customer identity key and states how conflicting duplicate rows are resolved; every column has type and nullability declared; sample files exercise each documented failure mode.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "ab81cc79-1102-49cb-8a26-ff3c176275f1",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:36.878Z",
+      "updatedAt": "2026-11-01T09:15:36.878Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "discovery",
+        "csv",
+        "contract"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "0037af4c-1dae-4895-9e28-70c66da46e32",
+      "name": "M1.4 Define application log schema contract v1",
+      "details": "Document the log record shape as a versioned contract: timestamp format and timezone, severity levels, required fields (request id, service, route, status, duration), message body rules, and how unknown/extra fields are handled.\n\nDeliverable: `contracts/app-log-v1.json` + `contracts/app-log-v1.md`, plus a 200-line sample log excerpt covering at least one multiline stack trace.\n\nAcceptance: every field used by the metric catalogue exists in the contract; a documented policy states whether unparseable lines are dropped, quarantined, or guessed; timezone normalisation to UTC is explicit.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "ab81cc79-1102-49cb-8a26-ff3c176275f1",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:36.880Z",
+      "updatedAt": "2026-11-01T09:15:36.880Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "discovery",
+        "log-analysis",
+        "contract"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "ffb683e9-ed4a-475f-91b2-d1350165c12c",
+      "name": "M1.5 Set data governance rules: PII classification, retention, units",
+      "details": "For every field in both contracts, classify as public / internal / PII, and record the required handling (mask, hash, exclude). Set retention windows for raw CSVs, raw logs, and aggregates. Fix canonical units and currency handling.\n\nDeliverable: a classification table appended to each contract doc, plus a one-page governance note.\n\nAcceptance: no field left unclassified; PII fields have a named masking strategy that a developer can implement without asking follow-up questions; retention windows are concrete durations, not \"as needed\".",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "ab81cc79-1102-49cb-8a26-ff3c176275f1",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:36.882Z",
+      "updatedAt": "2026-11-01T09:15:36.882Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "discovery",
+        "governance",
+        "pii",
+        "security"
+      ],
+      "estimatedHours": 3,
+      "level": 1
+    },
+    {
+      "id": "31e8e6ad-9583-4206-9e88-d2c44087bf02",
+      "name": "M1.6 Build shared fixture corpus for both data sources",
+      "details": "Consolidate the sample CSVs and log excerpts from M1.3/M1.4 into one checked-in fixture directory with a documented expected-output file per fixture, so pipeline and UI work can proceed without production data.\n\nDeliverable: `fixtures/` directory with a README, ~6 CSV fixtures (clean, duplicates, bad types, missing columns, BOM/UTF-8 edge case, empty), ~4 log fixtures, and `expected/` snapshots.\n\nAcceptance: fixtures contain no real customer PII (synthetic or anonymised); each fixture has exactly one clear purpose; downstream tasks can run against fixtures offline.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "ab81cc79-1102-49cb-8a26-ff3c176275f1",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:36.883Z",
+      "updatedAt": "2026-11-01T09:15:36.883Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "discovery",
+        "fixtures",
+        "testing"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "d0410c3a-660e-40de-a3cc-9f21e842e6e6",
+      "name": "M1.7 Contract sign-off review with downstream consumers",
+      "details": "Run a single 60-minute review with the owners of M2, M3, and M4. Walk both contracts and the metric catalogue field by field; log every objection as either a change or an accepted risk with an owner.\n\nDeliverable: review notes, resulting contract edits applied, and a recorded sign-off (commit message or signed doc) referencing the contract versions used downstream.\n\nAcceptance: M2, M3 and M4 owners each explicitly confirm they can build against these versions; zero unresolved blocking questions remain; any deferral is written down with a date.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "ab81cc79-1102-49cb-8a26-ff3c176275f1",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:47.240Z",
+      "updatedAt": "2026-11-01T09:15:47.240Z",
+      "dependsOn": [
+        "44aca87a-2930-4602-8f51-cf12c1cd4e69",
+        "f8e7d766-6117-43d2-94ea-56b78984eedb",
+        "0037af4c-1dae-4895-9e28-70c66da46e32",
+        "ffb683e9-ed4a-475f-91b2-d1350165c12c",
+        "31e8e6ad-9583-4206-9e88-d2c44087bf02"
+      ],
+      "priority": 10,
+      "complexity": 2,
+      "status": "pending",
+      "tags": [
+        "discovery",
+        "review",
+        "sign-off"
+      ],
+      "estimatedHours": 2,
+      "level": 1
+    },
+    {
+      "id": "16bcd460-bc20-4cd9-839a-04eb680982af",
+      "name": "M2.1 Scaffold ingestion service with config and secret loading",
+      "details": "Create the service skeleton: package layout, entrypoint, dependency manifest, structured logging setup, and a config loader that reads connection strings from environment/secret manager (never from committed files).\n\nDeliverable: runnable `ingest` service with `--dry-run` that prints resolved non-secret config and exits 0; `.env.example`; README section.\n\nAcceptance: service starts locally against a docker-compose database; a missing required config key fails fast with a clear message; no secret is logged or committed.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:47.244Z",
+      "updatedAt": "2026-11-01T09:15:47.244Z",
+      "dependsOn": [
+        "ab81cc79-1102-49cb-8a26-ff3c176275f1"
+      ],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "scaffolding"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "4cde5a17-05d1-4ba8-a82d-207f015220ff",
+      "name": "M2.2 Build streaming CSV reader with encoding and delimiter detection",
+      "details": "Implement a reader that streams rows without loading the whole file, detects/skips BOM, honours UTF-8 and Latin-1 fallback, detects delimiter and quote character from a sample, and enforces a max row/column-count guard.\n\nDeliverable: `csv_reader` module plus a standalone CLI that prints the detected dialect and first 10 parsed rows for a given file.\n\nAcceptance: passes against the clean, BOM, and semicolon-delimited fixtures from M1.6; memory stays flat on a 1M-row generated file; detection result is logged once per file.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:47.246Z",
+      "updatedAt": "2026-11-01T09:15:47.246Z",
+      "dependsOn": [
+        "a257bdc7-14db-4746-80bf-09bf54ade3ad"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "parsing"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "14d2b966-ba5c-4728-9055-5983e922399a",
+      "name": "M2.3 Implement schema validation with per-row reason codes",
+      "details": "Validate each row against `contracts/customer-csv-v1.json`, collecting all violations per row (not just the first). Emit a stable machine-readable reason code per violation type (e.g. `MISSING_REQUIRED`, `BAD_DATE`, `ENUM_OUT_OF_RANGE`).\n\nDeliverable: `validate.py` module with a reason-code enum and a table mapping code → human message.\n\nAcceptance: returns a structured result of {valid_rows, invalid_rows[{row_number, code, field, raw_value}]}; header-level failures abort the file with a distinct error class; unit tests cover every reason code.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:47.248Z",
+      "updatedAt": "2026-11-01T09:15:47.248Z",
+      "dependsOn": [
+        "f8e7d766-6117-43d2-94ea-56b78984eedb",
+        "69a462fc-0d9e-4bcf-8efd-015cf6495fbf"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "validation"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "95fd7253-b626-4865-a1d7-492453c38c3d",
+      "name": "M2.4 Implement normalisation and type-casting layer",
+      "details": "Write one small function per field group: dates to ISO-8601 UTC, currency strings to integer minor units plus currency code, phone numbers to E.164 with country hint, names trimmed/case-folded, booleans from a documented truthy set, plus PII masking per M1.5.\n\nDeliverable: `normalise.py` with a per-field dispatch table documented in the README.\n\nAcceptance: each caster is pure and unit-tested with at least 3 positive and 3 negative cases; unparseable values raise a typed error that validation maps to a reason code; no silent data loss.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:47.250Z",
+      "updatedAt": "2026-11-01T09:15:47.250Z",
+      "dependsOn": [
+        "ffb683e9-ed4a-475f-91b2-d1350165c12c"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "normalisation"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "e0d0e5b2-d4bb-4b55-b34a-7c406e393ce9",
+      "name": "M2.5 Implement deduplication and upsert keyed on customer identity",
+      "details": "Implement the merge rule declared in the CSV contract: group rows by canonical customer key, pick the winning record by documented precedence (e.g. latest source timestamp, then highest completeness), and upsert into the customer table.\n\nDeliverable: `merge.py` with an explicit precedence function and a `--dry-run` mode that reports would-be inserts/updates/conflicts.\n\nAcceptance: duplicate fixture collapses to the expected record set; re-running the same file produces zero changes (idempotent); conflict resolution is covered by a table-driven test.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:47.252Z",
+      "updatedAt": "2026-11-01T09:15:47.252Z",
+      "dependsOn": [
+        "f8e7d766-6117-43d2-94ea-56b78984eedb"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "dedupe"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "0a354281-9264-4414-a608-4fdd1837922d",
+      "name": "M2.6 Create warehouse staging and merged customer tables with migrations",
+      "details": "Write the migration that creates `stg_customer` (raw, all-text landing), `dim_customer` (typed, deduplicated, current state), and `customer_history` (SCD-2 style previous values) with keys and indexes.\n\nDeliverable: numbered, reversible migration files plus a schema diagram in the repo.\n\nAcceptance: migrations apply cleanly to an empty database and roll back without data loss on empty tables; unique constraint on the customer identity key is enforced; `dim_customer` has indexes supporting the metrics the catalogue needs.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:58.475Z",
+      "updatedAt": "2026-11-01T09:15:58.475Z",
+      "dependsOn": [
+        "f8e7d766-6117-43d2-94ea-56b78984eedb"
+      ],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "database"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "1d251adf-c798-4e24-a480-9a66af1ee10f",
+      "name": "M2.7 Build quarantine table and row-replay command",
+      "details": "Persist every rejected row to `quarantine_customer_row` with source file, row number, reason code, raw payload, and ingest run id. Add a CLI `replay --run-id` that re-validates quarantined rows after a fix and routes successes into the normal path.\n\nDeliverable: quarantine migration + `replay` CLI subcommand.\n\nAcceptance: no rejected row is silently dropped; replay is idempotent and marks replayed rows as resolved rather than deleting them; counts before/after replay are printed.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:58.479Z",
+      "updatedAt": "2026-11-01T09:15:58.479Z",
+      "dependsOn": [
+        "14d2b966-ba5c-4728-9055-5983e922399a",
+        "e0d0e5b2-d4bb-4b55-b34a-7c406e393ce9"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "dead-letter",
+        "recovery"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "ad1f539c-f36b-4eee-90fb-1774caf5d4f5",
+      "name": "M2.8 Add ingestion run metadata and reconciliation count report",
+      "details": "Record one `ingest_run` row per execution: file hash, byte size, started/finished timestamps, rows read/valid/rejected/inserted/updated/unchanged, duration, and status. Emit a reconciliation report asserting read_count == valid + rejected and valid == inserted + updated + unchanged.\n\nDeliverable: `ingest_run` migration, run-summary writer, and a `report --run-id` CLI that prints the reconciliation table.\n\nAcceptance: report fails loudly (non-zero exit) if the reconciliation identity does not hold; every run is attributable to a file hash; summary is written even when the run aborts.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:58.482Z",
+      "updatedAt": "2026-11-01T09:15:58.482Z",
+      "dependsOn": [
+        "e0d0e5b2-d4bb-4b55-b34a-7c406e393ce9"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "observability"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "31f32812-d3d7-4d86-aca0-aba5d07df0bf",
+      "name": "M2.9 Wire upload trigger and file-level idempotency guard",
+      "details": "Connect the pieces into one `ingest file.csv` entrypoint: hash the file, skip if hash already processed successfully (unless `--force`), then read → validate → normalise → merge → persist, with a batch size and checkpoint per chunk.\n\nDeliverable: single orchestration function plus CLI, covered by a flow test.\n\nAcceptance: uploading the same file twice writes once and the second run reports `skipped_duplicate_hash`; a crashed mid-run leaves no partial committed batch; `--force` documented as the override.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:58.485Z",
+      "updatedAt": "2026-11-01T09:16:41.079Z",
+      "dependsOn": [
+        "16bcd460-bc20-4cd9-839a-04eb680982af",
+        "4cde5a17-05d1-4ba8-a82d-207f015220ff",
+        "14d2b966-ba5c-4728-9055-5983e922399a",
+        "95fd7253-b626-4865-a1d7-492453c38c3d",
+        "e0d0e5b2-d4bb-4b55-b34a-7c406e393ce9",
+        "0a354281-9264-4414-a608-4fdd1837922d"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "orchestration",
+        "idempotency"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "79a3b644-e1e2-4166-a752-d7ab00ff3268",
+      "name": "M2.10 Write ingestion unit and integration tests against the fixture corpus",
+      "details": "Test each module in isolation (reader, validator, normaliser, merge) plus one end-to-end test that runs the clean fixture into a throwaway database and diffs against `fixtures/expected/`.\n\nDeliverable: test suite wired to `pytest`/equivalent with a coverage report artefact.\n\nAcceptance: suite runs green in CI in under 2 minutes; end-to-end diff covers all expected columns; a deliberately broken fixture is asserted to fail with the specific expected reason code.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:58.486Z",
+      "updatedAt": "2026-11-01T09:15:58.486Z",
+      "dependsOn": [
+        "31e8e6ad-9583-4206-9e88-d2c44087bf02",
+        "d0410c3a-660e-40de-a3cc-9f21e842e6e6"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "testing"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "93616344-76b2-4df6-a55e-51d9c256d81a",
+      "name": "M2.11 Write ingestion operator docs and troubleshooting runbook",
+      "details": "Document how to run an ingestion manually, how to read the reconciliation report, what each reason code means and how to fix the source file, and how to replay quarantined rows. Include the three most likely failure modes with concrete recovery steps.\n\nDeliverable: `docs/ingestion-runbook.md` linked from the project README.\n\nAcceptance: a teammate who did not write the code completes a manual ingestion and a replay using only the runbook (verified in a 15-minute dry walkthrough); every reason code in the enum appears in the doc.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "a257bdc7-14db-4746-80bf-09bf54ade3ad",
+      "completed": false,
+      "createdAt": "2026-11-01T09:15:58.488Z",
+      "updatedAt": "2026-11-01T09:15:58.488Z",
+      "dependsOn": [
+        "14d2b966-ba5c-4728-9055-5983e922399a"
+      ],
+      "priority": 6,
+      "complexity": 2,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion",
+        "documentation"
+      ],
+      "estimatedHours": 3,
+      "level": 1
+    },
+    {
+      "id": "1fa62d84-e143-45a4-b702-da05291583fa",
+      "name": "M3.1 Inventory log sources and collect representative samples",
+      "details": "List every service producing logs, where logs land (file, stdout, aggregator), retention available for backfill, and rough daily volume. Pull a representative 24-hour sample per service.\n\nDeliverable: `docs/log-source-inventory.md` table (service, path/stream, format, volume/day, retention) plus raw samples stored outside the repo if they contain PII.\n\nAcceptance: every service emitting request logs is accounted for; volume figures are measured, not guessed; any service whose logs cannot be backfilled is flagged explicitly as a v1 limitation.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:08.335Z",
+      "updatedAt": "2026-11-01T09:16:08.335Z",
+      "dependsOn": [
+        "d0410c3a-660e-40de-a3cc-9f21e842e6e6"
+      ],
+      "priority": 9,
+      "complexity": 2,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "discovery"
+      ],
+      "estimatedHours": 3,
+      "level": 1
+    },
+    {
+      "id": "48a0e975-7bf9-46b9-b41b-326ceab09641",
+      "name": "M3.2 Define log event taxonomy and field mapping table",
+      "details": "Map each source's raw fields onto the canonical log event defined in `contracts/app-log-v1.json`. Define the small closed set of event types we care about (http_request, db_query, exception, job_run, auth) and which fields each requires.\n\nDeliverable: `docs/log-event-taxonomy.md` with a per-source mapping table and a list of fields deliberately ignored.\n\nAcceptance: every field the metric catalogue needs appears in at least one mapping; unmapped source fields are listed with a reason; no event type is defined without a named consumer.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:08.339Z",
+      "updatedAt": "2026-11-01T09:16:08.339Z",
+      "dependsOn": [
+        "0037af4c-1dae-4895-9e28-70c66da46e32",
+        "44aca87a-2930-4602-8f51-cf12c1cd4e69"
+      ],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "schema"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "1bd431c2-5983-4ee4-80ca-b74f25bd0e06",
+      "name": "M3.3 Implement log line parser with JSON-first and regex fallback",
+      "details": "Write a parser that first attempts JSON decoding, then falls back to a per-source regex when the line is plaintext. Produce a canonical event object or a typed parse error — never a partial guess.\n\nDeliverable: `log_parser.py` with one named regex per known format plus a parser registry.\n\nAcceptance: parses all sample lines from M3.1 within the documented success target; each parser has an explicit version tag; a line matching no parser produces a typed error, not an exception that kills the batch.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:08.342Z",
+      "updatedAt": "2026-11-01T09:16:08.342Z",
+      "dependsOn": [
+        "0037af4c-1dae-4895-9e28-70c66da46e32",
+        "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "parsing"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "8277751e-5b71-4423-979e-179c238ecdfb",
+      "name": "M3.4 Handle multiline stack traces and out-of-order log lines",
+      "details": "Group continuation lines (indented, `at ...`, `Caused by:`) onto their parent record; buffer and re-sort records by timestamp within a bounded window so slightly out-of-order lines are correctly sequenced before aggregation.\n\nDeliverable: `line_assembler.py` with a bounded reorder buffer and an explicit rule for lines that never find a parent.\n\nAcceptance: multiline fixture yields exactly one event with the full trace attached; reordering is verified by feeding a shuffled fixture; buffer memory is bounded and the bound is configurable and documented.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:08.344Z",
+      "updatedAt": "2026-11-01T09:16:08.344Z",
+      "dependsOn": [
+        "31e8e6ad-9583-4206-9e88-d2c44087bf02"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "parsing",
+        "streaming"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "ac557758-1f3e-40da-8ddc-25da2d8e3560",
+      "name": "M3.5 Persist unparseable lines and emit a parse-rate metric",
+      "details": "Write unparseable lines to `quarantine_log_line` with source, offset, raw text and failure reason. Emit `parse_success_rate` per source per hour into the metrics store.\n\nDeliverable: quarantine migration, writer, and the parse-rate metric definition wired to the aggregate job.\n\nAcceptance: zero silently dropped lines (in = parsed + quarantined, asserted each batch); parse rate is queryable by source and hour; a seeded malformed batch shows a visible dip in the metric.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:08.345Z",
+      "updatedAt": "2026-11-01T09:16:08.345Z",
+      "dependsOn": [
+        "1d251adf-c798-4e24-a480-9a66af1ee10f",
+        "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "observability",
+        "dead-letter"
+      ],
+      "estimatedHours": 3,
+      "level": 1
+    },
+    {
+      "id": "a3c7450b-f8b1-4707-9f7a-45b8cd116d2d",
+      "name": "M3.6 Derive sessionization and request correlation identifiers",
+      "details": "Build session boundaries from request/user identifiers using the documented inactivity threshold, and stitch multi-service request flows together via correlation/request id so a trace can be followed across services.\n\nDeliverable: `sessionize.py` producing `session_id`, `session_seq`, and `correlation_id` on each event, with the threshold configurable.\n\nAcceptance: a synthetic 3-service request produces exactly one correlation group; sessions split correctly at the threshold boundary (tested at T-1s and T+1s); events lacking identifiers are handled by a documented fallback, not dropped.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:16.192Z",
+      "updatedAt": "2026-11-01T09:16:16.192Z",
+      "dependsOn": [
+        "1bd431c2-5983-4ee4-80ca-b74f25bd0e06",
+        "8277751e-5b71-4423-979e-179c238ecdfb"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "sessionization"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "94d120a2-1947-434d-97b1-568619775f6d",
+      "name": "M3.7 Build hourly aggregate tables for traffic, errors, and latency",
+      "details": "Materialise `agg_service_hourly` (requests, unique sessions, error count, error rate by status class, p50/p95/p99 latency) and `agg_route_hourly` (same broken down by route, capped to top N routes plus an `other` bucket).\n\nDeliverable: aggregate migration, SQL/job definitions, and a documented percentile method.\n\nAcceptance: aggregates reconcile with a hand-computed count over one fixture hour; percentile method is stated in the docs; re-running an hour is idempotent (delete-and-replace within the hour partition).",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:16.195Z",
+      "updatedAt": "2026-11-01T09:16:16.195Z",
+      "dependsOn": [
+        "1bd431c2-5983-4ee4-80ca-b74f25bd0e06"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "aggregates",
+        "metrics"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "db351a12-e4bb-4354-bd0b-ae98e73156e6",
+      "name": "M3.8 Implement backfill job with checkpointing over retained history",
+      "details": "Add a `backfill --from --to` job that walks retained log history hour by hour, records a checkpoint after each completed hour, resumes from the checkpoint after failure, and reports remaining hours.\n\nDeliverable: backfill runner plus a `backfill_status` table.\n\nAcceptance: killing the job mid-run and restarting resumes at the next incomplete hour with no duplicate aggregates; a 30-day simulated range completes unattended; progress output shows completed/total hours.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:16.198Z",
+      "updatedAt": "2026-11-01T09:16:16.198Z",
+      "dependsOn": [
+        "ac557758-1f3e-40da-8ddc-25da2d8e3560"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "backfill",
+        "reliability"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "e43ec8e6-87ef-4f09-a0e2-52c8bec167b2",
+      "name": "M3.9 Add golden-corpus parser regression tests",
+      "details": "Freeze a set of log lines with their expected canonical event output into a golden corpus; the test asserts exact match, so any parser change that alters behaviour is caught. Include one case per known format plus the multiline and malformed cases.\n\nDeliverable: `tests/golden/logs/` corpus with `--update-golden` workflow documented.\n\nAcceptance: corpus covers every registered parser version; tests fail when a parser's output changes unintentionally; running the suite on the 24-hour sample reports the real parse success rate.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:16.200Z",
+      "updatedAt": "2026-11-01T09:16:16.200Z",
+      "dependsOn": [
+        "1bd431c2-5983-4ee4-80ca-b74f25bd0e06",
+        "8277751e-5b71-4423-979e-179c238ecdfb"
+      ],
+      "priority": 7,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "testing"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "03916847-025f-47f9-85e1-638693d0ef56",
+      "name": "M3.10 Add log data-quality checks for volume and schema drift",
+      "details": "Implement three checks over aggregates: hour-over-hour volume drop beyond a threshold, null/unknown spike in a key field, and appearance of an unrecognised log format. Each check writes a pass/fail row with the observed value.\n\nDeliverable: `checks/log_quality.py` plus a `dq_result` table.\n\nAcceptance: each check both passes on clean fixture data and fails on a deliberately seeded anomaly; thresholds live in config, not hard-coded; results are queryable per hour per check.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "d3da3b6c-e1ce-4bfa-aeb3-00b4dff56fb6",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:16.202Z",
+      "updatedAt": "2026-11-01T09:16:16.202Z",
+      "dependsOn": [
+        "1bd431c2-5983-4ee4-80ca-b74f25bd0e06"
+      ],
+      "priority": 7,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "data-quality"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "29ebcf8c-04d4-403a-93be-5ad72fda2587",
+      "name": "M4.1 Spike charting library choice and define design tokens",
+      "details": "Timeboxed 1-day evaluation of two candidate charting libraries against fixed criteria: bundle size, SVG accessibility, time-series brush support, SSR compatibility, license. Build the same single line chart in both, then pick one.\n\nDeliverable: short decision note with the criteria scores, plus a `tokens.css` file defining colour, spacing, and typography variables.\n\nAcceptance: decision is recorded with the losing option and why; tokens cover series colours for at least 6 categories that remain distinguishable in greyscale; no chart code merged before the decision note exists.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:24.353Z",
+      "updatedAt": "2026-11-01T09:16:24.353Z",
+      "dependsOn": [
+        "d0410c3a-660e-40de-a3cc-9f21e842e6e6"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "spike"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "e6278263-13e3-40e9-b796-218836277a24",
+      "name": "M4.2 Define component API contract and prop typing conventions",
+      "details": "Write the shared contract every chart component must satisfy: a common `Series`/`Datum` shape, required props (`data`, `xKey`, `yKeys`, `loading`, `error`), naming rules, and the rule that components are presentational and never fetch data themselves.\n\nDeliverable: `docs/component-api.md` plus shared TypeScript types in `src/types/chart.ts`.\n\nAcceptance: every planned M4 component can be described using only these types (no bespoke shapes); the data-fetching prohibition is stated explicitly; the contract is reviewed by whoever owns M5 before components are built.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:24.356Z",
+      "updatedAt": "2026-11-01T09:16:24.356Z",
+      "dependsOn": [
+        "44aca87a-2930-4602-8f51-cf12c1cd4e69"
+      ],
+      "priority": 9,
+      "complexity": 2,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "api-design"
+      ],
+      "estimatedHours": 3,
+      "level": 1
+    },
+    {
+      "id": "c24510c6-64ac-49b9-ac10-2e7f0c9d6b6b",
+      "name": "M4.3 Build shared formatting utilities for numbers, currency, percent, and time",
+      "details": "One formatting module: compact numbers (1.2k / 3.4M), fixed-precision percentages, currency from minor units plus code, and timestamps rendered in the viewer's locale but labelled with the canonical timezone.\n\nDeliverable: `format.ts` with a unit test per function.\n\nAcceptance: handles zero, negative, very large, and null inputs without throwing; rounding rules documented; the same value formats identically in tooltip and axis (verified by test).",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:24.358Z",
+      "updatedAt": "2026-11-01T09:16:24.358Z",
+      "dependsOn": [
+        "ffb683e9-ed4a-475f-91b2-d1350165c12c"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "formatting"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "8f3ee7ff-c37f-46d0-8572-adeaa8e938cc",
+      "name": "M4.4 Build ChartShell wrapper handling loading, empty, and error states",
+      "details": "A wrapper providing the card frame, title, subtitle, actions slot, and the three non-happy states. Charts render inside it so state handling is implemented once rather than per chart.\n\nDeliverable: `ChartShell.tsx` plus skeleton, empty, and error subcomponents.\n\nAcceptance: all four states (loading, empty, error, populated) render in the explorer; error state accepts a retry callback; charts built later use the shell by construction, verified by a lint rule or code review checklist.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:24.360Z",
+      "updatedAt": "2026-11-01T09:16:24.360Z",
+      "dependsOn": [
+        "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66"
+      ],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "ux"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "4b0c6c28-12c9-4656-814c-099872c47127",
+      "name": "M4.5 Build the time-series line chart component",
+      "details": "Multi-series line chart with time x-axis, adaptive tick density, shared crosshair tooltip, legend toggle, and an option to render as stacked area for cumulative metrics.\n\nDeliverable: `TimeSeriesChart.tsx` consuming the M4.2 contract and rendering inside `ChartShell`.\n\nAcceptance: renders 1, 6, and 12 series without label overlap at 320px and 1440px widths; tooltip shows formatted values from M4.3; handles gaps (null points) by breaking the line rather than drawing through zero.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:24.362Z",
+      "updatedAt": "2026-11-01T09:16:41.074Z",
+      "dependsOn": [
+        "8f3ee7ff-c37f-46d0-8572-adeaa8e938cc",
+        "e6278263-13e3-40e9-b796-218836277a24",
+        "c24510c6-64ac-49b9-ac10-2e7f0c9d6b6b"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "chart"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "ee94b6e4-c9ab-4c1b-b743-fcc4acdf57be",
+      "name": "M4.6 Build the categorical bar chart component",
+      "details": "Horizontal and vertical bar chart for ranked categories (top routes, plan tiers), with value labels, a max-bar cap plus \"other\" bucket, and support for a single highlight colour to draw attention to one category.\n\nDeliverable: `BarChart.tsx` following the M4.2 contract.\n\nAcceptance: long category labels truncate with a tooltip instead of overflowing; 40 categories render without unreadable density (auto \"other\" bucket verified); negative values render below a zero baseline.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:34.498Z",
+      "updatedAt": "2026-11-01T09:16:34.498Z",
+      "dependsOn": [
+        "8f3ee7ff-c37f-46d0-8572-adeaa8e938cc",
+        "c24510c6-64ac-49b9-ac10-2e7f0c9d6b6b"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "chart"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "c1c119b5-b220-478c-b97c-e8782e1da21c",
+      "name": "M4.7 Build the KPI stat tile component",
+      "details": "Compact tile showing one metric with its value, a comparison against the previous period as an absolute and percentage delta, a directional indicator, and an optional inline sparkline.\n\nDeliverable: `KpiTile.tsx` with sparkline subcomponent.\n\nAcceptance: renders value, delta, and sparkline from fixtures; direction colouring flips for metrics where down is good (e.g. error rate) via a documented `goodDirection` prop; a null previous value renders as \"no comparison\" rather than \"0%\".",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:34.502Z",
+      "updatedAt": "2026-11-01T09:16:34.502Z",
+      "dependsOn": [
+        "c24510c6-64ac-49b9-ac10-2e7f0c9d6b6b"
+      ],
+      "priority": 8,
+      "complexity": 2,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "component"
+      ],
+      "estimatedHours": 3,
+      "level": 1
+    },
+    {
+      "id": "2404e425-06b8-4565-9e5b-78e25f74b380",
+      "name": "M4.8 Build the data table component with sort and pagination",
+      "details": "Sortable, paginated table for drill-down detail rows: column definitions supplied by the caller, numeric/date alignment, sticky header, and a column-visibility toggle for wide tables.\n\nDeliverable: `DataTable.tsx` with a column-definition type.\n\nAcceptance: sorting is stable and correct for numeric and date columns; pagination and page-size changes preserve sort; 500-row fixture renders in under 100ms; empty result shows the shell's empty state.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:34.505Z",
+      "updatedAt": "2026-11-01T09:16:34.505Z",
+      "dependsOn": [
+        "8f3ee7ff-c37f-46d0-8572-adeaa8e938cc",
+        "c24510c6-64ac-49b9-ac10-2e7f0c9d6b6b"
+      ],
+      "priority": 7,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "component"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "87841f40-aedb-407f-a1a9-b8de44db6291",
+      "name": "M4.9 Build the filter bar component for date range and segments",
+      "details": "Presentational filter bar: preset date ranges (7d/30d/90d/custom), a segment/category multi-select, an applied-filters chip list with individual clear, and a reset action. Emits a single change event; it holds no server state.\n\nDeliverable: `FilterBar.tsx` with a `FilterState` type shared with M5.\n\nAcceptance: presets correctly compute inclusive date boundaries across month ends; chips reflect active filters and clear individually; component is fully controllable (state passed in, change emitted up).",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:34.507Z",
+      "updatedAt": "2026-11-01T09:16:34.507Z",
+      "dependsOn": [
+        "c24510c6-64ac-49b9-ac10-2e7f0c9d6b6b"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "filters"
+      ],
+      "estimatedHours": 5,
+      "level": 1
+    },
+    {
+      "id": "0f194193-ae32-4b1d-87b5-5c29a00d546f",
+      "name": "M4.10 Accessibility pass on the component library",
+      "details": "Run automated axe checks plus a manual keyboard pass on every component: visible focus rings, ARIA roles and labels on charts, screen-reader text alternative summarising the data, and a colour-contrast audit of series colours.\n\nDeliverable: a11y findings list with fixes applied, plus an accessibility section in the component docs.\n\nAcceptance: zero critical axe violations; every chart reachable and operable by keyboard; each chart exposes a text summary of its data; contrast meets WCAG AA for text and ≥3:1 for graphical elements.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:34.510Z",
+      "updatedAt": "2026-11-01T09:16:34.510Z",
+      "dependsOn": [
+        "4b0c6c28-12c9-4656-814c-099872c47127"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "accessibility"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "81d10cb5-73a1-43eb-b583-8bb533c30428",
+      "name": "M4.11 Add component explorer stories and visual snapshot baselines",
+      "details": "One story per component covering each state (loading, empty, error, populated, extreme data), with fixture data from M1.6. Capture visual snapshot baselines so unintended rendering changes fail CI.\n\nDeliverable: stories directory plus committed snapshot baselines and a `--update-snapshots` instruction.\n\nAcceptance: every component and every state has a story; snapshots pass deterministically in CI (font-loaded and timezone-pinned); adding a new component without a story fails a lint/CI check.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "7a56dc2e-f02f-42d7-b83b-9cc3ff627e66",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:34.511Z",
+      "updatedAt": "2026-11-01T09:16:34.511Z",
+      "dependsOn": [
+        "31e8e6ad-9583-4206-9e88-d2c44087bf02",
+        "8f3ee7ff-c37f-46d0-8572-adeaa8e938cc"
+      ],
+      "priority": 7,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "testing"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    },
+    {
+      "id": "b7ab7fe9-9f0f-43ed-8c19-932adc9b5597",
+      "name": "M5.1 Define the metrics query API contract",
+      "details": "Specify the HTTP surface the dashboard consumes: one endpoint per metric family, request params (`from`, `to`, `granularity`, `segment[]`), response envelope matching the M4.2 chart data shape, error format, and pagination for detail rows.\n\nDeliverable: OpenAPI spec at `api/analytics-v1.yaml` plus a typed client stub.\n\nAcceptance: every metric in the catalogue maps to exactly one endpoint and parameter set; response shape conforms to the chart types with no client-side reshaping required; spec lints clean and generates a compiling client.",
+      "projectId": "6db221e5-65e4-4bad-8fcd-f1c6a4778d2d",
+      "parentId": "e5bbe72a-1b5b-4380-bb66-d9b6750ad480",
+      "completed": false,
+      "createdAt": "2026-11-01T09:16:41.082Z",
+      "updatedAt": "2026-11-01T09:16:41.082Z",
+      "dependsOn": [
+        "44aca87a-2930-4602-8f51-cf12c1cd4e69",
+        "e6278263-13e3-40e9-b796-218836277a24"
+      ],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "integration",
+        "api",
+        "contract"
+      ],
+      "estimatedHours": 4,
+      "level": 1
+    }
+  ],
+  "subtasks": [],
+  "migration": {
+    "version": "1.8.1"
+  }
+}
