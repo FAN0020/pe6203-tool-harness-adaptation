@@ -47,6 +47,8 @@ VARIANTS = (
     "ready_link",
     "reviewed_coverage",
     "evidence_dispatch",
+    "instruction_scope",
+    "instruction_scope_quote",
 )
 
 SUFFICIENCY_RULE = (
@@ -673,6 +675,21 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy in ("instruction_scope", "instruction_scope_quote"):
+        from .instruction_scope import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(
+            base, target, context.get("feedback", []), strategy == "instruction_scope_quote"
+        )
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "certificate": "exact source-reviewed contract and section decomposition",
+            "runtime": "unchanged; descriptions only; all tool/schema/routing fields retained",
+            "edits": len(changes),
+        }}
         return result
     if strategy == "evidence_dispatch":
         from .evidence_dispatch import compile_knowledge
