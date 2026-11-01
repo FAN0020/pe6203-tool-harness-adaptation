@@ -1,0 +1,654 @@
+{
+  "schema_version": "experiment-1",
+  "kind": "research_development",
+  "variant": "released_servers",
+  "created_at": "2026-11-01T12:14:14.867675+00:00",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "dataset_revision": "162e3ffbea1717ac8a20fe9b26465e29117229e4",
+  "cells": [
+    {
+      "id": "cell-001",
+      "task_id": 133,
+      "version": "late",
+      "strategy": "reviewed_coverage",
+      "seed": 0
+    },
+    {
+      "id": "cell-002",
+      "task_id": 235,
+      "version": "late",
+      "strategy": "selective_patch",
+      "seed": 0
+    },
+    {
+      "id": "cell-003",
+      "task_id": 133,
+      "version": "late",
+      "strategy": "selective_patch",
+      "seed": 0
+    },
+    {
+      "id": "cell-004",
+      "task_id": 235,
+      "version": "late",
+      "strategy": "reviewed_coverage",
+      "seed": 0
+    },
+    {
+      "id": "cell-005",
+      "task_id": 283,
+      "version": "late",
+      "strategy": "selective_patch",
+      "seed": 0
+    },
+    {
+      "id": "cell-006",
+      "task_id": 283,
+      "version": "late",
+      "strategy": "reviewed_coverage",
+      "seed": 0
+    },
+    {
+      "id": "cell-007",
+      "task_id": 283,
+      "version": "middle",
+      "strategy": "reviewed_coverage",
+      "seed": 0
+    },
+    {
+      "id": "cell-008",
+      "task_id": 133,
+      "version": "middle",
+      "strategy": "selective_patch",
+      "seed": 0
+    },
+    {
+      "id": "cell-009",
+      "task_id": 283,
+      "version": "middle",
+      "strategy": "selective_patch",
+      "seed": 0
+    },
+    {
+      "id": "cell-010",
+      "task_id": 133,
+      "version": "middle",
+      "strategy": "reviewed_coverage",
+      "seed": 0
+    }
+  ],
+  "tasks": [
+    {
+      "idx": 133,
+      "question": "How can I ensure secure mathematical operations in my Python codebase by validating expressions and getting security recommendations following OWASP guidelines?",
+      "servers": {
+        "math-mcp": [
+          "validate_syntax",
+          "evaluate"
+        ],
+        "mcp-ai-agent-guidelines": [
+          "security-hardening-prompt-builder"
+        ]
+      }
+    },
+    {
+      "idx": 283,
+      "question": "I need to launch a new analytics dashboard project that includes data processing from our customer CSV files, log analysis from our application logs, and visualization components. Can you help me structure the major milestones and break them down into manageable tasks, making sure we don't have any tasks that are too complex to execute?",
+      "servers": {
+        "@modelcontextprotocol/server-sequential-thinking": [
+          "sequentialthinking"
+        ],
+        "@pimzino/agentic-tools-mcp": [
+          "create_project",
+          "create_task",
+          "analyze_task_complexity"
+        ]
+      }
+    },
+    {
+      "idx": 235,
+      "question": "I need to create a sales performance dashboard for our Chinese regional teams. First, I want a map showing our 2025 sales distribution across provinces - we have data showing Guangdong had ¥15.8M, Jiangsu ¥12.3M, Zhejiang ¥9.7M, Shandong ¥8.4M, and Beijing ¥7.2M. Then create an area chart showing monthly sales trends from January to December 2025, with values: Jan: 1.2M, Feb: 1.1M, Mar: 1.4M, Apr: 1.6M, May: 1.8M, Jun: 2.1M, Jul: 2.3M, Aug: 2.2M, Sep: 2.5M, Oct: 2.7M, Nov: 3.0M, Dec: 3.5M. Finally, make a column chart comparing our top product categories across regions: Electronics (Guangdong: 6.2M, Jiangsu: 4.8M), Home Appliances (Guangdong: 4.5M, Jiangsu: 3.9M), and Clothing (Guangdong: 5.1M, Jiangsu: 3.6M).",
+      "servers": {
+        "@umengfe/mcp-server-chart": [
+          "generate_district_map",
+          "generate_area_chart",
+          "generate_column_chart"
+        ]
+      }
+    }
+  ],
+  "config": {
+    "agent": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "AGENT_BASE_URL",
+      "api_key_env": "AGENT_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096,
+      "extra_body": {
+        "provider": {
+          "only": [
+            "digitalocean"
+          ],
+          "order": [
+            "digitalocean"
+          ],
+          "allow_fallbacks": false,
+          "require_parameters": true
+        }
+      }
+    },
+    "judge": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "JUDGE_BASE_URL",
+      "api_key_env": "JUDGE_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096,
+      "extra_body": {
+        "reasoning": {
+          "enabled": false
+        },
+        "response_format": {
+          "type": "json_object"
+        },
+        "provider": {
+          "only": [
+            "digitalocean"
+          ],
+          "order": [
+            "digitalocean"
+          ],
+          "allow_fallbacks": false,
+          "require_parameters": true
+        }
+      }
+    },
+    "judge_runs": 5,
+    "max_rounds": 12,
+    "request_timeout_seconds": 120,
+    "run_timeout_seconds": 900,
+    "tool_timeout_seconds": 30,
+    "send_model_seed": false,
+    "tool_name_policy": "namespaced",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    },
+    "judge_recovery": {
+      "max_attempts": 2,
+      "stop_after_transport_failures": 2,
+      "format": "concise-counts-v1"
+    },
+    "spend_guard": {
+      "ledger": "results/raw/reviewed-coverage-dev-costs-20261101/spend-ledger.json",
+      "limit_usd": null,
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "context_tokens": 1048576,
+      "prompt_per_million": "0.3",
+      "completion_per_million": "1.2",
+      "max_completion_tokens": 4096,
+      "provider_route": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "expected_provider": "DigitalOcean"
+    }
+  },
+  "updater": {
+    "model": "deepseek/deepseek-v4.1-flash-1017",
+    "temperature": 0.0,
+    "max_tokens": 16384,
+    "timeout": 120,
+    "api_key_env": "AGENT_API_KEY",
+    "base_url_env": "AGENT_BASE_URL",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    },
+    "extra_body": {
+      "provider": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      }
+    },
+    "spend_guard": {
+      "ledger": "results/raw/reviewed-coverage-updater-costs-20261101/spend-ledger.json",
+      "limit_usd": null,
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "context_tokens": 1048576,
+      "prompt_per_million": "0.3",
+      "completion_per_million": "1.2",
+      "max_completion_tokens": 16384,
+      "provider_route": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "expected_provider": "DigitalOcean"
+    }
+  },
+  "judge_runs": 5,
+  "files": {
+    ".cache/node-runtime/node_modules/node/bin/node": "6f2e835e57feb7a29ffcd53a4d4eb60224ec264a1e002c3ba6d99999ea29807d",
+    "configs/benchmark.lock.json": "41ab8d30c05c341608a817c1fb62dd111f0fc1e928efd3849dfbe87413264151",
+    "configs/server-profiles.json": "ebf06d1fade4be170083a5907f3fce33ce15bb60c8e1266d3bbe14c21f9ad6c8",
+    "integration/baseline_wrapper.py": "43f8e0488d94ee2975393fd7238ab9daafbc4d666eccdf0f37946f3e173f17a4",
+    "integration/baselines.py": "f094b3dd3b24f72e7cb50a6f115102adf27c6c241ae3eb55a5b1db18d095d099",
+    "integration/export_baseline_knowledge.py": "ac1392141adbd6c5228246834c81f0d00987699a0cc14cd74b75c37849d1c5aa",
+    "integration/model_api.py": "dc150b715c7ea505d61950cf99becabcab9235c9c60337f492676ba19cef76f3",
+    "integration/project_paths.py": "a788c980a82ec165f95273cedc87711970136d27d218ff01191cb8831838bc91",
+    "integration/rewrite_constraints.py": "1f1f986c4079562da51604636bffd80113cc277609b242e7080fe36ada69883a",
+    "integration/run_baseline_validation.py": "6bf97d86fd598f10d5e4fd4ef9aa27f69c0b587484b6c934a70f81e47fd8838a",
+    "integration/test_real_baselines.py": "02e7a74e253ddd925b8838307687f871ddafa202d10cc398814caabffae28a89",
+    "pyproject.toml": "d5c9f053533197d841d4fe47262c4393850962df8ab9112cd231fc2ddea7c196",
+    "results/raw/reviewed-coverage-pilot-20261101/catalogs/133/early.json": "bae1080d26a4c1fe8842d564d61f02d355c4b4de0026c632e0ebeaa085160cde",
+    "results/raw/reviewed-coverage-pilot-20261101/catalogs/133/late.json": "40b3677539f855eebe873c05743c376038ded1a0771d79b1ebc9d40f68333528",
+    "results/raw/reviewed-coverage-pilot-20261101/catalogs/133/middle.json": "33463c6f29216058e3b04ef9ee0f314342556ab019de89a23dabf40a945e9eb2",
+    "results/raw/reviewed-coverage-pilot-20261101/catalogs/235/early.json": "a1dd73d217ad9b60f979e6840027b123a26bc66789910ad0e0a421b0c3a12b66",
+    "results/raw/reviewed-coverage-pilot-20261101/catalogs/235/late.json": "f89478d72530ca0ce0204a998330e0d282c56ef64b8d33dbfa1dbc6d6ae2c115",
+    "results/raw/reviewed-coverage-pilot-20261101/catalogs/235/middle.json": "2033c09808b02b8879164eeee1aca52dd4f78f69fb47855906d8c78fb680f967",
+    "results/raw/reviewed-coverage-pilot-20261101/catalogs/283/early.json": "01a0f5df548dd4f903a974c8b775cdfac88e1e92ac5d6b0c7da8bcc6d63d4d1a",
+    "results/raw/reviewed-coverage-pilot-20261101/catalogs/283/late.json": "2c4f8071f19d1af5754f08f14d8485791c52d3b414b5a19a995b754b40a8b865",
+    "results/raw/reviewed-coverage-pilot-20261101/catalogs/283/middle.json": "0cb2c811253421182980bff6f06affbd6a206d9cb7f3d676d8e257db17657cd2",
+    "results/raw/reviewed-coverage-pilot-20261101/diffs/133/late.json": "536b0157a6cd964318c953bc6d78aed891772148a02b1cad5c1e20f4c2957acf",
+    "results/raw/reviewed-coverage-pilot-20261101/diffs/133/middle.json": "5c3d4db67aae43f7d03491846f7b9f02897e521001c2a956fa5a70512f2c6db0",
+    "results/raw/reviewed-coverage-pilot-20261101/diffs/235/late.json": "455a60274cdc43bc4b632679276a6da40071464bf875e4d42ef0e33047046202",
+    "results/raw/reviewed-coverage-pilot-20261101/diffs/235/middle.json": "3e1a32f682d961eb8d1ffb7b40e738b0b4058771f6e9e76f294ce69ec978388d",
+    "results/raw/reviewed-coverage-pilot-20261101/diffs/283/late.json": "06276c664dcacded0489f5a946c90471e334460f985934be1629b1c94fa5caa3",
+    "results/raw/reviewed-coverage-pilot-20261101/diffs/283/middle.json": "f029b79f4361dfc95f23fbb6f140cecf6e6897b434413ad9eafc1052f11515f9",
+    "src/pe6203/__init__.py": "096ac1613471b474c8c0e94fd38eb8d3248ca6a94a9a22b06f7d278f1a006e22",
+    "src/pe6203/audit.py": "030c6afd481d96b9a75b21cfa9ecd99420dabd69dfe313dec92a2c17541bc397",
+    "src/pe6203/baselines.py": "a72d1423ba18f1e73d896d309fe773e51ecbddd72f0b356f8c8b84870ac9ea57",
+    "src/pe6203/batch.py": "b692e406fda13e280e4dfc07242f3dc8a1347f31e4bda6cb9133a708961d613f",
+    "src/pe6203/benchmark.py": "484a002bd63d90ea967f4915454ecebf97be5dedae54673bedb5f3295ee85837",
+    "src/pe6203/benchmark_suite.py": "f7bd83ea33fa46034ffd667578c0a50b4f843b02d4c0f41e4cbbfae7473f0fbd",
+    "src/pe6203/bootstrap.py": "b666bf7d3c126785ab0cecce439189c9d62ab2728c44663b7358c2b0c014eb95",
+    "src/pe6203/capability_withdrawal.py": "b02a2d0ea1c0b8968b39d7d19a3eac2e160cd92142806e4e63913b62bb1803b6",
+    "src/pe6203/cli.py": "ee399cf000736cf3ffabd9bad16dbbf1a19a6dad328577c6307bdb166d864136",
+    "src/pe6203/contract_reconcile.py": "40ed761c3cfce3da462f00b57216158d6490c7487c88a7f412ef339bcf662f65",
+    "src/pe6203/costs.py": "98707bfac3bacf97d1ea35fe466460a7149e14c1b503cfedbf2e478a8911e491",
+    "src/pe6203/dependency_cut.py": "5255f8ec35637e54e01ee42b48802c63b8167a6958e6fb966911c9ab644ff343",
+    "src/pe6203/description_factor.py": "a0f6b1bbfb7c0f2cb8f5cfdfb00d150af111597b45a614a62b1899291d1a6f12",
+    "src/pe6203/discovery_contract.py": "fc1a455e708a718e9c7fff817183f511db726a8f3a902d71cad51faa8f0909c4",
+    "src/pe6203/evaluation.py": "eee2b509d6ad0e7dafa3718929a279cf7c3cc55979ad9955a67ba8493645954d",
+    "src/pe6203/evidence_audit.py": "fbdc32119ef77063bdc71ed7fab0d26c0f46848adf93102654e80796ce8f301a",
+    "src/pe6203/experience_projection.py": "e8a5856df516a966f58b4ef072fe9280c9b9d141ab2cc2d8c5630a3e9949b57c",
+    "src/pe6203/experiment.py": "965d8c8cafa049591e3a8e86a7ddb59e406894e73a38757d563388a6b39a11d4",
+    "src/pe6203/inventory.py": "b58bb80bf3f7b10386c94581fd3d89c5ba2dabfcb16d3374238891fa84b83084",
+    "src/pe6203/judge.py": "aaa6efb94cf7719c085276e62e2811891a19a5d8ffcd59fb19c2ee6f80de2b82",
+    "src/pe6203/native_argument_routing.py": "6bdcb6024372bf310237c49dbdc0c0a6e0dff67c4834e95c548d41fcf64c1cae",
+    "src/pe6203/native_argument_routing_spec.py": "a41f7f5f04c8b48b833d4744b8ed0737573b5df3242b814a586cb66929dbba98",
+    "src/pe6203/native_media_contract.py": "45cf6ebe67485c4be64d16e9cf8a0c77fd03aae9d682bb213e38861df1240dd0",
+    "src/pe6203/native_record_batch.py": "4fb0cbe863a081dc67c9078e3692aa65d260477c777c450f961282adc44c0285",
+    "src/pe6203/netlify.py": "40627b18fac290328e53f402db9169ec661b99fa68dd7560754f98de69e18db2",
+    "src/pe6203/observation_coverage.py": "5f78dd72e09f5ce7d26c97e79cc66ab3c611537ac21311303c21b0a33f05655c",
+    "src/pe6203/optional_parameter_projection.py": "c1bea5cfea43caf60f3db0f9433c3bbdad8a432f64d50852f8b41a29ad236ef3",
+    "src/pe6203/parameter_coverage.py": "be1bc0fe48f66881a105fc3fe2beabbc1e0ec940e03e02c55dc12a5d4da78b88",
+    "src/pe6203/patch_variants.py": "693f2aadd8e5a25f618d29ed723723703c5578c270456b4b5f74e74e14ba29e5",
+    "src/pe6203/prefix_workflow_memory.py": "52f1026602a8c085acb3fa2ad7f6115be02c7a68bc6e7d905bec176406658f40",
+    "src/pe6203/project_episode_projection.py": "e3830b0fb5f504fc0683e897514820a3dae83fb198ec5418a42b506898b3ce67",
+    "src/pe6203/ready_link.py": "1b6b283ef9eebfbbfbec5095b1e9ab2024e2d059d0cf15d19ce7cad539921a61",
+    "src/pe6203/report.py": "7da42a59ad870fa2ce7d1fbff204f0bb51ef8cf43cc42555df664240395c065b",
+    "src/pe6203/request_retry.py": "11b66ea34089512d41e42e3275e6775130f0133cdd6249aa3ce94125d45ac574",
+    "src/pe6203/reviewed_coverage.py": "9b0715137049bfdee437b9e95c5e55fcfc2b8b8d2755670310d81f5e6da5c7f0",
+    "src/pe6203/runner.py": "e8f910263b68ab46c2073aed8ac852f2c2579895a2b36be13e55a988ad704bcb",
+    "src/pe6203/selective.py": "8e205a09e568e5c5b72c9f810210538e2f637ae1c5e0aae289a1f1ff8b580c8b",
+    "src/pe6203/semantic_contract_maintenance.py": "3e4b580b1474c347b6e2634409b97e646f5136ea5a2d446f81fc147f06202bf3",
+    "src/pe6203/spend_guard.py": "b42e8ab4db62db120f272d984746e9a912fff2990873aeec0b301723d70dacd6",
+    "src/pe6203/strategy_search.py": "58ae809edf12325eea920a05d92f1b57856c760bdf5fc1ed728e104db3cadede",
+    "src/pe6203/terminal_report.py": "2c522d1f4e6c5a339d81ca27bdd769a1efccc9a5276c9269ff07229f27c45ea4",
+    "src/pe6203/transport.py": "d7ceb1f783bc55a20809a1ad50f89e6af2c6f1bbccb2d322e75120b63b591dd4",
+    "src/pe6203/verified_component_memory.py": "c40282c4a9477250b7bd3148b3b5d80d4bd85547029072308e304101245083b9",
+    "src/pe6203/verified_coverage.py": "58e1a9d92c6615b20cb18fb087869286f15cddb2ffe5502f4cd457eba22c0f2b",
+    "uv.lock": "ff75e4f3c1f0ee9616bcdef2852c6396a22606352131a5ca51c62509225b3775",
+    "configs/reviewed-coverage-dev-v1.json": "fe23590d911daed1c94b65f81b63423822dc41f9c1541eec4f41ed38fdb2a737",
+    "configs/reviewed-coverage-updater-v1.json": "cf744ba4aad3e7c652f7fc5ed26705bf9406d80d7223e340bd13d357b0518017",
+    "experiments/reviewed-coverage-feedback-v1.json": "0bc393a094385ea78e8e191be5fca1e72393225b3c5827a4a83f28c32fb707ec",
+    "experiments/reviewed-coverage-v1.json": "87368de33a9e72f02402110759e72b7906c219e6c58e140e645b8b9a507da746",
+    "results/raw/reviewed-coverage-pilot-20261101/feedback.json": "0bc393a094385ea78e8e191be5fca1e72393225b3c5827a4a83f28c32fb707ec"
+  },
+  "endpoints": {
+    "agent": null,
+    "judge": null,
+    "updater": null
+  },
+  "coverage": {
+    "133": {
+      "middle": {
+        "catalog_change_types": [
+          "TOOL",
+          "PARAM",
+          "DESC"
+        ],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 38
+      },
+      "late": {
+        "catalog_change_types": [
+          "TOOL",
+          "PARAM",
+          "DESC"
+        ],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 35
+      }
+    },
+    "283": {
+      "middle": {
+        "catalog_change_types": [
+          "TOOL",
+          "PARAM",
+          "DESC"
+        ],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 28
+      },
+      "late": {
+        "catalog_change_types": [
+          "TOOL",
+          "PARAM",
+          "DESC"
+        ],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 23
+      }
+    },
+    "235": {
+      "middle": {
+        "catalog_change_types": [],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 28
+      },
+      "late": {
+        "catalog_change_types": [],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 28
+      }
+    }
+  },
+  "formal_evaluation": false,
+  "limitations": [
+    "Development subset; task-level change/retention labels need review",
+    "Under/over-update causal examples and independent holdout remain required",
+    "Selective Patch is deterministic; Full Rewrite is an LLM description rewrite",
+    "1 trajectory repeat(s); five judge ratings are not independent task repeats"
+  ],
+  "retry_policy": "Identical model request: one retry on connection/429/5xx, respecting Retry-After up to 60s. Judge: five slots, at most two logical attempts per slot, first valid rating only; durable request/response/outcome records and judge-only resume; all failed costs retained. No agent-trajectory, tool-call or low-score retries.",
+  "availability_preflight": true,
+  "stop_after_infrastructure_failures": 2,
+  "research": {
+    "spec": {
+      "quality_cases": [
+        {
+          "task_id": 133,
+          "properties": [
+            {
+              "id": "validation",
+              "required": "Provide meaningful expression validation, correctly interpret returned text, and distinguish syntax validity from actual evaluation and Python runtime/security verification."
+            },
+            {
+              "id": "guidance",
+              "required": "Provide usable Python-focused OWASP-related security recommendations: restricted inputs/allowed operations, avoid executing untrusted text as Python, and bound resource use. Do not claim that ignored tool flags establish these controls."
+            },
+            {
+              "id": "implementation_consistency",
+              "required": "Any code recommended as the solution must handle stated benign arithmetic and enforce its declared restrictions; do not use tool checks as proof that generated code was run. No code is required by the task if actionable recommendations suffice."
+            }
+          ],
+          "review": "Use actual calls/observations/final answer. Static AST inspection of generated Python; never execute untrusted generated code. Any unestablished required property is unknown, not pass. Additional nonessential prose is not a new requirement."
+        },
+        {
+          "task_id": 283,
+          "properties": [
+            {
+              "id": "coverage",
+              "required": "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work."
+            },
+            {
+              "id": "structure_and_scope",
+              "required": "Persisted task IDs are nonempty and unique; parent/dependency references exist and are acyclic. Concrete executable leaves have bounded scope; oversized required work is genuinely decomposed. Milestone containers are distinguished from executable leaves. Material unresolved executable work or unassessable scope does not pass merely because it is disclosed."
+            },
+            {
+              "id": "delivery_truth",
+              "required": "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations. A nonempty delivery identifies the actual project and work; absent final delivery is unknown, never pass."
+            },
+            {
+              "id": "scope_preserved",
+              "required": "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings."
+            }
+          ],
+          "prior_rubric": {
+            "task_id": 283,
+            "split": "exposed_changed_task_regression",
+            "provenance": "Original analytics dashboard planning request; archived task store, calls and final answer",
+            "required_properties": [
+              "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work.",
+              "Parent and dependency references are valid; oversized executable work is actually decomposed or its unresolved scope is disclosed.",
+              "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations.",
+              "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings."
+            ],
+            "forbidden": [
+              "Treat lower task counts or lower declared complexity as automatic quality improvement.",
+              "Treat an empty analyzer warning list as proof of meaningful decomposition.",
+              "Conflate milestone-container complexity with executable leaf-task complexity."
+            ],
+            "review": "Use parentId relationships in the actual saved task store; inspect semantics and before/after changes. Stored complexity is self-reported and not an independent difficulty ground truth."
+          },
+          "clarification_before_new_execution": "Same four substantive dimensions as prior283 review; explicitly treat unresolved material executable scope as fail/unknown rather than permitting disclosure alone to pass. No mandatory task count, numeric complexity threshold or hours cap. Do not equate an analyzer label with independent difficulty evidence. Apply equally to both arms.",
+          "review": "Hide methods/TF/PE until all property judgments frozen. Read actual task store and per-mutation states/calls, check concrete coverage, valid references and final claims. Same coordinator, not independent human reviewer."
+        },
+        {
+          "task_id": 235,
+          "properties": [
+            {
+              "id": "charts",
+              "required": "Three requested chart types returned successfully with source values, ordering, provinces/categories and monetary units preserved."
+            },
+            {
+              "id": "summary",
+              "required": "Any substantive final claim about these data matches the inputs; source totals if stated are exact."
+            }
+          ],
+          "review": "Frozen question and actual chart payloads; rendering remains unknown for both arms and is not added as a requirement."
+        }
+      ],
+      "evaluation": {
+        "normal_completion": "Runner execution_status==completed; truncation/max_rounds/error are not normal even if TF high.",
+        "artifact_quality": "Per-property pass/fail/unknown; core_pass requires every task-required property pass. Compare complete core_pass rates without a weighted score; show individual properties.",
+        "pilot_gate": "Strict normal-completion AND all-propertycore gains on projectsubset283M/L (2cells/arm) AND on wholefrozenchanged133M/L+283M/L (4cells/arm);TFmean>=SP ineachsubset.235Lnormal/core/TF>=SP. No per-stagewinrequired; reportallstages.133knowledgeidenticalSP,itsrandomdifferencecannotestablishadaptationbenefit. Noresampling; ifanygatefailscloseversion.",
+        "success_gate": "Each of2freshvalidationblocks individually meets sameproject-subset andwholechangedstrictdual gate plusTFnondecrease and235retention.3repeats/pair/arm perblock; neitherpooledgain norfirstblockgainalone qualifies.",
+        "other_metrics": "Report original TF/PE, per-condition rates, recovery/retention, update tokens/time/USD and all API costs/unknowns. ECS is not defined for this partial schedule; reference separate frozen three-stage course baseline cohort without pooling.",
+        "review_blinding": "Redirectrunnerstdouttofile; do notreadgroupedratings/methodmapuntilall10productjudgmentscommitted. PredeclaredopaquereviewIDs, samecoordinatornotindependenthuman andbehaviorcanrevealstrategy. Staticinspect133code, neverexecuteuntrustedcode; directstoreaudits283; sourcechartpayloads235.",
+        "statistics": "Descriptive fixed-subset replication, no population/significance claim. Report paired outcome counts and per-block effect; no arbitrary threshold tuned after results.",
+        "baselines": "Reuse original course27 and complete migration NU/FR cohorts for curriculum comparison, preserve all negative evidence. Do not substitute those scores as concurrent pilot controls."
+      },
+      "validation_schedule": {
+        "split": "Fresh executions on a predeclared already-exposed task subset; independent from pilot outcomes; not unseen-task generalization.",
+        "blocks": 2,
+        "repeats_per_block_per_condition": 3,
+        "task_stage_pairs": [
+          [
+            133,
+            "middle"
+          ],
+          [
+            133,
+            "late"
+          ],
+          [
+            283,
+            "middle"
+          ],
+          [
+            283,
+            "late"
+          ],
+          [
+            235,
+            "late"
+          ]
+        ],
+        "strategies": [
+          "selective_patch",
+          "reviewed_coverage"
+        ],
+        "knowledge": "Exact candidate bytes frozen after generation review; no changes in either validation block.",
+        "order": "Complete and report both scheduled blocks even if first block is adverse; only infrastructure safety can stop.",
+        "total_validation_trajectories": 60,
+        "independence": "Two sequential batches of fresh actor executions with empty isolated workspaces and no shared actor memory; each has3 repeats percondition. Same exposed original task families and byte-identical knowledge; independent executions, NOT unseen tasks, NOT statistical independence of the provider. No seeds are sent. All developer, diagnostic and viewed exploration runs excluded.",
+        "cells_per_block": 30,
+        "configs": [
+          "configs/reviewed-coverage-validation-1-v1.json",
+          "configs/reviewed-coverage-validation-2-v1.json"
+        ],
+        "config_files": [
+          "configs/reviewed-coverage-validation-1-v1.json",
+          "configs/reviewed-coverage-validation-2-v1.json"
+        ]
+      },
+      "confirmation": {
+        "tasks": [
+          133,
+          283,
+          235
+        ],
+        "stages": [
+          "middle",
+          "late"
+        ],
+        "task_stage_pairs": [
+          [
+            133,
+            "middle"
+          ],
+          [
+            133,
+            "late"
+          ],
+          [
+            283,
+            "middle"
+          ],
+          [
+            283,
+            "late"
+          ],
+          [
+            235,
+            "late"
+          ]
+        ],
+        "strategies": [
+          "selective_patch",
+          "selected_candidate"
+        ],
+        "repeats": 3,
+        "opaque_cell_ids": true
+      },
+      "authorization": {
+        "source": "User explicit same Goal authorization2026-11-01; local edits/tests/commits and frozen models authorized. No new total cap, no push/deploy/messages.",
+        "preflight_calls_max": 2
+      },
+      "failure_handling": "Retain raw output for every scheduled call and all errors/costs; no unknown product property is pass. Consecutive infrastructure failures follow existing stop rule with actual affected cells reported. Resolve authorized infrastructure problems without rerunning completed cells. No selecting favorable repeats. New unknown charges stop as existing ledger requires; oldA1 exception does not apply.",
+      "course": "Integrated report/reproduction alreadydelivered; no slides or speaker scripts. ResearchGoal incomplete.",
+      "champion": "selective_patch",
+      "development": {
+        "tasks": [
+          133,
+          283,
+          235
+        ],
+        "stages": [
+          "middle",
+          "late"
+        ],
+        "task_stage_pairs": [
+          [
+            133,
+            "middle"
+          ],
+          [
+            133,
+            "late"
+          ],
+          [
+            283,
+            "middle"
+          ],
+          [
+            283,
+            "late"
+          ],
+          [
+            235,
+            "late"
+          ]
+        ],
+        "strategies": [
+          "selective_patch",
+          "reviewed_coverage"
+        ],
+        "repeats": 1,
+        "opaque_cell_ids": true
+      },
+      "id": "reviewed-coverage-v1",
+      "status": "candidate_prepared_requires_test_and_exact_knowledge_freeze",
+      "candidates": [
+        "reviewed_coverage"
+      ],
+      "model_config": "configs/reviewed-coverage-dev-v1.json",
+      "updater_config": "configs/reviewed-coverage-updater-v1.json",
+      "feedback_probes": "experiments/reviewed-coverage-feedback-v1.json",
+      "generation": {
+        "mechanism": "Deterministic source-reviewed coverage table, protected by full contract and policy hashes; delete certified redundant description lines only. Property schemas and cited description witnesses survive.",
+        "input": "Original changed tool metadata only. The coverage policy is researcher-authored before new actor calls; no task questions, answers, scored trajectories or checker-generated annotations are passed as adaptation input.",
+        "scope_limit": "Specific reviewed contracts only; this is not an automated general semantic verifier or transfer result. Unrelated tasks stay exactly SP; any changed certified contract rejects the adapter.",
+        "review": "source-review.json lists every deletion and every retained matched parameter line. No post-actor policy edits. Deterministic compiler must reproduce reviewed bytes and preserve every other field.",
+        "manipulation_gate": "At least 500 Unicode characters removed per stage and a strict model-visible serialized-size decrease; unchanged from the previous series.",
+        "updater_calls": 0,
+        "next": "After exact policy/source review and tests, freeze 10 original development cells, then run only the unchanged conditional validation protocol if strict development passes."
+      },
+      "execution_order": "Freeze deterministic candidate, exact knowledge and ten original development cells before any model call. Use the existing development order; then only on all development gates, both independent 30-cell validation blocks with no candidate changes.",
+      "selection": "Frozen original133Middle/Late+283Middle/Late and235Late; input-complete. Original377lookupclosed. No syntheticbenchmarkrows substituted.",
+      "literature": {
+        "record": "results/evidence/reviewed-coverage-20261101/research-decision.json",
+        "prior_fixed_pins": "results/evidence/verified-coverage-20261101/source-pins.json"
+      },
+      "cost": "Updater API cost zero; authoring/review disclosed as researcher effort. Separate dev/validation ledgers. Development estimate USD 0.10–0.40, not a cap; all failures and costs retained.",
+      "review_integration": "Reuse completed independent review: assess decisions beyond wording, allow deletion, preserve unrelatedknowledge, do not require successful actor episodes for a metadata-only method. No new agent/reviewloop.",
+      "authority": "User fullGoal+samebranch/mainsolewriter/no push; course fixedtask/model/baselines; frozenactorbudget/provider/judge; prior append-only/toolcount assumptions are not permanent bans. User cancels additional slides/speaker scripts."
+    },
+    "phase": "development",
+    "candidate": null,
+    "confirmation_round": 1
+  },
+  "max_preflight_calls": 2,
+  "shared_adaptations": {
+    "133-late-reviewed_coverage": "adaptations/133-late-reviewed_coverage/adaptation.json",
+    "235-late-selective_patch": "adaptations/235-late-selective_patch/adaptation.json",
+    "133-late-selective_patch": "adaptations/133-late-selective_patch/adaptation.json",
+    "235-late-reviewed_coverage": "adaptations/235-late-reviewed_coverage/adaptation.json",
+    "283-late-selective_patch": "adaptations/283-late-selective_patch/adaptation.json",
+    "283-late-reviewed_coverage": "adaptations/283-late-reviewed_coverage/adaptation.json",
+    "283-middle-reviewed_coverage": "adaptations/283-middle-reviewed_coverage/adaptation.json",
+    "133-middle-selective_patch": "adaptations/133-middle-selective_patch/adaptation.json",
+    "283-middle-selective_patch": "adaptations/283-middle-selective_patch/adaptation.json",
+    "133-middle-reviewed_coverage": "adaptations/133-middle-reviewed_coverage/adaptation.json"
+  }
+}

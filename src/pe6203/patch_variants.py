@@ -45,6 +45,7 @@ VARIANTS = (
     "dependency_cut",
     "observation_coverage",
     "ready_link",
+    "reviewed_coverage",
 )
 
 SUFFICIENCY_RULE = (
@@ -671,6 +672,19 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "reviewed_coverage":
+        from .reviewed_coverage import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "certificate": "exact source-reviewed redundant-line policy and full contract hashes",
+            "runtime": "unchanged; descriptions only, every witness and other field retained",
+            "edits": len(changes),
+        }}
         return result
     if strategy == "ready_link":
         from .ready_link import compile_knowledge
