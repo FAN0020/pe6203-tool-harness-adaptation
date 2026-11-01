@@ -36,6 +36,8 @@ VARIANTS = (
     "native_argument_routing",
     "verified_component_memory",
     "prefix_workflow_memory",
+    "semantic_contract_direct",
+    "semantic_contract_closure",
 )
 
 SUFFICIENCY_RULE = (
@@ -662,6 +664,21 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy in ("semantic_contract_direct", "semantic_contract_closure"):
+        from .semantic_contract_maintenance import frozen_patch
+
+        result["knowledge"], annotations = frozen_patch(
+            old, target, context.get("feedback", []), strategy == "semantic_contract_closure"
+        )
+        result["changes"].extend({"operation": "frozen_semantic_edit", **a} for a in annotations)
+        result["cost"].update(seconds=perf_counter() - started,
+                              update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "compiled_annotation_edits": len(annotations),
+            "semantic_review": "external_frozen_knowledge_review_required",
+            "generation_cost": "separate_unique_updater_audits_not_double_counted_on_reuse",
+        }}
         return result
     if strategy == "prefix_workflow_memory":
         from .prefix_workflow_memory import expected_workflow, validate_workflow
