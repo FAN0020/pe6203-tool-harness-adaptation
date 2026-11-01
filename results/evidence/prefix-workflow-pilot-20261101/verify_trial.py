@@ -83,7 +83,18 @@ def main():
         ids.extend(response_ids)
     assert len(ids) == len(set(ids))
     assert len({row["protocol_sha256"] for row in rows}) == 1
-    ledger = read("spend-ledger.json")
+    reconciliation = json.loads((FOLDER / "ledger-reconciliation.json").read_text())
+    merged_bytes=(FOLDER / "shared-ledger-preserved.json").read_bytes()
+    prior_bytes=(FOLDER / "prior-ledger-preserved.json").read_bytes()
+    assert sha(merged_bytes)==reconciliation["merged_sha256"]
+    assert sha(prior_bytes)==reconciliation["original_sha256"]
+    merged,prior=json.loads(merged_bytes),json.loads(prior_bytes)
+    assert merged["requests"][:len(prior["requests"])]==prior["requests"]
+    ledger = json.loads((FOLDER / "trial-ledger-projection.json").read_text())
+    assert ledger["requests"]==merged["requests"][len(prior["requests"]):]
+    assert len(ledger["requests"])==reconciliation["new_requests"]
+    assert ledger["policy"]==merged["policy"]==prior["policy"]
+
     assert ledger["policy"]["limit_usd"] is None and not ledger["blocked"]
     assert Decimal(ledger["unknown_reserved_usd"]) == 0
     for request in ledger["requests"]:
