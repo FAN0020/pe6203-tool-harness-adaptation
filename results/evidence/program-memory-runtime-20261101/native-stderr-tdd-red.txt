@@ -1,0 +1,26 @@
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+____ test_successful_common_build_does_not_report_stderr_as_native_failure _____
+
+tmp_path = PosixPath('/private/var/folders/h0/bnvcw08s11zf6vd_7_19_46r0000gn/T/pytest-of-fanysmacpro/pytest-101/test_successful_common_build_d0')
+
+    @pytest.mark.integration
+    def test_successful_common_build_does_not_report_stderr_as_native_failure(tmp_path):
+        shutil.copytree(COMMON, tmp_path, dirs_exist_ok=True)
+        (tmp_path / "src/main.tsx").write_text('document.body.textContent="generic runtime check";')
+        result = subprocess.run([str(NODE), "build.cjs"], cwd=tmp_path, capture_output=True,
+                                text=True, timeout=30,
+                                env={"PATH": str(NODE.parent)+":/usr/bin:/bin", "HOME": str(tmp_path), "TMPDIR": str(tmp_path)})
+        assert result.returncode == 0, result.stderr
+>       assert result.stderr == "", "Native code runner treats nonempty stderr as an error receipt"
+E       AssertionError: Native code runner treats nonempty stderr as an error receipt
+E       assert '≈ tailwindcs...one in 23ms\n' == ''
+E         
+E         + ≈ tailwindcss v4.1.16
+E         + 
+E         + Done in 23ms
+
+tests/test_program_memory_runtime.py:22: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_program_memory_runtime.py::test_successful_common_build_does_not_report_stderr_as_native_failure
+1 failed, 1 passed in 0.31s
