@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>PE6203 依赖深度 × 字段长度：中断快照</title>
+<style>body{font:16px/1.7 system-ui,sans-serif;max-width:1120px;margin:40px auto;padding:0 24px;color:#172b3a;background:#fafbfc}h1{font-size:30px}h2{font-size:21px;margin-top:32px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{border:1px solid #bdcbd5;padding:8px;text-align:left}th{background:#e8f0f5}a{color:#075b9b}code{background:#edf1f4;padding:2px 5px}.notice{border-left:5px solid #ad6700;background:#fff4db;padding:14px 20px}li{margin:8px 0}</style>
+<h1>依赖深度 × 完整字段长度：中断快照</h1><p>2026-11-01 · 受控合成机制诊断 · 原 benchmark 成功与正式验证均未达成</p>
+<p class="notice">原计划 16 单元，已执行 7 个 actor：6 次正常结束、5 份产物全项通过。6 单元完成官方评分，第 7 单元仅有 2/5 评分。剩余 9 单元尚未执行。当前结果不足以判断因素效应或策略胜负。</p>
+<h2>失败证据 → 源码机制 → 冻结诊断</h2>
+<p>上一轮原题 dependency_cut v1 已采用延期依赖路径，但原变化子集双方正常完成均为 1/4、产物全项均为 0/4。该版本已经关闭。本轮为了区分依赖深度与文本负担，使用完全独立的合成 ID；不修改候选知识，不重启旧开发，不采集训练正例。</p>
+<p>复用 <a href="https://arxiv.org/html/2312.04511v3">LLMCompiler v3</a> 的依赖表示思路；作者仓库固定 <code>a00c9d35507507da70e8c637eee64efc8c1857ae</code>，关键位置为 <code>output_parser.py:97</code> 和 <code>task_fetching_unit.py:100–133</code>。原方法解析符号依赖、解析前序观测并释放可执行任务。本项目仅借静态操作图和原生 API 支持的创建/补链接拆分，没有移植作者规划器、调度器或运行时。</p>
+<p>固定 8 条记录、2 个根和 6 个子任务；改变 0/7 条跨任务依赖和每条 128/1920 字符完整正文，形成四个输入。所有元数据、层级、模型、供应商、4096 单次输出、12 轮及验收保持一致。两组知识逐字复制已冻结原283Late版本。两固定随机顺序区组各运行每条件 × 每策略一次，共 16 单元；生成规则和精确知识分别在 <code>1984654</code>、<code>0c2a249</code> 冻结。</p>
+<h2>已执行单元：全部保留</h2><table><thead><tr><th>审查</th><th>策略</th><th>条件</th><th>完成状态</th><th>产物全项</th><th>轮数</th><th>工具调用</th><th>TF</th><th>PE</th></tr></thead><tbody><tr><td>F01</td><td>dependency_cut</td><td>chain / long</td><td>completed</td><td>未通过</td><td>11</td><td>24</td><td>10</td><td>7</td></tr><tr><td>F02</td><td>dependency_cut</td><td>chain / short</td><td>completed</td><td>通过</td><td>6</td><td>17</td><td>9.6</td><td>9</td></tr><tr><td>F03</td><td>dependency_cut</td><td>shallow / short</td><td>completed</td><td>通过</td><td>7</td><td>19</td><td>10</td><td>4.8</td></tr><tr><td>F04</td><td>selective_patch</td><td>shallow / short</td><td>completed</td><td>通过</td><td>5</td><td>10</td><td>10</td><td>10</td></tr><tr><td>F05</td><td>selective_patch</td><td>chain / short</td><td>max_rounds</td><td>未通过</td><td>12</td><td>12</td><td>6.4</td><td>7</td></tr><tr><td>F06</td><td>dependency_cut</td><td>shallow / long</td><td>completed</td><td>通过</td><td>7</td><td>13</td><td>10</td><td>7.2</td></tr><tr><td>F07</td><td>selective_patch</td><td>shallow / long</td><td>completed</td><td>通过</td><td>8</td><td>13</td><td>未完成</td><td>未完成</td></tr></tbody></table>
+<p>全部 7 份保存了正确的 8 条记录和完整字段。F01 漏掉 N07→N06 的依赖，最终答复却称全部关系已保存，因此结构和交付失败；F05 的保存状态正确，但没有最终答复。高官方 TF 不能替代这些属性证据。F07 的 TF/PE 不使用两个已返回分数代替完整五槽结果。ECS 均为空。</p>
+<h2>机制观察及结论边界</h2><ul>
+<li><strong>依赖与收尾成本：</strong>短文本链状 F02 先创建、后补全部 7 条依赖，6 轮完成；SP F05 在 9 轮中创建，随后读回与额外工具调用，用尽 12 轮。该配对支持继续检验，但只有第一重复区组，不能满足预设的两区组方向一致要求。</li>
+<li><strong>文本负担与采用程度：</strong>长文本链状 F01 是混合路线：4 条在创建时写依赖、2 条延期写入、1 条遗漏；不是完整采用后的纯性能测量。长文本浅树 F06/F07 均成功，故不能把长文本本身判定为充分失败原因。</li>
+<li><strong>调用输出异常：</strong>F07 有一次 4096 completion-token 响应，在可见 content 中包含未成为结构化调用的 N08 片段；实际工具没有执行该片段。后续读回、补建并正确交付。finish_reason 为 tool_calls，不能仅凭停止字段诊断根因。没有读取隐藏 reasoning 文本。</li>
+<li><strong>评测偏差：</strong>F01–F06 的产物判断先于各自官方分数；F07 语义审查前意外看见两个评分槽的结果，已在原审查和冻结文件披露。全部审查由同一协调者完成，非严格方法盲评或独立人工评审。</li></ul>
+<h2>环境中断、费用与可审查恢复方案</h2>
+<p>北京时间 17:39:49 发出的 F07 第三评分槽请求在本地超时，没有返回 generation ID。账本保留 91 笔已启动请求，其中 90 笔结算：已知费用 <strong>US$0.118087392</strong>，未知 1 笔。US$0.319488 是该笔账本预留估算，不是收费，也不是无总限额模式下强制执行的价格上界。总实际费用仍未知。updater 调用为 0。</p>
+<p>分发的推理 key 没有控制台/管理权限，个人网页登录路线关闭。官方单笔查询需要 generation ID；当前 key 的只读元数据查询成功且限额仍有余额，超时不能归因额度耗尽。新增空变量 OPENROUTER_API_KEY_BACKUP 供用户填写，尚未启用。</p>
+<p>A1 是尚未获准执行的、绑定精确哈希的基础设施例外：保留原未知费用、全部原失败和账本停止标记；仅在此前 91 笔记录完全一致、之后请求全部可结算时允许继续。遇到任何新的未知费用仍停止。只恢复 F07 缺失评分，保持首有效分数和原重试上限；之后按原顺序运行 008–016，已执行 actor 不重跑。该例外改变原冻结停止条件，须明确批准并在最终诊断中披露，不得称为无偏差的原始预注册完成。</p>
+<h2>复现、决策与剩余目标</h2>
+<p>中断快照验证 294 个原始文件、131 个冻结源码/输入文件、精确知识、全部 7 份产物及 32 个有效评分槽。恢复相关 33 项本地测试通过，验证已有低分不被替换、失败不被抹去、评分上限不变、新未知费用仍停止；没有因此发送新的模型请求。</p>
+<p><strong>本轮决定：</strong>目前无机制通过预设支持门槛，无候选晋级、无正式验证。等待对具体 A1 例外的决定；不再等待个人网站日志，不将合成成功代替原 benchmark 的严格双提升。原 NU/FR 基线保留，最终课程综合报告、复现包与展示，以及两批独立验证仍未完成。</p>
+<ul><li><a href="../results/evidence/dependency-factorial-20261101/partial-decision.json">可复核的逐单元结果与费用</a></li><li><a href="../results/evidence/dependency-factorial-20261101/interpretation-at-stop.json">事实、观察、竞争解释与瓶颈排序</a></li><li><a href="../results/evidence/dependency-factorial-20261101/continuation-a1.json">冻结的 A1 恢复提案</a></li><li><a href="../results/evidence/dependency-factorial-20261101/reproduction.txt">离线复现说明</a></li><li><a href="../experiments/extensions/dependency-factorial-v1/protocol.json">原始冻结协议</a></li><li><a href="dependency-cut-development.html">原题 v1 开发失败报告</a></li></ul>
+</html>

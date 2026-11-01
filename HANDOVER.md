@@ -24,7 +24,19 @@
 
 交接时没有正在运行的实验或renderer。研究结果基点为`ac4c328`，本次交接不改任何旧结果。交接前仅出现EasyTool/Play2Prompt/工具描述重写的搜索线索，尚未完成原文与固定源码核对，也没有新候选或新模型调用；不能当作已完成研究。新聊天创建同一完整目标的Goal后自主推进，旧聊天不再并发研究。
 
-### 当前最新状态：依赖拆分知识策略原题开发结束，未达到严格双提升
+### 当前最新状态：16 单元因子诊断中断，已冻结具体恢复提案
+
+- 同一完整 Goal active、未完成；主线程唯一执行者，无运行实验。原 dependency_cut v1 仍关闭，未进入正式验证。
+- 报告 [`reports/dependency-factorial-interruption.html`](reports/dependency-factorial-interruption.html)；只读最新 `partial-decision.json`、`interpretation-at-stop.json` 与 `continuation-a1.json`，均在 `results/evidence/dependency-factorial-20261101/`。
+- 1984654 冻结独立合成四条件（8记录、2根、6子；依赖0/7 × 正文128/1920字符）；0c2a249 冻结原283Late SP/候选精确知识。16单元两区组，同模型/供应商/预算/工具/评分。不是新候选、训练或原题成功。
+- 7 actor 执行，6正常、5产物全项通过；6完整评分、F07仅2/5槽。第一block7/8，第二0/8，不比较不平衡总胜率。短链候选6轮成功，SP12轮空答复但保存正确；长链候选混合路线漏1依赖；长浅树均成功。门槛尚无支持。
+- runner81214退出2：F07slot3attempt1在北京时间17:39:49发出后超时，无generationID，触发未知费用停止。91请求/90结算，knownUSD0.118087392、unknown1、reserved估算0.319488；预留不是收费，也不是无总限额模式下保证上界。
+- 用户只有分发的推理key，没有owner网页/管理权限；个人登录与等待路线关闭。只读key元数据200、非management、限额仍有余额，不能归因额度耗尽。已在gitignored `.env` 增加空 `OPENROUTER_API_KEY_BACKUP` 并发送打开请求；未启用备用key，不记录密钥。
+- 4739ccc保留7产物审查及偏差：F01–F06先于各自分数；F07语义审查前意外看到2评分槽。非方法盲评/独立人工。294raw/131source/知识/7产物/32评分槽/ledger离线验证通过。
+- **A1恢复提案尚未运行，需用户明确批准冻结停止条件的例外。** 仅允许已冻结的那一笔未知费用继续保留；账本、原失败不改。派生恢复视图保留原评分上限与首有效分数，只恢复F07缺失槽，再执行008–016，旧actor不重跑；新未知费用/其他保护仍停。33项本地测试通过。文件/代码/输入哈希及审批原因见manifest；不能把备用key填写当批准。
+- 无模型调用发生在A1提案之后。若批准，按current.json具体步骤继续；否则保留诊断不足，不擅自清账或换输出目录。最终双提升、两独立批、课程综合交付仍未完成。
+
+### 已结束上一轮：依赖拆分知识策略原题开发结束，未达到严格双提升
 
 - 同一完整 Goal 由工具确认 active、未完成；本轮是实质试验进展，不是重复阻塞。主线程独占写入/实验，未另开agent/worktree、push、部署或外发。当前无运行实验。
 - 报告 [`reports/dependency-cut-development.html`](reports/dependency-cut-development.html)；轻量证据 `results/evidence/dependency-cut-20261101/decision.json` 与 `interpretation.json`；离线复现见该目录 `reproduction.txt`。
