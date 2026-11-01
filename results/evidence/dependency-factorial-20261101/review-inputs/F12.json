@@ -1,0 +1,126 @@
+{
+  "review_id": "F12",
+  "task_id": 901004,
+  "execution_status": "completed",
+  "answer": "## Saved project\n\n**Pollen record ledger** — project ID `d20fc54a-e9a6-4054-87d3-9e08bd7ca28e`\n\n## Record counts\n\n- **Total records saved: 8**\n- **Root records (top-level): 2** — N01, N02 (both supplied with `parent: null`)\n- **Non-root records: 6** — N03–N08 (all stored one level deep under a supplied parent)\n\n## Saved records (key → actual stored task ID)\n\n| Key | Name | ID | Parent | Depends on | P / C / Hrs | Tags |\n|---|---|---|---|---|---|---|\n| N01 | Pollen record N01 | `768d3945-101c-48bb-935b-f52b4a55ba50` | root | — (none supplied) | 2 / 2 / 3 | controlled, group1 |\n| N02 | Pollen record N02 | `a484c139-1c9b-4400-98ad-95b99e44e971` | root | N01 → `768d3945…` | 3 / 3 / 4 | controlled, group2 |\n| N03 | Pollen record N03 | `499be6f6-3d46-4bbe-aeb0-788f84a241dc` | N01 → `768d3945…` | N02 → `a484c139…` | 4 / 4 / 5 | controlled, group1 |\n| N04 | Pollen record N04 | `b96b0020-6b75-4e9a-8ba9-ccd4ce6291cf` | N02 → `a484c139…` | N03 → `499be6f6…` | 5 / 5 / 6 | controlled, group2 |\n| N05 | Pollen record N05 | `816c4d47-85c7-43a5-9085-dc38451872dd` | N01 → `768d3945…` | N04 → `b96b0020…` | 6 / 2 / 7 | controlled, group1 |\n| N06 | Pollen record N06 | `f912a585-65f6-4f0d-83ae-3a34f748f112` | N02 → `a484c139…` | N05 → `816c4d47…` | 7 / 3 / 8 | controlled, group2 |\n| N07 | Pollen record N07 | `bbbbc039-2554-4877-b3ea-86848d379c8b` | N01 → `768d3945…` | N06 → `f912a585…` | 8 / 4 / 9 | controlled, group1 |\n| N08 | Pollen record N08 | `376189bb-8ac1-4014-be6f-123fa2a0582d` | N02 → `a484c139…` | N07 → `bbbbc039…` | 2 / 5 / 10 | controlled, group2 |\n\n## Relationships — saved, with evidence\n\n- **Parent/child: saved for all 6 non-root records.** Resolved symbolic parents to real stored IDs. Verified by filtering on each parent: `list_tasks(parentId=N01)` returns exactly 3 children (N03, N05, N07) and `list_tasks(parentId=N02)` returns exactly 3 children (N04, N06, N08). So N01 and N02 are the only roots.\n- **Dependencies: saved for all 7 dependency-bearing records.** Each symbolic `dependsOn` reference was resolved to the actual stored task ID and written with `update_task`. The updates returned success with the resolved ID echoed as the dependency (e.g. N02 → `768d3945…`, N03 → `a484c139…`, N04 → `499be6f6…`, N05 → `b96b0020…`, N06 → `816c4d47…`, N07 → `f912a585…`, N08 → `bbbbc039…`), and the hierarchy listing independently reports 1 dependency for each of N02–N08 and no dependency for N01, matching the supplied chain exactly. No extra, missing, or circular links were introduced.\n\n## Fidelity notes\n\n- All supplied `name`, `details`, `priority`, `complexity`, `estimatedHours`, `tags` and status were preserved as given; long detail strings were stored in full, including each record's trailing `p.` marker text.\n- **All 8 records remain `pending` and incomplete** (`0 completed`). Creating and linking these records records the definitions only — no work was performed.\n- One tool (`review_project_status`) returned an internal error (`storage.getTasksByProject is not a function`); it was not used as evidence. Verification was done entirely via `list_tasks`, `list_tasks(parentId=…)` and the per-record `update_task` receipts.",
+  "properties": {
+    "records": "pass",
+    "fields": "pass",
+    "structure": "pass"
+  },
+  "expected_counts": {
+    "total_records": 8,
+    "root_records": 2,
+    "non_root_records": 6
+  },
+  "project": [
+    {
+      "id": "d20fc54a-e9a6-4054-87d3-9e08bd7ca28e",
+      "name": "Pollen record ledger",
+      "description": "Independent fictional ledger. Preserve the supplied work definitions and references; all work remains pending.",
+      "createdAt": "2026-11-01T10:14:45.420Z",
+      "updatedAt": "2026-11-01T10:14:45.420Z"
+    }
+  ],
+  "store_path": "review-artifacts/F12/tasks.json",
+  "store_sha256": "0663632c8483a23e28cf51c7dc55ffc7e2c0496cf09a835ea9e695f88fc8f67f",
+  "trace_sha256": "2d416c031f3ad0ab82442ede4a6469d4d7ecda74170a87ffa105a8761d66cf36",
+  "calls": [
+    {
+      "native_tool": "list_projects",
+      "isError": false
+    },
+    {
+      "native_tool": "create_project",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "update_task",
+      "isError": false
+    },
+    {
+      "native_tool": "update_task",
+      "isError": false
+    },
+    {
+      "native_tool": "update_task",
+      "isError": false
+    },
+    {
+      "native_tool": "update_task",
+      "isError": false
+    },
+    {
+      "native_tool": "update_task",
+      "isError": false
+    },
+    {
+      "native_tool": "update_task",
+      "isError": false
+    },
+    {
+      "native_tool": "update_task",
+      "isError": false
+    },
+    {
+      "native_tool": "list_tasks",
+      "isError": false
+    },
+    {
+      "native_tool": "review_project_status",
+      "isError": true
+    },
+    {
+      "native_tool": "list_tasks",
+      "isError": false
+    },
+    {
+      "native_tool": "list_tasks",
+      "isError": false
+    },
+    {
+      "native_tool": "list_tasks",
+      "isError": false
+    },
+    {
+      "native_tool": "get_task",
+      "isError": false
+    },
+    {
+      "native_tool": "get_task",
+      "isError": false
+    }
+  ]
+}
