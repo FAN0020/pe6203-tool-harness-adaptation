@@ -1,4 +1,5 @@
 """Workflow abstraction, contract isolation and benchmark leakage boundaries."""
+
 import json
 from copy import deepcopy
 from pathlib import Path
@@ -16,7 +17,11 @@ SERVER = "slidev-mcp::create_bulk_slides"
 def inputs(stage="late", task=457):
     folder = ROOT / "results/raw/document-sequence-pilot-20261101/catalogs" / str(task)
     old, new = [json.loads((folder / f"{v}.json").read_text()) for v in ("early", stage)]
-    context = {"feedback": json.loads((ROOT / "experiments/prefix-workflow-feedback-v1.json").read_text())["observations"]}
+    context = {
+        "feedback": json.loads((ROOT / "experiments/prefix-workflow-feedback-v1.json").read_text())[
+            "observations"
+        ]
+    }
     return old, new, context
 
 
@@ -40,7 +45,17 @@ def test_single_program_description_and_unchanged_contracts(stage):
     assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
     assert (old, new, context) == pristine
     encoded = json.dumps(program)
-    for leaked in ["772519", "816271", "CANARY", "Train Document", "heldout", "457", "4096", "PaLM", "/Users/"]:
+    for leaked in [
+        "772519",
+        "816271",
+        "CANARY",
+        "Train Document",
+        "heldout",
+        "457",
+        "4096",
+        "PaLM",
+        "/Users/",
+    ]:
         assert leaked not in encoded
 
 
@@ -48,12 +63,18 @@ def test_single_program_description_and_unchanged_contracts(stage):
 def test_only_exact_verified_training_is_accepted(mutation):
     old, new, context = inputs()
     rows = context["feedback"]
-    if mutation == "missing": rows.pop()
-    elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
-    elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
-    elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
-    elif mutation == "stage": rows[-1]["stage"] = "middle"
-    else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+    if mutation == "missing":
+        rows.pop()
+    elif mutation == "duplicate":
+        rows.append(deepcopy(rows[-1]))
+    elif mutation == "failed":
+        rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+    elif mutation == "body":
+        rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+    elif mutation == "stage":
+        rows[-1]["stage"] = "middle"
+    else:
+        rows[-1]["result"]["trace"][0]["case"] = "heldout"
     with pytest.raises(ValueError, match="training"):
         adapt(old, new, "prefix_workflow_memory", context)
 
@@ -66,7 +87,9 @@ def test_early_and_retention_are_exact_baseline():
 
 def test_unknown_contract_rejected():
     old, new, context = inputs()
-    next(t for t in new["tools"] if t["tool_id"] == "slidev-mcp::add_page")["parameters"]["required"].append("new_param")
+    next(t for t in new["tools"] if t["tool_id"] == "slidev-mcp::add_page")["parameters"][
+        "required"
+    ].append("new_param")
     with pytest.raises(ValueError, match="contract"):
         adapt(old, new, "prefix_workflow_memory", context)
 
@@ -81,21 +104,32 @@ def test_task_answer_never_accepted():
 @pytest.mark.parametrize("field", ["description", "parameters", "routing", "usage_rules"])
 def test_extra_edit_rejected(field):
     from pe6203.prefix_workflow_memory import validate_workflow
+
     old, new, context = inputs()
     candidate, _, _ = adapt(old, new, "prefix_workflow_memory", context)
     row = candidate["tools"][0]
-    if field == "description": row[field] += "extra"
-    elif field == "usage_rules": row[field].append("extra")
-    else: row[field]["extra"] = True
-    assert validate_workflow(candidate, old, new, base_patch(old, new), context["feedback"])["errors"]
+    if field == "description":
+        row[field] += "extra"
+    elif field == "usage_rules":
+        row[field].append("extra")
+    else:
+        row[field]["extra"] = True
+    assert validate_workflow(candidate, old, new, base_patch(old, new), context["feedback"])[
+        "errors"
+    ]
 
 
 def test_induced_program_expansion_matches_reserved_native_actions():
     from pe6203.prefix_workflow_memory import expand_workflow, induce_workflow
+
     _, _, context = inputs()
     program = induce_workflow(context["feedback"][-1]["result"]["trace"])
     folder = ROOT / "results/evidence/prefix-workflow-admission-20261101"
-    rows = [x for x in json.loads((folder / "observations.json").read_text()) if x["stage"] == "late" and x["case"] == "heldout"]
+    rows = [
+        x
+        for x in json.loads((folder / "observations.json").read_text())
+        if x["stage"] == "late" and x["case"] == "heldout"
+    ]
     # Only the independently specified mid-write durability challenge has no training analogue.
     expected = [{"call": x["tool"], "args": x["arguments"]} for i, x in enumerate(rows) if i != 3]
     pages = json.loads((folder / "cases.json").read_text())["heldout"]

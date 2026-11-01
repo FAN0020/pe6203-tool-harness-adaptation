@@ -1,0 +1,166 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> results/evidence/prefix-workflow-admission-20261101/run_probes.py:2:1
+   |
+ 1 |   """Execute the immutable 40-call native schedule once, with no model calls."""
+ 2 | / import asyncio
+ 3 | | import hashlib
+ 4 | | import json
+ 5 | | from pathlib import Path
+ 6 | |
+ 7 | | from checks import check_document, check_records, unpack
+ 8 | | from pe6203.experiment import configure_runtime
+ 9 | | from pe6203.transport import sessions
+   | |_____________________________________^
+10 |
+11 |   FOLDER = Path(__file__).resolve().parent
+   |
+help: Organize imports
+  |
+7 | from checks import check_document, check_records, unpack
+8 +
+9 | from pe6203.experiment import configure_runtime
+  |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_admission.py:40:25
+   |
+38 | def test_reject_native_record_state(kind):
+39 |     rows = [{**p, "content": p["body"]} for p in PAGES]
+40 |     if kind == "missing": rows.pop()
+   |                         ^
+41 |     if kind == "layout": rows[1]["layout"] = "cover"
+42 |     if kind == "body": rows[0]["content"] = "missing"
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_admission.py:41:24
+   |
+39 |     rows = [{**p, "content": p["body"]} for p in PAGES]
+40 |     if kind == "missing": rows.pop()
+41 |     if kind == "layout": rows[1]["layout"] = "cover"
+   |                        ^
+42 |     if kind == "body": rows[0]["content"] = "missing"
+43 |     data = response(rows, success=kind != "failure")
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_admission.py:42:22
+   |
+40 |     if kind == "missing": rows.pop()
+41 |     if kind == "layout": rows[1]["layout"] = "cover"
+42 |     if kind == "body": rows[0]["content"] = "missing"
+   |                      ^
+43 |     data = response(rows, success=kind != "failure")
+44 |     if kind == "transport": data["isError"] = True
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_admission.py:44:27
+   |
+42 |     if kind == "body": rows[0]["content"] = "missing"
+43 |     data = response(rows, success=kind != "failure")
+44 |     if kind == "transport": data["isError"] = True
+   |                           ^
+45 |     assert checks.check_records(data, PAGES)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_memory.py:51:29
+   |
+49 |     old, new, context = inputs()
+50 |     rows = context["feedback"]
+51 |     if mutation == "missing": rows.pop()
+   |                             ^
+52 |     elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+53 |     elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_memory.py:52:33
+   |
+50 |     rows = context["feedback"]
+51 |     if mutation == "missing": rows.pop()
+52 |     elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+   |                                 ^
+53 |     elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+54 |     elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_memory.py:53:30
+   |
+51 |     if mutation == "missing": rows.pop()
+52 |     elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+53 |     elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+   |                              ^
+54 |     elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+55 |     elif mutation == "stage": rows[-1]["stage"] = "middle"
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_memory.py:54:28
+   |
+52 |     elif mutation == "duplicate": rows.append(deepcopy(rows[-1]))
+53 |     elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+54 |     elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+   |                            ^
+55 |     elif mutation == "stage": rows[-1]["stage"] = "middle"
+56 |     else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_memory.py:55:29
+   |
+53 |     elif mutation == "failed": rows[-1]["result"]["trace"][0]["result"]["isError"] = True
+54 |     elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+55 |     elif mutation == "stage": rows[-1]["stage"] = "middle"
+   |                             ^
+56 |     else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+57 |     with pytest.raises(ValueError, match="training"):
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_memory.py:56:9
+   |
+54 |     elif mutation == "body": rows[-1]["result"]["trace"][1]["arguments"]["content"] = "substitute"
+55 |     elif mutation == "stage": rows[-1]["stage"] = "middle"
+56 |     else: rows[-1]["result"]["trace"][0]["case"] = "heldout"
+   |         ^
+57 |     with pytest.raises(ValueError, match="training"):
+58 |         adapt(old, new, "prefix_workflow_memory", context)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_memory.py:87:30
+   |
+85 |     candidate, _, _ = adapt(old, new, "prefix_workflow_memory", context)
+86 |     row = candidate["tools"][0]
+87 |     if field == "description": row[field] += "extra"
+   |                              ^
+88 |     elif field == "usage_rules": row[field].append("extra")
+89 |     else: row[field]["extra"] = True
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_memory.py:88:32
+   |
+86 |     row = candidate["tools"][0]
+87 |     if field == "description": row[field] += "extra"
+88 |     elif field == "usage_rules": row[field].append("extra")
+   |                                ^
+89 |     else: row[field]["extra"] = True
+90 |     assert validate_workflow(candidate, old, new, base_patch(old, new), context["feedback"])["errors"]
+   |
+
+E701 Multiple statements on one line (colon)
+  --> tests/test_prefix_workflow_memory.py:89:9
+   |
+87 |     if field == "description": row[field] += "extra"
+88 |     elif field == "usage_rules": row[field].append("extra")
+89 |     else: row[field]["extra"] = True
+   |         ^
+90 |     assert validate_workflow(candidate, old, new, base_patch(old, new), context["feedback"])["errors"]
+   |
+
+Found 14 errors.
+[*] 1 fixable with `--fix`.

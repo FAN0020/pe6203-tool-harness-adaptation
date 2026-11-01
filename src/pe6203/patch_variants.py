@@ -35,6 +35,7 @@ VARIANTS = (
     "discovery_contract",
     "native_argument_routing",
     "verified_component_memory",
+    "prefix_workflow_memory",
 )
 
 SUFFICIENCY_RULE = (
@@ -661,6 +662,19 @@ def adapt_result(old, target, strategy, context=None):
     result = deepcopy(base)
     result["cost"]["method"] = strategy
     if base["status"] == "no_change":
+        return result
+    if strategy == "prefix_workflow_memory":
+        from .prefix_workflow_memory import expected_workflow, validate_workflow
+
+        feedback = context.get("feedback", [])
+        result["knowledge"], annotations = expected_workflow(base, target, feedback)
+        result["changes"].extend(annotations)
+        result["validation"] = validate_workflow(result["knowledge"], old, target, base, feedback)
+        if result["validation"]["errors"]:
+            raise ValueError("Workflow memory changed a protected contract")
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
         return result
     if strategy == "verified_component_memory":
         from .verified_component_memory import expected_memory, validate_memory
