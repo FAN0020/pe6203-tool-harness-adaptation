@@ -22,7 +22,7 @@ def archive_files(folder):
     return (files, manifest)
 
 
-def inspect_cell(files, prefix, cell, block, allow_incomplete=False):
+def inspect_cell(files, prefix, cell, block, allow_incomplete=False, allow_unknown_cost=False):
 
     def read(name):
         return json.loads(files[prefix + name])
@@ -120,7 +120,7 @@ def inspect_cell(files, prefix, cell, block, allow_incomplete=False):
     costs, tokens, providers, ids = ({}, {}, {}, [])
     for role, values in [("agent", responses), ("judge", judges)]:
         cost = sum((Decimal(str(v["usage"]["cost"])) for v in values), Decimal(0))
-        if allow_incomplete and role == "judge":
+        if (allow_incomplete or allow_unknown_cost) and role == "judge":
             assert r["cost"][role]["usd"] is None
             assert all(
                 r["cost"][role][k] is None
@@ -156,7 +156,7 @@ def inspect_cell(files, prefix, cell, block, allow_incomplete=False):
         "tool_calls": len(calls),
         "tool_errors": sum(bool(e["result"].get("isError")) for e in calls),
         "cost_usd": costs,
-        "cost_complete": not allow_incomplete,
+        "cost_complete": not (allow_incomplete or allow_unknown_cost),
         "tokens": tokens,
         "providers": providers,
         "seconds": r["seconds"],

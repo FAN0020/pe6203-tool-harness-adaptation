@@ -1,0 +1,34 @@
+{
+  "decision": "完成16单元机制诊断；支持依赖结构影响执行成本，正确性交付仍不稳定。原dependency_cut v1保持关闭，无候选晋级、无正式验证。",
+  "goal_complete": false,
+  "facts": [
+    {"class":"execution","claim":"SP四个链式单元全部max_rounds且最终答复为空；全部原生记录、字段和关系通过。浅结构四个SP单元全部正常完成且core通过。四个链式SP都用了9个创建轮次，之后读回占据剩余轮次；全部16单元没有finish_reason=length。","source":["decision.json","phase-accounting.json","mechanism-projection.json"]},
+    {"class":"knowledge_and_artifact","claim":"候选四个链式单元全部正常完成，但仅F02/F12全项通过。F01漏一条依赖且答复称已保存；F16额外tags进入项目description，违反原样保留。后者任务本身的字段/引用差异为0，但冻结审核先判records失败，fields/structure仍unknown，未改分。","source":["individual-reviews/F01.json","individual-reviews/F16.json","review-analysis/F16-project-description.json"]},
+    {"class":"adoption","claim":"候选F02/F12/F16完整延期7条依赖；F01混合路线(4条创建时写、2条延期、1条遗漏)。SP链式均在创建时写7条依赖。候选浅结构没有同等完成或质量收益，平均工具调用反而更多。","source":["mechanism-projection.json","decision.json"]},
+    {"class":"environment","claim":"A1经明确批准后，仅补F07缺失评分并继续原008–016。旧actor不重跑，原前6单元全部字节保留，第7actor和旧评分尝试保留；2个已成功preflight复用，没有新增preflight。649原始文件与131冻结来源文件验证通过。","source":["decision.json","continuation-authorization.json","preflight-reuse-addendum.json","verify_completed_diagnostic.py"]},
+    {"class":"evaluation","claim":"F01官方TF10仍缺依赖且虚报；F16TF9.6仍改变项目描述。F07语义审核前意外看见两个评分槽，已披露；其余15份先审查后看各自分数。非方法盲评或独立人工评审。","source":["review-freeze.json","decision.json"]}
+  ],
+  "controlled_observations": {
+    "topology":"固定文本长度时，两重复区组中SP都从浅结构成功变为链式不完成；这比仅观察原题截断更能支持依赖结构的重要性。但干预同时增加7个关系要求，不能把效应完全分离成纯串行深度，也不能直接外推原题开放式规划。",
+    "payload":"长文本未在两区组一致恶化正常完成或完整字段；SP和候选长文本浅结构均2/2全项通过。该预设payload支持条件未满足。输入、参数输出、返回正文共同增加，不能归因为输出token单独问题。",
+    "conditional_route":"链式条件按区组汇总：候选每区组完成2/2、core1/2；SP每区组均0/2。浅结构双方每区组均2/2、2/2。该模式支持研究条件化路线，但各精确链式条件的core优势没有跨区组重复：长链block0持平0/1，短链block1持平0/1。完整报告保留两种粒度，不把汇总定义成新的晋级门槛。",
+    "cost":"候选链式平均轮数短8、长11，对照均12；候选平均调用短23.5、长24，对照15.5、18.5。减少轮次不等于减少调用或成本。",
+    "original_transfer":"原283候选已充分延期23条依赖仍未完成；本诊断的预给8条记录省去了原题开放式规划。因此本诊断不证明原benchmark已有可胜出策略。"
+  },
+  "hypotheses_and_rivals": [
+    {"hypothesis":"依赖拆分缩短执行等待，但额外读回和正确性检查仍耗费轮次。","rivals":"actor自行增加检查或其他工具，调度采用不完整；原题规模和规划内容可能主导。","test_boundary":"目前有调用/轮次描述证据；未随机干预读回策略，不能断言减少读回会提高产物正确性。"},
+    {"hypothesis":"工具返回的观察范围不明确，使重复读取无法验证真正需要的属性。","rivals":"读取可能验证名称/details/status；跳过读取也可能掩盖真实错误。","test_boundary":"原生get_task正文没有完整priority/complexity/tags/dependsOn引用，list_tasks只显示依赖数量；须先做无题目、无评分输入的来源/原生覆盖证明，才可设计局部知识干预。未向updater发送任何本轮轨迹。"}
+  ],
+  "ranked_next_bottlenecks": [
+    {"rank":1,"name":"正确存储到可靠交付之间的执行与验证成本","basis":"四个链式SP正确存储却全部空交付；既有原题两组同样空交付。观察范围知识可局部干预，但收益仍待检验。"},
+    {"rank":2,"name":"局部知识无法保证全部关系与输入保真","basis":"候选链式两种不同产物失败；调用成功或高TF都没有排除。不能只修F16 tags后称整类正确性解决。"},
+    {"rank":3,"name":"原题开放式规划规模与固定预算的交互","basis":"8条预给记录的收益未迁移到25/26条原题规划。只有规模相关性，不能靠增加预算或删任务获得改善。"}
+  ],
+  "next_direction_comparison": [
+    {"priority":1,"direction":"来源验证的观察覆盖表示","difference":"改变知识对工具写入效果、返回证据和未覆盖属性的表示，区别于旧依赖拆分和普通减少调用提示。","support":"本轮4个SP正确存储但无交付；get_task/list_tasks来源显示观察范围有限。","counterevidence":"错误的省略检查可能损害质量；原题规划可能仍主导。","next_minimum":"先核对旧contract/semantic维护是否已经测试同一覆盖机制，再用任务无关原生记录验证可观察属性；通过合法范围与保护字段检查后冻结新原题开发，不把合成结果当验证。","admitted_new_model_candidate":false},
+    {"priority":2,"direction":"依赖路线的条件化成本选择","difference":"比较源契约支持的原子操作依赖图与调用成本，区别于一律延期。","support":"依赖结构影响完成且浅结构无额外收益，符合条件化假说。","counterevidence":"原题已延期；已知引用提前写入只覆盖4/23、5/23记录，不保证少一轮或更好质量；不能仅重写旧suffix。","next_minimum":"只在出现能改变原题操作图且保真可验证的决策规则后进入冻结；没有先验成功证明要求。","admitted_new_model_candidate":false}
+  ],
+  "not_selected":"无一致payload失败证据，不优先研究损失less压缩；不重跑相同16单元、不把F02/F12纳入训练正例、不复活已关闭原v1。",
+  "accounting":"独立诊断账本已知USD0.271760952，A1后新增已知USD0.153673560，1笔旧未知保留。Key累计用量与该实验账本不同口径，见accounting-comparison.json。",
+  "course_and_user_goal":"保留历史NU/FR；原变化子集的严格双提升开发与两批独立验证未完成，课程综合报告/复现交付/展示尚缺。本报告仅是一次诊断的完整证据链。"
+}
