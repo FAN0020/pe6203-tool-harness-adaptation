@@ -161,3 +161,31 @@ uv run python results/evidence/active-contract-probing-20261101/verify_generatio
 
 This is evidence about probe selection and local updating, not evidence of original
 benchmark dual improvement. No slides or speaker scripts were edited.
+
+## Later research addendum: shared contract references and authorized A2
+
+[Result and limitations](../../results/evidence/shared-contract-refs-20261101/RESULT.md).
+Cross-record exact parameter-description references reduced model-visible JSON by
+0.816%/5.519% for the project Middle/Late stages. Nine original cells were evaluated;
+one candidate Late actor remained failed after HTTP429 and an unknown-charge stop.
+The user-approved A2 ran only the four previously unstarted cells. No actor was
+rerun, no preflight call was added, and the unknown row remains unresolved.
+
+Changed-task normal completion was1/4 for each arm; primary product core was0/4
+for each. Project normal/core remained0/2 for both. Candidate full-cohort TF is
+missing, so available-case means cannot establish nondecrease. Even all registered
+permissive review alternatives do not pass the dual-improvement gates. No validation.
+
+A2 added USD0.088749432; total known USD0.213821040,105 settled plus1 unresolved.
+All10 product reviews were committed before overall score unblinding; partial
+method exposure is disclosed. The dated integrated report and NU/FR baselines
+remain intact; this addendum does not establish the unmet research Goal.
+
+```sh
+uv run python results/evidence/shared-contract-refs-20261101/verify_after_a2.py
+uv run python results/evidence/shared-contract-refs-20261101/audit_interrupted_cell.py
+```
+
+The original complete-cohort verifier remains unchanged and is intentionally not
+the reproduction command for this interrupted cohort. Slides and speaker scripts
+were not edited.
