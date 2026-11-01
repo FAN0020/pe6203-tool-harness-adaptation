@@ -92,6 +92,15 @@ def render_report(data, *, expanded=False):
             f"阶段       agent={run['execution_status'] or MISSING}  |  judge={run['judge_status'] or MISSING} ({judge_count} 有效)",
             f"模型       {run['model'] or MISSING}",
         ]
+        if run.get("artifact_validation"):
+            artifact = run["artifact_validation"]
+            accepted = bool(artifact.get("accepted_artifact"))
+            lines.append(
+                f"产物验收   {artifact['status']} | accepted={accepted} | security_guarantee=False"
+            )
+            lines.append(
+                f"生成/修复  initial={run.get('generation_status')} | final={run['execution_status']} | origin={run.get('completion_origin')} | repairs={len(artifact.get('repairs', []))}"
+            )
         if run["judge_model"] and run["judge_model"] != run["model"]:
             lines.append(f"Judge 模型 {run['judge_model']}")
         if run.get("execution_backend"):

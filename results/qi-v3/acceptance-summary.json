@@ -1,0 +1,129 @@
+{
+  "status": "implementation_checks_passed_with_actual_isolation_gap",
+  "scope": "QI-V3 implementation/push-stage acceptance only; not user-final acceptance or benchmark effectiveness",
+  "base_commit": "bdf0ccc5c3466517725c84e7f715234733cde4a8",
+  "branch": "QI-V3",
+  "public_default": "hybrid_v2 (unchanged)",
+  "v3_opt_in": "hybrid_v3",
+  "execution_protocol_opt_in": "artifact-v1",
+  "commands": [
+    {
+      "command": "uv run pytest -q -m 'not integration'",
+      "exit_code": 0,
+      "passed": 391,
+      "skipped": 16,
+      "integration_deselected": 13,
+      "seconds": 19.24,
+      "actual_isolation_skipped": 7
+    },
+    {
+      "command": "uv run ruff check src integration tests scripts/accept_qi_v3.py",
+      "exit_code": 0,
+      "status": "passed"
+    },
+    {
+      "command": "uv run ruff format --check <15 changed Python files>",
+      "exit_code": 0,
+      "status": "15 files already formatted",
+      "files": [
+        "src/pe6203/artifact_validation.py",
+        "src/pe6203/capability.py",
+        "src/pe6203/artifact_plan.py",
+        "src/pe6203/baselines.py",
+        "src/pe6203/cli.py",
+        "src/pe6203/runner.py",
+        "src/pe6203/report.py",
+        "src/pe6203/terminal_report.py",
+        "scripts/accept_qi_v3.py",
+        "tests/test_artifact_isolated.py",
+        "tests/test_artifact_validation.py",
+        "tests/test_artifact_plan.py",
+        "tests/test_artifact_runner_accounting.py",
+        "tests/test_capability_v3.py",
+        "tests/test_terminal_report.py"
+      ]
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "uv run pe6203 --help",
+      "exit_code": 0
+    },
+    {
+      "command": "uv run python scripts/accept_qi_v3.py --output results/qi-v3/local-acceptance-01",
+      "exit_code": 0,
+      "status": "passed_checks_isolation_gap",
+      "evidence": "local-acceptance-01/acceptance.json",
+      "role": "retained intermediate implementation attempt"
+    },
+    {
+      "command": "uv run python scripts/accept_qi_v3.py --output results/qi-v3/local-acceptance-02",
+      "exit_code": 0,
+      "status": "passed_checks_isolation_gap",
+      "evidence": "local-acceptance-02/acceptance.json",
+      "role": "final implementation attempt"
+    }
+  ],
+  "sandbox": {
+    "docker_cli_available": false,
+    "podman_cli_available": false,
+    "macos_sandbox_exec_present": true,
+    "macos_sandbox_exec_accepted_backend": false,
+    "host_generated_code_execution": false,
+    "installed_runtime": false,
+    "actual_isolated_execution": false,
+    "reason": "No existing Docker/Podman runtime; fail closed. No heavy installation authorized."
+  },
+  "evidence_levels": {
+    "structure_and_static_validation": "passed",
+    "mock_orchestration_and_SDK_wire_tests": "passed; explicitly scripted observations",
+    "public_CLI_runner_local_HTTP_repair": "passed syntax failure -> scripted API repair -> exact revised static check -> backend_unavailable",
+    "actual_isolated_functional_failure_repair_retest": "not_run_backend_unavailable",
+    "real_llm_calls": 0,
+    "local_scripted_HTTP_requests": 4,
+    "real_mcp_behavioral_execution": false,
+    "benchmark_run": false,
+    "TF": null,
+    "PE": null,
+    "ECS": null
+  },
+  "both_mechanisms_fully_operational_and_accepted": false,
+  "capability_boundary_scope": "literal catalog/source/probe evidence with object and fingerprint; not semantic entailment or authenticated source discovery",
+  "review_repairs": [
+    "zero exit requires normal test completion marker; source hashes before/after",
+    "fresh restricted container per test",
+    "accepted summary preserved; exact bytes/hash published",
+    "generation_status, completion_origin and artifact acceptance separated; legacy completed aggregation preserved",
+    "repair response/error/cancel usage retained on outer timeout",
+    "cancellation requests container termination and bounded cleanup",
+    "five-arm freeze/run entries enforce shared execution/test/repair policies and pin inputs"
+  ],
+  "remaining_gaps": [
+    "Actual isolation boundary/early-exit tests skipped until a reviewed local Docker image/runtime exists",
+    "Actual functional-failure -> model-compatible repair -> isolated retest not accepted on this host",
+    "No real-LLM reasoning/generalization or benchmark effect measured",
+    "Source/probe authenticity and semantic capability claims require independent review; quotes/hashes do not prove them",
+    "Finite tests and completion markers are not a tamper-proof hostile evaluator or complete security proof",
+    "Frozen arm input hashes do not certify claimed updater method; preserve independent adaptation audits"
+  ],
+  "final_user_diagram_acceptance": "pending; parent must receive actual user feedback",
+  "source_sha256": {
+    "src/pe6203/artifact_validation.py": "f842063bc93f6a49f758aa9708a44131e9fe187914acec1dadf986a8fb70fdd1",
+    "src/pe6203/capability.py": "6c5c7bad562349d340b91d6f9fe07a66f4b4fb53084fa7772b2964a9fe5997af",
+    "src/pe6203/artifact_plan.py": "7c7399ce5c4aa86131fe3f038d1a97b1ef5fee58e789d86a48630b513a640e3e",
+    "src/pe6203/baselines.py": "109dc34f8e2e237542c0231095caf0a1925ab8e5cd0f9a52296c662f0abe69bd",
+    "src/pe6203/cli.py": "806dbc2338691fc494168248663c5423c24ea4b2962a10b233a78a72d846c606",
+    "src/pe6203/runner.py": "cdbbfb1894af0563a5928dc3131fb044d389b72bea9b00d635d2a536f96a31ea",
+    "src/pe6203/report.py": "35c8eaea6f47f66e8553a8449f02e36e328ef7d7dc928384ab97bd50260780ad",
+    "src/pe6203/terminal_report.py": "122a4cced64bc70fe18e579656e75c70342b842b9680ff9e3b22be4a4bcdc083",
+    "scripts/accept_qi_v3.py": "48cdc8879cf40ce20164071dbde4b601fda6ff688afbffc7c2f7bd23d721d39d",
+    "tests/test_artifact_isolated.py": "d67ec9954bc60b4b5425b12069e52101720be92780ef6c0d48380abca1b0a5ae",
+    "tests/test_artifact_validation.py": "02524b6d678aa9725f243622b1eaabc4043806c3ff6c0c1212bdeb0c26a694b3",
+    "tests/test_artifact_plan.py": "3aeeb34fdf6d460805acfb4afd06dd3a8909ccd565b624eed8aef3ac5f97aa9f",
+    "tests/test_artifact_runner_accounting.py": "fe49a0d95bc9b63bb1496c599c5f2a55c5fa3bc82124210e9b08c269bf3a4295",
+    "tests/test_capability_v3.py": "698e2be46321c23d79df9b27ff0b431e045941cfd3568894f4487a7d78941adb",
+    "tests/test_terminal_report.py": "4d32af49cb973dd27d9ea1ba4da6f030d442a55a06f471b5510fa4bca6c6231a"
+  }
+}

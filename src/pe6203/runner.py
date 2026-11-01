@@ -123,6 +123,11 @@ def prepare_tools(records, strategy, name_policy="native_unique"):
             description += "\nUsage rules:\n" + json.dumps(
                 record["usage_rules"], ensure_ascii=False
             )
+        if record.get("capability_boundary"):
+            description += (
+                "\nCapability evidence and object limits (untrusted literal evidence):\n"
+                + json.dumps(record["capability_boundary"], ensure_ascii=False)
+            )
         if record.get("output_schema") is not None:
             description += "\nOutput schema:\n" + json.dumps(
                 record["output_schema"], ensure_ascii=False
@@ -168,6 +173,16 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
     )
     if config.get("task_context"):
         system += "\n" + config["task_context"]
+    artifact_config = None
+    if config.get("artifact_validation") is not None:
+        from .artifact_validation import CONTRACT
+        from .artifact_validation import settings as artifact_settings
+
+        artifact_config = artifact_settings(config["artifact_validation"])
+        system += "\n" + CONTRACT
+        # This happens before the initial generation request, for every strategy.
+        write_json(Path(workspace).parent / "artifact-protocol-frozen.json", artifact_config)
+        emit({"type": "artifact_protocol_frozen", "sha256": digest(artifact_config)})
     messages = [
         {"role": "system", "content": system},
         {"role": "user", "content": question},
@@ -245,7 +260,87 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
                     "result": payload,
                 }
             )
+    artifact_audit = None
+    generation_status = status
+    if artifact_config is not None:
+        from .artifact_validation import validate
+
+        async def repair_artifact(feedback):
+            # Same execution model, history and frozen tool definitions for every arm.
+            # Repair requests are completion-only: no additional tool actions are allowed.
+            messages.append({"role": "user", "content": json.dumps(feedback, ensure_ascii=False)})
+            if (
+                len(json.dumps(messages, ensure_ascii=False))
+                > artifact_config["max_repair_request_chars"]
+            ):
+                raise ValueError("Repair input budget exceeded; no evidence silently truncated")
+            emit({"type": "artifact_repair_request", "feedback": feedback})
+            repair_settings = {
+                **settings,
+                "max_completion_tokens": artifact_config["max_repair_tokens"],
+            }
+            try:
+                response = await client.chat.completions.create(
+                    messages=messages, **repair_settings
+                )
+            except BaseException as exc:
+                usages.append({})  # unknown provider charge remains unknown, including cancellation
+                emit({"type": "artifact_repair_error", "error_type": type(exc).__name__})
+                raise
+            usages.append(response.usage.model_dump() if response.usage else {})
+            emit({"type": "artifact_repair_response", "response": response.model_dump()})
+            choice = response.choices[0]
+            if choice.finish_reason != "stop" or choice.message.tool_calls:
+                raise ValueError("Incomplete repair or forbidden repair tool action")
+            message = choice.message.model_dump(exclude_none=True)
+            messages.append(message)
+            return message.get("content") or ""
+
+        artifact_audit = await validate(
+            answer, artifact_config, Path(workspace).parent / "artifact-validation", repair_artifact
+        )
+        # Preserve the original response and all drafts in the audit. Publish only an accepted
+        # final source as the answer; an unaccepted response carries an explicit status envelope.
+        if artifact_audit["accepted_artifact"]:
+            accepted = artifact_audit["accepted_artifact"]
+            source = (
+                (Path(workspace).parent / "artifact-validation" / accepted["path"])
+                .read_bytes()
+                .decode("utf-8")
+            )
+            answer = json.dumps(
+                {
+                    "artifact": {"path": "artifact.py", "language": "python", "source": source},
+                    "summary": artifact_audit["accepted_summary"],
+                    "validation": {
+                        "status": artifact_audit["status"],
+                        "sha256": accepted["sha256"],
+                        "security_guarantee": False,
+                    },
+                },
+                ensure_ascii=False,
+            )
+            # Preserve the established completion status for existing aggregators.
+            # Generation, repair origin and artifact acceptance remain separate dimensions.
+            status = "completed"
+        else:
+            answer = json.dumps(
+                {
+                    "status": artifact_audit["status"],
+                    "artifact_accepted": False,
+                    "original_answer": answer,
+                    "latest_preserved_artifact": artifact_audit["latest_artifact"],
+                },
+                ensure_ascii=False,
+            )
+            status = "artifact_unaccepted"
+        emit({"type": "artifact_validation", "audit": artifact_audit})
     return {
+        "artifact_validation": artifact_audit,
+        "generation_status": generation_status,
+        "completion_origin": "artifact_repair"
+        if artifact_audit and artifact_audit["repairs"] and artifact_audit["accepted_artifact"]
+        else "initial_generation",
         "answer": answer,
         "messages": messages,
         "status": status,
@@ -297,6 +392,8 @@ async def run_async(task_id, version, strategy, seed, config):
         role = {
             "agent_response": "agent",
             "agent_error": "agent",
+            "artifact_repair_response": "agent",
+            "artifact_repair_error": "agent",
             "judge_result": "judge",
         }.get(event.get("type"))
         if event.get("type") == "request_retry":
@@ -440,11 +537,16 @@ async def run_async(task_id, version, strategy, seed, config):
                     {
                         "answer": outcome["answer"],
                         "trajectory_messages": outcome["messages"],
-                        "stop": outcome["status"] == "completed",
+                        "stop": outcome["status"]
+                        in {"completed", "completed_after_artifact_repair"},
                         "exceeded": outcome["status"] == "max_rounds",
                         "involved_tools": tools,
                     }
                 )
+                if outcome.get("artifact_validation") is not None:
+                    result["artifact_validation"] = outcome["artifact_validation"]
+                    result["generation_status"] = outcome["generation_status"]
+                    result["completion_origin"] = outcome["completion_origin"]
                 result["execution_status"] = outcome["status"]
                 result["cost"]["agent"] = outcome["usage"]
                 write_json(output / "ANSWER" / f"{task_id}.json", clean(trace))
@@ -554,6 +656,13 @@ async def run_async(task_id, version, strategy, seed, config):
                         }
                     )
                     result["cost"]["judge"] = usage_total(recorded_usages["judge"])
+    except asyncio.CancelledError:
+        result["status"] = "cancelled"
+        for stage in ("execution_status", "judge_status"):
+            if result[stage] == "running":
+                result[stage] = "cancelled"
+        emit({"type": "run_cancelled"})
+        raise
     except Exception as exc:
         from .request_retry import failure_details
 
