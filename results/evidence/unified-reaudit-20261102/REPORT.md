@@ -204,7 +204,7 @@
 
 其中匹配队列actor/judge收据USD 6.9149795745；较广历史账本USD 4.753494864；updater收据USD 0.161608292。三者有重叠，**不可相加**。较广账本含课程基线、准入、原生诊断相关模型请求等。保留3笔未决账本请求；另有早期失败actor请求缺ID，不能仅用网页/key累计额度补记为0。
 
-`cost-receipts.json`给出去重来源；`cost-audit.json`给出账本原数、复算、范围和未知。新字典、差分、能力合并与关系探测轮费用在独立账本另报，不混入以上历史快照。
+`cost-receipts.json`给出去重来源；`cost-audit.json`给出账本原数、复算、范围和未知。五项新机制轮费用在独立账本另报，不混入以上历史快照。
 
 ## 已推进的新机制
 
@@ -228,7 +228,7 @@
 
 独立24调用parser状态诊断发现无效调用保留旧诊断与位置，后续有效调用清空。最初怀疑的fresh-invalid崩溃未发生；不把状态现象写成产物错误根因。此诊断$0，不算开发通过。
 
-四项新机制含关系探测生成费用合计$0.915632808，加历史去重下界$7.2084398105，共$8.1240726185；历史未知费用仍未结清。
+五项新机制含关系探测生成费用合计$1.094071176，加历史去重下界$7.2084398105，共$8.3025109865；历史未知费用仍未结清。
 
 ## 复算
 
@@ -253,6 +253,26 @@ uv run python scripts/render_reaudit_report.py
 
 relational_probe_memory v1完成10格原题开发：283正常完成0/2→0/2、完整产物0/2→0/2、TF9.7→8.4；全变化正常1/4→1/4、产物均0/4、TF9.75→9.0。开发失败，无验证。生成3笔+开发117笔共$0.201469284，新增未知0。知识源冻结327374b，审查bed4560。最后两份产品审查前意外暴露两臂汇总分数，此偏离与原冻结复算器均保留；数值门槛本身也失败。详见../relational-probe-memory-20261102/RESULT.md。
 
-四个版本分属三个机制方向：无损表示2轮、能力合并1轮、状态关联1轮。尚未满足用户每个获选方向2–5个新机制版本的全部迭代要求，不能把版本计数或负结果当成Goal完成。
+五个版本分属三个已检验机制方向：无损表示2轮、能力合并1轮、状态关联及程序裁剪2轮。尚未满足用户每个获选方向2–5个新机制版本的全部迭代要求，不能把版本计数或负结果当成Goal完成。
 
 补审复算还包括prepare_registry_gaps.py、review_registry_charts.py、review_registry_projects.py、review_registry_math.py。原扩展直接cell-N-review.json映射已修正，优先复用原盲审，不以新事后审查覆盖原判定。
+
+状态记忆第二轮pruned_episode_memory也已完成：6条原生重放/17调用均状态等价，选择最短程序和终态记录证明；10格开发、50评分槽，源码冻结6739fbe，全部产物封存211b9ca。283正常均0/2、全属性均0/2，TF9.4→9.0、PE7.8→9.2；全变化正常均1/4、全属性均0/4，TF9.5→9.3。122笔请求$0.178438368全部结算，新增未知0。项目9–11/12轮含写操作，纯非写工具轮只有1–3轮；这削弱仅靠减少读取解决交付问题的解释，但不是根因证明。
+
+## 可复算比较表与完成边界
+
+- `candidate-maturity.csv/json`：36候选的评测层级、执行/5槽/产物覆盖和原题类别；33项有actor结果，3项止于生成/准入。
+- `pairwise-comparison.csv/json`：按同队列、同题、同阶段与SP配对，含完成、全属性、TF/PE、保持任务、工具/输运错误、n和费用；不跨任务排名。
+- `new-mechanism-cells.csv`、`new-mechanism-rounds.json`：5个新版本的全部50格、各轮门槛与淘汰理由。
+- `failure-matrix.json`、`failure-counts-by-cohort-task.json`：五类失败、事实/观察/假说区分及瓶颈排序。
+- `total-cost-audit.json`、`new-cost-receipts.json`：603新增结算收据与历史5560条无重复；合计6163条，已知下界$8.3025109865，旧未知保留。
+
+复算新增入口：`uv run python scripts/build_research_matrix.py`、`uv run python scripts/build_new_rounds.py`、`uv run python scripts/build_total_research_cost.py`。五个封存试验各自verify_trial入口保存于各evidence目录；relationalv1使用verify_trial_with_deviation.py并保留原复算器。
+
+已解决的代码/环境问题分开记录：历史直接盲审映射遗漏、固定fixture层级误标均已修正；pruned准备时未载env导致本地检查拒绝，发生于模型调用前，原计划保留且未重跑任何格。它们不记成候选性能提升。relationalv1的两份部分暴露审查不冒充完全盲审。
+
+**尚未完成：** 没有候选达到开发严格双提升，未启动新的两批独立验证；能力合并方向尚未形成有充分机制差异的第二版，未完成用户要求每个方向2–5轮的全部范围。未找到赢家不证明所有选择性适应无效；不以课程报告、负结果或合成成功替代Goal。原生bulk导入不能直接保留层级/依赖，普通终态证书又重复已测observation_coverage，均不能换名后重抽样。后续需具体的合法写操作/知识决策机制；目前不冻结无依据第六次模型试验。
+
+续路核查见 `followup-mechanism-screen.json`：固定actor要求精确绝对工作路径；普通调用分组已在budget_feedback出现，依赖图改写已由dependency_cut测试。完整状态保持的进一步写入转换仍未知，不据此断言所有范围内方案无效。当前缺的是可区分的新机制，不是用户批准；没有待运行或等待中的实验。
+
+封存证据统一复算：`uv run python scripts/verify_reaudit_closure.py`。该命令不调用模型、judge或MCP；输出`closure-verification.json`，验证数据完整性，不代表研究成功。

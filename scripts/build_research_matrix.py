@@ -32,8 +32,12 @@ def main():
             layer = "generation/admission only; no actor result"
         elif observed["independent_validation"]:
             layer = "independent execution blocks run; joint gates failed"
-        elif not changed_original:
+        elif not changed_original and item["condition_classes"].get("original_with_fixed_fixture", 0):
+            layer = "original with fixed fixture development/products; retention separate"
+        elif not changed_original and item["condition_classes"].get("controlled_synthetic_extension", 0):
             layer = "synthetic execution/products plus original retention only"
+        elif not changed_original:
+            layer = "original retention-only execution; no changed-task evidence"
         elif observed["confirmation"]:
             layer = "historical research confirmation; not current independent Goal validation"
         else:
@@ -255,7 +259,7 @@ def main():
             "rank": 1,
             "bottleneck": "Project final delivery and bounded required work",
             "basis": "Recurring original283 empty finals acrossmultiplecohorts; actualpersistedgraph/directstop evidence; affects entire required delivery. Native writes/reads andknowledge can be intervened on, but the root cause is unresolved.",
-            "action": "State-linked evidence v1 failed; preregistered replay-pruning v2 tests a different memory selection mechanism.",
+            "action": "State-linked evidence v1 and replay-pruning v2 both failed strict development; finite native state equivalence did not transfer to final delivery.",
         },
         {
             "rank": 2,

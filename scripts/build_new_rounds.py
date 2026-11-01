@@ -103,6 +103,7 @@ def main():
         "closed_new_rounds_usd": str(total),
         "combined_known_lower_bound_usd": str(Decimal(historical) + total),
         "live_round_cost_included": False,
+        "live_or_unclosed_rounds": sum(r["development_pass"] is None for r in rounds),
         "historical_unknowns_preserved": True,
         "goal_complete": False,
         "direction_status": [
