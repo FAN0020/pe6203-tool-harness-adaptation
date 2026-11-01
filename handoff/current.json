@@ -1,5 +1,5 @@
 {
-  "handoff_version": "2026-11-01-capability-withdrawal-1",
+  "handoff_version": "2026-11-01-native-record-batch-1",
   "purpose": "在干净的新聊天继续同一个研究目标，按需读取磁盘证据；不继承完整旧对话，不重新开始研究。",
   "workspace": {
     "repository": "/Users/fanysmacpro/Developer/agents/pe6203-agent-harness-safety",
@@ -8,10 +8,10 @@
     "source_thread": "01a19253-fa19-74f2-89ca-eae44eeb98fb",
     "old_goal": "用户已明确授权暂停旧聊天Goal并创建新聊天继续；旧Goal已暂停，未完成。新聊天是研究的唯一执行者。",
     "working_rule": "所有仓库命令显式使用repository作为workdir。不要扫描父目录/home；不要切换分支、创建新worktree或重置文件。保留全部已有文件、原评分、正负结果。",
-    "live_work": "6/6原benchmark开发运行全部evaluated，runner95975退出0；capability_withdrawal v1关闭，两批验证未启动，无模型进程。",
+    "live_work": "无运行实验。native_record_batch四单元完成、严格双提升失败，版本关闭；runner22445退出0。全部4产物评审先提交e47c8d3再揭盲；196raw/358source离线核验通过。",
     "current_thread": "01a19594-5645-7520-bf4f-98de0419fc4e",
-    "new_goal": "同一完整Goal active且未完成；本轮为实际6单元机制试验，不是无进展阻塞轮。",
-    "latest_frozen_execution_commit": "23b4df6"
+    "new_goal": "同一完整Goal active且未完成；本轮为12原生准入+4原题开发的实际机制试验，不是无进展阻塞轮。",
+    "latest_frozen_execution_commit": "8ec44b8"
   },
   "goal": {
     "create_in_new_chat": true,
@@ -21,9 +21,9 @@
   },
   "minimum_read_order": [
     "handoff/current.json：当前索引与完整约束。",
-    "HANDOVER.md：只读新版Goal和最新失效能力撤下断点。",
-    "results/evidence/capability-withdrawal-20261101/decision.json与interpretation.json：6单元结果、成本和因果边界。",
-    "results/evidence/capability-withdrawal-20261101/research-decision.json与protocol-deviation.json：新机制、来源及部分提前揭盲偏差。",
+    "HANDOVER.md：只读新版Goal和最新native_record_batch断点。",
+    "results/evidence/native-batch-knowledge-20261101/decision.json与interpretation.json：4单元结果、成本和因果边界。",
+    "results/evidence/native-batch-knowledge-20261101/research-decision.json及mechanism-projection.json：机制、来源与定向调用/停止字段。",
     "此前独立审查/五类失败矩阵仍在results/evidence/semantic-contract-maintenance-20261101/review-decision.json，仅按需定向读取。"
   ],
   "hard_constraints": [
@@ -51,6 +51,21 @@
     "ledger_lesson": "prefix-workflow轮错误追加旧ledger后已完整保留合并记录、按响应ID分离并恢复旧字节；不得再复用旧路径。"
   },
   "recent_results": [
+    {
+      "method": "native record batch v1",
+      "result": "原283Late SP/候选完成均0/1、core均0/1、TF均9；PE8.6/9.2，calls70/56，保存47/29任务。SP12轮耗尽答复空；候选第10轮length、4096completion含4083reasoning、54字符半句。严格双提升失败，无验证。",
+      "mechanism_evidence": "12通用原生调用确认parse_prd短ASCII段落一次多写、列表取ID/补链接，以及语法fallback、500截断、重复产生新记录。候选仅changed create_project增加3usage_rules，其他知识/schema/native均不改。实际两组parse_prd均0调用；不能把调用下降归因批量中介或否定整类方法。",
+      "new_discriminator": "对前3条283定向顺序核查：各只analyze一次，第10/11轮；不支持反复分析循环。早期主要创建和依赖写入。当前candidate提示后也不使用batch，采用/适用性原因未知。",
+      "retention": "235两组知识字节相同，都完成/TFPE10；core SP0/1候选1/1。SP把8月下跌称plateau；措辞宽松敏感性不改变283拒绝，不作适应因果解释。",
+      "cost": "48请求=26actor+20judge+2preflight，USD0.085840668，未知0/未结0；updater0，12原生调用模型成本0。",
+      "verification": "56针对性测试；196rawfiles/358sourcefiles离线核验；e47c8d3提交全部评审后揭盲。相同协调者，非独立人工。",
+      "paths": [
+        "reports/native-record-batch-development.html",
+        "results/evidence/native-batch-knowledge-20261101/decision.json",
+        "results/evidence/native-batch-knowledge-20261101/interpretation.json",
+        "results/evidence/native-batch-knowledge-20261101/reproduction.txt"
+      ]
+    },
     {
       "method": "source-certified capability withdrawal v1",
       "result": "原283Late三组完成均0/1、core均0/1。SP TF9.8/PE9.6/calls77；warning诊断9.2/8.6/72；主withdrawal9.8/8.6/43。全为12轮耗尽、末轮tool_calls，非4096length；保存54/43/36个有效任务但最终答复空。未晋级。",
@@ -144,12 +159,12 @@
     }
   ],
   "next_action": {
-    "state": "本轮有实质进展：首次 whole-tool withdrawal 与warning/SP同期6单元试验完成，具体版本关闭，无未完成实验或下一已准入候选。完整Goal active未完成。",
-    "research_direction": "本轮证明计划已持久化、减少调用与首轮输入仍未交付；不能以停止字段断言根因。下轮须找到不同的范围内干预以区分持续扩写/修订与最终交付的解释，不为胜出重复当前版本。",
-    "do_not_repeat": "不重跑capability_withdrawal v1或事后晋级warning；不简单再删同类工具/同组数学参数，不重开377，不重复预算/流程旧提示。当前SP对撤下3工具也0调用；不能声称已证明避免坏调用中介无效。",
-    "remaining_source_findings": "securitybuilder22本地模块+models.yaml+package.json三个阶段字节一致，无支持改变它的依赖边；外部依赖/全局初始化未全证明。workspacehealth有空项目+includeMemories=false可能成功分支，未作为全局无效工具撤下。",
-    "scope_option": "state-conditional tool exposure would change actor protocol; do notexecute. Not a blocker for otherlegalmechanisms.",
-    "required_next_progress": "新的合法、清楚、有依据、依赖齐全、可证伪且公平的机制；无需试验前成功证明。不能把报告/归档或重复综述当突破。"
+    "state": "本轮有实质进展：原生批量机制准入与4单元同期试验完成；具体版本关闭，无运行实验或下一已准入候选。完整Goal active未完成。",
+    "research_direction": "候选和SP均未采用原生parse_prd，中介未激活。下一项须能区分路线采用与输入适用性的不同知识表示/依赖选择机制，先据无题目源码与通用探针核清可用字段、选择冲突和保护范围；再加命令句不是新机制。",
+    "do_not_repeat": "不重跑native_record_batch v1，不把0采用外推批量工具无效；不强制actor调用，不加runtime宏，不调预算，不重开377，不再使用反复analyzer循环作为已证明根因。",
+    "remaining_unknowns": "为何没有采用：输入域/字段限制、知识位置与选择、native create_project响应推荐create_task，或规划偏好？未隔离。批量正确采用是否减少总reasoning/依赖编辑未知。",
+    "scope_option": "新bulk API、macroexecutor或状态强制调用会改actor/native边界，未执行，不阻塞其他合法知识适应。",
+    "required_next_progress": "新候选须合法、机制明确、有依据、依赖齐全、可证伪且公平；无需事先有效证明。报告整合仍需做但不替代原benchmark双提升。"
   },
   "on_demand_map": {
     "current_protocol": "experiments/extensions/experience-brief-training-v1/protocol.json",
@@ -176,10 +191,10 @@
       "reports/course-completion-plan.html"
     ],
     "large_archives": "各results/evidence下tar.gz仅复现需要时按manifest定向提取，不整体展开或加载。results/raw是旧原始执行，不能全量扫描内容。",
-    "latest_admission_review": "results/evidence/capability-withdrawal-20261101/research-decision.json",
-    "latest_diagnostic": "results/evidence/capability-withdrawal-20261101/mechanism-observations.json",
-    "latest_development": "results/evidence/capability-withdrawal-20261101/decision.json",
-    "latest_reproducer": "results/evidence/capability-withdrawal-20261101/verify_archive.py"
+    "latest_admission_review": "results/evidence/native-batch-knowledge-20261101/research-decision.json",
+    "latest_diagnostic": "results/evidence/native-batch-knowledge-20261101/mechanism-projection.json",
+    "latest_development": "results/evidence/native-batch-knowledge-20261101/decision.json",
+    "latest_reproducer": "results/evidence/native-batch-knowledge-20261101/verify_archive.py"
   },
   "blocked_audit": {
     "status": "blocked",
@@ -211,13 +226,23 @@
     ],
     "resume_condition": "需要新的、具体且范围内的机制证据或用户给出的新研究方向，使失败依据→方法/固定源码→可执行知识差异→冻结验证链能够成立。单纯重复相同搜索/采样不构成解除阻塞。",
     "preserved": "完整objective、原评分、正负结果、固定模型/供应商/解码/单次预算/评分协议不变。",
-    "superseded_for_current_work": "历史阻塞记录保留；用户恢复后多轮均有真实机制试验进展，本轮完成6单元并关闭候选，不累计重复阻塞。Goal active未完成。"
+    "superseded_for_current_work": "历史阻塞记录保留；恢复后多轮均有真实机制试验。本轮12原生+4原题调用、具体版本关闭，不累计重复阻塞；Goal active未完成。"
   },
   "current_round_authority": {
     "source": "用户2026-11-01同一Goal研究路径与执行授权；课程DOCX SHA256 6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d；分项来源见review-decision.json。",
     "review": "唯一授权独立agent只读，使用ai-pipeline-evaluation；已完成，不改文件、不跑实验、不操作Goal、不派生agent。主线程唯一写者/实验执行者。",
     "goal": "完整双提升、两批各自通过、TF与保持不降、课程交付均保留；本轮未达标，不标complete。",
     "historical_choices": "旧暂停/审批/优先级不覆盖后续授权；正例依赖仅适用于确实需要正例的机制；保留/删除与LLM参与不是禁区。",
-    "next_candidate": "本轮撤下具体版本失败不外推全部知识删除/LLM适应无效。固定原生runtime/actor之外，tool knowledge列表相等是此前实现选择；本轮明确研究其删除机制，无新增永久禁区。"
+    "next_candidate": "当前批量路线版本未双提升不否定全部工具知识适应；无下一已冻结候选。独立审查已完成，不新开审查循环。"
+  },
+  "active_round": {
+    "status": "closed_development_failed",
+    "spec": "experiments/native-record-batch-v1.json",
+    "evidence": "results/evidence/native-batch-knowledge-20261101",
+    "raw": "results/raw/native-record-batch-pilot-20261101",
+    "runner_exit_code": 0,
+    "review": "4/4审查在e47c8d3提交后揭盲；runnerstdout此前未读。同协调者，非独立人工。",
+    "scope": "仅changedLatecreate_project3usage_rules；原生parse_prd一次写多条，参数/schema/其他知识不改；235同K0。",
+    "decision": "strictcompletion/coregainfalse;TFandretentionnondecrease true. No validation; goal incomplete."
   }
 }

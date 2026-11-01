@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PE6203 · 原生多记录写入知识开发试验</title>
+<style>body{font:16px/1.7 system-ui,sans-serif;color:#17273c;background:#f5f7fa;margin:0}main{max-width:1000px;margin:auto;padding:32px 22px 70px}h1{line-height:1.25;font-size:32px}h2{font-size:23px;margin-top:32px}a{color:#075aa8;overflow-wrap:anywhere}code{overflow-wrap:anywhere}table{border-collapse:collapse;width:100%;background:white}th,td{padding:11px;border:1px solid #d7dee8;text-align:left;vertical-align:top}.scroll{overflow-x:auto}.notice{background:#fff0d8;border-left:5px solid #c67a14;padding:16px 20px}.muted{color:#526277}li{margin:8px 0}@media(max-width:600px){main{padding:20px 16px}h1{font-size:26px}th,td{padding:8px}}</style></head><body><main>
+<p class="muted">PE6203 · 同一研究 Goal · 2026-11-01 · native_record_batch v1</p>
+<h1>原生多记录写入路线没有被采用；本版未实现双提升</h1>
+<p class="notice">冻结的 4 条原 benchmark 开发运行、20 个官方评分槽位已全部完成。变化任务 283 Late 的正常完成和产物全项通过，两组都为 0/1。按事前规则关闭本版，不启动两批验证。完整 Goal 仍未完成；本结果不代表整类批量写入或选择性适应方法无效。</p>
+<h2>从失败证据到具体机制</h2>
+<p>此前撤下失效工具后，调用数和初始输入量下降，却仍未交付。此次只读取三条已完成 283 运行的调用顺序：每条只分析复杂度一次，首次在第 10 或 11 轮，前面主要创建任务和补依赖。因此，“反复运行分析器”不符合这三条记录；记录构建消耗轮次是观察，是否构成截断根因尚待干预。</p>
+<div class="scroll"><table><tr><th>失败类别</th><th>本轮有界结论及证据性质</th></tr>
+<tr><td>知识适应</td><td>事实：候选和 SP 均未调用 parse_prd。候选更新已暴露，但预定批量写入中介没有激活。为何不选该路线未知。</td></tr>
+<tr><td>执行与预算</td><td>事实：SP 到 12 轮仍在调用；候选第 10 轮 length，4096 输出 token 中 4083 为 reasoning。可证明截断，不能从停止字段单独推定原因。</td></tr>
+<tr><td>产物生成</td><td>事实：分别保存 47/29 个任务，覆盖三个需求领域、引用有效且无环；最终答复为空/半句话。存储成功不能替代最终交付。</td></tr>
+<tr><td>环境与数据</td><td>283 是规划任务，无需实际 CSV/日志输入；235 数据完整嵌在原问题中。原生写入均使用冻结运行环境；377 路线保持关闭。</td></tr>
+<tr><td>评测不确定性</td><td>每条件仅一次开发运行；同一协调者审查。235 的趋势措辞有解释敏感性，且两组知识相同；不能归因更新。官方高分不替代产物正确性。</td></tr></table></div>
+<p>排名优先考虑的两个可干预点是记录构建/依赖写入成本，以及已保存结构到最终交付的转换。前者有可调用的原生替代操作，可做最小干预；后者尚不能由终止字段建立因果。没有再添加“避免反复分析”的旧式提示。</p>
+<h2>论文、源码与实际借鉴</h2>
+<p>复用已核读的 <a href="https://arxiv.org/html/2401.06201v3">EasyTool 2401.06201v3</a> 和作者 microsoft/JARVIS 仓库 SHA <code>7624cf388b47334ff8a0868e7d862dde18cfda86</code>。<a href="https://github.com/microsoft/JARVIS/blob/7624cf388b47334ff8a0868e7d862dde18cfda86/easytool/data_process.py#L29">data_process.py</a> 消费准备后的工具说明；<a href="https://github.com/microsoft/JARVIS/blob/7624cf388b47334ff8a0868e7d862dde18cfda86/easytool/easytool/toolbench.py#L140">toolbench.py 参数选择</a> 使用说明和例子。借鉴的是可调用验证的参数化知识；未采用作者分阶段 actor、检索或执行方式。使用本项目已有原生一对多写入，是项目特定扩展，不称为完整复现 EasyTool。</p>
+<p>原生 parse-prd.js 三阶段同 SHA <code>d84ed2420bd56f9c648fe6a730fa61b9a12a3ab01254acbad86b5626859c338d</code>。它是正则导入器，并不智能设计任务；不生成层级/依赖，不返回新任务 ID，不保证幂等。冻结的 12 次通用原生调用验证：合格的三个短段落完整写入；平铺列表提供 ID，之后可补链接；错误语法产生 fallback，超长段落被截断，重复导入产生新记录。全部正负证据保留，不能当作 benchmark 成功。</p>
+<p>候选仅在实际变化的 create_project 记录增加三条 usage_rules，提供已验证输入域、调用后的 ID/链接恢复和限制。它利用现有 parse_prd 一次写多条记录，区别于此前每页/每条单写流程。全部原生工具、模型可见 schema、其他知识记录和 actor 不变。仅在不损失所需字段和内容时适用；其余记录仍用普通写入。未指定任务数量或降低复杂度，未把题目、答案或已评分轨迹送入更新器。此次是确定性证书变换，LLM updater 调用为零。</p>
+<p>另一方向——新增批量 API 或执行器——需要改变运行边界，未执行。唯一已完成的独立策略审查意见已纳入：不要求试验前有效证明、不把原生成功当成产物成功、只对真正需要正例的机制要求正例。<a href="../results/evidence/native-batch-knowledge-20261101/research-decision.json">完整候选取舍、约束来源与审查采纳记录</a>保留课程、用户、公平条件和实现选择的区别。</p>
+<h2>事前冻结与公平条件</h2>
+<ul><li><code>c577a3d</code> 冻结原生准入；<code>8ac249b</code> 冻结实现、4 单元开发及条件验证；<code>8ec44b8</code> 冻结全部知识。56 项针对性测试通过。</li>
+<li>原 283 Late 和 235 Late，SP/候选各一次；沿用已暴露的任务族，无新增挑题。模型 deepseek-v4.1-flash-1017、DigitalOcean、temperature 0、每次 4096 token（含 reasoning）、12 轮，以及原工具环境、评分和产物规则不变。</li>
+<li>开发要求正常完成与产物全项通过均严格超过同期 SP，TF 和保持能力不下降；通过才执行两批各 12 条验证。两批指空工作区、无共享 actor 记忆的全新执行，使用相同知识；不是未见任务泛化或供应商随机性的统计独立证明。</li>
+<li>runner 输出重定向；四份产物判断在 <code>e47c8d3</code> 提交后才揭示分组/逐项评分及方法映射。行为和路径可能暴露身份，审查仍由同一协调者完成，不称独立人工盲审。</li></ul>
+<p><a href="../experiments/native-record-batch-v1.json">完整冻结协议</a> · <a href="../results/evidence/native-batch-knowledge-20261101/knowledge-audit.json">知识边界核查</a> · <a href="../results/evidence/native-batch-knowledge-20261101/review-freeze.json">揭盲前审查冻结</a></p>
+<h2>实际结果与决策</h2>
+<div class="scroll"><table><tr><th>任务 / 策略</th><th>正常完成</th><th>产物全项通过</th><th>TF / PE</th><th>工具调用</th><th>实际停止</th></tr>
+<tr><td>283 Late · SP</td><td>0/1</td><td>0/1</td><td>9.0 / 8.6</td><td>70</td><td>12 轮；答复空</td></tr>
+<tr><td>283 Late · 候选</td><td>0/1</td><td>0/1</td><td>9.0 / 9.2</td><td>56</td><td>第 10 轮 length；54 字符半句话</td></tr>
+<tr><td>235 Late · SP</td><td>1/1</td><td>0/1</td><td>10.0 / 10.0</td><td>3</td><td>正常结束；把 8 月下跌称为 plateau</td></tr>
+<tr><td>235 Late · 候选</td><td>1/1</td><td>1/1</td><td>10.0 / 10.0</td><td>3</td><td>正常结束</td></tr></table></div>
+<p>283 的存储覆盖、结构和范围保留均通过；交付项分别为 unknown（无答复）和 fail（未完成句子），全项通过均为零。没有用更少任务数、较低自报难度或较高 PE 替代质量。本轮 ECS 为 null，部分阶段不能重建课程的三阶段指标。</p>
+<p>235 两组的全部图表数据均保留，K0 字节完全相同，质量差异不归因适应。即使宽松接受“plateau”并把 SP 235 改判为通过，283 严格双提升仍失败；原判定不改。两组关于节日原因的推测均不作为已验证因果，渲染外观未另加为验收要求。</p>
+<p><strong>关闭 native_record_batch v1，不重复抽样、不启动验证。</strong>两组均零次调用批量导入，因此本次支持“这版知识没有带来实际收益”，不支持“正确采用批量写入也无效”。候选末轮 prompt 63698 token，SP 56588；候选另调用了平铺列表和复杂度分析。观察体积、规划方式、输入域限制或路线偏好仍是竞争解释，没有被隔离。</p>
+<p>下一步需要能区分路线采用与输入适用性的不同知识表示/依赖选择机制，并先用无题目源码和通用探针建立依据；再加一句命令或强制 actor 调用会分别重复失败版本或越出公平边界。目前没有下一已准入候选，尚未证明全部合法路线穷尽。</p>
+<h2>费用、复现与剩余交付</h2>
+<p>本轮新增 <strong>48 次 API 请求，USD 0.085840668</strong>：26 actor、20 judge、2 preflight；未知费用 0，未结算 0。updater 请求/token/费用均 0；离线知识生成用时未单独计量。12 次原生准入不消耗模型费用。全部失败和原评分保留，没有与旧账本混用。</p>
+<p>离线核验通过：196 个原始归档成员（含日志、原生状态与固定源码）、358 个执行源码文件，全部执行状态、评分、审查和费用可复算。运行 <code>python3 results/evidence/native-batch-knowledge-20261101/verify_archive.py</code> 不需要凭据、网络或解包。新的 API 运行不是确定性重放，不应为胜出重采。</p>
+<p><a href="../results/evidence/native-batch-knowledge-20261101/decision.json">完整结果</a> · <a href="../results/evidence/native-batch-knowledge-20261101/mechanism-projection.json">定向机制投影</a> · <a href="../results/evidence/native-batch-knowledge-20261101/interpretation.json">事实、未知与结论边界</a> · <a href="../results/evidence/native-batch-knowledge-20261101/reproduction.txt">复现说明</a></p>
+<p>历史 NU/FR 课程基线继续保留，未冒充同期对照。最终课程综合报告、完整复现材料和展示仍需整合；原 benchmark 双提升及两批独立验证仍未实现。本报告、原生探针和负结果均不构成 Goal 完成。</p>
+</main></body></html>

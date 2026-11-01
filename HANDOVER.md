@@ -24,7 +24,21 @@
 
 交接时没有正在运行的实验或renderer。研究结果基点为`ac4c328`，本次交接不改任何旧结果。交接前仅出现EasyTool/Play2Prompt/工具描述重写的搜索线索，尚未完成原文与固定源码核对，也没有新候选或新模型调用；不能当作已完成研究。新聊天创建同一完整目标的Goal后自主推进，旧聊天不再并发研究。
 
-### 当前最新状态：失效能力撤下完成6条开发，未双提升
+### 当前最新状态：原生批量路线完成4条开发，未被采用、未双提升
+
+- 同一完整 Goal active、未完成；本轮为真实机制试验，不是阻塞轮。主线程唯一写者/实验执行者；无新 agent/worktree、push、部署或外发。
+- 报告 [`reports/native-record-batch-development.html`](reports/native-record-batch-development.html)，离线复核 `python3 results/evidence/native-batch-knowledge-20261101/verify_archive.py`。
+- 定向复查上一轮3条283调用顺序：每条只分析复杂度一次，首次第10/11轮，之前主要创建与依赖写入。因此不支持“反复分析循环”；仍未隔离真正截断原因。
+- 复用 EasyTool v3 / microsoft JARVIS `7624cf3` 的可调用验证参数知识机制，不改其执行器。本项目扩展：原生 parse_prd 一次写多条记录，三阶段实现相同；并非新增工具。`c577a3d` 冻结12次通用原生准入，全部预定属性成立：短段落保存、取ID补链接、坏语法fallback、长段落截断、重复非幂等。
+- `8ac249b` 冻结实现/4单元开发及条件验证，`8ec44b8` 冻结知识；56针对性测试通过。仅实际变化 create_project 记录增加3条 usage_rules，保护全部其他记录/schema/runtime/actor/预算，235精确K0。无模型updater，无题目/答案/评分轨迹进入候选生成。
+- runner22445退出0，4/4 evaluated，20评分槽位。全部4产物审查先于评分/方法揭盲，在 `e47c8d3` 提交；同协调者，可从行为推测方法，不称独立人工。
+- 原283Late：SP/候选完成均0/1、core均0/1、TF均9；PE8.6/9.2，calls70/56，保存47/29个任务，结构引用有效且三领域覆盖。SP12轮耗尽、答复空；候选第10轮length、4096输出含4083reasoning、最终54字符半句话。停止字段证明截断，不证明根因。
+- 两组 parse_prd 均0调用。预定批量写入中介未激活；调用下降或PE上升不能归因该机制，也不能证明正确采用batch仍无效。下一机制须区分采用与适用性解释，不能再加命令句或重跑到赢。
+- 235都完成、TFPE10，core SP0/1候选1/1；SP把8月下跌称plateau。两组知识相同，不作适应因果解释；即使宽松接受该词，283拒绝不变。未改原判定。
+- 新费用48请求（26actor/20judge/2preflight）USD0.085840668，未知0/未结0，updater0；12原生调用无模型费用。196原始归档成员（含日志/原生状态/12固定native源码）和358执行源码文件离线核验通过。
+- 本版关闭，预注册两批各12条验证未启动，无运行实验或下一已准入候选。既有NU/FR和全部正负结果保留；最终综合报告/复现/展示与完整原benchmark双提升仍欠，不能用此次归档或负结果标complete。
+
+### 已结束上一轮：失效能力撤下完成6条开发，未双提升
 
 - 同一完整Goal active、未完成；本轮是实际机制检验，不是阻塞轮。原分支未切换，无新agent/worktree、push、部署或外发。
 - 报告[`reports/capability-withdrawal-development.html`](reports/capability-withdrawal-development.html)，离线复核`python3 results/evidence/capability-withdrawal-20261101/verify_archive.py`。
