@@ -4,7 +4,7 @@
 
 ## Research conclusion
 
-<span style="color:#1250A0">The implementation can recover specific tool capabilities after an environment change, but no tested candidate has demonstrated the required joint improvement over the original Selective Patch on the frozen original benchmark subset. The ready_link development study tied normal completion at 1 of 4 changed conditions and reduced mean official task fulfillment from 9.8 to 7.4; its apparent product-quality gain occurred where the two arms used identical knowledge. A later offline audit of 36 registered candidates and seven recent rounds found no qualifying successor. These are separate cohorts, not a pooled effect estimate. [3, 12]</span>
+<span style="color:#1250A0">Selective updating recovered specific obsolete-tool and required-parameter failures, while the 27-run course comparison found higher mean planning and efficiency (PE) for the original Selective Patch but lower normal completion than No Update and Full Rewrite. The separate QI-V2 original-task comparison is incomplete (25/27 scored) and has no manual complete-product review. The later 36-candidate audit found no successor with strict joint gains in normal completion and complete product quality over a contemporaneous Patch control. These cohorts cannot be pooled; the stronger research objective remains unmet. [1, 12, 13]</span>
 
 This report separates the completed 27-run course comparison, additional exposed development cohorts, and controlled synthetic diagnostics. Their scores are not pooled. No Update and Full Rewrite remain course baselines; new candidate studies use a fresh, contemporaneous original Selective Patch control. Five judge ratings per trajectory are measurement repeats, not five independent agent runs.
 
@@ -26,16 +26,18 @@ The course brief requires fixed model, decoding, tasks and judge across No Updat
 | --- | --- | --- |
 | Course baseline | 133, 235, 283 × Early, Middle, Late × NU, FR, SP; 27 runs | Course comparison; one run per cell |
 | Current original development | 133 Middle/Late and 283 Middle/Late; 235 Late retention; 10 runs per two-arm study | Exposed development; fresh SP control |
-| Daily migration | Task 90 × three stages × four methods; 12 runs | Separate exposed capability-recovery cohort |
-| Synthetic diagnostics | Predeclared generated cases in separate protocols | Mechanism discrimination only |
 
 Task 133 concerns secure mathematical-expression guidance; task 283 requests a structured project plan; task 235 checks unchanged chart-tool behavior. TOOL coverage in the course subset consists of relevant optional additions, not mandatory deletion or rename. The data and tools are available for the chosen original conditions. The missing-input search route for task 377 remains closed. Task 283 shares a server family with earlier development, so the subset is not an unseen-family holdout.
+
+<span style="color:#1250A0">Earlier team material considered task 223, research-paper retrieval and webpage publication. The course matrix instead froze executable original tasks 133/283/235; it does not test that scenario or a verified book task. Task-223 fetch/publication services were unverified for this matrix, and a later Netlify variant changes the backend. No written team sign-off for the switch was found. The brief permits a documented fixed subset, so the 27 scores remain valid for their stated tasks. [10, 11]</span>
+
+<span style="color:#1250A0">The historical “29 candidates” were registry names, not 29 complete course matrices: 27 had actor evidence, two only generation/admission evidence, and none task-223 actor results. The registry later listed 36 audited and 43 total names. Versions and original, fixed-fixture or synthetic inputs need separate accounting; new paired effects need a same-condition Patch control. [11, 12]</span>
 
 ### Shared execution and information boundaries
 
 Current development fixes deepseek/deepseek-v4.1-flash-1017 on DigitalOcean with fallback disabled, temperature 0, 4096 actor completion tokens including reasoning, 12 rounds, and request/run/tool timeouts of 120/900/30 seconds. No model seed is sent. The official rubric uses five first-valid judge slots, at most two logical attempts per slot and the frozen transport-retry policy. Judge tool observations are limited to 1000 characters. Historical course routing configuration is retained as recorded, rather than retroactively described as the current provider lock. [1, 3]
 
-Updaters may consume changed metadata, relevant source and frozen task-free native probes. They may not consume benchmark questions, answers, scored trajectories or manually distilled answer recipes. Candidate knowledge, sources and hashes, order, repetitions, acceptance, failure handling and an independent ledger are frozen before model calls. A change of actor, model, single-run budget or acceptance threshold would require a different authorized study.
+<span style="color:#1250A0">Updaters may use changed metadata, relevant source and frozen task-free native probes, but not benchmark questions, answers, scored traces or distilled answer recipes. Knowledge, sources, task conditions, schedule, metrics, failure handling and ledger are frozen before calls. Actor, model, per-run budget and acceptance remain fixed for a comparable study.</span>
 
 ## Course baseline results
 
@@ -64,6 +66,18 @@ All 27 trajectories have complete official ratings: 20 ended normally, five reac
 ECS is calculated for each matched task as mean TF across Early, Middle and Late minus its standard deviation, then averaged over the three tasks. Both the released population and paper sample conventions are retained. SP has zero model-update tokens but does not lead ECS in this cohort. Early task 133 varied despite identical knowledge across methods, affecting ECS without an adaptation difference.
 
 For changed tasks, SP minus NU mean TF is 0.0 in Middle and +0.1 in Late; FR is −0.1 and +0.1. For unchanged task 235, all methods have TF 10 in Middle and Late, with zero change from NU Early. This establishes score retention of chart-specification behavior, not browser-rendered dashboard correctness. NU Middle also repeats the map call five times, showing that repeated calls are not unique to Full Rewrite.
+
+## <span style="color:#1250A0">Separate QI-V2 comparison on the same original task IDs</span>
+
+<span style="color:#1250A0">The QI-V2 hybrid_v2 Selective Patch is a distinct knowledge version, pinned to bdf0ccc5c3466517725c84e7f715234733cde4a8. It planned the same 133/235/283 × three stages × NU/FR/QI-V2 comparison, but two adaptation failures prevented actor execution. The 25 scored trajectories have 125 valid official judge slots and 19 normal completions. It cannot be merged with the complete course V1 cohort or treated as a new success claim. [13]</span>
+
+| <span style="color:#1250A0">Method</span> | <span style="color:#1250A0">Normal</span> | <span style="color:#1250A0">Scored</span> | <span style="color:#1250A0">Matched TF</span> | <span style="color:#1250A0">Matched PE</span> | <span style="color:#1250A0">Complete product</span> |
+| --- | --- | --- | --- | --- | --- |
+| <span style="color:#1250A0">NU</span> | <span style="color:#1250A0">7/9</span> | <span style="color:#1250A0">9/9</span> | <span style="color:#1250A0">9.686</span> | <span style="color:#1250A0">8.371</span> | <span style="color:#1250A0">Not reviewed</span> |
+| <span style="color:#1250A0">FR</span> | <span style="color:#1250A0">6/9</span> | <span style="color:#1250A0">8/9</span> | <span style="color:#1250A0">9.886</span> | <span style="color:#1250A0">8.714</span> | <span style="color:#1250A0">Not reviewed</span> |
+| <span style="color:#1250A0">QI-V2 SP</span> | <span style="color:#1250A0">6/9</span> | <span style="color:#1250A0">8/9</span> | <span style="color:#1250A0">9.771</span> | <span style="color:#1250A0">7.314</span> | <span style="color:#1250A0">Not reviewed</span> |
+
+<span style="color:#1250A0">Matched TF/PE use the seven task-stage triplets with all three methods scored; available-case means have unequal denominators and are not substituted. The missing FR 133-Middle and QI-V2 SP 283-Late cells remain missing, not zero. Only task 235 has a full three-stage ECS triplet for all methods. All 27 case files mark artifact quality as not manually reviewed, so neither high TF nor completion certifies the final product. Known request costs are NU USD 0.113712221, FR USD 0.140799942 and QI-V2 SP USD 0.132039527, plus USD 0.000008241 preflight; FR and SP each retain two unknown-cost records. [13]</span>
 
 ## Mechanisms tested beyond the baseline
 
@@ -100,6 +114,18 @@ Each study independently evaluates the same four original changed conditions and
 
 Dependency cut failed both strict-gain criteria. Observation coverage improved normal completion from 2/4 to 3/4 but tied core quality at 1/4; retention TF fell from 10 to 9.8. Ready link tied completion at 1/4 and reduced TF. Its two core passes were on task 133 with identical knowledge in both arms, so they do not establish an adaptation effect. Under a stricter intermediate-resource-bound interpretation of one answer, candidate core becomes 1/4; the rejection decision is unchanged.
 
+### <span style="color:#1250A0">Other candidate results and validation</span>
+
+| <span style="color:#1250A0">Separate cohort</span> | <span style="color:#1250A0">SP normal</span> | <span style="color:#1250A0">Candidate normal</span> | <span style="color:#1250A0">Complete product</span> | <span style="color:#1250A0">Decision</span> |
+| --- | --- | --- | --- | --- |
+| <span style="color:#1250A0">Sufficiency feedback confirmation, all stages</span> | <span style="color:#1250A0">17/27</span> | <span style="color:#1250A0">14/27</span> | <span style="color:#1250A0">Not established</span> | <span style="color:#1250A0">Rejected</span> |
+| <span style="color:#1250A0">Observed contract, changed tasks, two batches</span> | <span style="color:#1250A0">8/12</span> | <span style="color:#1250A0">5/12</span> | <span style="color:#1250A0">0/12 each</span> | <span style="color:#1250A0">Validation failed</span> |
+| <span style="color:#1250A0">Budget feedback, mixed local six</span> | <span style="color:#1250A0">2/6</span> | <span style="color:#1250A0">6/6</span> | <span style="color:#1250A0">Code/numeric defects</span> | <span style="color:#1250A0">Lead only</span> |
+
+<span style="color:#1250A0">The sufficiency-feedback confirmation contains 108 trajectories across four methods; its candidate increased post-change PE from 8.5444 to 9.4556 while changed-stage completion tied SP at 11/18. The overall 14/27 versus 17/27 difference arose in Early, where both arms had identical K0. The observed-contract changed-task validation split into two independent batches: candidate 3/6 then 2/6 versus SP 4/6 in each; both arms failed every complete-product check. Budget-feedback’s 6/6 versus 2/6 completion comes from a smaller mixed/reused local cohort and does not survive as a complete-quality gain. These protocols and fixtures differ from each other and from QI-V2. [12, 14, 15]</span>
+
+<span style="color:#1250A0">The offline 36-candidate audit checked 45 cohorts, 517 executed cells, 2555 valid judge slots and 445 existing product reviews. Seven recent rounds contained 69 actor trajectories; six rounds completed and one was interrupted. No version met strict completion and all-property quality gains with TF and retention safeguards. The audit describes evaluation maturity, not 36 comparable effect sizes or 36 completed course matrices. [12]</span>
+
 ### Why local savings did not establish success
 
 In ready_link Late, the candidate used 33 calls for 30 records, including 22 inline dependency writes; SP used 74 calls for 53 records and 18 later link updates. Both reached 12 rounds with an empty final delivery. The 41-call difference comprises 23 fewer creates and 18 fewer updates, so it cannot all be attributed to scheduling. Candidate Middle stopped after one list_projects call; the next response used its entire 4096-token allowance and ended with length. This proves truncation, not its root cause.
@@ -122,6 +148,8 @@ Repeated round exhaustion with incomplete handoff is a high-impact bottleneck in
 
 Saved state and final claims require separate checking. In ready_link, a substantial saved project can coexist with an empty final answer. In the dependency-factorial diagnostic, all four SP chain cases saved correct state but exhausted rounds; the candidate completed all four yet passed all product properties in only two. One candidate omitted a dependency and another changed a project description while claiming an extra tag. Completion gains alone therefore did not establish reliable quality gains. Synthetic outcomes remain separate from original benchmark success. [7]
 
+<span style="color:#1250A0">Local success has a narrower cause than full delivery: updated schema knowledge made task-133 Late calls valid before runtime repair; preserved chart records supported task-235 specification retrieval; daily=true routing recovered task-90 content. Yet observed_contract improved individual explanations while its Python deliverable stayed invalid. Budget_feedback saved a 36-record/356-hour plan in one 283-Middle run, while other answers had a SyntaxError or wrong annual total. Efficiency and stronger narrative can coexist with a failed artifact. [1, 2, 12, 15]</span>
+
 ### Environment and data
 
 A missing upstream method and an agent-generated empty argument object are different failures. The course archive records review_workspace_health(includeMemories=true) failing because listMemories is absent, alongside two rejected empty create_task calls. Those observations do not demonstrate damage to unrelated knowledge. Task 235 returns chart specifications; hosted rendering was not tested. Missing original input for task 377 is excluded as unavailable, not scored as a strategy failure.
@@ -140,6 +168,8 @@ The six-run chart rollback diagnostic gave both arms TF/PE 10 and one map call p
 | Budget feedback | 3/3 | 10.000 | 9.333 | 10.000 |
 
 In this separate 12-run exposed development cohort, No Update Late used an obsolete tool twice and failed to retrieve the current daily problem. Updated methods recovered the content through daily=true. All methods nevertheless completed all three stages, so this supports content recovery over NU, not a completion advantage over SP. Budget feedback also mislabeled setcode 221 as a card password in one answer; the actual card ID was 89631139. Core retrieval and additional unsupported assertions are distinguished. [2]
+
+<span style="color:#1250A0">A second, distinct original-task migration cohort on task 430 moved search_symbols to browse_module(query). In Late, NU called the removed entry seven times; original SP used the new query route, while FR and budget_feedback avoided the old call without testing that route. Across 12 trajectories, SP and budget_feedback each completed 3/3, NU and FR 1/3; all four had mean official TF 9.9333. This supports the specific SP routing recovery, not verified correctness of every generated Swift deliverable or superiority across tasks. [16]</span>
 
 | Cohort | Known USD | Unknown | Accounting scope |
 | --- | --- | --- | --- |
@@ -165,7 +195,7 @@ MCPEvol-Bench is pinned to commit 888c779a0fe735f612ca62bdd1fdd7c9e6bf8701 and d
 | Changed-task recovery and unchanged retention | Measured; limited recovery evidence, no general superiority claim |
 | Causal SP under-update and over-update examples | Not established; related trajectories and failed diagnostic retained |
 | Strict original development dual improvement | Not achieved by the reported candidates |
-| Two independent validation batches | Not started because development gates failed |
+| <span style="color:#1250A0">Two independent validation batches</span> | <span style="color:#1250A0">Observed contract ran two batches and failed; no candidate passed</span> |
 | Report and reproducibility entry | Produced locally; no external submission claimed |
 | Presentation work | Ended per user; no further slides or speaker scripts requested |
 
@@ -195,18 +225,18 @@ No new candidate is admitted by this synthesis. The report closes a delivery gap
 
 [10] Course authority. PE6203 Group Project 4 brief. Tool Harness Adaptation under Environment Change. Supplied DOCX SHA256 6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d. User research requirements and later presentation-scope update take precedence for this work.
 
+## <span style="color:#1250A0">Evidence and references continued</span>
+
 <span style="color:#1250A0">[11] Task selection and candidate provenance. reports/course-research/plan-alignment-20261102.md. The bounded audit ties the original paper-webpage plan, frozen course subset and 29-to-43 registry evolution to dated plans and task metadata.</span>
 
 <span style="color:#1250A0">[12] Current branch evaluation. results/evaluation/current-branch-5b772ff-20261102/REPORT.md. Offline recomputation of 36 registered candidates and later rounds; original scores, missing cells and product reviews remain separate.</span>
 
+<span style="color:#1250A0">[13] QI-V2 separate original-task comparison. results/evidence/v2-eval-20261101. Frozen plan, 27 case reports, 25 scored cells, seven matched triplets, verification.json and raw-results.tar.gz. This is a distinct hybrid_v2 knowledge version with unreviewed final products.</span>
+
+<span style="color:#1250A0">[14] Sufficiency-feedback confirmation. results/evidence/selective-search-20261031/confirmation-r1-review.json. 108 trajectories, post-change PE and stage-specific normal-completion accounting.</span>
+
+<span style="color:#1250A0">[15] Observed-contract validation and local budget audit. results/evidence/observed-contract-validation-20261031/validation-verification.json; results/evidence/matched-existing-20261031. Two validation batches and the distinct mixed local budget comparison; product reviews and costs retained.</span>
+
+<span style="color:#1250A0">[16] Tool migration. results/evidence/tool-migration-pilot-20261031. trial-verification.json and quality-review.json; twelve separate original-task-430 trajectories.</span>
+
 LLMCompiler: https://arxiv.org/html/2312.04511v3 ; https://github.com/SqueezeAILab/LLMCompiler/tree/a00c9d35507507da70e8c637eee64efc8c1857ae . Borrowed ready-prerequisite logic only; native equivalence and agent outcomes are reported separately.
-
-## <span style="color:#1250A0">2 November task selection and candidate addendum</span>
-
-<span style="color:#1250A0">The course brief permits a fixed, documented subset. Early team materials included task 223, which asks for recent research-paper retrieval and webpage publication. The course matrix later froze tasks 133, 283 and 235 before model scoring because their original inputs and local tool archives were executable without an external login. These 27 trajectories are three tasks × three stages × three methods × one agent run; they do not test the earlier paper-webpage scenario or a verified book task. The original task 223 publication and fetch services were not verified for that matrix, and a later Netlify variant changes the publication backend. No written team sign-off for the task switch was found in the audited record. [11]</span>
-
-<span style="color:#1250A0">The historical “29 candidates” refers to a later registry snapshot, not 29 completed course matrices: 27 names had actor evidence and two had only generation or admission records, with none tested on task 223. The registry later grew to 36 and then 43 names. Candidate cohorts vary by original task, fixed fixture and controlled synthetic extension; name, version and input class must stay distinct. The old 27-run baseline preserves No Update and Full Rewrite, while a new candidate requires a contemporaneous Selective Patch control on the same frozen conditions. The 29 × 27 proposal cannot be treated as a completed or directly comparable screen. [11, 12]</span>
-
-<span style="color:#1250A0">The later 36-candidate audit checked 45 cohorts, 517 executed cells, 2555 valid judge slots and 445 existing product reviews; seven recent rounds contained 69 actor trajectories, with six rounds complete and one interrupted. No version satisfied strict normal-completion and complete-product improvement with the TF and retention safeguards. These exposed development and historical results do not substitute for two fresh validation batches. [12]</span>
-
-<span style="color:#1250A0">Local signals remain research leads rather than adopted replacements: sufficiency_feedback improved PE but completed 14/27 versus Selective Patch 17/27; budget_feedback sometimes finished earlier while code or numerical summaries remained wrong; observed_contract completed 5/12 versus 8/12 for Patch across two batches, with complete product quality at 0/12 in both arms. None is inserted into the frozen original Patch or presented as a validated task-223 method. [11, 12]</span>

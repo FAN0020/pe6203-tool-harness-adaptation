@@ -27,13 +27,14 @@ with zipfile.ZipFile(HERE / 'PE6203 Research Report.docx') as z:
         content = ''.join(t.text or '' for t in p.findall('.//w:t', ns))
         if p.findall('.//w:color[@w:val="1250A0"]', ns):
             blue_paragraphs.append(content)
-    for required in ('amended 2 November 2026', '2 November task selection and candidate addendum',
-                     'The historical “29 candidates”', 'The later 36-candidate audit'):
+    for required in ('amended 2 November 2026', 'Separate QI-V2 comparison on the same original task IDs',
+                     'The historical “29 candidates”', 'The offline 36-candidate audit'):
         assert any(required in paragraph for paragraph in blue_paragraphs), required
+    assert not any('task selection and candidate addendum' in paragraph for paragraph in blue_paragraphs)
 tables = []
 for t in xml.findall('.//w:tbl',ns):
     tables.append([[''.join(x.text or '' for x in c.findall('.//w:t',ns)) for c in row.findall('w:tc',ns)] for row in t.findall('w:tr',ns)])
-assert len(tables) == 7
+assert len(tables) == 9
 labels = {'no_update':'NU','full_rewrite':'FR','selective_patch':'SP'}
 expected=[]
 for stage in ('early','middle','late'):
@@ -64,7 +65,30 @@ for key,label in [('dependency_cut','Dependency cut'),('observation_coverage','O
             assert all(math.isclose(actual[k],saved[k],abs_tol=1e-10) for k in actual),(key,arm,group)
             if group=='changed':
                 expected.append([label,'SP' if arm=='selective_patch' else 'Candidate',f"{actual['completed']}/4",f"{actual['core_pass']}/4",f"{actual['TF']:.2f}",f"{actual['PE']:.2f}"])
+assert tables[4][1:]==expected
+v2=read(ROOT/'results/evidence/v2-eval-20261101/v2-eval/summary.json')
+matched={r['strategy']:r for r in v2['matched_results']}
+expected=[]
+for arm in v2['strategies']:
+    label='QI-V2 SP' if arm['strategy']=='selective_patch' else labels[arm['strategy']]
+    mm=matched[arm['strategy']]
+    expected.append([label,f"{arm['normally_completed']}/9",f"{arm['scored']}/9",f"{mm['TF']:.3f}",f"{mm['PE']:.3f}",'Not reviewed'])
 assert tables[3][1:]==expected
+assert (v2['planned_executions'],v2['scored_executions'],v2['matched_three_method_cells'])==(27,25,7)
+v2_check=read(ROOT/'results/evidence/v2-eval-20261101/verification.json')
+assert v2_check['verified'] and v2_check['official_valid_slots']==125
+assert hashlib.sha256((ROOT/'results/evidence/v2-eval-20261101/raw-results.tar.gz').read_bytes()).hexdigest()==v2_check['archive_sha256']
+suff=read(ROOT/'results/evidence/selective-search-20261031/confirmation-r1-review.json')['summary']['arms']
+observed=read(ROOT/'results/evidence/observed-contract-validation-20261031/validation-verification.json')
+budget=read(ROOT/'results/evidence/matched-existing-20261031/trial-verification.json')['summary']
+oc={arm:{key:sum(block['arms'][arm]['changed'][key] for block in observed['blocks'].values()) for key in ('completed','core_pass')}
+    for arm in ('selective_patch','observed_contract')}
+assert oc['selective_patch']['core_pass']==oc['observed_contract']['core_pass']==0
+assert tables[5][1:]==[
+ ['Sufficiency feedback confirmation, all stages',f"{suff['selective_patch']['completed_execution']}/27",f"{suff['sufficiency_feedback']['completed_execution']}/27",'Not established','Rejected'],
+ ['Observed contract, changed tasks, two batches',f"{oc['selective_patch']['completed']}/12",f"{oc['observed_contract']['completed']}/12",'0/12 each','Validation failed'],
+ ['Budget feedback, mixed local six',f"{budget['selective_patch']['completed']}/6",f"{budget['budget_feedback']['completed']}/6",'Code/numeric defects','Lead only'],
+]
 daily=read(ROOT/'results/evidence/daily-migration-pilot-20261031/trial-verification.json')
 expected=[]
 for arm in ('no_update','full_rewrite','selective_patch','budget_feedback'):
@@ -72,16 +96,18 @@ for arm in ('no_update','full_rewrite','selective_patch','budget_feedback'):
     assert len(rows)==3
     values=[r['TF'] for r in rows]
     expected.append([labels.get(arm,'Budget feedback'),f"{sum(r['execution_status']=='completed' for r in rows)}/3",f'{st.mean(values):.3f}',f"{st.mean(r['PE'] for r in rows):.3f}",f'{st.mean(values)-st.pstdev(values):.3f}'])
-assert tables[4][1:]==expected
+assert tables[6][1:]==expected
 cost=read(ROOT/'results/evidence/course-v1.3-20261031/cost-audit.json')
 execution=sum(Decimal(str(r['known_usd'])) for r in cost['records'])
 assert abs(execution-Decimal(str(cost['known_execution_usd'])))<Decimal('0.0000000001')
-assert tables[5][1][1]==f"{execution+Decimal(str(cost['update_usd'])):.6f}"
-assert tables[5][1][2]==str(sum(r['unknown_charges'] for r in cost['records']))
-assert tables[5][1:]==metrics['selected_cohort_costs']
+assert tables[7][1][1]==f"{execution+Decimal(str(cost['update_usd'])):.6f}"
+assert tables[7][1][2]==str(sum(r['unknown_charges'] for r in cost['records']))
+assert tables[7][1:]==metrics['selected_cohort_costs']
 archive=ROOT/'results/evidence/course-v1.3-20261031/raw-trial.tar.gz'
 assert hashlib.sha256(archive.read_bytes()).hexdigest()=='e95e15694abe9a12e37c813f81e6e0fb0b5ccd00c2003f2a25a36a092c8001c9'
-assert not metrics['goal_achieved'] and not metrics['formal_validation_started']
+assert observed['verified'] and not observed['success'] and len(observed['blocks'])==2
+assert not metrics['goal_achieved'] and metrics['formal_validation_started'] and not metrics['formal_validation_passed']
+assert metrics['validation_cohort']=='observed_contract'
 for folder,file in [('course-v1.3-20261031','reproduction.json'),('daily-migration-pilot-20261031','reproduction.json'),('semantic-claim-repair-20261101','reproduction.txt'),('dependency-cut-20261101','reproduction.txt'),('observation-coverage-20261101','reproduction.txt'),('ready-link-20261101','reproduction.txt'),('dependency-factorial-20261101','reproduction.txt'),('observation-selection-20261101','reproduction.txt')]:
     assert (ROOT/'results/evidence'/folder/file).is_file(),(folder,file)
-print(json.dumps({'passed':True,'source_hashes':len(manifest['sources']),'course_rows_recomputed':27,'original_development_rows_recomputed':30,'daily_rows_recomputed':12,'numeric_docx_tables_checked':5,'docx_tables':7,'course_archive_hash':'passed','reproduction_entries':8,'network_or_model_calls':0}))
+print(json.dumps({'passed':True,'source_hashes':len(manifest['sources']),'course_rows_recomputed':27,'original_development_rows_recomputed':30,'daily_rows_recomputed':12,'v2_scored_rows':25,'v2_archive_hash':'passed','recorded_validation_batches':2,'numeric_docx_tables_checked':7,'docx_tables':9,'course_archive_hash':'passed','reproduction_entries':8,'network_or_model_calls':0}))

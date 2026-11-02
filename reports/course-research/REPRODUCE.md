@@ -7,6 +7,11 @@ batches. One older candidate underwent two recorded batches and failed. Presenta
 slides and speaker scripts are outside current scope, following the user's
 update that the presentation has ended.
 
+The revised report places task-selection history in study design, the separate
+QI-V2 cohort beside the course results, candidate comparisons beside the
+development results, and recovery mechanisms beside failure analysis. Blue
+text marks revised wording. Distinct versions and input classes are not pooled.
+
 ## Verify this synthesis without models
 
 Run from the repository root, on the existing branch:
@@ -17,8 +22,9 @@ uv run python reports/course-research/verify_report.py
 
 The standard-library verifier checks all synthesis source hashes, recomputes
 baseline means and ECS from 27 individual rows and development metrics from 30
-individual rows, and checks the actual DOCX tables. It also checks the existing
-course archive checksum without extracting it. It does not call the network,
+individual rows, and checks the actual DOCX tables. It checks the course and
+QI-V2 archive checksums, the 25-scored-cell QI-V2 summary, and the recorded failed
+two-batch observed-contract validation. It does not call the network,
 models, native tools or any benchmark runner. A passing result means this
 report matches its declared evidence; it does not establish experiment success
 or independently validate the human product judgments.
@@ -54,14 +60,23 @@ document has its own dated verification. No slides or speaker scripts were gener
 | Dependency cut, 10 original runs | `results/evidence/dependency-cut-20261101` | `reproduction.txt` |
 | Observation coverage, 10 original runs | `results/evidence/observation-coverage-20261101` | `reproduction.txt` |
 | Ready link, 10 original runs | `results/evidence/ready-link-20261101` | `reproduction.txt` |
+| QI-V2 original-task comparison, 25/27 scored | `results/evidence/v2-eval-20261101` | `verify.py` |
+| Observed-contract two failed validation batches, 36 runs | `results/evidence/observed-contract-validation-20261031` | `validation-verification.json` |
+| Tool migration task 430, 12 original runs | `results/evidence/tool-migration-pilot-20261031` | `reproduction.json` |
 | Dependency factorial, 16 synthetic runs | `results/evidence/dependency-factorial-20261101` | `reproduction.txt` |
 | Observation selection, 16 synthetic runs | `results/evidence/observation-selection-20261101` | `reproduction.txt` |
 
 These directories retain original plans, knowledge, raw archives, product
-reviews, scores, positive and negative results, cost ledgers and verification
+reviews where performed, scores, positive and negative results, cost ledgers and verification
 code. This entry reuses those packages; it does not create a misleading second
 copy or merge the cohorts. The course archive is `raw-trial.tar.gz`, SHA256
 `e95e15694abe9a12e37c813f81e6e0fb0b5ccd00c2003f2a25a36a092c8001c9`.
+The separate QI-V2 package verifies every archived file and recomputes all
+125 valid judge slots without model calls:
+
+```sh
+python3 results/evidence/v2-eval-20261101/verify.py
+```
 
 Historical course offline replay must use the implementation **inside that
 archive**, as described in `reproduction.json`. Do not run its old `verify.py`
@@ -108,8 +123,8 @@ Future research requires a justified distinct mechanism, a pre-call freeze,
 new output paths and independent ledgers. It may not overwrite old failures,
 retune acceptance after outcomes, feed original questions/answers/scored traces
 to the updater, or count exposed development as unseen validation. Source
-archives and the report contain no API key; live model execution would require
-local ignored environment credentials and fresh authorization within scope.
+archives and the report contain no API key. The user's existing authorization
+covers bounded new local research, but not unplanned replay of a closed version.
 
 ## Delivery boundary
 
