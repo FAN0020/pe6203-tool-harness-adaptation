@@ -80,3 +80,7 @@ python3 submission/handover-20261031/verify.py
 | `docs/`、`contributions/` | 机器说明、来源与成员贡献记录。 |
 | `tools/netlify/` | 可选 Netlify CLI 的版本与依赖锁。 |
 | `.cache/`、`.venv/`、`.netlify/` | 本机依赖、环境、登录关联，不提交。 |
+
+## Selective V6 (2026-11-03)
+
+V6 implements deterministic metadata synchronization, compact global semantic screening, candidate-only evidence patches and frozen Python artifact validation. See the [design](docs/selective-v6.md), [flow](docs/selective-v6-flow.mmd) and [nine-cell results with costs](results/evidence/selective-v6-20261103/REPORT.md). All nine updates passed; seven executions completed normally. Historical methods and baselines remain unchanged.
