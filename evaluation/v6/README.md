@@ -13,7 +13,7 @@ packing acceptance tool byte-for-byte. `recorded-results/` includes every source
 snapshot, request/response, cost receipt, trajectory and diagnostic attempt in
 the original archives. r1–r3 diagnostics are not pooled with final r4 scores.
 Any V3 comparisons inside the historical report are old archived values, not
-an evaluation or acceptance of the current unavailable V3.
+an evaluation of the later optimized V3.
 
 ```sh
 python evaluation/manage.py verify --version 6
