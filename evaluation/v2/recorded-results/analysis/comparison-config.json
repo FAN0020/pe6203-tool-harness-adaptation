@@ -1,0 +1,60 @@
+{
+  "config": {
+    "agent": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "AGENT_BASE_URL",
+      "api_key_env": "AGENT_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096
+    },
+    "judge": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "JUDGE_BASE_URL",
+      "api_key_env": "JUDGE_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096,
+      "extra_body": {
+        "reasoning": {
+          "enabled": false
+        },
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "judge_runs": 5,
+    "max_rounds": 12,
+    "request_timeout_seconds": 120,
+    "run_timeout_seconds": 900,
+    "tool_timeout_seconds": 30,
+    "send_model_seed": false,
+    "tool_name_policy": "namespaced",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    },
+    "judge_recovery": {
+      "max_attempts": 2,
+      "stop_after_transport_failures": 2,
+      "format": "concise-counts-v1"
+    }
+  },
+  "updater": {
+    "model": "deepseek/deepseek-v4.1-flash-1017",
+    "temperature": 0.0,
+    "max_tokens": 16384,
+    "timeout": 120,
+    "api_key_env": "AGENT_API_KEY",
+    "base_url_env": "AGENT_BASE_URL",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    }
+  },
+  "endpoints": {
+    "agent": "https://openrouter.ai/api/v1",
+    "judge": "https://openrouter.ai/api/v1",
+    "updater": "https://openrouter.ai/api/v1"
+  },
+  "plan_sha256": "c851bf8230c06fd3e826a3c3bbd044a460a0d3a34211f9bc2635cf20af7754fe"
+}
