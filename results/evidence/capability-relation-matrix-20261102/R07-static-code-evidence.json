@@ -1,0 +1,10 @@
+{
+  "review_id": "R07",
+  "code_sha256": "067ff724c090fb0c598af8c609235117f9f918b08f15d0ce917337eaf1691ddd",
+  "parsed": true,
+  "executed": false,
+  "methods": {
+    "_check_node": "def _check_node(node, depth=0):\n    if depth > MAX_DEPTH:\n        raise SafeEvalError(\"Expression too deeply nested.\")\n    if isinstance(node, ast.Expression):\n        return _check_node(node.body, depth + 1)\n    if isinstance(node, ast.BinOp):\n        if type(node.op) not in _OPS:\n            raise SafeEvalError(\"Operator not permitted.\")\n        # Block unbounded exponentiation\n        if isinstance(node.op, ast.Pow):\n            rhs = node.right\n            if isinstance(rhs, ast.Constant) and (not isinstance(rhs.value, int) or rhs.value > MAX_POW_EXP):\n                raise SafeEvalError(\"Exponent too large.\")\n        _check_node(node.left, depth + 1)\n        _check_node(node.right, depth + 1)\n    elif isinstance(node, ast.UnaryOp):\n        if type(node.op) not in _OPS:\n            raise SafeEvalError(\"Operator not permitted.\")\n        _check_node(node.operand, depth + 1)\n    elif isinstance(node, ast.Constant):\n        if not isinstance(node.value, (int, float)):\n            raise SafeEvalError(\"Only numeric literals allowed.\")\n    elif isinstance(node, ast.Name):\n        pass  # variable reference; resolved by caller's variable dict\n    else:\n        raise SafeEvalError(\"Disallowed expression element.\")",
+    "_eval": "def _eval(n):\n        if isinstance(n, ast.Expression):   return _eval(n.body)\n        if isinstance(n, ast.Constant):      return n.value\n        if isinstance(n, ast.Name):\n            if n.id not in variables:\n                raise SafeEvalError(\"Unknown variable.\")\n            return variables[n.id]\n        if isinstance(n, ast.BinOp):        return _OPS[type(n.op)](_eval(n.left), _eval(n.right))\n        if isinstance(n, ast.UnaryOp):      return _OPS[type(n.op)](_eval(n.operand))\n        raise SafeEvalError(\"Unsupported element.\")"
+  }
+}
