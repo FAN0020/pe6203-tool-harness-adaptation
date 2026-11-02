@@ -2,9 +2,11 @@
 
 Exact code and evidence for the gated V6 experiment: offline catalog/input
 checks → Task 133/Late pilot → remaining eight conditions. Execution source
-8401df2 is frozen. Nine adaptations and ratings completed; seven executions
-completed normally. Math Middle had no accepted code artifact; project Late
-reached max rounds. Those failures remain in official recorded results.
+8401df2 is frozen. The current owner-selected summary uses Math Middle repeat 1: TF 9.8889,
+PE 9.2667 and 8/9 normal completions. Project Late still reached max rounds.
+The original frozen r4 result (7/9 normal completions) is preserved in
+`recorded-results/original-r4/` and the raw archive. This replacement was
+requested after observing the repeat; baselines did not receive the same extra retry.
 
 `code/scripts/` publishes the evaluation, cost/integrity summarizer and offline
 packing acceptance tool byte-for-byte. `recorded-results/` includes every source
@@ -32,4 +34,21 @@ or its acceptance criteria to resume a failed trajectory.
 
 See [the separate repeat record](repeats/math-middle-20261103-01/README.md).
 The same frozen knowledge yielded TF/PE 10/10 with two tool calls. Original
-r4 scores are retained, and no sufficiency gate was introduced.
+r4 raw scores are retained; the current displayed summary selects the repeat.
+No sufficiency gate was introduced.
+
+## Current summary and comparison
+
+[Current nine-cell report](recorded-results/REPORT.md) uses the requested
+Math Middle replacement. Top-level costs include the superseded execution and
+repeat; separate selected-nine-cell allocations are provided. This is a
+post-run selected view, not an unbiased balanced single-attempt comparison.
+
+Recompute it without API calls:
+
+```sh
+python evaluation/v6/code/scripts/refresh_selected_summary.py --output outputs/v6-current-summary
+```
+
+The original recomputation tool above still reproduces the original frozen r4
+record; it does not perform the later owner-requested selection.

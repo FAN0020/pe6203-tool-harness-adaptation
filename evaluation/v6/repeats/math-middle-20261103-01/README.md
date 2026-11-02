@@ -28,3 +28,10 @@ frozen source hashes; do not run it against a different active runtime while
 claiming exact reproduction. `raw-repeat.tar.gz` retains source snapshots,
 original adaptation, all seven requests/responses, trajectory and artifact tests.
 `repeat-summary.json` contains the exact equality, cost and score checks.
+
+## Later display-selection request
+
+The owner subsequently requested using this repeat in the current nine-cell
+summary. See [the current report](../../recorded-results/REPORT.md). The
+original r4 raw records remain unchanged; the current display is explicitly
+marked as selected after observing the repeat, with all incurred fees retained.
