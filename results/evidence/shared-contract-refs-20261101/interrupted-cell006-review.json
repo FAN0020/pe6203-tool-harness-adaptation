@@ -1,0 +1,99 @@
+{
+  "cell_id": "cell-006",
+  "scope": "Interrupted candidate output, not a blinded completed trajectory",
+  "source_sha256": {
+    "results/raw/shared-contract-refs-pilot-20261101/cells/cell-006/run/events.jsonl": "f8cda049feadba6b36cf346edd94e87eab326c97c4ac7106b2616e5ba30396c7",
+    "results/raw/shared-contract-refs-pilot-20261101/cells/cell-006/run/result.json": "70f0ca0744f952345fd29ec53b0cb59118f58e822adc5b7cb79264315161e139",
+    "results/raw/shared-contract-refs-pilot-20261101/cells/cell-006/run/workspace/.agentic-tools-mcp/tasks/tasks.json": "5008de3bbbb43ce6a2296b6729acd19e2ba236a4c53fee15dd40f05b3a441374",
+    "results/evidence/shared-contract-refs-20261101/knowledge-audit.json": "f3b9cd87eea3ec06bd6fbf4cd4ea0bf22477c46ed4deda2a6d418452506fd008",
+    "results/raw/shared-contract-refs-pilot-20261101/cells/cell-006/run/raw_trace.json": "d91168cd2bf656e5acdc392c7604cb1793688999e18c60a01c90955773ad4112"
+  },
+  "normal_completion": false,
+  "official_scores": null,
+  "graph": {
+    "projects": 1,
+    "tasks": 18,
+    "dependency_edges": 7,
+    "valid_ids_and_acyclic_references": true,
+    "roots": [
+      {
+        "name": "M1 — Customer CSV Data Pipeline",
+        "children": 8
+      },
+      {
+        "name": "M2 — Application Log Analysis Pipeline",
+        "children": 6
+      },
+      {
+        "name": "M3 — Visualization Components",
+        "children": 0
+      },
+      {
+        "name": "M4 — Integration, Testing &amp; Deployment",
+        "children": 0
+      }
+    ]
+  },
+  "actor_responses": 5,
+  "tool_call_counts": {
+    "list_projects": 1,
+    "review_workspace_health": 1,
+    "create_project": 1,
+    "create_task": 18,
+    "update_task": 7
+  },
+  "affected_calls": [
+    {
+      "tool": "list_projects",
+      "working_directory_matches": true,
+      "isError": false
+    },
+    {
+      "tool": "review_workspace_health",
+      "working_directory_matches": true,
+      "isError": true
+    },
+    {
+      "tool": "create_project",
+      "working_directory_matches": true,
+      "isError": false
+    }
+  ],
+  "anchor_update_project_calls": 0,
+  "native_errors": [
+    {
+      "tool": "review_workspace_health",
+      "reported_error": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Error: memoryStorage.listMemories is not a function"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "properties": {
+    "coverage": "fail",
+    "structure_and_scope": "fail",
+    "delivery_truth": "unknown",
+    "scope_preserved": "pass"
+  },
+  "core_pass": false,
+  "review_evidence": [
+    "CSV has eight concrete child tasks and logs six. Visualization and integration roots explicitly promise delivery through children, but have none at interruption. Visualization has no executable breakdown.",
+    "IDs and references are valid and acyclic. This does not satisfy all scope/decomposition requirements; remaining milestone work is incomplete.",
+    "No final handover; judge not started. Missing score is not zero or pass.",
+    "Observed mutations create project/tasks and update dependencies; no deletion or substantive scope relabeling observed."
+  ],
+  "mechanism_evidence": [
+    "Exactly three observed calls use tools whose workingDirectory description is a reference. All supply the exact run workspace. No anchor update_project call occurs.",
+    "One native tool reports memoryStorage.listMemories is not a function despite the correct path. This error is separate from the later HTTP429. Whether knowledge altered the decision to call it is unknown.",
+    "Correct parameters do not prove the actor resolved the description reference; other context or prior knowledge may suffice. No paired effect or completion benefit is established."
+  ],
+  "decision": "Retain failed interrupted product. No actor rerun, no candidate edit, no validation promotion. Existing A2 accounting question remains pending.",
+  "new_model_calls": 0,
+  "new_native_calls": 0,
+  "new_cost_usd": 0
+}

@@ -1,0 +1,31 @@
+{
+  "edges": [],
+  "edits": [
+    {
+      "tool_id": "math-mcp::validate_syntax",
+      "path": "parameters.properties.detailed.description",
+      "before": "If true, return a more detailed validation result when supported",
+      "after": "Accepted by the schema but has no observed effect: the handler ignores it and returns the same text whether true or false.",
+      "basis": "math-mcp::validate_syntax",
+      "evidence": [
+        "middle-source-1",
+        "middle-source-2",
+        "middle-syntax-probes"
+      ],
+      "reason": "Handler destructures only expression; dispatcher adds a detailed default that is never read. Probes with detailed true and false produce identical output, so 'when supported' overstates a capability that does not exist."
+    },
+    {
+      "tool_id": "math-mcp::validate_syntax",
+      "path": "parameters.properties.allow_variables.description",
+      "before": "If true, allow variable references during validation when supported",
+      "after": "Accepted by the schema but has no observed effect: the handler ignores it, and an undefined variable reference such as q+1 validates the same whether true or false.",
+      "basis": "math-mcp::validate_syntax",
+      "evidence": [
+        "middle-source-1",
+        "middle-source-2",
+        "middle-syntax-probes"
+      ],
+      "reason": "Handler reads only expression; allow_variables is not consulted. Probe q+1 validates as valid for both true and false, so the 'allow' framing implies a behavior not supported."
+    }
+  ]
+}

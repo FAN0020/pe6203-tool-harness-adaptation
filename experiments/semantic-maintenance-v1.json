@@ -1,0 +1,142 @@
+{
+  "quality_cases": [
+    {
+      "task_id": 133,
+      "properties": [
+        {
+          "id": "validation",
+          "required": "Provide meaningful expression validation, correctly interpret returned text, and distinguish syntax validity from actual evaluation and Python runtime/security verification."
+        },
+        {
+          "id": "guidance",
+          "required": "Provide usable Python-focused OWASP-related security recommendations: restricted inputs/allowed operations, avoid executing untrusted text as Python, and bound resource use. Do not claim that ignored tool flags establish these controls."
+        },
+        {
+          "id": "implementation_consistency",
+          "required": "Any code recommended as the solution must handle stated benign arithmetic and enforce its declared restrictions; do not use tool checks as proof that generated code was run. No code is required by the task if actionable recommendations suffice."
+        }
+      ],
+      "review": "Use actual calls/observations/final answer. Static AST inspection of generated Python; never execute untrusted generated code. Any unestablished required property is unknown, not pass. Additional nonessential prose is not a new requirement."
+    },
+    {
+      "task_id": 235,
+      "properties": [
+        {
+          "id": "charts",
+          "required": "Three requested chart types returned successfully with source values, ordering, provinces/categories and monetary units preserved."
+        },
+        {
+          "id": "summary",
+          "required": "Any substantive final claim about these data matches the inputs; source totals if stated are exact."
+        }
+      ],
+      "review": "Frozen question and actual chart payloads; rendering remains unknown for both arms and is not added as a requirement."
+    }
+  ],
+  "evaluation": {
+    "normal_completion": "Runner execution_status==completed; truncation/max_rounds/error are not normal even if TF high.",
+    "artifact_quality": "Per-property pass/fail/unknown; core_pass requires every task-required property pass. Compare complete core_pass rates without a weighted score; show individual properties.",
+    "pilot_gate": "Primary must strictly beatSP completion/core on133M/L, TF>=SP and235completion/core/TF>=SP; otherwise noformalvalidation. D0 diagnostic only, never choose it posthoc afterprimaryfails. No repeatedsampling.",
+    "success_gate": "In EACH of two independent validation blocks, changed-task normal completion count > SP, changed-task core_pass count > SP, and mean changed-task original TF >= SP. Retention completion/core_pass counts and mean TF >= SP in each block. Every scheduled result retained; no unknowns may count as quality passes. No requirement to win every cell or baseline.",
+    "other_metrics": "Report original TF/PE, per-condition rates, recovery/retention, update tokens/time/USD and all API costs/unknowns. ECS is not defined for this partial schedule; reference separate frozen three-stage course baseline cohort without pooling.",
+    "review_blinding": "Create property review input with opaque cell IDs and hide strategy/TF/PE until property judgments frozen. Same rubric in pilot and validation. Five judges are ratings, not executions.",
+    "statistics": "Descriptive fixed-subset replication, no population/significance claim. Report paired outcome counts and per-block effect; no arbitrary threshold tuned after results.",
+    "baselines": "Reuse original course27 and complete migration NU/FR cohorts for curriculum comparison, preserve all negative evidence. Do not substitute those scores as concurrent pilot controls."
+  },
+  "validation_schedule": {
+    "split": "Fresh executions on a predeclared already-exposed task subset; independent from pilot outcomes; not unseen-task generalization.",
+    "blocks": 2,
+    "repeats_per_block_per_condition": 3,
+    "task_stage_pairs": [
+      [
+        133,
+        "middle"
+      ],
+      [
+        133,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "primary_candidate_frozen_before_actor"
+    ],
+    "knowledge": "Freeze exact candidate from pilot, byte-identical in validation. No tuning, selection or low-score reruns.",
+    "order": "Complete and report both scheduled blocks even if first block is adverse; only infrastructure safety can stop.",
+    "total_validation_trajectories": 36
+  },
+  "fairness": {
+    "model_provider": "Unchanged pinned DigitalOcean and model from existing-method-recheck-v1",
+    "decode": "temperature0,4096 output tokens,12rounds,900s; unchanged five first-valid judge slots with original1000-character observation truncation",
+    "other": "Same original questions, runtimes, empty isolated workspaces, provider, budgets and five judge slots. Only frozen knowledge descriptions differ; all parameter validation constraints remain identical."
+  },
+  "id": "semantic-maintenance-v1",
+  "status": "generation_and_conditional_execution_frozen_before_model",
+  "champion": "selective_patch",
+  "candidates": [
+    "semantic_contract_direct",
+    "semantic_contract_closure"
+  ],
+  "model_config": "configs/semantic-maintenance-v1.json",
+  "updater_config": "configs/semantic-maintenance-updater-v1.json",
+  "feedback_probes": "experiments/semantic-maintenance-feedback-v1.json",
+  "generation": {
+    "input": "results/evidence/semantic-contract-maintenance-20261101/updater-inputs.json",
+    "calls": "one perstage in middle thenlate order; maxone structural JSON repair perstage; no semantic rewrite retry",
+    "output": "exactfield edits before/after with reason/evidence plus explicit changed-root dependency edges; omitted fields retained",
+    "scope": "Only math-mcp descriptions and existing immediate parameter descriptions; protectednames/schema constraints/routing/rules/outputschema/allother servers byteidentical to SP. Edits remove unsupported clauses by replacing descriptive field, not deleting callable tools.",
+    "review": "Check evidence actually entails each edit, source/probe meaning, mandatory args/limits retained, no answer/domain-specific instructions or extra mandatory calls. Invalid semantic proposal rejects version; no hand repair.",
+    "candidate_rule": "If accepted proposal adds any neighbor edit with actual changed-root justification, primary=closure and execute bothdirect/closure plusSP; else primary=direct and twoarms. Decided solely from knowledgebeforeactor outcomes."
+  },
+  "development": {
+    "tasks": [
+      133,
+      235
+    ],
+    "stages": [
+      "middle",
+      "late"
+    ],
+    "task_stage_pairs": [
+      [
+        133,
+        "middle"
+      ],
+      [
+        133,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "semantic_contract_direct",
+      "semantic_contract_closure"
+    ],
+    "repeats": 1,
+    "opaque_cell_ids": true
+  },
+  "selection": "Conditional schedule resolves before any actor/judge using frozen candidate_rule. Both middle/late retained; never select by scores. 377excludedclosed;457deferred due weak change-dependent closure;235unchangedretention.",
+  "execution_order": "Existing cells_for(make_cells), Random1729 shuffle then seed sorting; publish exact plan beforecalls. No trajectory retries. Readouts changes-before-final/write etc supplementary only.",
+  "mechanism": "Evidence-conditioned LLM semantic edit and impact decision, not merely replacement or new tool defect. Direct ablation drops neighbor edits from exactly same proposal, overlapping edits byte-identical. Closure comparison is entire patch package including added coverage/location/length, not pure edge causal proof.",
+  "dependencies": "Original133/235 question/server fixtures alreadycomplete; no externaloriginal input or renderer needed. Freshcatalog hashes comparedtofrozen generation input. Native probe checked batchfails andscalar evaluation7/6; notbenchmark results.",
+  "failure_rule": "All failures/costs retained. Schema repair oneattempt; semantic failure stopscandidate beforeagent. No change to questions/rubrics/source labels. Infrastructure follows existingplan; no low-score rerun.",
+  "authorization": {
+    "approved": true,
+    "source": "Currentuserexplicitauthorization",
+    "total_cost_limit_usd": null,
+    "total_trajectory_cap": null,
+    "push": false,
+    "deploy": false
+  },
+  "validation_independence": "Already-exposed same133M/L+235L families; freshdisjoint executions/isolatedworkspaces, stageknowledgebyteidentical acrossdevelopment andbothvalidationbatches. No modelseed claim. Batches1/2 each3repeats, bothscheduled andretained afterstrictdevelopment gate; no firstbatchretuning. Not unseen-task generalization.",
+  "costs": "Independent pilotledger includes updater+actor+judge+preflight; generation cost counted once despite frozenproposal reuse. Validationeach ownledger; no totalcaps.",
+  "stop_rule": "Primary must strictly beatSP completion/core on133M/L, TF>=SP and235completion/core/TF>=SP; otherwise noformalvalidation. D0 diagnostic only, never choose it posthoc afterprimaryfails. No repeatedsampling."
+}

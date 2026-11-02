@@ -1,0 +1,58 @@
+{
+  "id": "parser-state-code-diagnostic-v1",
+  "created_utc": "2026-11-01T18:27:24.809836+00:00",
+  "kind": "released_code_diagnostic_not_benchmark",
+  "hypothesis": "Lexical error diagnostics depend on previous parser state because tokenization precedes resetting tokens/current/errors. Valid tokenizable recovery resets errors.",
+  "competing_explanation": "Every parse is stateless; only visible formatting differs.",
+  "stages": [
+    "iter3",
+    "iter5"
+  ],
+  "sequences": {
+    "fresh_lexical": [
+      "_"
+    ],
+    "valid_then_lexical": [
+      "7+3",
+      "_"
+    ],
+    "syntax_then_lexical": [
+      "7+",
+      "_"
+    ],
+    "two_lexical_then_valid": [
+      "7+",
+      "_",
+      "_",
+      "7+3"
+    ],
+    "valid_then_syntax_then_valid": [
+      "7+3",
+      "7+",
+      "7+3"
+    ]
+  },
+  "repetitions": 1,
+  "order": "stages then sequences insertion order; fresh GrammarParser per sequence",
+  "source_sha256": {
+    ".cache/mcpevol/iter3/node_modules/math-mcp/dist/evaluator.js": "bd9ad8acb83f13bf6ff06cf4efbbdf077718154e89148f6e45fa268b39818370",
+    ".cache/mcpevol/iter3/node_modules/math-mcp/dist/grammar-parser.js": "28ab575b40cf44147b8fe7ee1ee27fc4b980fd04f4cae58971a31646c0acadd0",
+    ".cache/mcpevol/iter3/node_modules/math-mcp/dist/index.js": "81c2cc0799296987a26a013ef3b1d6a203a617393e3a63128969c54d01ed4795",
+    ".cache/mcpevol/iter3/node_modules/math-mcp/dist/precision.js": "7442f02d30b3e8cf1dd12cb7559cb1ad12796605a405b84de2a19f2f2249fc8e",
+    ".cache/mcpevol/iter3/node_modules/math-mcp/dist/server.js": "881897c762485ab29df7432ac7ffd60c4564428a2b820c0d96d7f990a0efdb66",
+    ".cache/mcpevol/iter3/node_modules/math-mcp/dist/tokenizer.js": "3e72aa0193f3a427e192f6f0fc2a2d8840c3569da30e3b8ef5fd8db260f89c98",
+    ".cache/mcpevol/iter3/node_modules/math-mcp/dist/types.js": "58e9c7e4f78879565f3143f190e458ec96e3ca101ff328d0f9f63f18f5e885e7",
+    ".cache/mcpevol/iter5/node_modules/math-mcp/dist/evaluator.js": "bd9ad8acb83f13bf6ff06cf4efbbdf077718154e89148f6e45fa268b39818370",
+    ".cache/mcpevol/iter5/node_modules/math-mcp/dist/grammar-parser.js": "28ab575b40cf44147b8fe7ee1ee27fc4b980fd04f4cae58971a31646c0acadd0",
+    ".cache/mcpevol/iter5/node_modules/math-mcp/dist/index.js": "81c2cc0799296987a26a013ef3b1d6a203a617393e3a63128969c54d01ed4795",
+    ".cache/mcpevol/iter5/node_modules/math-mcp/dist/precision.js": "7442f02d30b3e8cf1dd12cb7559cb1ad12796605a405b84de2a19f2f2249fc8e",
+    ".cache/mcpevol/iter5/node_modules/math-mcp/dist/server.js": "96a4f655eda70b22aa1d31192a5a72f507d52eeaa4799d3a6bfaff4e9a60c8be",
+    ".cache/mcpevol/iter5/node_modules/math-mcp/dist/tokenizer.js": "3e72aa0193f3a427e192f6f0fc2a2d8840c3569da30e3b8ef5fd8db260f89c98",
+    ".cache/mcpevol/iter5/node_modules/math-mcp/dist/types.js": "58e9c7e4f78879565f3143f190e458ec96e3ca101ff328d0f9f63f18f5e885e7"
+  },
+  "acceptance": "Compare exception type, isValid, error count/messages/positions for identical lexical input and recovery. Preserve all results; no retries or edits to released code.",
+  "limits": "Imports parser only, no MCP, no evaluator and no generated code. Does not establish native handler behavior, actor causality or Goal improvement. No benchmark question/answer/trace used.",
+  "model_calls": 0,
+  "cost_usd": "0",
+  "stop": "Any import/execution failure preserved; no dependent model admission by this diagnostic alone."
+}

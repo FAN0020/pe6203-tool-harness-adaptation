@@ -1,0 +1,30 @@
+Native batch cost diagnostic (not benchmark development/validation)
+Freeze: 68493fe; base: c0c2997; original branch retained.
+Input: experiments/native-batch-cost-diagnostic-v1.json
+Synthetic native-only IDs900301,900302,900303;8paths,69calls,8catalog reads;one execution each.
+Actor/updater/judge calls and costs0. No API credentials or old ledger used.
+
+Offline audit, no cache/network/SDK/extraction needed:
+  python3 results/evidence/native-batch-cost-diagnostic-20261101/verify.py
+Expected: verified true;204archivefiles;8paths;69nativecalls;all required fields equal.
+The auditor checks all raw member hashes, frozen input and runner hashes, every native
+response/index/cost, actual persisted final state against generated input, and the
+specified algorithms' dependency-wave arithmetic. It does not infer actor success.
+
+raw-native.tar.gz preserves every native response, per-call task store, workspace,
+stdout/stderr, ledger, all pinned native contract sources, and execution inputs/code.
+manifest.json lists exact member paths and hashes. No original raw file was deleted.
+The eight raw directories are ignored in Git only because the entire bytes are archived;
+all paths and outcomes are retained without filtering.
+
+For native reproduction the existing pinned cache/runtime and dependencies from the
+main repository are required. Source hashes are in the frozen plan. Do not rerun the
+started diagnostic in its existing workspaces or replace measured outcomes. New API
+runs were not authorized as a way to sample this mechanism until success.
+
+Counters are native calls and raw UTF-8 payload bytes, not model tokens. Raw request
+byte sizes include local directory-name lengths. Dependency waves are theoretical
+lower bounds with unlimited independent argument capacity;4096-token actor behavior
+was not tested. State equivalence excludes random IDs/timestamps only and preserves
+all specified text/metadata/link fields. These controlled synthetic results do not
+count as original benchmark success or independent validation.

@@ -1,6 +1,7 @@
 import asyncio
 import os
 from contextlib import AsyncExitStack, asynccontextmanager
+from copy import deepcopy
 from datetime import timedelta
 from pathlib import Path
 
@@ -96,20 +97,51 @@ async def sessions(root, version, server_ids, workspace, stderr_path, timeout=30
             yield clients
 
 
+def compatible_input_schema(server, tool, schema):
+    """Translate the released PDF page bound without changing its accepted values.
+
+    This is a common transport compatibility rule, not a strategy. Only the
+    reviewed legacy location is supported; all other metadata stays verbatim.
+    """
+    result = deepcopy(schema)
+    if (server, tool) != ("@sylphlab/pdf-reader-mcp", "read_pdf"):
+        return result, None
+    path = ("properties", "sources", "items", "properties", "pages", "anyOf", 0, "items")
+    try:
+        node = result
+        for key in path:
+            node = node[key]
+    except (KeyError, IndexError, TypeError):
+        return result, None
+    if not isinstance(node, dict) or not isinstance(node.get("exclusiveMinimum"), bool):
+        return result, None
+    if type(node.get("minimum")) not in (int, float):
+        raise ValueError("Legacy PDF exclusive bound requires a numeric minimum")
+    original = deepcopy(node)
+    exclusive = node.pop("exclusiveMinimum")
+    if exclusive:
+        node["exclusiveMinimum"] = node.pop("minimum")
+    return result, {"path": list(path), "original": original, "normalized": deepcopy(node)}
+
+
 async def snapshot(clients, version, commit):
     records = []
+    compatibility = []
     for server, client in clients.items():
         cursor = None
         while True:
             page = await client.list_tools(cursor=cursor)
             for tool in page.tools:
+                parameters, audit = compatible_input_schema(server, tool.name, tool.inputSchema)
+                if audit:
+                    compatibility.append({"server": server, "tool": tool.name, **audit})
                 records.append(
                     {
                         "tool_id": f"{server}::{tool.name}",
                         "server_id": server,
                         "version": version,
                         "name": tool.name,
-                        "parameters": tool.inputSchema,
+                        "parameters": parameters,
                         "description": tool.description or "",
                         "usage_rules": [],
                         "output_schema": tool.outputSchema,
@@ -119,10 +151,13 @@ async def snapshot(clients, version, commit):
             cursor = page.nextCursor
             if not cursor:
                 break
-    return {
+    result = {
         "schema_version": "1.0",
         "benchmark_commit": commit,
         "version": version,
         "source": "live_released_mcp_servers",
         "tools": records,
     }
+    if compatibility:
+        result["schema_compatibility"] = compatibility
+    return result

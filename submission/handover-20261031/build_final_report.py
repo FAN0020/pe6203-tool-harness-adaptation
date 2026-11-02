@@ -14,6 +14,13 @@ from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, 
 R = Path(__file__).resolve().parents[1]
 m = json.loads((R / "evidence/recomputed/metrics.json").read_text())
 f = json.loads((R / "evidence/failure-cases.json").read_text())
+v2 = json.loads((R.parent / "results/evidence/v2-eval-20261101/v2-eval/summary.json").read_text())
+suff = json.loads((R.parent / "results/evidence/selective-search-20261031/confirmation-r1-review.json").read_text())
+observed = json.loads((R.parent / "results/evidence/observed-contract-validation-20261031/validation-verification.json").read_text())
+budget = json.loads((R.parent / "results/evidence/matched-existing-20261031/trial-verification.json").read_text())
+budget_quality = json.loads((R.parent / "results/evidence/matched-existing-20261031/quality-review.json").read_text())
+assert all(block['arms'][arm]['changed']['core_pass'] == 0 for block in observed['blocks'].values() for arm in ('selective_patch', 'observed_contract'))
+assert not budget_quality['decision']['candidate_promoted']
 N = {"no_update": "No Update", "full_rewrite": "Full Rewrite", "selective_patch": "Selective Patch"}
 pdfmetrics.registerFont(TTFont("Arial", "/System/Library/Fonts/Supplemental/Arial.ttf"))
 pdfmetrics.registerFont(TTFont("Arial-Bold", "/System/Library/Fonts/Supplemental/Arial Bold.ttf"))
@@ -47,6 +54,7 @@ S.add(
     )
 )
 S.add(ParagraphStyle(name="CellX", fontName="Arial", fontSize=9, leading=12, spaceAfter=0))
+S.add(ParagraphStyle(name="CellBlue", parent=S["CellX"], textColor=colors.HexColor("#1250A0")))
 S.add(ParagraphStyle(name="CodeX", fontName="Courier", fontSize=8, leading=11, spaceAfter=8))
 flow = []
 sections = []
@@ -63,10 +71,13 @@ def para(s):
     flow.append(Paragraph(s, S["BodyX"]))
     current.append("<p>" + s + "</p>")
 
+def blue_para(s):
+    para('<font color="#1250A0">' + s + '</font>')
 
-def heading(s):
-    flow.append(Paragraph(s, S["H2X"]))
-    current.append("<h3>" + s + "</h3>")
+
+def heading(s, blue=False):
+    flow.append(Paragraph('<font color="#1250A0">' + s + '</font>' if blue else s, S["H2X"]))
+    current.append('<h3' + (' style="color:#1250A0"' if blue else '') + '>' + s + '</h3>')
 
 
 def code(s):
@@ -74,8 +85,8 @@ def code(s):
     current.append("<pre>" + html.escape(s) + "</pre>")
 
 
-def table(headers, rows, widths=None):
-    cells = [[Paragraph(html.escape(str(x)), S["CellX"]) for x in row] for row in [headers] + rows]
+def table(headers, rows, widths=None, blue=False):
+    cells = [[Paragraph(html.escape(str(x)), S["CellBlue" if blue else "CellX"]) for x in row] for row in [headers] + rows]
     t = Table(
         cells, colWidths=widths or [491 / len(headers)] * len(headers), repeatRows=1, hAlign="LEFT"
     )
@@ -83,7 +94,7 @@ def table(headers, rows, widths=None):
         TableStyle(
             [
                 ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e8eef4")),
-                ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#142539")),
+                ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#1250A0" if blue else "#142539")),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#ced7e2")),
                 ("LEFTPADDING", (0, 0), (-1, -1), 7),
@@ -95,7 +106,7 @@ def table(headers, rows, widths=None):
     )
     flow.extend([t, Spacer(1, 10)])
     current.append(
-        '<div class="scroll"><table><tr>'
+        '<div class="scroll"><table' + (' class="blue-table"' if blue else '') + '><tr>'
         + "".join("<th>" + html.escape(str(x)) + "</th>" for x in headers)
         + "</tr>"
         + "".join(
@@ -106,13 +117,13 @@ def table(headers, rows, widths=None):
     )
 
 
-def page(title):
+def page(title, blue=False):
     global current
     if current:
         sections.append("".join(current))
         flow.append(PageBreak())
-    current = ["<section><h2>" + title + "</h2>"]
-    flow.append(Paragraph(title, S["TitleX"]))
+    current = ['<section><h2' + (' style="color:#1250A0"' if blue else '') + '>' + title + '</h2>']
+    flow.append(Paragraph('<font color="#1250A0">' + title + '</font>' if blue else title, S["TitleX"]))
 
 
 def ev(s):
@@ -120,7 +131,7 @@ def ev(s):
 
 
 page("Tool Harness Adaptation<br/>under Environment Change")
-para("<b>PE6203 Group Project 4 | Final offline audit | 31 October 2026</b>")
+blue_para("<b>PE6203 Group Project 4 | Historical course audit, integrated research evidence | amended 2 November 2026</b>")
 heading("Research questions")
 para(
     "Does updating affected tool knowledge recover task performance after persistent tool-environment change? Does it preserve capabilities on tasks whose tools remain unchanged? We evaluate quality, efficiency, cross-version stability, update cost and execution status separately; no weighted score is introduced."
@@ -135,12 +146,15 @@ para(
 para(
     "The results establish a runnable, auditable course experiment. They do not establish general superiority, statistical significance or broad generalization. Early arms share identical knowledge, yet exhibit different truncation and completion outcomes. This variation materially affects ECS."
 )
+blue_para(
+    "Later evidence ties updated parameter and route knowledge to avoided obsolete calls, while high scores or faster completion can coexist with faulty products. QI-V2 scored 25/27 planned cells without manual product certification. The 36-candidate audit found no joint completion-and-product winner. Cohorts remain separate."
+)
 heading("Submission status")
 para(
     "<b>The main experiment is verified. Failure-case acceptance remains unresolved.</b> The brief does not require naturally occurring failures. Four approved controlled diagnostics establish a missing-parameter rejection mechanism, while course acceptance of that injected case needs TA clarification. The over-update claim still lacks a demonstrated change to unrelated knowledge that causes damage. Negative diagnostics remain part of the evidence."
 )
-para(
-    "This final revision performs offline verification only. It integrates the four previously approved diagnostic trajectories, kept separate from the main 27. No additional model calls, scoring, strategy development or deployment occurred. Historical scores and billing uncertainties remain unchanged. Appendix C-E document the baseline, actual change coverage and diagnostic limits."
+blue_para(
+    "This offline revision adds no model calls or scoring. Original course scores, diagnostic records and unknown charges remain intact; Appendix C–E retain the historical audit. The research Goal has not passed its two-batch gate."
 )
 ev(
     "results/evidence/course-v1.3-20261031/raw-trial.tar.gz; submission/evidence/recomputed/metrics.json; failure-cases.json; original course brief §§3-4."
@@ -202,6 +216,9 @@ table(
 para(
     "The fixed subset is identical across methods. TOOL coverage is limited to relevant optional additions, not mandatory renaming/removal. PARAM and DESC changes affect required tools. Metadata coverage does not mean every trajectory actually called every changed tool. Task 283 shares a service family with development task 139, so this is not an unseen-family evaluation."
 )
+blue_para(
+    "The brief permits a documented fixed subset. Earlier team material considered task 223, research-paper retrieval and webpage publication; the course matrix froze executable original tasks 133/283/235 instead. It does not test the paper-webpage scenario or a verified book task. Task-223 fetch/publication services were unverified for this matrix; a later Netlify variant changes the backend. No written team sign-off for the switch was found."
+)
 table(
     ["Control", "Frozen value"],
     [
@@ -232,10 +249,10 @@ para(
     "One execution is permitted by brief §3.2 under compute constraints and is explicitly disclosed. Five judge ratings are measurements of the same trajectory, not five independent agent executions. All 135 slots in this main cohort succeeded on their first logical attempt. No benchmark labels or question text were modified."
 )
 para(
-    "Checks from the archive confirm identical task-question hashes, model settings, budgets and static judge rubric within matched task/slot groups. Prompt evidence necessarily varies with each trajectory. Historic v1.2, v1.3 and research cohorts remain separate."
+    "Archived checks confirm common question hashes, settings, budgets and judge rubric within matched groups. Historical cohorts stay separate."
 )
-ev(
-    "main archive plan.json, plan.sha256, saved judge prompts, judge-attempts/*/response.json; evidence/recomputed/metrics.json fairness block."
+blue_para(
+    "A later registry had 29 names (27 with actor evidence, two with only generation/admission), not 29 course matrices; it later reached 36 audited and 43 total names. None of the historical 29 has task-223 actor evidence. Versions and input classes—original, fixed-fixture original, synthetic—must remain distinct. New effects need a same-condition Patch control."
 )
 page("3. Main results and execution status")
 table(
@@ -283,6 +300,26 @@ para(
 ev(
     "evidence/recomputed/cells.csv; all run/result.json, raw_trace.json and immutable EVAL outputs in main archive."
 )
+page("3A. Separate QI-V2 original-task results", blue=True)
+blue_para(
+    "QI-V2 hybrid_v2 is a different Selective Patch knowledge version, pinned to bdf0ccc5c3466517725c84e7f715234733cde4a8. It planned the same 133/235/283 × Early/Middle/Late × three-method grid. FR 133-Middle and QI-V2 SP 283-Late failed during adaptation before actor execution: 25/27 cells were scored (125 valid judge slots), 19/27 ended normally. These results do not replace or pool with the complete course V1 matrix."
+)
+v2_matched = {row["strategy"]: row for row in v2["matched_results"]}
+table(
+    ["Method", "Normal/planned", "Scored/planned", "Matched TF", "Matched PE", "Complete product"],
+    [["QI-V2 SP" if x["strategy"] == "selective_patch" else N[x["strategy"]],
+      f"{x['normally_completed']}/9", f"{x['scored']}/9",
+      f"{v2_matched[x['strategy']]['TF']:.3f}", f"{v2_matched[x['strategy']]['PE']:.3f}", "Not reviewed"]
+     for x in v2["strategies"]],
+    [86, 91, 85, 70, 70, 89], blue=True,
+)
+blue_para(
+    "The TF/PE columns compare only seven triplets scored under all three methods. Available-case means use different denominators (NU 9, FR 8, QI-V2 SP 8) and are not presented as a matched effect. Missing cells remain missing, not zero; only task 235 has a complete three-stage ECS triplet for all methods. All 27 case files mark final artifact quality as not manually reviewed."
+)
+blue_para(
+    "Known request cost: NU USD 0.113712221; FR USD 0.140799942; QI-V2 SP USD 0.132039527; separate preflight USD 0.000008241. FR and QI-V2 SP each retain two unknown-cost records, so these are lower bounds. Integrity replay verified all 1067 archived source files and recomputed the 125 rating slots without model calls."
+)
+ev("results/evidence/v2-eval-20261101/README.md, verification.json, v2-eval/summary.json and raw-results.tar.gz; archive SHA256 c36e88370426d1aedcf5368b1bf2881bcbce8e259b532c14eac3804d8b920f22.")
 page("4. Exact PE check and ECS conventions")
 pe = [x for x in m["cells"] if x["method"] == "selective_patch"]
 table(
@@ -352,6 +389,25 @@ para(
 ev(
     "Recomputed recovery and retention arrays; tasks133/283 labelled changed and235 unaffected before scoring in the frozen suite."
 )
+page("5A. Follow-up mechanisms and results", blue=True)
+blue_para(
+    "Two separate original-task migrations show where tool knowledge can help. In task 90 Late, NU called an obsolete entry twice and failed to retrieve the current daily problem, while updated methods used get_problem(daily=true); all four methods nevertheless completed all three stages. In task 430 Late, NU attempted deleted search_symbols seven times; original SP used browse_module(query) successfully. FR and budget_feedback avoided the old call but did not exercise that new query route. Across the task-430 cohort, SP and budget_feedback completed 3/3, NU and FR 1/3, while all four mean TF scores were 9.9333. This establishes local route recovery, not complete Swift-deliverable correctness."
+)
+table(
+    ["Distinct cohort", "SP normal", "Candidate normal", "All-property product", "Reading"],
+    [
+        ["sufficiency_feedback confirmation", f"{suff['summary']['arms']['selective_patch']['completed_execution']}/27", f"{suff['summary']['arms']['sufficiency_feedback']['completed_execution']}/27", "Not established", "PE improved"],
+        ["observed_contract, changed, two batches", f"{sum(b['arms']['selective_patch']['changed']['completed'] for b in observed['blocks'].values())}/12", f"{sum(b['arms']['observed_contract']['changed']['completed'] for b in observed['blocks'].values())}/12", "0/12 each", "Validation failed"],
+        ["budget_feedback, mixed local six", f"{budget['summary']['selective_patch']['completed']}/6", f"{budget['summary']['budget_feedback']['completed']}/6", "Code/numeric defects", "Lead only"],
+    ], [148, 66, 82, 101, 94], blue=True,
+)
+blue_para(
+    "The 108-trajectory sufficiency confirmation raised changed-stage PE from 8.5444 to 9.4556, yet changed-stage completion tied at 11/18; the all-stage gap arose in Early when knowledge was identical. Observed_contract finished 3/6 then 2/6 changed tasks versus SP 4/6 in each validation batch; neither arm produced a complete product in those 12 changed-task runs. Budget_feedback’s local completion gain includes reused/mixed conditions: one 283-Middle run saved a 36-record, 356-hour plan, but other answers contained a SyntaxError or wrong annual total. These observations support narrower mechanisms, not a transferable joint win."
+)
+blue_para(
+    "The offline audit covers 36 registered candidates across 45 cohorts, 517 executed cells, 2555 valid judge slots and 445 existing product reviews; seven recent rounds contain 69 actor trajectories, six complete rounds and one interrupted round. No candidate satisfies strict normal-completion and complete-product gains with TF and retention safeguards. The counts describe research maturity, not comparable effect sizes across differing tasks and fixtures."
+)
+ev("results/evidence/daily-migration-pilot-20261031; tool-migration-pilot-20261031; selective-search-20261031/confirmation-r1-review.json; observed-contract-validation-20261031/validation-verification.json; matched-existing-20261031/trial-verification.json and quality-review.json; results/evaluation/current-branch-5b772ff-20261102/REPORT.md.")
 page("6. Update and execution costs")
 table(
     ["Method", "Update tokens", "Update seconds", "Update API USD"],
@@ -445,6 +501,9 @@ heading("Supported observations")
 para(
     "Selective Patch updates tool knowledge without model calls and prevents the specific initial missing-parameter errors seen in No Update task133 Late. In this cohort it retains task235 TF and has the highest mean PE. Full Rewrite leads the mean TF and ECS comparisons; both baselines have more normally completed runs. These outcomes can coexist and do not require a composite winner."
 )
+blue_para(
+    "The successful local mechanism is specific: an authoritative parameter diff made task-133 Late validation calls admissible before error-driven repair, while preserved task-235 chart records retained the observed specification behavior; later original-task migrations show that updated routing can recover a moved lookup. These facts explain avoided stale calls and recovered information. They do not by themselves explain the course mean PE difference or prove complete final artifacts."
+)
 heading("What the data do not establish")
 para(
     "One execution per cell on three tasks is not enough to estimate robust strategy-level uncertainty, frequency of rare failures or generalization to the full benchmark. Temperature0 does not make provider execution deterministic. Five judge ratings characterize one saved trajectory, not run-to-run agent variance. No inferential significance claim is made for the27-run main cohort."
@@ -455,16 +514,12 @@ para(
 para(
     "The subset lacks required tool removal/renaming, uses optional tool additions, and is not an unseen-family holdout. The runner uses native stdio and common local adaptation plumbing, rather than an exact recreation of every paper infrastructure choice. Full Rewrite and Patch differ in both update scope and generation mechanism. Public MCP package defects are kept common across arms."
 )
-heading("Reuse of prior work")
-para(
-    "The completed108-trajectory research confirmation contains81 executions of the original three methods with three repeats each. It can serve as a separate robustness appendix, alongside its fourth candidate and negative promotion result. Its frozen Full Rewrite artifacts and shared-build protocol differ from the main cohort, so results are not pooled. Sixty research development trajectories, old A/B cohorts, incomplete confirmations, generation rejections and negative diagnostics remain available as history."
+blue_para(
+    "The follow-up cohorts locate the remaining gap: fewer calls, higher PE, better individual explanations or early completion did not consistently produce runnable code, correct totals and a delivered answer together. QI-V2 has missing adaptation cells and no manual all-property review. None of these cohorts can be used to declare the original Patch superseded, and synthetic diagnostics remain mechanistic checks rather than original-benchmark validation."
 )
-para(
-    "The historical PE+0.5 and statistical-promotion thresholds are not course completion requirements. Netlify/task223 is an optional custom deployment demonstration; it is not required to complete the fixed27-cell experiment and is not run here. VPN involvement is possible in past connection failures, but not established as their cause."
-)
-heading("Stopping rule")
-para(
-    "Stop strategy optimization and further execution. Review the evidence with the group and seek TA clarification on controlled cases and the implemented Full Rewrite scope. The outstanding issue is strength and relevance of evidence, not whether failures arose naturally or whether Patch beats a baseline. No more diagnostics,81/108-cell matrices or deployment are authorized."
+heading("Research decision", blue=True)
+blue_para(
+    "The course comparison is complete for its stated subset; the stronger research Goal remains unmet. Observed_contract failed both validation batches, and no later version earned promotion. A future frozen mechanism needs a contemporaneous Patch control and strict gains in normal completion and every required product attribute, with TF and retention preserved, in development and separately in two independent batches. Failures and unknown charges remain recorded; task 223 and synthetic fixtures cannot silently replace the frozen subset."
 )
 page("10. Reproducibility and delivery")
 para(
@@ -475,12 +530,12 @@ code("python3 submission/handover-20261031/verify.py")
 para(
     "From the repository root, run: python3 submission/handover-20261031/verify.py. It blocks networking, recomputes the main 27 cells and135 ratings, checks all target-record rewrites and actual changed-tool calls, reconstructs10,959 frozen files from committed archives in a temporary directory, replays the historical case audit and independently recalculates the four diagnostic cells. It requires only Python3.12+ standard library. Inputs remain read-only; the experimental pipeline is not executed."
 )
-heading("Optional future execution - authorization required")
+heading("Future execution under a new frozen protocol", blue=True)
 code(
     "mkdir -p frozen-source\ntar -xzf submission/evidence/source-main-12d693c.tar.gz -C frozen-source\ncd frozen-source\nuv sync --frozen\n# Install pinned Node and released MCP environments per RUNBOOK.html.\n# Configure credentials locally; do not put them in the package.\n./experiment prepare --suite experiments/benchmark-v1.3.json \\\n  --repeats 1 --output results/raw/approved-new-run\n./experiment run --output results/raw/approved-new-run"
 )
-para(
-    "These commands are documentation, not an instruction to rerun the completed experiment. A fresh execution may not reproduce identical numerical scores because the provider is stochastic. Reproduction of archived arithmetic is exact; fresh behavioral reproduction is a separate, billable activity requiring approval."
+blue_para(
+    "These commands document the historical environment, not a reason to rerun completed cells. The user has authorized bounded local research, but any new experiment must freeze its distinct mechanism, task conditions, product acceptance, schedule and ledger before model calls. Archived arithmetic is exactly reproducible; a fresh behavioral run is billable and may differ. No push, deployment or external message is part of this report revision."
 )
 heading("Provenance")
 para(
@@ -712,13 +767,13 @@ para(
     "1. May the explicitly injected missing-knowledge trajectory satisfy under-update analysis despite unchanged TF and no demonstrated original-updater omission? The brief contains no natural-occurrence requirement.\n2. May we present over-update candidates and negative controls as an unresolved finding, or is a stronger unrelated-change failure required?\n3. Does full-catalog rebuilding with all descriptions regenerated and schema/rules/routing copied from authoritative target metadata meet the Full Rewrite definition?\n4. Does the documented optional-addition coverage with actual contact meet the intended Tool-level scope, with deletion/rename untested?"
 )
 para(
-    "Pending TA clarification is a limitation, not an instruction to expand the experiment. No further diagnostics, model calls, scoring or deployment are authorized. HANDOVER.md lists evidence paths, team review and next steps."
+    '<font color="#1250A0">TA clarification remains open. Later user authorization permits bounded local research; frozen scores are unchanged, and external submission or deployment is not authorized.</font>'
 )
 ev(
     "diagnostics-20261031/plan.json, exact-knowledge-diffs.json and audit.json; targeted-diagnostics archive; HANDOVER.md. This clarification supersedes earlier strict-natural wording; diagnostic facts remain unchanged."
 )
 sections.append("".join(current))
-css = "body{font:16px/1.65 system-ui,sans-serif;color:#172333;background:#f4f6fa;margin:0}main{max-width:1060px;margin:auto;padding:35px;background:white}section{margin-bottom:44px}h1,h2{color:#102b46}h2{border-bottom:1px solid #cbd5e1;padding-bottom:12px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:9px;border:1px solid #cbd5e1;text-align:left;vertical-align:top}th{background:#e8eef4}.scroll{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fa;padding:15px}p{overflow-wrap:anywhere}@media print{section{break-before:page}main{padding:0}}"
+css = "body{font:16px/1.65 system-ui,sans-serif;color:#172333;background:#f4f6fa;margin:0}main{max-width:1060px;margin:auto;padding:35px;background:white}section{margin-bottom:44px}h1,h2{color:#102b46}h2{border-bottom:1px solid #cbd5e1;padding-bottom:12px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:9px;border:1px solid #cbd5e1;text-align:left;vertical-align:top}th{background:#e8eef4}.blue-table th,.blue-table td{color:#1250A0}.scroll{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fa;padding:15px}p{overflow-wrap:anywhere}@media print{section{break-before:page}main{padding:0}}"
 (R / "report-final.html").write_text(
     '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PE6203 Course Report</title><style>'
     + css

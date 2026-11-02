@@ -1,0 +1,30 @@
+{
+  "review_id": "R07",
+  "input_sha256": "2789522134fa2ef8e35b97915d797bd196d4cfef8f0a019363ab4f58ccab49a8",
+  "reviewed_at": "2026-11-01T12:25:31.867882+00:00",
+  "properties": {
+    "validation": "fail",
+    "guidance": "pass",
+    "implementation_consistency": "fail"
+  },
+  "core_pass": false,
+  "rationale": {
+    "validation": "The answer supplies AST validation code without claiming it was executed, but incorrectly says ast.literal_eval accepts1+2 incidentally through complex support. Installed Python primary source requires the right operand be complex in this special case; two real integer operands do not qualify. No actual tool or evaluated example is available to correct that claim.",
+    "guidance": "Actionable parse-once AST allowlist, no eval/exec, input/node/depth/integer-size limits and distinction between injection and resource exhaustion are delivered, although the promised later OWASP mapping is absent.",
+    "implementation_consistency": "Declared MAX_EXPONENT1000 as max absolute exponent is checked only when right is int. A float exponent1001.0 with base1.0 bypasses the guard and returns1, contrary to the stated restriction. Permitted functions also allow excessive arity into the callable and fail to wrap TypeError despite claiming SafeExpressionError for any invalid expression. Main module parses, but its claimed controls are not all enforced."
+  },
+  "static_ast_audit": {
+    "main_module_parseable": true,
+    "functions": [
+      "safe_eval",
+      "_guard",
+      "_validate",
+      "_eval"
+    ],
+    "generated_code_executed": false,
+    "stdlib_literal_eval_source_sha256": "2b9ac4d639cd31e304e44ff200ddbf94bac334feb5cbb3d0a143bfcf649660d8",
+    "stdlib_excerpt": "elif isinstance(node, BinOp) and isinstance(node.op, (Add, Sub)):\n            left = _convert_signed_num(node.left)\n            right = _convert_num(node.right)\n            if isinstance(left, (int, float)) and isinstance(right, complex):\n                if isinstance(node.op, Add):\n                    return left + right\n                else:\n                    return left - right\n        return _convert_signed_num(node)\n    return _convert(node_or_string)\n"
+  },
+  "official_scores_seen_before_review": false,
+  "reviewer": "Same coordinator; not independent human or strict methodblind. Frozen rubric and static analysis; no generated code executed."
+}

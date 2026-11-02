@@ -1,0 +1,78 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PE6203 · 六条预算规则试验</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#182437;background:#f5f7fa;margin:auto;max-width:1150px;padding:28px}main{background:white;padding:34px;border-radius:12px}h1{font-size:30px;line-height:1.3}h2{font-size:22px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;text-align:left;border-bottom:1px solid #d9e0e8;vertical-align:top}th{background:#eef3f8}a{color:#175da8}code,pre{font-size:13px;overflow-wrap:anywhere}pre{white-space:pre-wrap;background:#eef3f8;padding:12px}.note{border-left:4px solid #b57d13;padding:12px 16px;background:#fff8e7}.scroll{overflow-x:auto}summary{cursor:pointer;font-weight:600;margin-top:12px}.small{font-size:14px;color:#526074}@media(max-width:650px){body{padding:10px}main{padding:18px}}</style><main>
+<h1>六条预算规则试验已完成：未证明双重改善</h1>
+<p class="note"><strong>结论：budget_contract 不晋级，本轮停止。</strong>两组均正常完成 3/3；候选 TF、PE 均低于同步对照。项目计划的汇总更准确，但数学说明和代码出现新的错误。全部成功、错误、评分及费用保留，没有低分重跑或自动扩展。</p>
+<p>2026-10-31 · 本轮比较 <code>budget_feedback</code> 与单一新候选 <code>budget_contract</code>，不是与原 Selective Patch 的新对照。用户批准 6 条轨迹、30 个原协议评分槽、至多 2 次预检，独立费用上限 US$1。课程 27 条主实验、PDF、Slides 和既有证据保持冻结。</p>
+<h2>1. 独立核验后的结果</h2><div class="scroll"><table><tr><th>各 3 条</th><th>budget_feedback 对照</th><th>budget_contract 候选</th></tr>
+<tr><td>正常完成</td><td>3/3</td><td>3/3</td></tr>
+<tr><td>变化任务完成</td><td>2/2</td><td>2/2</td></tr>
+<tr><td>保持任务完成</td><td>1/1</td><td>1/1</td></tr>
+<tr><td>TF 平均</td><td>9.9333</td><td>9.8667</td></tr>
+<tr><td>PE 平均</td><td>9.7333</td><td>8.9333</td></tr>
+<tr><td>变化任务 TF / PE</td><td>9.9 / 9.6</td><td>9.8 / 8.4</td></tr>
+<tr><td>保持任务 TF / PE</td><td>10 / 10</td><td>10 / 10</td></tr>
+<tr><td>Agent 费用</td><td>$0.033376212</td><td>$0.033273108</td></tr>
+<tr><td>Judge 费用</td><td>$0.010540008</td><td>$0.011807928</td></tr>
+<tr><td>确定性知识更新</td><td>0 模型调用 / $0 / 0.540 秒</td><td>0 模型调用 / $0 / 0.536 秒</td></tr>
+</table></div>
+<p>包含两次预检后总费用 <strong>US$0.089010216</strong>；未知费用 0。61 次请求＝29 agent + 30 judge + 2 preflight；预检 $0.00001296。从第一笔请求到最后结算约 3.83 分钟，低于估算的 5–12 分钟 / $0.15–0.40。费用是供应商响应记录值，未另行核对账户账单。两组均无截断、轮数耗尽或网络中断。</p>
+<p>执行前判据要求：变化任务完成数增加、TF 不降低、独立质量改善且无实质退化、保持能力不退化。本轮完成数打平、TF 下降，已不满足判据。虽有局部答案准确性改善，也有新错误与未确认属性。PE +0.5、旧 108 条晋级门槛均未使用。只覆盖两个变化阶段，<strong>不计算 ECS</strong>，不拼接历史 Early；五个 judge 不是五次独立任务执行。</p>
+<h2>2. 六个格与全部原始评分</h2><div class="scroll"><table><tr><th>Cell / 任务阶段</th><th>方法</th><th>TF / PE</th><th>轮数 / 工具调用 / isError</th><th>五次 TF；五次 PE</th></tr>
+<tr><td>cell-001<br>133 middle</td><td>budget_feedback</td><td>10.0 / 10.0</td><td>2 / 3 / 0</td><td>TF 10, 10, 10, 10, 10；PE 10, 10, 10, 10, 10</td></tr>
+<tr><td>cell-002<br>235 middle</td><td>budget_contract</td><td>10.0 / 10.0</td><td>2 / 3 / 0</td><td>TF 10, 10, 10, 10, 10；PE 10, 10, 10, 10, 10</td></tr>
+<tr><td>cell-003<br>283 late</td><td>budget_feedback</td><td>9.8 / 9.2</td><td>10 / 41 / 0</td><td>TF 10, 9, 10, 10, 10；PE 9, 9, 9, 10, 9</td></tr>
+<tr><td>cell-004<br>235 middle</td><td>budget_feedback</td><td>10.0 / 10.0</td><td>2 / 3 / 0</td><td>TF 10, 10, 10, 10, 10；PE 10, 10, 10, 10, 10</td></tr>
+<tr><td>cell-005<br>133 middle</td><td>budget_contract</td><td>9.6 / 7.8</td><td>3 / 8 / 0</td><td>TF 9, 9, 10, 10, 10；PE 8, 7, 8, 8, 8</td></tr>
+<tr><td>cell-006<br>283 late</td><td>budget_contract</td><td>10.0 / 9.0</td><td>10 / 42 / 1</td><td>TF 10, 10, 10, 10, 10；PE 10, 9, 10, 9, 7</td></tr>
+</table></div>
+<p>对照：TF＝(10+9.8+10)/3＝9.9333；PE＝(10+9.2+10)/3＝9.7333。候选：TF＝(10+9.6+10)/3＝9.8667；PE＝(10+7.8+9)/3＝8.9333。正常完成依据原始终止状态独立复核，不能由 TF 推断。工具 isError 仅是结构化标志，语法校验主动拒绝恶意输入不自动算工具故障。</p>
+<h2>3. 质量与错误证据</h2><ul>
+<li><strong>133 Middle：</strong>对照 2 轮、3 次工具调用，候选 3 轮、8 次调用；都正常结束。候选仍把拒绝 <code>**</code> 扩大为语法不支持指数；同一固定 Middle 实现的历史工具记录支持 <code>^</code>。候选还把 <code>ast.parse</code> 构造语法树说成会执行幂运算并卡住。其 <code>_check</code> 始终以 depth=0 调用且不递增，声明的 MAX_DEPTH 未生效。对照代码也有未落实到示例中的指数上限；完整安全性未知。只做了静态解析，未执行生成的计算器或安全测试。</li>
+<li><strong>283 Late 的局部改善：</strong>对照保存 30 个任务、4 个容器、26 个叶任务；M3 九个叶任务实际合计 <strong>79h</strong>，答案写成 67h，还声称有一次未在轨迹中出现的参数失败。候选保存 35＝6+29 个任务，六组工时 40/36/46/34/26/22 合计 <strong>204h</strong>，与落盘记录相符，并准确披露真实的 dependsOn 参数错误及恢复。这支持该格答案准确性改善，不代表任务数量更多或工时更少就是更好。</li>
+<li><strong>复杂度“清零”须保留限制：</strong>候选将已拥有六个子任务的父节点改名、改说明后，分析器警告从 1 变 0；该次修改没有新增拆分。容器澄清是合理解释，但不能只凭警告消失认定解决了根因。没有证据表明无关 harness 知识被改写并造成损害，不能把此例冒充已确认 over-update。</li>
+<li><strong>235 Middle 保持：</strong>两组知识均为精确 K0，三类图表规格、源数据、顺序、金额单位均保留。可核算的金额与差值准确；没有归档渲染图，颜色强度与实际可读性仍未知。同一 K0 的输出差异不能归因于适应规则。</li></ul>
+<p>20 个预先定义的属性逐项审阅：12 pass、4 fail、4 unknown；<strong>这些数量不是质量总分</strong>。由 Codex 非盲离线复核，详见 <a href="../results/evidence/budget-contract-20261031/quality-review.json">quality-review.json</a> 和 <a href="../results/evidence/budget-contract-20261031/artifact-checks.json">静态事实检查</a>。</p>
+<h2>4. Judge 局限，保留原分数</h2>
+<p>例如 283 对照 slot 2 把实际 79h 说成“stored 66h”；候选 283 slot 2 将层级列表重复显示的 64 项误当唯一任务数，而落盘记录是 35。部分 133 评分把一次 validation 加一次 evaluation 说成重复 validation。详见 <a href="../results/evidence/budget-contract-20261031/judge-audit.json">原评分与错误审计</a>。所有历史与本轮分数均未修改；没有用离线人工意见替换原 judge。</p>
+<h2>5. 设计、公平性与解释边界</h2>
+<p>只替换已有 budget_feedback 的预算规则：显式说明 12 轮 / 4096 tokens，先覆盖全部所需工作，给核验和汇报留出空间，建议答案约 1200 tokens。后两项是软指导，没有增加预算、额外续写或改变完成判定。133 Middle 替换 5 个、283 Late 替换 11 个直接变化/新增工具中的规则；235 不变。其余 schema、description、routing、探测事实与使用规则逐项一致。</p>
+<p>两组使用同一模型 <code>deepseek/deepseek-v4.1-flash-1017</code>、temperature 0、12 轮、4096 输出、900 秒、原任务、MCP 发布实现及五槽 judge 协议。实际 61 次响应均为 DigitalOcean；禁止 fallback。模型可见初始路径使用不含方法名的 cell IDs。冻结的 57 项输入和知识哈希在执行后仍一致；工具选择仍由 agent 决定。</p>
+<p>一次执行、已暴露的开发任务、供应商内部权重/量化未知，不能推断统计优越性或未见任务泛化。新旧两轮的供应商与路径控制不同；本轮对照两个旧失败条件都已正常完成，因此不能把历史失败与当前候选成功相减来声称修复效果。一条规则包含多个指导句，也不能隔离每句的因果贡献。</p>
+<h2>6. 复现与停止状态</h2>
+<p>源码冻结提交 <code>418ed2b</code>；<a href="../experiments/budget-contract-v1.json">获批执行协议</a>、<a href="../configs/budget-contract-v1.json">固定配置</a>、<a href="../results/evidence/budget-contract-20261031/preflight-freeze.json">执行前核对</a>、<a href="../results/evidence/budget-contract-20261031/reproduction.json">环境和命令</a>。333 项离线测试通过，13 项集成测试未在测试套件中执行；本轮实际执行了指定 MCP 工具。真实实验命令仅用于复现说明，后续付费执行仍须重新批准。</p>
+<p><a href="../results/evidence/budget-contract-20261031/raw-trial.tar.gz">原始归档（262 文件）</a> · <a href="../results/evidence/budget-contract-20261031/raw-manifest.json">逐文件哈希</a> · <a href="../results/evidence/budget-contract-20261031/source-418ed2b.tar.gz">冻结源码</a> · <a href="../results/evidence/budget-contract-20261031/trial-verification.json">独立复算</a> · <a href="../results/evidence/budget-contract-20261031/trial-facts/facts.json">轨迹和产物事实</a>。源码包不含已安装依赖或凭据。</p>
+<pre><code>python3 results/evidence/budget-contract-20261031/verify_trial.py</code></pre><p class="small">原始归档 SHA-256：b82b34719e304d3037ab465ecfe1bc46c7d1ff9be0712b1123623a39600c115a</p>
+<p><strong>授权范围已执行完毕；没有待运行的重复或扩展。</strong>本轮未找到同时改善完成率与任务质量的策略。课程原有 TA 接受范围、无关知识 over-update 因果证据及 Full Rewrite 解释问题仍按 HANDOVER 记录；本轮不关闭这些缺口，也不改课程结论。不推送到 main、不改 Slides、不部署、不自动申请或执行更大矩阵。</p>
+<h2>逐属性审阅</h2>
+<details><summary>cell-001 · task133 · budget_feedback</summary><ol>
+<li><b>PASS</b> · Two recorded grammar checks and the OWASP-related hardening prompt support the displayed observations. No codebase was supplied or audited.</li>
+<li><b>PASS</b> · The answer distinguishes syntax/AST validation and interpretation and separately recommends exponent/resource caps. No claim that syntax acceptance alone proves production security.</li>
+<li><b>UNKNOWN</b> · The example uses unbounded operator.pow; the prose calls for exponent caps and subprocess limits outside the snippet. Generated code was not executed. The After (safe) label is stronger than the demonstrated evidence; complete security/correctness is not established.</li>
+</ol></details>
+<details><summary>cell-002 · task235 · budget_contract</summary><ol>
+<li><b>PASS</b> · All three chart specifications returned successfully.</li>
+<li><b>PASS</b> · Five provinces, twelve ordered months, all six category/region values and 百万元 units match the original request.</li>
+<li><b>UNKNOWN</b> · Arithmetic checks match: provinces 53.4, months 25.4, Guangdong 15.8 and Jiangsu 12.3; January-to-December growth rounds to 192%. Different data scope is explicitly a hypothesis. Continuous-color/visual-readability claims cannot be checked without rendered images.</li>
+</ol></details>
+<details><summary>cell-003 · task283 · budget_feedback</summary><ol>
+<li><b>PASS</b> · Saved project has 30 tasks, four milestone containers and 26 concrete leaves spanning CSV, logs, API/UI, tests and rollout.</li>
+<li><b>PASS</b> · Parent and dependency references are valid and acyclic. The flagged combined log-ingestion task is narrowed and two distinct watermark/backfill tasks are added. Remaining four analyzer flags correspond to parent containers and are disclosed.</li>
+<li><b>FAIL</b> · Final M3 rollup is 67 hours, but its nine saved leaves total 79; all leaves total 233. The claimed earlier malformed-parameter creation failure is absent from the complete trace (41 tool results, zero structured errors; the named data-quality task is first called at round 8). Other counts and M1/M2/M4 rollups match.</li>
+<li><b>PASS</b> · Round 8 lowers and renames one task while transferring work into two new concrete leaves; this is actual scope splitting, not merely a numerical lowering to suppress the warning. No task deletion is recorded.</li>
+</ol></details>
+<details><summary>cell-004 · task235 · budget_feedback</summary><ol>
+<li><b>PASS</b> · All three chart specifications returned successfully.</li>
+<li><b>PASS</b> · All source data and month order are retained; the map and both chart axes specify 百万元.</li>
+<li><b>UNKNOWN</b> · Reported category gaps 1.5/1.4/0.6 and approximately threefold January-to-December ratio agree with data. Warm continuous-color/intensity and actual rendering are not independently evidenced by an archived image.</li>
+</ol></details>
+<details><summary>cell-005 · task133 · budget_contract</summary><ol>
+<li><b>FAIL</b> · Observed checks are mostly reproduced accurately, but rejection of ** is generalized to this grammar lacking exponentiation. The same pinned Middle grammar accepts ^ in preserved historical tool evidence. This new trial did not test ^.</li>
+<li><b>FAIL</b> · It correctly warns that validation is not proof of safety, but also says ast.parse(&quot;9**9**9**9&quot;) will hang the worker. Offline AST parsing returns a tree without evaluating powers: parsing is being conflated with evaluation in that sentence.</li>
+<li><b>FAIL</b> · The reference code advertises MAX_DEPTH=20, but _check is called once with default depth=0 and neither recurses nor increments depth. That guard cannot enforce its depth limit. The explicit reference-pattern disclaimer is retained; no generated evaluator/security test was executed.</li>
+</ol></details>
+<details><summary>cell-006 · task283 · budget_contract</summary><ol>
+<li><b>PASS</b> · Saved project has 35 tasks, six milestone containers and 29 concrete leaves covering all three requested workstreams, supporting services, tests and rollout.</li>
+<li><b>PASS</b> · All parent/dependency references are valid and acyclic; leaves have concrete scopes and declared complexity 3–5. The single encoded dependency and incompletely encoded ordering are explicitly disclosed. Self-reported complexity does not prove practical difficulty.</li>
+<li><b>PASS</b> · 35=6+29 and 204 leaf hours agree with storage; per-milestone rollups 40/36/46/34/26/22 match. The malformed dependsOn error and successful correction are recorded. No implementation is claimed complete.</li>
+<li><b>UNKNOWN</b> · Round 8 only renames and redescribes an already decomposed parent; its six children already existed. Analyzer flags fall from one to zero without new work decomposition. Container clarification is plausible, but calling this fixing the root cause overstates what the warning disappearance proves. No evidence of erased material work or a harness edit to unrelated knowledge; not confirmed over-update.</li>
+</ol></details>
+</main></html>

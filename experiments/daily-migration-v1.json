@@ -1,0 +1,109 @@
+{
+  "id": "daily-migration-v1",
+  "status": "authorized_freeze_before_first_model_request",
+  "objective": "Test already implemented methods on official task90, whose daily challenge lookup genuinely requires current remote information. Preserve all earlier results and candidates unchanged.",
+  "hypothesis": "Current get_problem(daily=true) knowledge should retrieve the actual dated daily challenge after get_daily_challenge is removed; stale knowledge may fail or recover. Compare answer facts and image retrieval separately from normal termination. No new candidate is introduced.",
+  "candidate": {
+    "name": "budget_feedback",
+    "implementation": "existing deterministic patch, unchanged since previous cohorts",
+    "selection": "Existing budget_feedback chosen before this task is run, with positive completion observations and documented negative studies; no promotion presumed."
+  },
+  "champion": "selective_patch",
+  "candidates": [
+    "budget_feedback"
+  ],
+  "model_config": "configs/daily-migration-v1.json",
+  "updater_config": "configs/daily-migration-updater-v1.json",
+  "development": {
+    "tasks": [
+      90
+    ],
+    "stages": [
+      "early",
+      "middle",
+      "late"
+    ],
+    "strategies": [
+      "no_update",
+      "full_rewrite",
+      "selective_patch",
+      "budget_feedback"
+    ],
+    "repeats": 1,
+    "opaque_cell_ids": true
+  },
+  "case_selection": "results/evidence/daily-migration-readiness-20261031/",
+  "quality_cases": [
+    {
+      "task_id": 90,
+      "split": "exposed_development_coverage_extension",
+      "provenance": "Original official task90 question and full server set. An earlier broad metadata inspection exposed its released answer/trace; it is not protected heldout. No released answer, current daily answer, judge score or new execution is passed to updater.",
+      "required_properties": [
+        "Identify the requested Blue-Eyes White Dragon card with details consistent with retrieved card record.",
+        "Actually fetch the requested card image and retain nonempty valid image bytes; any final URL or card identity must correspond to the observed asset. Fetching bytes does not establish successful rendering in a browser.",
+        "Report the actual daily challenge title/identifier and date from current remote evidence; disclose missing retrieval instead of guessing from old benchmark answers.",
+        "Final success claims match tool observations; retrieval failure is reported separately from agent stop status."
+      ],
+      "forbidden": [
+        "Substitute the historic released daily answer for the current service result.",
+        "Count ordinary stop as complete fulfillment when requested current facts or the image are absent.",
+        "Use a generic probe card instead of the requested card."
+      ],
+      "review": "Independently parse saved card/daily observations, decode stored image bytes and compare final facts. No new judge rubric or corrected historical scores. The unchanged image/details tool contracts provide within-task retention evidence; prior task235 retention remains a separate cohort."
+    }
+  ],
+  "evaluation": {
+    "metrics": [
+      "TF",
+      "PE",
+      "ECS_population",
+      "ECS_sample",
+      "actual_execution_status",
+      "removed_tool_call_errors",
+      "card_details_preservation",
+      "image_bytes_fetched",
+      "dated_daily_answer_accuracy",
+      "update_tokens_time_usd",
+      "agent_and_judge_usd_unknowns"
+    ],
+    "success_interpretation": "Report whether completion and independently checked task facts improve, for each matched baseline and stage. Positive evidence can support a limited observed advantage; no perfection, universal superiority, statistical or PE+0.5 course gate. Negative observations remain visible.",
+    "completion_separate": true,
+    "historical_scores_immutable": true,
+    "early": "All four arms use exactK0. Differences at Early are stochastic, not adaptation gains.",
+    "retention": "get_card_by_id/get_card_image metadata are unchanged across stages; verify rather than assume. Search changes at Middle/Late, so card lookup as a whole is not an unchanged-task test. Existing task235 results remain separate.",
+    "repeat_limit": "One execution per cell is a readiness/coverage pilot, not a three-repeat stability claim. No automatic81/108 expansion or low-score retries.",
+    "decision_after_run": "Review all12 raw trajectories before further design. If the predicted mechanism is absent or quality fails, record the negative result. Any next work must address a specific remaining gap."
+  },
+  "fairness": {
+    "base_model": "deepseek/deepseek-v4.1-flash-1017",
+    "actual_provider": "DigitalOcean only for updater/agent/judge; no fallback",
+    "agent_budget": "4096 output tokens,12 rounds,900s execution,120s request,30s tools",
+    "judge": "Five original first-valid slots, fixed model/decoding/rubric and concise-counts-v1 recovery",
+    "updater": "16384 tokens,temperature0,reasoning disabled,JSON; whole target catalog for FR, deterministic selective methods. Same model, actual-provider route and cost accounting. Extra updater config fields do not change historical defaults.",
+    "source_control": "All code/config/knowledge frozen before agent execution; opaque cell IDs. No task content or scores enter updater.",
+    "network_limit": "Released public YGOCDB/CDN and global LeetCode services, no cookies/accounts. Daily data and card content live; timestamps and returned date archived. No main-task answer supplied from readiness probes.",
+    "full_rewrite_scope": "Rebuild every record from target catalog, rewrite all descriptions by LLM, preserve target schemas/routing/output schema and supplied usage rules. Same disclosed interpretation as main benchmark, not a newly validated all-fields LLM rewrite.",
+    "image_handling": "Unchanged shared runtime serializes MCP image blocks as JSON text and preserves full base64 in raw records. This is not vision input or automatic browser rendering. All four arms receive the same handling; original judge protocol also sees archived representation. No claim that this validates image understanding.",
+    "limitations": "Framework generic warning about independent holdout is a historical research caution, not an additional course requirement. No causal interpretation of identical Early knowledge differences."
+  },
+  "authorization": {
+    "approved": true,
+    "record": "results/evidence/next-comparison-review-20261031/authorization.json",
+    "total_cost_limit_usd": null,
+    "total_trajectory_cap": null,
+    "deployment": false
+  },
+  "estimate": {
+    "expected_usd": [
+      0.3,
+      2.0
+    ],
+    "expected_minutes": [
+      8,
+      20
+    ],
+    "is_cap": false,
+    "basis": "Prior12-cell migration study $0.128; image responses add about100k base64 characters to subsequent agent/judge context, increasing input cost. Actual usage is recorded."
+  },
+  "original_task_retention": "Keep tasks133/235/283/430 and all failures in their original cohorts. This12-cell addition cannot overwrite course27 or be silently pooled with earlier studies. No automatic confirmation or wider matrix."
+}

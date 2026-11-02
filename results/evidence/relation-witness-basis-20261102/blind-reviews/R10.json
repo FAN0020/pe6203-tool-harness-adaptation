@@ -1,0 +1,20 @@
+{
+  "review_id": "R10",
+  "input_sha256": "6fcf3fd82bf35e975b938f9f8ed79fc203ee03765ae25fd92e47185a1e92bbe6",
+  "properties": {
+    "validation": "fail",
+    "guidance": "pass",
+    "implementation_consistency": "fail"
+  },
+  "core_pass": false,
+  "evidence": {
+    "validation": "Claims native syntactically-valid response only for pure arithmetic/no variables. One benign probe cannot establish this; approved native contract accepts variables and nonnumeric constructs, and allow_variables flag is not enforcement.",
+    "guidance": "Actionable Python allowlist/no-eval/resource bounds/logging/OWASP advice; assess code separately.",
+    "implementation_consistency": "gated_pow defined separately but _ALLOWED still maps ast.Pow to operator.pow; explicit rejection test2**999999999 not enforced.; Recursive BinOp/UnaryOp calls omit max_depth, resetting custom bound to50.; Wrapper catches ValueError/SyntaxError, not ZeroDivisionError despite claimed generic400 for1/0."
+  },
+  "review_phase": "before_arm_mapping_and_scores",
+  "limitations": [
+    "Same coordinator; mapping/scores not read.",
+    "AST static inspection only."
+  ]
+}

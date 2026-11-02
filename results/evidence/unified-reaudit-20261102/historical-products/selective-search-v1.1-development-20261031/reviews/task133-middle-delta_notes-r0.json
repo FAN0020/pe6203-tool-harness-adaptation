@@ -1,0 +1,37 @@
+{
+  "cell_id": "task133-middle-delta_notes-r0",
+  "cohort": "results/raw/selective-search-v1.1-development-20261031",
+  "task_id": 133,
+  "input_sha256": "dc20d5cab2720f4529877b34587dc08da485119d8046d1769fce1f5d9acba9ab",
+  "trace_sha256": "594176266f2210d3d15a891cc2d3b086c9aa634cfa65aa2cc86aed1a90c5b04a",
+  "properties": {
+    "validation": "fail",
+    "guidance": "pass",
+    "implementation_consistency": "fail"
+  },
+  "core_pass": false,
+  "evidence": {
+    "validation": "Generalizes math.sqrt rejection to allfunctioncalls andnulloutput to fail-closedsecurity; nativegrammar allowsbarefunctions.",
+    "guidance": "ASTallowlist andlength/node/integer/exponentlimits areactionable.",
+    "implementation_consistency": "MAX_INT_BITS describedasmaximumsizeofanyinteger, butappliedonlyafterpower/multiplication allocation. Powmayallocate resultfarabovecapbeforechecking; outputcanalso becomplexdespiteint|floatcontract."
+  },
+  "static_syntax": [
+    {
+      "block": 1,
+      "status": "parses_as_AST",
+      "executed": false
+    }
+  ],
+  "source_limits": [
+    "Sympyofficialparsingdocumentation1.14.0 saysparse_expruseseval;evaluate=False suppressesautomatic simplification,notexecution.",
+    "PythonAST discards redundantparentheses and parsesdecimalfloats before evaluator.",
+    "No generatedcode or hostilepayload executed."
+  ],
+  "review_phase": "supplemental_posthoc_scores_exposed",
+  "review_source": "scripts/review_registry_math.py",
+  "limitations": [
+    "Samecoordinator;originalscores exposed,notindependentvalidation.",
+    "Securityexamples criticizedonlywhen recommended,notwhen explicitlylabelledunsafe.",
+    "Static evidence isnotruntimeverification; unknown remainsnotpass."
+  ]
+}

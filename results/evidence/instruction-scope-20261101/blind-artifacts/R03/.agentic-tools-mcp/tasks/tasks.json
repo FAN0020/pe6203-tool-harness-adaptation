@@ -1,0 +1,1143 @@
+{
+  "projects": [
+    {
+      "id": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "name": "Analytics Dashboard",
+      "description": "New analytics dashboard platform combining three data sources: (1) customer CSV file processing, (2) application log analysis, and (3) interactive visualization components. Goal is a single dashboard that ingests, transforms, stores, and visualizes customer and operational data for business and engineering stakeholders.\n\nScope of work:\n- Requirements & architecture foundations\n- Customer CSV ingestion, validation, and transformation pipeline\n- Application log parsing, enrichment, and aggregation\n- Unified data storage/modeling layer serving both sources\n- Visualization components and dashboard UI\n- Integration, performance hardening, testing, and deployment\n\nWork is organized as 6 major milestones broken down into right-sized executable tasks.\n\nTags: analytics, dashboard, data-pipeline, csv, log-analysis, visualization",
+      "createdAt": "2026-11-01T13:27:42.128Z",
+      "updatedAt": "2026-11-01T13:27:42.128Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "848511dc-2bba-4f65-984b-9ca956fc9835",
+      "name": "M1: Requirements & Architecture Foundation",
+      "details": "Milestone 1. Establish the shared understanding and technical blueprint before any pipeline code is written.\n\nCovers:\n- Stakeholder interviews and dashboard KPI definition\n- Inventory and profiling of the customer CSV files (schemas, volume, encoding, data quality)\n- Inventory and profiling of application log formats (sources, lines/day, severity levels, retention)\n- Target architecture decision: batch vs streaming, storage choice, orchestration, hosting\n- Naming conventions, environment setup, and repo/tooling baseline\n- Definition of done and success metrics for each downstream milestone\n\nExit criteria: signed-off KPI list, documented source inventories, one-page architecture diagram, and a prioritized milestone backlog with acceptance criteria.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "completed": false,
+      "createdAt": "2026-11-01T13:27:54.119Z",
+      "updatedAt": "2026-11-01T13:27:54.119Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 5,
+      "status": "in-progress",
+      "tags": [
+        "milestone",
+        "discovery",
+        "architecture"
+      ],
+      "estimatedHours": 40,
+      "level": 0
+    },
+    {
+      "id": "eeebbbd4-158e-4578-9525-ad305da7e000",
+      "name": "M2: Customer CSV Ingestion & Processing Pipeline",
+      "details": "Milestone 2. Build the end-to-end pipeline that turns raw customer CSV files into clean, queryable customer records.\n\nCovers:\n- File arrival/discovery and landing-zone conventions\n- CSV parsing with configurable delimiters, quoting, encoding, and header handling\n- Schema validation, type coercion, and rejected-record quarantine with reasons\n- De-duplication and customer identity resolution\n- Transformation and derived customer attributes (segments, lifetime value inputs, churn signals)\n- Incremental/idempotent loads with run metadata and lineage\n- Pipeline observability: row counts, failure alerts, and reprocessing runbook\n\nExit criteria: a reproducible run that ingests a full sample CSV set, quarantines bad rows with reasons, and lands conformed customer data in the storage layer with a documented reconciliation report.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "completed": false,
+      "createdAt": "2026-11-01T13:27:54.121Z",
+      "updatedAt": "2026-11-01T13:28:03.908Z",
+      "dependsOn": [
+        "848511dc-2bba-4f65-984b-9ca956fc9835"
+      ],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "csv",
+        "ingestion",
+        "etl"
+      ],
+      "estimatedHours": 120,
+      "level": 0
+    },
+    {
+      "id": "2a5f7be1-ee7f-4c94-ad91-4a827408f7ff",
+      "name": "M3: Application Log Analysis Pipeline",
+      "details": "Milestone 3. Turn raw application logs into structured, aggregated operational metrics that the dashboard can serve.\n\nCovers:\n- Log shipping/collection from application hosts and containers\n- Parsing and normalizing mixed log formats (structured JSON, plaintext, stack traces)\n- Timestamp normalization, severity classification, and request/correlation ID extraction\n- Enrichment: service name, environment, region, endpoint, user/customer linkage\n- Aggregation into time-bucketed metrics (error rates, p95 latency, request volume, top errors)\n- Retention, partitioning, and cost controls on log storage\n- PII scrubbing and log-access guardrails\n\nExit criteria: parsed logs land in the storage layer with a documented schema, hourly aggregates reconcile against a manual sample count, and PII scrubbing is verified on a red-team sample.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "completed": false,
+      "createdAt": "2026-11-01T13:27:54.122Z",
+      "updatedAt": "2026-11-01T13:28:03.910Z",
+      "dependsOn": [
+        "848511dc-2bba-4f65-984b-9ca956fc9835"
+      ],
+      "priority": 8,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "logs",
+        "parsing",
+        "aggregation"
+      ],
+      "estimatedHours": 130,
+      "level": 0
+    },
+    {
+      "id": "19dd31bb-335b-4fad-a7f9-e852e01f826e",
+      "name": "M4: Unified Data Storage & Modeling Layer",
+      "details": "Milestone 4. Provide one governed data model and serving layer that both the customer and log pipelines write into and the dashboard reads from.\n\nCovers:\n- Logical and physical data model (customer dimension, log fact tables, aggregate/summary tables)\n- Storage technology selection and provisioning (warehouse vs OLAP vs hybrid)\n- Ingestion write contracts and schema registry/versioning\n- Serving layer for the dashboard: pre-aggregated marts for the defined KPIs\n- Access control, row/column-level security, and secrets management\n- Data quality tests and freshness SLAs on the modeled tables\n\nExit criteria: modeled tables are queryable, documented in a data catalog, covered by automated freshness/quality checks, and benchmarked to meet dashboard query latency targets.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "completed": false,
+      "createdAt": "2026-11-01T13:27:54.124Z",
+      "updatedAt": "2026-11-01T13:28:03.912Z",
+      "dependsOn": [
+        "848511dc-2bba-4f65-984b-9ca956fc9835"
+      ],
+      "priority": 8,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "data-model",
+        "storage",
+        "governance"
+      ],
+      "estimatedHours": 110,
+      "level": 0
+    },
+    {
+      "id": "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc",
+      "name": "M5: Visualization Components & Dashboard UI",
+      "details": "Milestone 5. Build the user-facing dashboard: reusable chart components, page layout, and the APIs that feed them.\n\nCovers:\n- Dashboard information architecture and wireframes for the defined KPIs\n- Reusable visualization component library (line, bar, KPI tile, table, heatmap)\n- Data access/query API layer between the UI and the serving marts\n- Interactive filters (date range, customer segment, service, environment) with URL-persisted state\n- Loading, empty, error, and partial-data states\n- Accessibility (color contrast, keyboard navigation, screen-reader labels)\n- Responsive layout and theming\n\nExit criteria: an end-to-end dashboard that renders every agreed KPI from real pipeline data, passes accessibility checks, and meets agreed load-time budgets.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "completed": false,
+      "createdAt": "2026-11-01T13:27:54.125Z",
+      "updatedAt": "2026-11-01T13:28:03.913Z",
+      "dependsOn": [
+        "19dd31bb-335b-4fad-a7f9-e852e01f826e"
+      ],
+      "priority": 7,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "visualization",
+        "frontend",
+        "ux"
+      ],
+      "estimatedHours": 140,
+      "level": 0
+    },
+    {
+      "id": "1aeabfc6-8a76-4a8c-adf5-5be8dd7f6fcd",
+      "name": "M6: Integration, Quality Hardening & Production Launch",
+      "details": "Milestone 6. Prove the whole system works together and ship it safely.\n\nCovers:\n- End-to-end integration testing across CSV pipeline, log pipeline, storage, and UI\n- Automated test suite: unit, contract, integration, and a smoke suite in CI\n- Performance/load testing at projected data volumes and dashboard concurrency\n- Monitoring, alerting, and dashboards for pipeline health and data freshness\n- Deployment automation, environments (dev/staging/prod), and rollback plan\n- Security review, PII handling sign-off, and access control verification\n- Documentation, runbooks, and stakeholder enablement/training\n- Staged rollout and post-launch review\n\nExit criteria: production deployment completed with green CI, monitored pipelines, a rehearsed rollback, and user sign-off on the live dashboard.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "completed": false,
+      "createdAt": "2026-11-01T13:27:54.127Z",
+      "updatedAt": "2026-11-01T13:28:03.915Z",
+      "dependsOn": [
+        "eeebbbd4-158e-4578-9525-ad305da7e000",
+        "2a5f7be1-ee7f-4c94-ad91-4a827408f7ff",
+        "19dd31bb-335b-4fad-a7f9-e852e01f826e",
+        "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc"
+      ],
+      "priority": 7,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "integration",
+        "testing",
+        "deployment"
+      ],
+      "estimatedHours": 120,
+      "level": 0
+    },
+    {
+      "id": "f0fd9964-24dc-4095-a4a9-a9a0c58b4145",
+      "name": "Define stakeholders, KPIs & success metrics",
+      "details": "Deliverable: a signed-off KPI catalogue.\n\nSteps:\n1. Identify stakeholder groups (business, support, engineering) and their top 3 questions of the dashboard.\n2. Run 45-minute interviews; capture verbatim questions.\n3. Convert questions into candidate KPIs with explicit definitions (numerator, denominator, grain, time window).\n4. Mark each KPI as \"v1 must-have\" vs \"later\" and map it to a data source (CSV / logs / both).\n5. Define measurable success criteria per KPI (freshness, accuracy tolerance).\n\nDone when: KPI catalogue is reviewed and approved; every KPI has an owner and a source.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "848511dc-2bba-4f65-984b-9ca956fc9835",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:11.782Z",
+      "updatedAt": "2026-11-01T13:28:11.782Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "discovery",
+        "requirements",
+        "kpi"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "3b1d29a7-ebb8-4795-be5a-f1a04b81687f",
+      "name": "Profile customer CSV source files",
+      "details": "Deliverable: a source inventory + data profile document for the customer CSV files.\n\nSteps:\n1. Collect a representative sample of CSV extracts (at least one per producing system).\n2. Record file naming patterns, cadence, volume, encoding, delimiter, quoting, and header conventions.\n3. Profile each column: datatype, null rate, distinct count, min/max, top values.\n4. Flag data-quality problems (duplicate customers, inconsistent country/date formats, embedded newlines, BOM/UTF-8 issues).\n5. Note any PII columns and their sensitivity classification.\n\nDone when: the profile document exists per source file and edge cases are captured as test fixtures.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "848511dc-2bba-4f65-984b-9ca956fc9835",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:11.785Z",
+      "updatedAt": "2026-11-01T13:28:11.785Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "discovery",
+        "csv",
+        "data-profiling"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "ae7c29ba-cac9-4bee-a7cf-c95b27280e95",
+      "name": "Profile application log sources & formats",
+      "details": "Deliverable: a log source inventory with sample records per format.\n\nSteps:\n1. Enumerate log-producing services, hosts/containers, and current collection mechanism.\n2. Measure daily volume and peak throughput; estimate 12-month growth.\n3. Collect 100 sample lines per service covering JSON, plaintext, and stack-trace formats.\n4. Document timestamp formats/timezones, severity vocabulary, and request/correlation ID presence.\n5. Identify PII/sensitive fields that appear in log payloads.\n6. Record current retention and any compliance constraints.\n\nDone when: every log source has a documented format, volume, and sensitivity rating.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "848511dc-2bba-4f65-984b-9ca956fc9835",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:11.786Z",
+      "updatedAt": "2026-11-01T13:28:11.786Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "discovery",
+        "logs",
+        "data-profiling"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "1e7b30d2-2455-4986-91a7-26f878c9a6c4",
+      "name": "Write architecture decision record & system design",
+      "details": "Deliverable: one-page architecture diagram + ADRs for the key choices.\n\nSteps:\n1. Choose batch vs streaming per source, justified by freshness KPIs from the KPI catalogue.\n2. Choose the storage/serving technology against volume and latency targets.\n3. Choose orchestration (scheduler/DAG runner) and hosting model.\n4. Define component boundaries: CSV pipeline, log pipeline, shared storage, API, UI.\n5. Write ADRs capturing options considered, decision, and consequences.\n6. Review with engineering for feasibility and cost.\n\nDone when: architecture diagram and ADRs are reviewed and the cost envelope is acknowledged.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "848511dc-2bba-4f65-984b-9ca956fc9835",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:11.788Z",
+      "updatedAt": "2026-11-01T13:29:39.450Z",
+      "dependsOn": [
+        "f0fd9964-24dc-4095-a4a9-a9a0c58b4145",
+        "3b1d29a7-ebb8-4795-be5a-f1a04b81687f",
+        "ae7c29ba-cac9-4bee-a7cf-c95b27280e95"
+      ],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "architecture",
+        "adr",
+        "design"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "a8404c80-20dd-4a8a-a860-203b4a4988d3",
+      "name": "Stand up repo, environments & tooling baseline",
+      "details": "Deliverable: a working repo skeleton that a developer can clone and run in under 30 minutes.\n\nSteps:\n1. Create repository with README, folder conventions, and branch protection.\n2. Add linting, formatting, and pre-commit hooks.\n3. Define environment strategy (dev/staging/prod) and secret storage.\n4. Provision local dev stack (containers for storage + app).\n5. Add a CI skeleton that runs lint and tests on pull request.\n6. Document onboarding steps in the README.\n\nDone when: a fresh clone passes CI and the local stack starts from documented commands.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "848511dc-2bba-4f65-984b-9ca956fc9835",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:11.790Z",
+      "updatedAt": "2026-11-01T13:28:11.790Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "setup",
+        "tooling",
+        "devops"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "b11cbcfb-7270-4129-b2fa-ed72de5339ac",
+      "name": "Build CSV landing zone & file discovery",
+      "details": "Deliverable: a landing-zone convention plus a discovery component that finds new CSV drops.\n\nSteps:\n1. Define folder/bucket layout and file naming contract (source, extract date, sequence).\n2. Implement discovery that lists new files since the last successful run.\n3. Record a manifest entry per file (path, size, checksum, arrival time).\n4. Use checksum to detect re-delivered or mutated files.\n5. Handle files still being written (stability check on size/mtime).\n6. Unit-test discovery against re-delivery and partial-write cases.\n\nDone when: the pipeline reliably identifies exactly-once file ingestion candidates from a test drop folder.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "eeebbbd4-158e-4578-9525-ad305da7e000",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:24.492Z",
+      "updatedAt": "2026-11-01T13:28:24.492Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "65ae12dc-1b77-42c2-9348-47cf08b38d24",
+      "name": "Implement configurable CSV parser",
+      "details": "Deliverable: a parser module driven by per-source config rather than hardcoded rules.\n\nSteps:\n1. Implement a config schema per source: encoding, delimiter, quote char, escape, header row, null tokens, date formats.\n2. Parse to a raw typed structure while preserving original line numbers for error reporting.\n3. Handle BOM, embedded newlines, quoted delimiters, ragged rows, and trailing empty columns.\n4. Emit structured parse errors instead of throwing on the first bad row.\n5. Add fixtures for every edge case found during profiling.\n6. Benchmark throughput at projected file size.\n\nDone when: all profiled source samples parse with zero unhandled exceptions and throughput meets the volume target.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "eeebbbd4-158e-4578-9525-ad305da7e000",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:24.496Z",
+      "updatedAt": "2026-11-01T13:29:39.453Z",
+      "dependsOn": [
+        "b11cbcfb-7270-4129-b2fa-ed72de5339ac"
+      ],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "parsing"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "078143a9-b125-49f8-9f6d-7259d6d5fe9a",
+      "name": "Add schema validation & bad-record quarantine",
+      "details": "Deliverable: validation layer plus a quarantine table with human-readable reject reasons.\n\nSteps:\n1. Codify expected schema per source (types, required fields, allowed enumerations, regex formats).\n2. Implement type coercion (dates, decimals, booleans) with per-source locale rules.\n3. Route failing rows to quarantine with: source file, line number, field, value, reason code.\n4. Separate hard failures (unusable row) from soft warnings (coerced/corrected values).\n5. Emit counts per reason code for the reconciliation report.\n6. Test with a deliberately corrupted sample containing every failure class.\n\nDone when: a corrupted sample quarantines 100% of bad rows with correct reason codes and zero valid-row loss.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "eeebbbd4-158e-4578-9525-ad305da7e000",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:24.497Z",
+      "updatedAt": "2026-11-01T13:29:39.456Z",
+      "dependsOn": [
+        "65ae12dc-1b77-42c2-9348-47cf08b38d24"
+      ],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "validation",
+        "data-quality"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "4a169ca1-1c0a-434d-a6dd-4790035f5b1b",
+      "name": "Design customer identity match rules",
+      "details": "Deliverable: deterministic matching rules with a scored candidate list and a documented threshold policy.\n\nSteps:\n1. Pick blocking keys (e.g. normalized email domain, phone suffix, postal+name) to avoid full cross-join.\n2. Implement normalizers for email, phone, name, and address fields.\n3. Define match tiers: exact, strong (email+phone), probabilistic (name+address+DOB).\n4. Score candidate pairs and set auto-merge vs manual-review thresholds.\n5. Produce a match-rule tuner report against the labeled sample.\n6. Document false-positive/false-negative tradeoffs.\n\nDone when: match rules achieve agreed precision/recall on the labeled sample and thresholds are signed off.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "eeebbbd4-158e-4578-9525-ad305da7e000",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:24.499Z",
+      "updatedAt": "2026-11-01T13:29:39.458Z",
+      "dependsOn": [
+        "078143a9-b125-49f8-9f6d-7259d6d5fe9a"
+      ],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "identity-resolution",
+        "matching"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "8cf10809-8c68-42b6-b42b-9c81430691b9",
+      "name": "Implement golden-record merge & survivorship",
+      "details": "Deliverable: a single conformed customer record per resolved identity.\n\nSteps:\n1. Define per-field survivorship rules (source priority, most-recent, most-complete).\n2. Implement merge producing one golden record plus a link table of contributing source rows.\n3. Preserve lineage: every golden field traces back to a source record.\n4. Keep merge idempotent — re-running produces the same golden record.\n5. Handle unmerge/backout for wrongly merged identities.\n6. Test with known duplicate clusters from the profiling sample.\n\nDone when: duplicate clusters collapse correctly, lineage is intact, and re-runs are byte-identical.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "eeebbbd4-158e-4578-9525-ad305da7e000",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:24.500Z",
+      "updatedAt": "2026-11-01T13:29:39.460Z",
+      "dependsOn": [
+        "4a169ca1-1c0a-434d-a6dd-4790035f5b1b"
+      ],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "identity-resolution",
+        "merge"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "b8e6190c-a2f8-414a-a100-1fa996782e63",
+      "name": "Build customer transformations & derived attributes",
+      "details": "Deliverable: the derived customer attributes required by the KPI catalogue.\n\nSteps:\n1. Implement segmentation logic (e.g. plan tier, tenure band, spend band) with documented cutoffs.\n2. Derive calculated fields needed for KPIs (tenure days, MRR contribution, engagement flags).\n3. Implement churn-risk signals as per the KPI definitions (avoid inventing untested logic).\n4. Encode all thresholds/config as parameters, not hardcoded constants.\n5. Unit-test each derivation with boundary values.\n6. Document each attribute's definition in the data dictionary.\n\nDone when: every KPI-required derived attribute exists, is tested, and is documented.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "eeebbbd4-158e-4578-9525-ad305da7e000",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:24.502Z",
+      "updatedAt": "2026-11-01T13:29:39.462Z",
+      "dependsOn": [
+        "8cf10809-8c68-42b6-b42b-9c81430691b9"
+      ],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "transformation",
+        "metrics"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "c01ae9c2-37d5-4981-b95b-3a8b08458956",
+      "name": "Implement idempotent loads & run metadata",
+      "details": "Deliverable: upsert/merge loading that is safe to re-run, with a queryable run history.\n\nSteps:\n1. Define the load contract with the storage layer (merge key, partition overwrite vs merge).\n2. Make each file load transactional: all-or-nothing per batch.\n3. Record run metadata: file, checksum, row counts, timing, status, error summary.\n4. Add retry with backoff and a fail-fast path that does not leave partial data.\n5. Add a CLI/entrypoint to reprocess a specific file or date range.\n6. Test double-execution of the same file to prove no duplication.\n\nDone when: re-running any file twice yields identical table counts and a complete run-history audit trail.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "eeebbbd4-158e-4578-9525-ad305da7e000",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:24.504Z",
+      "updatedAt": "2026-11-01T13:29:39.464Z",
+      "dependsOn": [
+        "078143a9-b125-49f8-9f6d-7259d6d5fe9a"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "loading",
+        "idempotency"
+      ],
+      "estimatedHours": 14,
+      "level": 1
+    },
+    {
+      "id": "8f72104b-5a81-4fbc-bff9-b1e725b6700d",
+      "name": "Add CSV pipeline observability & reconciliation report",
+      "details": "Deliverable: metrics, alerts, and a per-run reconciliation report.\n\nSteps:\n1. Emit metrics: files processed, rows read/valid/quarantined/loaded, duration, duplicate rate.\n2. Add failure alerting (failed run, zero-row run, sudden quarantine-rate spike).\n3. Generate a reconciliation report: input rows = loaded + quarantined + explicitly skipped, with reasons.\n4. Add a freshness indicator (last successful load per source).\n5. Write a reprocessing runbook covering common failures.\n6. Validate the report against a hand-counted sample file.\n\nDone when: the report balances to zero for the sample set and alerts fire correctly in a simulated failure.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "eeebbbd4-158e-4578-9525-ad305da7e000",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:24.505Z",
+      "updatedAt": "2026-11-01T13:29:39.465Z",
+      "dependsOn": [
+        "c01ae9c2-37d5-4981-b95b-3a8b08458956",
+        "b8e6190c-a2f8-414a-a100-1fa996782e63"
+      ],
+      "priority": 7,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "observability",
+        "monitoring"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "c2b7e670-3d73-425a-945b-fcd1dce41092",
+      "name": "Set up log collection & shipping",
+      "details": "Deliverable: a reliable collection path from application hosts/containers into the raw log landing area.\n\nSteps:\n1. Choose the shipping mechanism (agent vs sidecar vs platform-native) per ADR.\n2. Configure collection for each enumerated service and environment.\n3. Ensure backpressure handling so shipping never blocks or crashes the app.\n4. Add at-least-once delivery with dedup-friendly record IDs.\n5. Verify coverage: every known service appears with expected volume.\n6. Document the collection topology.\n\nDone when: 100% of enumerated services deliver logs and a 24-hour volume matches the profiling estimate within tolerance.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "2a5f7be1-ee7f-4c94-ad91-4a827408f7ff",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:42.000Z",
+      "updatedAt": "2026-11-01T13:28:42.000Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "ingestion",
+        "infrastructure"
+      ],
+      "estimatedHours": 14,
+      "level": 1
+    },
+    {
+      "id": "875fd178-ccf8-4f0f-adee-fd20f3385ee6",
+      "name": "Build log parser & format normalization",
+      "details": "Deliverable: a parser producing one normalized record shape regardless of source format.\n\nSteps:\n1. Define the normalized log record schema (timestamp, severity, service, message, attributes, trace IDs).\n2. Implement the JSON path for structured logs.\n3. Implement the regex/dissect path for plaintext logs, per service.\n4. Implement stack-trace handling: attach multi-line exceptions to their parent log record.\n5. Unparseable lines go to a raw/overflow bucket with the reason — never silently dropped.\n6. Build a regression fixture set from the 100-line samples per service.\n\nDone when: ≥99% of sample lines across all services normalize successfully and the remainder is accounted for.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "2a5f7be1-ee7f-4c94-ad91-4a827408f7ff",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:42.004Z",
+      "updatedAt": "2026-11-01T13:29:48.304Z",
+      "dependsOn": [
+        "c2b7e670-3d73-425a-945b-fcd1dce41092"
+      ],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "parsing",
+        "normalization"
+      ],
+      "estimatedHours": 18,
+      "level": 1
+    },
+    {
+      "id": "1d34d8bb-f9ce-4461-8edb-78b7b226535d",
+      "name": "Normalize timestamps, severities & correlation IDs",
+      "details": "Deliverable: trustworthy time and identity fields on every normalized record.\n\nSteps:\n1. Parse all observed timestamp formats and convert to UTC, keeping the original as a raw field.\n2. Handle timezone-less logs using per-service default offsets.\n3. Map each service's severity vocabulary onto a common scale (DEBUG/INFO/WARN/ERROR/FATAL).\n4. Extract request IDs, trace IDs, and span IDs where present.\n5. Detect and flag records with implausible timestamps (future, pre-epoch, clock skew).\n6. Unit-test each format variant including DST boundaries.\n\nDone when: 100% of sample records carry a valid UTC timestamp and normalized severity, with flagged anomalies surfaced.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "2a5f7be1-ee7f-4c94-ad91-4a827408f7ff",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:42.006Z",
+      "updatedAt": "2026-11-01T13:29:48.307Z",
+      "dependsOn": [
+        "875fd178-ccf8-4f0f-adee-fd20f3385ee6"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "normalization",
+        "timestamps"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "e185c254-00a3-41c8-b1c7-622bf22adf58",
+      "name": "Enrich logs with service, environment & customer linkage",
+      "details": "Deliverable: log records joined to the dimensions the dashboard filters on.\n\nSteps:\n1. Attach service, environment, and region from collection metadata (not guessed from message text).\n2. Extract endpoint/route and HTTP method where present; normalize path parameters.\n3. Extract customer identifiers from log attributes and link them to the golden customer record from M2.\n4. Handle anonymous/unlinked traffic with an explicit \"unknown\" bucket (do not drop).\n5. Cache dimension lookups to keep per-record cost low.\n6. Validate enrichment coverage rates and record them as metrics.\n\nDone when: every filter dimension on the dashboard has a populated, documented source field, and linkage coverage is measured.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "2a5f7be1-ee7f-4c94-ad91-4a827408f7ff",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:42.008Z",
+      "updatedAt": "2026-11-01T13:29:48.309Z",
+      "dependsOn": [
+        "1d34d8bb-f9ce-4461-8edb-78b7b226535d"
+      ],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "enrichment",
+        "dimensions"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "a2b7d9fc-6fcd-40ec-8744-9a38e0a31b16",
+      "name": "Implement PII detection & scrubbing in logs",
+      "details": "Deliverable: a scrubbing stage with verified coverage and an audit trail.\n\nSteps:\n1. Catalogue sensitive patterns (emails, phone numbers, card-like numbers, tokens, IPs, names in payloads).\n2. Implement detection with configurable pattern rules plus allow-lists for false positives.\n3. Choose masking strategy per field (hash, redact, tokenize) and apply consistently.\n4. Scrub before persistence into the analytics layer; keep raw access restricted.\n5. Build a red-team sample that embeds PII in tricky places (stack traces, URLs, JSON nesting).\n6. Log scrub counts per rule for audit.\n\nDone when: the red-team sample shows zero residual PII and scrub metrics are recorded per rule.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "2a5f7be1-ee7f-4c94-ad91-4a827408f7ff",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:42.011Z",
+      "updatedAt": "2026-11-01T13:29:48.310Z",
+      "dependsOn": [
+        "875fd178-ccf8-4f0f-adee-fd20f3385ee6"
+      ],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "security",
+        "pii",
+        "compliance"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "b056a744-967d-4711-842d-a6deb434de5e",
+      "name": "Build time-bucketed log aggregations",
+      "details": "Deliverable: hourly/daily aggregate tables for error rate, latency percentiles, volume, and top errors.\n\nSteps:\n1. Define aggregation grain (hourly base, daily rollup) and the KPI metric formulas.\n2. Implement error-rate aggregation using normalized severity and HTTP status classes.\n3. Implement latency percentiles (p50/p95/p99) from duration fields, handling missing durations.\n4. Implement request-volume counts and top-N error signatures (message fingerprinting).\n5. Make aggregations incremental and recomputable for late-arriving logs.\n6. Backfill aggregates for the historical window the dashboard needs.\n\nDone when: aggregates are produced for the full backfill window and match spot-checked manual counts.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "2a5f7be1-ee7f-4c94-ad91-4a827408f7ff",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:42.012Z",
+      "updatedAt": "2026-11-01T13:29:48.312Z",
+      "dependsOn": [
+        "e185c254-00a3-41c8-b1c7-622bf22adf58",
+        "a2b7d9fc-6fcd-40ec-8744-9a38e0a31b16"
+      ],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "aggregation",
+        "metrics"
+      ],
+      "estimatedHours": 18,
+      "level": 1
+    },
+    {
+      "id": "1d579359-74fc-40d7-801a-709b14b941d9",
+      "name": "Configure log retention, partitioning & cost controls",
+      "details": "Deliverable: a retention and partitioning policy that keeps storage cost inside the agreed budget.\n\nSteps:\n1. Set retention tiers: hot (queryable), warm (aggregates only), cold/expired raw.\n2. Partition raw logs by date and service to prune scans.\n3. Add lifecycle rules to drop expired partitions automatically.\n4. Estimate monthly cost at projected volume and compare with the budget envelope.\n5. Add a cost guardrail/alert on unexpected volume growth.\n6. Document the retention policy and its compliance rationale.\n\nDone when: lifecycle rules are active, cost projection is within budget, and the policy is documented.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "2a5f7be1-ee7f-4c94-ad91-4a827408f7ff",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:42.013Z",
+      "updatedAt": "2026-11-01T13:29:48.314Z",
+      "dependsOn": [
+        "c2b7e670-3d73-425a-945b-fcd1dce41092"
+      ],
+      "priority": 6,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "retention",
+        "cost"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "067ed596-4cdc-4f68-8608-10a333c134e0",
+      "name": "Reconcile log aggregates against manual sample counts",
+      "details": "Deliverable: a reconciliation report proving aggregate accuracy.\n\nSteps:\n1. Pick three representative hours and three services for manual counting.\n2. Count raw lines per severity by hand/grep and compare with aggregate output.\n3. Explain every discrepancy (late logs, dedup, unparseable bucket, filtering).\n4. Add automated reconciliation checks with tolerance thresholds.\n5. Schedule the check to run daily and alert on drift.\n6. Record results in the milestone exit-criteria evidence pack.\n\nDone when: discrepancies are fully explained and within tolerance, and the daily check is scheduled.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "2a5f7be1-ee7f-4c94-ad91-4a827408f7ff",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:42.014Z",
+      "updatedAt": "2026-11-01T13:29:48.316Z",
+      "dependsOn": [
+        "b056a744-967d-4711-842d-a6deb434de5e"
+      ],
+      "priority": 7,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "logs",
+        "validation",
+        "quality"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "6fa74a27-8cf3-45c5-9d12-cb00d2b15edb",
+      "name": "Design logical & physical data model",
+      "details": "Deliverable: an ERD plus DDL-ready physical model.\n\nSteps:\n1. Model the customer dimension (golden record + lineage keys).\n2. Model log facts at hourly grain and the aggregate/summary tables.\n3. Define keys, grain, and slowly-changing-dimension strategy for customers.\n4. Define raw/staging/conformed/mart layer boundaries.\n5. Write the physical model with partitioning and clustering choices.\n6. Review against every KPI in the catalogue to confirm it is answerable.\n\nDone when: every v1 KPI can be computed from the model and the ERD is reviewed.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "19dd31bb-335b-4fad-a7f9-e852e01f826e",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:55.542Z",
+      "updatedAt": "2026-11-01T13:28:55.542Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "data-model",
+        "design"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "fa07b246-7ce6-4661-826b-a8b2f0639f5e",
+      "name": "Provision storage & serving infrastructure",
+      "details": "Deliverable: provisioned, network-isolated storage available in every environment.\n\nSteps:\n1. Provision the chosen store per environment (dev/staging/prod) with IaC.\n2. Configure networking, private endpoints, and encryption at rest/in transit.\n3. Create databases, schemas, and service accounts for each pipeline.\n4. Set resource limits and autoscaling/quota guardrails.\n5. Verify connectivity from pipeline runners and the API layer.\n6. Document provisioning and teardown steps.\n\nDone when: IaC applies cleanly from scratch and both pipelines plus the API can connect.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "19dd31bb-335b-4fad-a7f9-e852e01f826e",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:55.545Z",
+      "updatedAt": "2026-11-01T13:29:48.317Z",
+      "dependsOn": [
+        "6fa74a27-8cf3-45c5-9d12-cb00d2b15edb"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "storage",
+        "infrastructure",
+        "iac"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "4be42b86-1659-46b7-9524-d39a417254bc",
+      "name": "Define schema registry & ingestion write contracts",
+      "details": "Deliverable: versioned schemas and enforced write contracts for both pipelines.\n\nSteps:\n1. Register v1 schemas for customer records, normalized logs, and aggregate tables.\n2. Define compatibility policy (backward/forward) and versioning workflow.\n3. Make pipelines validate against the registry before writing.\n4. Add a contract test that fails the build on incompatible changes.\n5. Document the change process for schema evolution.\n6. Simulate an additive and a breaking change to verify enforcement.\n\nDone when: an incompatible schema change is blocked by CI and a compatible one flows through.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "19dd31bb-335b-4fad-a7f9-e852e01f826e",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:55.548Z",
+      "updatedAt": "2026-11-01T13:29:48.319Z",
+      "dependsOn": [
+        "6fa74a27-8cf3-45c5-9d12-cb00d2b15edb"
+      ],
+      "priority": 7,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "data-model",
+        "schema",
+        "contracts"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "52360a16-2f97-45f1-80fa-0c26c877551c",
+      "name": "Build pre-aggregated KPI marts",
+      "details": "Deliverable: one mart per KPI group, refreshed on schedule, shaped for fast reads.\n\nSteps:\n1. Map each KPI to its source tables and aggregation grain.\n2. Implement mart tables (e.g. customer health, service reliability, traffic trends).\n3. Add refresh jobs with dependency ordering on upstream pipelines.\n4. Ensure marts are recomputable for any historical date range.\n5. Validate mart output against ad-hoc queries on the underlying data.\n6. Document each mart's columns and refresh cadence.\n\nDone when: all v1 KPIs are served from marts with refresh jobs running end to end.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "19dd31bb-335b-4fad-a7f9-e852e01f826e",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:55.550Z",
+      "updatedAt": "2026-11-01T13:29:48.321Z",
+      "dependsOn": [
+        "4be42b86-1659-46b7-9524-d39a417254bc",
+        "fa07b246-7ce6-4661-826b-a8b2f0639f5e"
+      ],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "data-model",
+        "marts",
+        "serving"
+      ],
+      "estimatedHours": 18,
+      "level": 1
+    },
+    {
+      "id": "8f8f2e11-08dd-4975-942a-013bb8b5b6a7",
+      "name": "Implement access control, row security & secrets",
+      "details": "Deliverable: least-privilege access with auditable grants.\n\nSteps:\n1. Define roles: pipeline writer, analyst reader, dashboard API reader, admin.\n2. Grant schema/table-level privileges per role; deny by default.\n3. Apply row/column-level security for sensitive customer attributes if required.\n4. Move all credentials into the secret manager with rotation.\n5. Enable query/access audit logging.\n6. Test that each role can do exactly its job and nothing more.\n\nDone when: a negative-access test matrix passes for all roles and secrets are out of code.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "19dd31bb-335b-4fad-a7f9-e852e01f826e",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:55.552Z",
+      "updatedAt": "2026-11-01T13:29:48.322Z",
+      "dependsOn": [
+        "fa07b246-7ce6-4661-826b-a8b2f0639f5e"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "security",
+        "access-control",
+        "governance"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "30b60dbd-050c-4ccd-8020-4a13272d9aa2",
+      "name": "Add data quality tests & freshness SLAs",
+      "details": "Deliverable: automated quality gates on every modeled table.\n\nSteps:\n1. Define tests per table: not-null, unique keys, accepted values, referential integrity, row-count bounds.\n2. Define freshness SLAs per mart (e.g. hourly aggregates available by T+20 min).\n3. Run tests after each pipeline load and block promotion on failure.\n4. Publish freshness/quality status to a health table the dashboard can read.\n5. Alert on SLA breach.\n6. Document the test catalogue.\n\nDone when: quality tests run automatically and a simulated SLA breach triggers an alert.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "19dd31bb-335b-4fad-a7f9-e852e01f826e",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:55.554Z",
+      "updatedAt": "2026-11-01T13:29:48.323Z",
+      "dependsOn": [
+        "52360a16-2f97-45f1-80fa-0c26c877551c"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "data-quality",
+        "sla",
+        "monitoring"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "52c78ddf-863e-4bbe-8f2d-cdf510d5af67",
+      "name": "Benchmark & tune dashboard query performance",
+      "details": "Deliverable: a benchmark report showing every dashboard query meets its latency budget.\n\nSteps:\n1. Capture the query set the UI will issue, with expected filter combinations.\n2. Benchmark each against production-scale data volumes.\n3. Tune with partitioning, clustering, pre-aggregation, and caching as needed.\n4. Record p50/p95 latency per query and compare with the budget.\n5. Add a regression benchmark to CI for the top queries.\n6. Document tuning decisions.\n\nDone when: every benchmarked query meets its p95 latency budget at projected volume.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "19dd31bb-335b-4fad-a7f9-e852e01f826e",
+      "completed": false,
+      "createdAt": "2026-11-01T13:28:55.555Z",
+      "updatedAt": "2026-11-01T13:29:48.325Z",
+      "dependsOn": [
+        "52360a16-2f97-45f1-80fa-0c26c877551c"
+      ],
+      "priority": 7,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "performance",
+        "storage",
+        "benchmark"
+      ],
+      "estimatedHours": 14,
+      "level": 1
+    },
+    {
+      "id": "3532241d-a66a-4a7f-8e8d-82cbd7fa6d1b",
+      "name": "Create dashboard IA, wireframes & KPI-to-chart mapping",
+      "details": "Deliverable: wireframes plus a table mapping each KPI to its chart type, page, and filter set.\n\nSteps:\n1. Group KPIs into pages/sections by user intent (customer health, reliability, traffic).\n2. Choose the correct chart type per KPI (avoid pie charts for many categories).\n3. Sketch low-fidelity wireframes for each page and review with stakeholders.\n4. Define global filters and which KPIs each filter affects.\n5. Specify default time range and comparison period.\n6. Get written sign-off before UI build starts.\n\nDone when: wireframes and KPI-to-chart matrix are approved and every component in the build backlog traces to a KPI.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:11.832Z",
+      "updatedAt": "2026-11-01T13:29:11.832Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "ux",
+        "design"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "fa30c985-709e-41b2-a09c-ccb0af44fe50",
+      "name": "Scaffold component library, theme & layout shell",
+      "details": "Deliverable: a runnable app shell with design tokens and a component playground.\n\nSteps:\n1. Create the app skeleton with routing and page layout (header, filter bar, grid area).\n2. Define design tokens: color palette (accessible), spacing, typography, chart color scale.\n3. Set up the charting library wrapper and a shared chart container (title, legend, footer, sizing).\n4. Build a component playground/storybook for isolated development.\n5. Add a visual regression baseline.\n6. Document component conventions.\n\nDone when: the shell renders in the playground and tokens drive all styling — no hardcoded colors.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:11.835Z",
+      "updatedAt": "2026-11-01T13:29:11.835Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "components"
+      ],
+      "estimatedHours": 14,
+      "level": 1
+    },
+    {
+      "id": "b5040de8-a413-4c91-aadd-333918a5a4a1",
+      "name": "Build KPI tile & summary components",
+      "details": "Deliverable: a reusable KPI tile used across all summary rows.\n\nSteps:\n1. Build the tile: label, big value, unit, delta vs comparison, trend sparkline slot.\n2. Handle number formatting (metrics suffix, thousands separators, sig figs).\n3. Encode positive/negative semantics correctly (up is not always good — e.g. error rate).\n4. Add thresholds/target bands with color semantics that survive color-blindness.\n5. Document props and add playground stories.\n6. Unit-test formatting and delta logic.\n\nDone when: tiles render correctly for currency, percentage, count, and duration KPIs.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:11.837Z",
+      "updatedAt": "2026-11-01T13:29:11.837Z",
+      "dependsOn": [],
+      "priority": 7,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "components",
+        "kpi"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "e29a04d9-ac3b-42bb-954f-ec6a263991af",
+      "name": "Build time-series chart components (line, bar, area)",
+      "details": "Deliverable: reusable time-series charts driven by a shared data contract.\n\nSteps:\n1. Define the shared series data contract (timestamps, series key, value, optional band).\n2. Implement line, stacked bar, and area variants on the shared container.\n3. Handle missing buckets vs true zeros distinctly in the visual.\n4. Add responsive resizing, tooltips, and legend toggle.\n5. Add an accessible data-table fallback for screen readers.\n6. Add stories covering single series, multi-series, and sparse data.\n\nDone when: each variant renders from the same contract and passes visual review.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:11.839Z",
+      "updatedAt": "2026-11-01T13:29:11.839Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "components",
+        "charts"
+      ],
+      "estimatedHours": 14,
+      "level": 1
+    },
+    {
+      "id": "2f1dafc6-2448-4a10-a3c8-11d5ad488a53",
+      "name": "Build data table & drill-down component",
+      "details": "Deliverable: a sortable, paginated table that supports drill-down from a chart selection.\n\nSteps:\n1. Build the table with column config, sorting, and pagination.\n2. Add client-side row filtering that respects global filters.\n3. Support drill-down: clicking a chart point/segment filters the table rows.\n4. Add CSV export of the current view.\n5. Handle large result sets (server-side paging or virtual scroll).\n6. Document usage and add stories.\n\nDone when: drill-down from chart to table works for at least two pages end to end.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:11.841Z",
+      "updatedAt": "2026-11-01T13:29:11.841Z",
+      "dependsOn": [],
+      "priority": 7,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "components",
+        "table"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "cd7eae81-6f64-48b6-b7d8-1a4f3450d7ff",
+      "name": "Implement query API layer for dashboard",
+      "details": "Deliverable: a typed API that serves each widget from the marts.\n\nSteps:\n1. Define API endpoints per widget group with request/response schemas.\n2. Implement query builders against the marts with parameterized filters (no string concatenation).\n3. Add server-side caching keyed by filter set and a short TTL.\n4. Add authn/authz on every endpoint.\n5. Add consistent error responses and request IDs.\n6. Contract-test endpoints against the real marts.\n\nDone when: every widget in the KPI-to-chart matrix has a working endpoint with tests.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:11.842Z",
+      "updatedAt": "2026-11-01T13:29:11.842Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "api",
+        "backend"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "d26b8501-51f2-4e29-80d1-1fff13c9a7d4",
+      "name": "Add global filters & URL-persisted state",
+      "details": "Deliverable: one filter bar that drives every widget, shareable via URL.\n\nSteps:\n1. Build the filter bar: date range, customer segment, service, environment.\n2. Serialize filter state to the URL query string and restore on load.\n3. Debounce changes and cancel in-flight stale requests.\n4. Show active-filter chips with individual clear plus \"reset all\".\n5. Define sensible defaults and guard against invalid/empty ranges.\n6. Test deep-link sharing and back/forward navigation.\n\nDone when: a copied URL reproduces the exact dashboard view and back/forward behave correctly.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:11.844Z",
+      "updatedAt": "2026-11-01T13:29:11.844Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "filters",
+        "frontend"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "6dadb431-b8c0-46eb-bf9b-007195e7ece6",
+      "name": "Implement loading, empty, error & stale-data states",
+      "details": "Deliverable: every widget degrades gracefully instead of showing a blank or broken panel.\n\nSteps:\n1. Build skeleton loaders per component type.\n2. Build empty states that explain \"no data for these filters\" with a reset action.\n3. Build error states with retry and a support reference (request ID).\n4. Surface data-freshness badges (\"as of 14:05\") and a stale-data warning.\n5. Distinguish partial failure (one widget down) from total failure.\n6. Test by simulating slow, empty, erroring, and stale API responses.\n\nDone when: each of the four failure modes is visually verified on every page type.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:11.846Z",
+      "updatedAt": "2026-11-01T13:29:11.846Z",
+      "dependsOn": [],
+      "priority": 7,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "ux",
+        "resilience"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "5b5aca08-ccf5-4359-8d00-0c5666ffed01",
+      "name": "Accessibility & responsive layout pass",
+      "details": "Deliverable: an accessibility audit report and fixes applied.\n\nSteps:\n1. Run automated axe/Lighthouse checks on every page.\n2. Fix contrast, focus order, focus visibility, and landmark structure.\n3. Add ARIA labels to charts and provide the data-table alternative.\n4. Verify full keyboard operation of filters, charts, and drill-down.\n5. Test responsive breakpoints (mobile, tablet, desktop, wide).\n6. Record results and residual issues.\n\nDone when: automated checks are clean (no critical/serious issues) and keyboard-only walkthrough passes.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "f115e1f0-b82b-4ce2-94c0-ee44c3af05fc",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:11.847Z",
+      "updatedAt": "2026-11-01T13:29:11.847Z",
+      "dependsOn": [],
+      "priority": 7,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "accessibility",
+        "ux"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "dedfbf3e-6426-41a2-97e4-842482cafff9",
+      "name": "Build end-to-end integration test suite",
+      "details": "Deliverable: an automated suite proving CSV → storage → API → UI works together.\n\nSteps:\n1. Create a seeded fixture dataset covering normal and edge-case rows.\n2. Run the full path: CSV drop → parse → model → mart → API → rendered widget.\n3. Assert KPI values match hand-computed expectations from the fixture.\n4. Run the log path in the same harness and assert aggregates.\n5. Test late-arriving and duplicate data scenarios end to end.\n6. Include the suite in the deployment gate.\n\nDone when: the suite runs unattended in CI and fails correctly when a stage is broken.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "1aeabfc6-8a76-4a8c-adf5-5be8dd7f6fcd",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:26.604Z",
+      "updatedAt": "2026-11-01T13:29:26.604Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "testing",
+        "integration"
+      ],
+      "estimatedHours": 18,
+      "level": 1
+    },
+    {
+      "id": "3e7cb535-7811-403b-bc98-a7564f4d73a7",
+      "name": "Complete CI pipeline with test gates",
+      "details": "Deliverable: a CI pipeline that blocks merges on failing quality gates.\n\nSteps:\n1. Wire lint, unit, contract, and integration tests into the PR pipeline.\n2. Add coverage thresholds for pipeline and API modules.\n3. Add schema-compatibility and visual-regression checks.\n4. Cache dependencies and parallelize stages to keep PR feedback under target time.\n5. Publish test and coverage artifacts.\n6. Document how to run the same gates locally.\n\nDone when: a deliberately broken PR is blocked by each gate and a green PR completes within the time target.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "1aeabfc6-8a76-4a8c-adf5-5be8dd7f6fcd",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:26.607Z",
+      "updatedAt": "2026-11-01T13:29:26.607Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "testing",
+        "ci",
+        "devops"
+      ],
+      "estimatedHours": 14,
+      "level": 1
+    },
+    {
+      "id": "34dd44fb-62de-42f9-823b-f05445ac2946",
+      "name": "Run performance & load testing",
+      "details": "Deliverable: a performance report against agreed latency and throughput targets.\n\nSteps:\n1. Define load scenarios: peak CSV batch size, peak log throughput, concurrent dashboard users.\n2. Generate production-scale synthetic data and run pipelines at peak.\n3. Load-test the API and dashboard with realistic filter mixes.\n4. Measure p50/p95/p99 latency, error rate, and resource saturation.\n5. Identify and fix bottlenecks; re-test.\n6. Record results and remaining capacity headroom.\n\nDone when: all scenarios meet targets with documented headroom, or gaps are accepted with a plan.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "1aeabfc6-8a76-4a8c-adf5-5be8dd7f6fcd",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:26.609Z",
+      "updatedAt": "2026-11-01T13:29:26.609Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "performance",
+        "testing",
+        "load"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "192b3282-e746-468a-9353-8c3cdc10541a",
+      "name": "Set up monitoring, alerting & health dashboards",
+      "details": "Deliverable: one operational dashboard plus routed alerts.\n\nSteps:\n1. Instrument pipelines, API, and UI with metrics and structured logs.\n2. Build a pipeline health dashboard: run status, duration, row counts, freshness, quarantine rate.\n3. Define alerts with thresholds and severity: failed run, SLA breach, error-rate spike.\n4. Route alerts to the on-call channel with runbook links.\n5. Add synthetic uptime checks on the dashboard.\n6. Test an alert end to end (fire, notify, acknowledge).\n\nDone when: a simulated failure pages the right owner with an actionable runbook link.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "1aeabfc6-8a76-4a8c-adf5-5be8dd7f6fcd",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:26.611Z",
+      "updatedAt": "2026-11-01T13:29:26.611Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "monitoring",
+        "alerting",
+        "operations"
+      ],
+      "estimatedHours": 14,
+      "level": 1
+    },
+    {
+      "id": "bb2fdac4-d316-4d1d-b079-ed076904d2a0",
+      "name": "Automate deployment, environments & rollback",
+      "details": "Deliverable: one-command promotion from staging to production with a rehearsed rollback.\n\nSteps:\n1. Define environment parity (config, secrets, data masking) across dev/staging/prod.\n2. Automate build, migrate, and deploy steps as a repeatable pipeline.\n3. Add pre-deploy checks: tests green, migrations reversible, capacity headroom.\n4. Add health checks and automatic deploy abort on failed verification.\n5. Rehearse rollback in staging, including a schema-change rollback.\n6. Document the release process.\n\nDone when: a full deploy and a full rollback are both executed successfully in staging.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "1aeabfc6-8a76-4a8c-adf5-5be8dd7f6fcd",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:26.614Z",
+      "updatedAt": "2026-11-01T13:29:26.614Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "deployment",
+        "devops",
+        "release"
+      ],
+      "estimatedHours": 18,
+      "level": 1
+    },
+    {
+      "id": "83af8b66-82f4-4181-9d3c-03b08d9e3282",
+      "name": "Security review & PII sign-off",
+      "details": "Deliverable: a completed security checklist with signed PII handling approval.\n\nSteps:\n1. Review authn/authz on the API and dashboard.\n2. Verify secrets management, encryption, and network isolation.\n3. Re-verify PII scrubbing on production-representative logs.\n4. Confirm retention/deletion complies with policy.\n5. Run dependency and container vulnerability scans; triage findings.\n6. Obtain written sign-off from the data owner.\n\nDone when: no unresolved critical/high findings and sign-off is recorded.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "1aeabfc6-8a76-4a8c-adf5-5be8dd7f6fcd",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:26.615Z",
+      "updatedAt": "2026-11-01T13:29:26.615Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "security",
+        "compliance",
+        "pii"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "6b286dcb-4640-4c8e-b847-e4bfc2f51834",
+      "name": "Write documentation, runbooks & enablement",
+      "details": "Deliverable: complete docs and a delivered enablement session.\n\nSteps:\n1. Write the architecture overview, data dictionary, and KPI definitions.\n2. Write operational runbooks: failed CSV load, log gap, stale mart, rollback.\n3. Write a dashboard user guide with interpretation caveats.\n4. Record a walkthrough for stakeholders.\n5. Run a live enablement session and capture questions.\n6. Collect feedback into a follow-up backlog.\n\nDone when: docs are published, the session is delivered, and follow-ups are logged.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "1aeabfc6-8a76-4a8c-adf5-5be8dd7f6fcd",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:26.617Z",
+      "updatedAt": "2026-11-01T13:29:26.617Z",
+      "dependsOn": [],
+      "priority": 6,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "documentation",
+        "enablement"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "fd0c46b2-c983-451c-9662-bd5cd9dd3902",
+      "name": "Execute staged rollout & post-launch review",
+      "details": "Deliverable: dashboard live for all users, with a post-launch review record.\n\nSteps:\n1. Roll out to a pilot group (e.g. one team) for one week.\n2. Monitor usage, errors, and freshness during the pilot.\n3. Triage pilot feedback; fix blockers before wider release.\n4. Roll out to all users with a monitored window.\n5. Hold a post-launch review: what worked, what to change, KPI adoption.\n6. Record decisions and open follow-ups.\n\nDone when: all users have access, no critical issues in the monitored window, and the review is documented.",
+      "projectId": "d15666bc-1bc1-4c5c-b769-587ef301ebd4",
+      "parentId": "1aeabfc6-8a76-4a8c-adf5-5be8dd7f6fcd",
+      "completed": false,
+      "createdAt": "2026-11-01T13:29:26.619Z",
+      "updatedAt": "2026-11-01T13:29:26.619Z",
+      "dependsOn": [],
+      "priority": 7,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "launch",
+        "rollout",
+        "review"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    }
+  ],
+  "subtasks": [],
+  "migration": {
+    "version": "1.8.1"
+  }
+}

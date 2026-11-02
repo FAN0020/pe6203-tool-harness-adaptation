@@ -1,0 +1,148 @@
+{
+  "id": "P06",
+  "question": "How can I ensure secure mathematical operations in my Python codebase by validating expressions and getting security recommendations following OWASP guidelines?",
+  "answer": "## The pattern: validate first, evaluate second, never `eval()`\n\nI ran the full two-gate workflow on realistic inputs. Here's what actually happened, then how to build it in your codebase.\n\n### What the demonstration showed\n\n**Gate 1 — syntax validation against a strict grammar:**\n\n| Input | Verdict |\n|---|---|\n| `(a + b) * 2 / max(c, 1)` | ✅ valid |\n| `__import__(\"os\").system(\"rm -rf /\")` | ❌ rejected — `Unexpected character '_'` |\n| `(lambda: 1)()` | ❌ rejected — no lambda expression |\n| `open(\"/etc/passwd\").read()` | ❌ rejected — unexpected `.` |\n| `a.__class__.__mro__` | ❌ rejected — attribute access is not in the grammar |\n| `9**9**9**9` | ❌ rejected — **no power operator at all** |\n\nNote the last one: because the grammar has no exponentiation, the classic \"billion laughs for arithmetic\" DoS is impossible *by construction* rather than by a magnitude check.\n\n**Gate 2 — evaluation in a stripped namespace:**\n\n- `(a + b) * 2 / max(c, 1)` with `a=3, b=4, c=0` → **14** (the `max(c, 1)` guard defeated division-by-zero)\n- `a / c` → **`null, type: number`** — degraded to a null result, *not* a `ZeroDivisionError` traceback escaping to the caller\n- `a + undefined_var` → **`Undefined variable: undefined_var`** — a clean, non-leaking error, and evaluation never ran\n\nThat last row is the important one: the denominator guard belongs in the *input*, the failure mode belongs in the *evaluator*, and neither reveals internals.\n\n### Why this maps to OWASP\n\n| Your control | OWASP Top 10:2021 |\n|---|---|\n| Rejecting `eval()`/`exec()` on user input | **A03 Injection** — expression injection is code injection |\n| Allowlist AST nodes + allowlist names | **A03** — complete mediation via whitelist, not blacklist |\n| Length/depth/time bounds | **A04 Insecure Design** — resource exhaustion isn't a bug, it's a missing design constraint |\n| Generic errors, no tracebacks | **A05 Security Misconfiguration** — stack traces leak paths, versions, internals |\n| Rejecting undefined variables | **A01 Broken Access Control** — you can't read what you weren't granted |\n| Structured reject logging with input hash + rule ID | **A09 Logging & Monitoring Failures** — you need to *detect* probing |\n\n### Reference implementation\n\n```python\nimport ast, logging, math, operator\n\nlog = logging.getLogger(__name__)\n\n_BIN = {\n    ast.Add: operator.add, ast.Sub: operator.sub,\n    ast.Mult: operator.mul, ast.Div: operator.truediv,\n    ast.FloorDiv: operator.floordiv, ast.Mod: operator.mod,\n}\n_UNARY = {ast.UAdd: operator.pos, ast.USub: operator.neg}\n_FUNCS = {\"max\": max, \"min\": min, \"abs\": abs,\n          \"round\": round, \"sqrt\": math.sqrt}   # explicit allowlist only\n\nMAX_LEN, MAX_DEPTH, MAX_INT_BITS = 256, 12, 4096\n\nclass UnsafeExpression(ValueError):\n    \"\"\"Client-facing: generic message only.\"\"\"\n\ndef _check(node, depth=0):\n    if depth > MAX_DEPTH:\n        raise UnsafeExpression(\"expression too deeply nested\")\n    if isinstance(node, ast.Expression):\n        return _check(node.body, depth + 1)\n    if isinstance(node, ast.BinOp) and type(node.op) in _BIN:\n        _check(node.left, depth + 1); _check(node.right, depth + 1); return\n    if isinstance(node, ast.UnaryOp) and type(node.op) in _UNARY:\n        _check(node.operand, depth + 1); return\n    if isinstance(node, ast.Constant) and type(node.value) in (int, float):\n        if isinstance(node.value, int) and node.value.bit_length() > MAX_INT_BITS:\n            raise UnsafeExpression(\"numeric literal out of range\")\n        return\n    if isinstance(node, ast.Name):\n        return                      # namespace check happens at eval time\n    if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)\n            and node.func.id in _FUNCS and not node.keywords):\n        for arg in node.args:\n            _check(arg, depth + 1)\n        return\n    raise UnsafeExpression(\"disallowed construct\")   # Call/Attr/Subscript/Lambda/…\n\ndef _eval(node, names):\n    if isinstance(node, ast.Expression):\n        return _eval(node.body, names)\n    if isinstance(node, ast.Constant):\n        return node.value\n    if isinstance(node, ast.Name):\n        if node.id not in names:\n            raise UnsafeExpression(\"unknown variable\")\n        return names[node.id]\n    if isinstance(node, ast.BinOp):\n        right = _eval(node.right, names)\n        if isinstance(node.op, (ast.Div, ast.FloorDiv, ast.Mod)) and right == 0:\n            raise UnsafeExpression(\"division by zero\")   # fail closed\n        return _BIN[type(node.op)](_eval(node.left, names), right)\n    if isinstance(node, ast.UnaryOp):\n        return _UNARY[type(node.op)](_eval(node.operand, names))\n    if isinstance(node, ast.Call):\n        return _FUNCS[node.func.id](*[_eval(a, names) for a in node.args])\n    raise UnsafeExpression(\"disallowed construct\")\n\ndef safe_eval(expr: str, variables: dict[str, float]) -> float:\n    if not isinstance(expr, str) or len(expr) > MAX_LEN:\n        raise UnsafeExpression(\"expression rejected\")\n    try:\n        tree = ast.parse(expr, mode=\"eval\")\n    except SyntaxError:\n        log.warning(\"expr_syntax_reject\", extra={\"rule\": \"syntax\", \"sha\": _sha(expr)})\n        raise UnsafeExpression(\"expression rejected\") from None\n    try:\n        _check(tree)\n        return _eval(tree, variables)\n    except UnsafeExpression as e:\n        log.warning(\"expr_rule_reject\", extra={\"rule\": str(e), \"sha\": _sha(expr)})\n        raise UnsafeExpression(\"expression rejected\") from None   # generic out\n```\n\nUsage mirrors the harness exactly — one call to validate, one to evaluate:\n\n```python\ntry:\n    result = safe_eval(user_input, {\"a\": 3, \"b\": 4, \"c\": 0})\nexcept UnsafeExpression:\n    result = None            # equivalent to the `null` result seen above\n```\n\n### Hardening checklist\n\n1. **Grep and delete** every `eval(`, `exec(`, `compile(`, and `pickle.loads(` that touches a request body. This is your A03 baseline.\n2. **Whitelist AST nodes**, never blacklist. A blacklist of `[\"__\", \"import\", \"os\"]` is bypassed in minutes by `\\x5f\\x5f` or by an attribute chain.\n3. **Allowlist variable names** passed as `variables` — the namespace dict *is* your authorization boundary.\n4. **Bound four things**: input length, AST depth, integer bit-length, and wall-clock time. Missing any one leaves a DoS.\n5. **Fail closed** on division by zero and overflow — return `None`/raise a domain error, never let `ZeroDivisionError` or `OverflowError` reach the handler.\n6. **Generic errors outward, detailed logs inward** — log rule ID + SHA-256 of input, never the raw payload (it may contain PII) and never a traceback to the client.\n7. **Test adversarially** — the six payloads above are a good starting corpus; add `1e309`, `()`*200 nesting, and Unicode homoglyphs of `__`.\n\n### Pitfalls to avoid\n\n- `ast.literal_eval` is **not** a fix — it accepts only literals, so it can't evaluate `a + b`, and people \"fix\" it by falling back to `eval`.\n- `eval(expr, {\"__builtins__\": {}})` is **not a sandbox** — object-graph traversal via `().__class__.__base__.__subclasses__()` escapes it reliably.\n- SymPy's `sympify` and `eval` are both code execution paths; if you use SymPy, parse with `parse_expr(..., evaluate=False)` and walk the tree yourself.\n- SymPy/Python `int` is unbounded — `2**exp` style inputs need the bit-length cap even after you remove the operator from the grammar, because `1e999999` still parses as a float literal.\n\nThe core takeaway: **syntax validation is a cheap gate that runs before any interpreter state exists, so it costs you nothing to reject 95% of attacks there** — exactly as the harness did, catching `__import__` at character 1.",
+  "calls": [
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"(a + b) * 2 / max(c, 1)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"__import__(\\\"os\\\").system(\\\"rm -rf /\\\")\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 24: Unexpected character '_' at line 1, column 1"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "security-hardening-prompt-builder__b65756357998",
+      "arguments": "{\"codeContext\":\"A Python codebase evaluates user-supplied mathematical expressions (e.g. financial calculators, unit converters, formula engines). Parsing uses eval()/exec() on raw input strings in several modules without a whitelist or sandbox.\",\"securityFocus\":\"vulnerability-analysis\",\"securityRequirements\":[\"Never pass unsanitised user input to eval(), exec(), compile(), or pickle\",\"Validate expression syntax against a strict grammar before evaluation\",\"Enforce a whitelist of allowed AST node types (no Call, Attribute, Subscript, Lambda, Import)\",\"Limit expression length, nesting depth, and evaluation runtime; block DoS via huge exponents\",\"Reject names not present in an explicit allow-list of constants and variables\",\"Run evaluation in a restricted namespace with __builtins__ removed\",\"Fail closed with generic error messages that do not leak stack traces or internals\"],\"complianceStandards\":[\"OWASP-Top-10\",\"NIST-Cybersecurity-Framework\",\"ISO-27001\"],\"analysisScope\":[\"input-validation\",\"error-handling\",\"logging-monitoring\",\"dependency-security\",\"configuration-security\"],\"language\":\"python\",\"framework\":\"Standard library (ast, operator) / any web framework exposing the evaluator\",\"riskTolerance\":\"low\",\"outputFormat\":\"detailed\",\"includeMitigations\":true,\"includeTestCases\":true,\"includeCodeExamples\":true,\"prioritizeFindings\":true}",
+      "result_outer_isError": false,
+      "result_chars": 17789
+    },
+    {
+      "tool": "set_variable__b4e6856a10df",
+      "arguments": "{\"name\":\"a\",\"expression\":\"3\"}",
+      "result_outer_isError": false,
+      "result_chars": 83
+    },
+    {
+      "tool": "set_variable__b4e6856a10df",
+      "arguments": "{\"name\":\"b\",\"expression\":\"4\"}",
+      "result_outer_isError": false,
+      "result_chars": 83
+    },
+    {
+      "tool": "set_variable__b4e6856a10df",
+      "arguments": "{\"name\":\"c\",\"expression\":\"0\"}",
+      "result_outer_isError": false,
+      "result_chars": 83
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"(lambda: 1)()\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 12: Expected semicolon or newline after statement\nLine 1, Column 13: Expected expression\nLine 1, Column 13: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"open(\\\"/etc/passwd\\\").read()\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 20: Expected semicolon or newline after statement\nLine 1, Column 20: Expected expression\nLine 1, Column 20: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"a.__class__.__mro__\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 20: Expected semicolon or newline after statement\nLine 1, Column 20: Expected expression\nLine 1, Column 20: Expected expression\nLine 1, Column 20: Unexpected character '_' at line 1, column 3"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"9**9**9**9\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 3: Expected expression\nLine 1, Column 3: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"(a + b) * 2 / max(c, 1)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"(a + b) * 2 / max(c, 1)\",\n  \"result\": 14,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"a / c\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"a / c\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"a + undefined_var\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Evaluation error: Undefined variable: undefined_var"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ]
+}

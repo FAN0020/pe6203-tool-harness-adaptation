@@ -1,0 +1,785 @@
+{
+  "schema_version": "experiment-1",
+  "kind": "research_development",
+  "variant": "released_servers",
+  "created_at": "2026-11-01T12:34:39.057409+00:00",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "dataset_revision": "162e3ffbea1717ac8a20fe9b26465e29117229e4",
+  "cells": [
+    {
+      "id": "cell-001",
+      "task_id": 133,
+      "version": "late",
+      "strategy": "evidence_dispatch",
+      "seed": 0
+    },
+    {
+      "id": "cell-002",
+      "task_id": 235,
+      "version": "late",
+      "strategy": "selective_patch",
+      "seed": 0
+    },
+    {
+      "id": "cell-003",
+      "task_id": 133,
+      "version": "late",
+      "strategy": "selective_patch",
+      "seed": 0
+    },
+    {
+      "id": "cell-004",
+      "task_id": 235,
+      "version": "late",
+      "strategy": "evidence_dispatch",
+      "seed": 0
+    },
+    {
+      "id": "cell-005",
+      "task_id": 283,
+      "version": "late",
+      "strategy": "selective_patch",
+      "seed": 0
+    },
+    {
+      "id": "cell-006",
+      "task_id": 283,
+      "version": "late",
+      "strategy": "evidence_dispatch",
+      "seed": 0
+    },
+    {
+      "id": "cell-007",
+      "task_id": 283,
+      "version": "middle",
+      "strategy": "evidence_dispatch",
+      "seed": 0
+    },
+    {
+      "id": "cell-008",
+      "task_id": 133,
+      "version": "middle",
+      "strategy": "selective_patch",
+      "seed": 0
+    },
+    {
+      "id": "cell-009",
+      "task_id": 283,
+      "version": "middle",
+      "strategy": "selective_patch",
+      "seed": 0
+    },
+    {
+      "id": "cell-010",
+      "task_id": 133,
+      "version": "middle",
+      "strategy": "evidence_dispatch",
+      "seed": 0
+    }
+  ],
+  "tasks": [
+    {
+      "idx": 133,
+      "question": "How can I ensure secure mathematical operations in my Python codebase by validating expressions and getting security recommendations following OWASP guidelines?",
+      "servers": {
+        "math-mcp": [
+          "validate_syntax",
+          "evaluate"
+        ],
+        "mcp-ai-agent-guidelines": [
+          "security-hardening-prompt-builder"
+        ]
+      }
+    },
+    {
+      "idx": 283,
+      "question": "I need to launch a new analytics dashboard project that includes data processing from our customer CSV files, log analysis from our application logs, and visualization components. Can you help me structure the major milestones and break them down into manageable tasks, making sure we don't have any tasks that are too complex to execute?",
+      "servers": {
+        "@modelcontextprotocol/server-sequential-thinking": [
+          "sequentialthinking"
+        ],
+        "@pimzino/agentic-tools-mcp": [
+          "create_project",
+          "create_task",
+          "analyze_task_complexity"
+        ]
+      }
+    },
+    {
+      "idx": 235,
+      "question": "I need to create a sales performance dashboard for our Chinese regional teams. First, I want a map showing our 2025 sales distribution across provinces - we have data showing Guangdong had ¥15.8M, Jiangsu ¥12.3M, Zhejiang ¥9.7M, Shandong ¥8.4M, and Beijing ¥7.2M. Then create an area chart showing monthly sales trends from January to December 2025, with values: Jan: 1.2M, Feb: 1.1M, Mar: 1.4M, Apr: 1.6M, May: 1.8M, Jun: 2.1M, Jul: 2.3M, Aug: 2.2M, Sep: 2.5M, Oct: 2.7M, Nov: 3.0M, Dec: 3.5M. Finally, make a column chart comparing our top product categories across regions: Electronics (Guangdong: 6.2M, Jiangsu: 4.8M), Home Appliances (Guangdong: 4.5M, Jiangsu: 3.9M), and Clothing (Guangdong: 5.1M, Jiangsu: 3.6M).",
+      "servers": {
+        "@umengfe/mcp-server-chart": [
+          "generate_district_map",
+          "generate_area_chart",
+          "generate_column_chart"
+        ]
+      }
+    }
+  ],
+  "config": {
+    "agent": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "AGENT_BASE_URL",
+      "api_key_env": "AGENT_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096,
+      "extra_body": {
+        "provider": {
+          "only": [
+            "digitalocean"
+          ],
+          "order": [
+            "digitalocean"
+          ],
+          "allow_fallbacks": false,
+          "require_parameters": true
+        }
+      }
+    },
+    "judge": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "JUDGE_BASE_URL",
+      "api_key_env": "JUDGE_API_KEY",
+      "temperature": 0.0,
+      "max_completion_tokens": 4096,
+      "extra_body": {
+        "reasoning": {
+          "enabled": false
+        },
+        "response_format": {
+          "type": "json_object"
+        },
+        "provider": {
+          "only": [
+            "digitalocean"
+          ],
+          "order": [
+            "digitalocean"
+          ],
+          "allow_fallbacks": false,
+          "require_parameters": true
+        }
+      }
+    },
+    "judge_runs": 5,
+    "max_rounds": 12,
+    "request_timeout_seconds": 120,
+    "run_timeout_seconds": 900,
+    "tool_timeout_seconds": 30,
+    "send_model_seed": false,
+    "tool_name_policy": "namespaced",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    },
+    "judge_recovery": {
+      "max_attempts": 2,
+      "stop_after_transport_failures": 2,
+      "format": "concise-counts-v1"
+    },
+    "spend_guard": {
+      "ledger": "results/raw/evidence-dispatch-dev-costs-20261101/spend-ledger.json",
+      "limit_usd": null,
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "context_tokens": 1048576,
+      "prompt_per_million": "0.3",
+      "completion_per_million": "1.2",
+      "max_completion_tokens": 4096,
+      "provider_route": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "expected_provider": "DigitalOcean"
+    }
+  },
+  "updater": {
+    "model": "deepseek/deepseek-v4.1-flash-1017",
+    "temperature": 0.0,
+    "max_tokens": 16384,
+    "timeout": 120,
+    "api_key_env": "AGENT_API_KEY",
+    "base_url_env": "AGENT_BASE_URL",
+    "request_retry": {
+      "max_retries": 1,
+      "backoff_seconds": 2
+    },
+    "extra_body": {
+      "provider": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      }
+    },
+    "spend_guard": {
+      "ledger": "results/raw/evidence-dispatch-updater-costs-20261101/spend-ledger.json",
+      "limit_usd": null,
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "context_tokens": 1048576,
+      "prompt_per_million": "0.3",
+      "completion_per_million": "1.2",
+      "max_completion_tokens": 16384,
+      "provider_route": {
+        "only": [
+          "digitalocean"
+        ],
+        "order": [
+          "digitalocean"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "expected_provider": "DigitalOcean"
+    }
+  },
+  "judge_runs": 5,
+  "files": {
+    ".cache/node-runtime/node_modules/node/bin/node": "6f2e835e57feb7a29ffcd53a4d4eb60224ec264a1e002c3ba6d99999ea29807d",
+    "configs/benchmark.lock.json": "41ab8d30c05c341608a817c1fb62dd111f0fc1e928efd3849dfbe87413264151",
+    "configs/server-profiles.json": "ebf06d1fade4be170083a5907f3fce33ce15bb60c8e1266d3bbe14c21f9ad6c8",
+    "integration/baseline_wrapper.py": "43f8e0488d94ee2975393fd7238ab9daafbc4d666eccdf0f37946f3e173f17a4",
+    "integration/baselines.py": "f094b3dd3b24f72e7cb50a6f115102adf27c6c241ae3eb55a5b1db18d095d099",
+    "integration/export_baseline_knowledge.py": "ac1392141adbd6c5228246834c81f0d00987699a0cc14cd74b75c37849d1c5aa",
+    "integration/model_api.py": "dc150b715c7ea505d61950cf99becabcab9235c9c60337f492676ba19cef76f3",
+    "integration/project_paths.py": "a788c980a82ec165f95273cedc87711970136d27d218ff01191cb8831838bc91",
+    "integration/rewrite_constraints.py": "1f1f986c4079562da51604636bffd80113cc277609b242e7080fe36ada69883a",
+    "integration/run_baseline_validation.py": "6bf97d86fd598f10d5e4fd4ef9aa27f69c0b587484b6c934a70f81e47fd8838a",
+    "integration/test_real_baselines.py": "02e7a74e253ddd925b8838307687f871ddafa202d10cc398814caabffae28a89",
+    "pyproject.toml": "d5c9f053533197d841d4fe47262c4393850962df8ab9112cd231fc2ddea7c196",
+    "results/raw/evidence-dispatch-pilot-20261101/catalogs/133/early.json": "bae1080d26a4c1fe8842d564d61f02d355c4b4de0026c632e0ebeaa085160cde",
+    "results/raw/evidence-dispatch-pilot-20261101/catalogs/133/late.json": "40b3677539f855eebe873c05743c376038ded1a0771d79b1ebc9d40f68333528",
+    "results/raw/evidence-dispatch-pilot-20261101/catalogs/133/middle.json": "33463c6f29216058e3b04ef9ee0f314342556ab019de89a23dabf40a945e9eb2",
+    "results/raw/evidence-dispatch-pilot-20261101/catalogs/235/early.json": "a1dd73d217ad9b60f979e6840027b123a26bc66789910ad0e0a421b0c3a12b66",
+    "results/raw/evidence-dispatch-pilot-20261101/catalogs/235/late.json": "f89478d72530ca0ce0204a998330e0d282c56ef64b8d33dbfa1dbc6d6ae2c115",
+    "results/raw/evidence-dispatch-pilot-20261101/catalogs/235/middle.json": "2033c09808b02b8879164eeee1aca52dd4f78f69fb47855906d8c78fb680f967",
+    "results/raw/evidence-dispatch-pilot-20261101/catalogs/283/early.json": "01a0f5df548dd4f903a974c8b775cdfac88e1e92ac5d6b0c7da8bcc6d63d4d1a",
+    "results/raw/evidence-dispatch-pilot-20261101/catalogs/283/late.json": "2c4f8071f19d1af5754f08f14d8485791c52d3b414b5a19a995b754b40a8b865",
+    "results/raw/evidence-dispatch-pilot-20261101/catalogs/283/middle.json": "0cb2c811253421182980bff6f06affbd6a206d9cb7f3d676d8e257db17657cd2",
+    "results/raw/evidence-dispatch-pilot-20261101/diffs/133/late.json": "536b0157a6cd964318c953bc6d78aed891772148a02b1cad5c1e20f4c2957acf",
+    "results/raw/evidence-dispatch-pilot-20261101/diffs/133/middle.json": "5c3d4db67aae43f7d03491846f7b9f02897e521001c2a956fa5a70512f2c6db0",
+    "results/raw/evidence-dispatch-pilot-20261101/diffs/235/late.json": "455a60274cdc43bc4b632679276a6da40071464bf875e4d42ef0e33047046202",
+    "results/raw/evidence-dispatch-pilot-20261101/diffs/235/middle.json": "3e1a32f682d961eb8d1ffb7b40e738b0b4058771f6e9e76f294ce69ec978388d",
+    "results/raw/evidence-dispatch-pilot-20261101/diffs/283/late.json": "06276c664dcacded0489f5a946c90471e334460f985934be1629b1c94fa5caa3",
+    "results/raw/evidence-dispatch-pilot-20261101/diffs/283/middle.json": "f029b79f4361dfc95f23fbb6f140cecf6e6897b434413ad9eafc1052f11515f9",
+    "src/pe6203/__init__.py": "096ac1613471b474c8c0e94fd38eb8d3248ca6a94a9a22b06f7d278f1a006e22",
+    "src/pe6203/audit.py": "030c6afd481d96b9a75b21cfa9ecd99420dabd69dfe313dec92a2c17541bc397",
+    "src/pe6203/baselines.py": "a72d1423ba18f1e73d896d309fe773e51ecbddd72f0b356f8c8b84870ac9ea57",
+    "src/pe6203/batch.py": "b692e406fda13e280e4dfc07242f3dc8a1347f31e4bda6cb9133a708961d613f",
+    "src/pe6203/benchmark.py": "484a002bd63d90ea967f4915454ecebf97be5dedae54673bedb5f3295ee85837",
+    "src/pe6203/benchmark_suite.py": "f7bd83ea33fa46034ffd667578c0a50b4f843b02d4c0f41e4cbbfae7473f0fbd",
+    "src/pe6203/bootstrap.py": "b666bf7d3c126785ab0cecce439189c9d62ab2728c44663b7358c2b0c014eb95",
+    "src/pe6203/capability_withdrawal.py": "b02a2d0ea1c0b8968b39d7d19a3eac2e160cd92142806e4e63913b62bb1803b6",
+    "src/pe6203/cli.py": "ee399cf000736cf3ffabd9bad16dbbf1a19a6dad328577c6307bdb166d864136",
+    "src/pe6203/contract_reconcile.py": "40ed761c3cfce3da462f00b57216158d6490c7487c88a7f412ef339bcf662f65",
+    "src/pe6203/costs.py": "98707bfac3bacf97d1ea35fe466460a7149e14c1b503cfedbf2e478a8911e491",
+    "src/pe6203/dependency_cut.py": "5255f8ec35637e54e01ee42b48802c63b8167a6958e6fb966911c9ab644ff343",
+    "src/pe6203/description_factor.py": "a0f6b1bbfb7c0f2cb8f5cfdfb00d150af111597b45a614a62b1899291d1a6f12",
+    "src/pe6203/discovery_contract.py": "fc1a455e708a718e9c7fff817183f511db726a8f3a902d71cad51faa8f0909c4",
+    "src/pe6203/evaluation.py": "eee2b509d6ad0e7dafa3718929a279cf7c3cc55979ad9955a67ba8493645954d",
+    "src/pe6203/evidence_audit.py": "fbdc32119ef77063bdc71ed7fab0d26c0f46848adf93102654e80796ce8f301a",
+    "src/pe6203/evidence_dispatch.py": "4a293c2e2a14f89c82e7a464f4e3edaeab0f0b308d5e603e409db596306a4296",
+    "src/pe6203/experience_projection.py": "e8a5856df516a966f58b4ef072fe9280c9b9d141ab2cc2d8c5630a3e9949b57c",
+    "src/pe6203/experiment.py": "965d8c8cafa049591e3a8e86a7ddb59e406894e73a38757d563388a6b39a11d4",
+    "src/pe6203/inventory.py": "b58bb80bf3f7b10386c94581fd3d89c5ba2dabfcb16d3374238891fa84b83084",
+    "src/pe6203/judge.py": "aaa6efb94cf7719c085276e62e2811891a19a5d8ffcd59fb19c2ee6f80de2b82",
+    "src/pe6203/native_argument_routing.py": "6bdcb6024372bf310237c49dbdc0c0a6e0dff67c4834e95c548d41fcf64c1cae",
+    "src/pe6203/native_argument_routing_spec.py": "a41f7f5f04c8b48b833d4744b8ed0737573b5df3242b814a586cb66929dbba98",
+    "src/pe6203/native_media_contract.py": "45cf6ebe67485c4be64d16e9cf8a0c77fd03aae9d682bb213e38861df1240dd0",
+    "src/pe6203/native_record_batch.py": "4fb0cbe863a081dc67c9078e3692aa65d260477c777c450f961282adc44c0285",
+    "src/pe6203/netlify.py": "40627b18fac290328e53f402db9169ec661b99fa68dd7560754f98de69e18db2",
+    "src/pe6203/observation_coverage.py": "5f78dd72e09f5ce7d26c97e79cc66ab3c611537ac21311303c21b0a33f05655c",
+    "src/pe6203/optional_parameter_projection.py": "c1bea5cfea43caf60f3db0f9433c3bbdad8a432f64d50852f8b41a29ad236ef3",
+    "src/pe6203/parameter_coverage.py": "be1bc0fe48f66881a105fc3fe2beabbc1e0ec940e03e02c55dc12a5d4da78b88",
+    "src/pe6203/patch_variants.py": "a7dfada9d607b23ea57e3b33727a98f863ed233ed91f3efd529d7d9296d135b9",
+    "src/pe6203/prefix_workflow_memory.py": "52f1026602a8c085acb3fa2ad7f6115be02c7a68bc6e7d905bec176406658f40",
+    "src/pe6203/project_episode_projection.py": "e3830b0fb5f504fc0683e897514820a3dae83fb198ec5418a42b506898b3ce67",
+    "src/pe6203/ready_link.py": "1b6b283ef9eebfbbfbec5095b1e9ab2024e2d059d0cf15d19ce7cad539921a61",
+    "src/pe6203/report.py": "7da42a59ad870fa2ce7d1fbff204f0bb51ef8cf43cc42555df664240395c065b",
+    "src/pe6203/request_retry.py": "11b66ea34089512d41e42e3275e6775130f0133cdd6249aa3ce94125d45ac574",
+    "src/pe6203/reviewed_coverage.py": "9b0715137049bfdee437b9e95c5e55fcfc2b8b8d2755670310d81f5e6da5c7f0",
+    "src/pe6203/runner.py": "e8f910263b68ab46c2073aed8ac852f2c2579895a2b36be13e55a988ad704bcb",
+    "src/pe6203/selective.py": "8e205a09e568e5c5b72c9f810210538e2f637ae1c5e0aae289a1f1ff8b580c8b",
+    "src/pe6203/semantic_contract_maintenance.py": "3e4b580b1474c347b6e2634409b97e646f5136ea5a2d446f81fc147f06202bf3",
+    "src/pe6203/spend_guard.py": "b42e8ab4db62db120f272d984746e9a912fff2990873aeec0b301723d70dacd6",
+    "src/pe6203/strategy_search.py": "58ae809edf12325eea920a05d92f1b57856c760bdf5fc1ed728e104db3cadede",
+    "src/pe6203/terminal_report.py": "2c522d1f4e6c5a339d81ca27bdd769a1efccc9a5276c9269ff07229f27c45ea4",
+    "src/pe6203/transport.py": "d7ceb1f783bc55a20809a1ad50f89e6af2c6f1bbccb2d322e75120b63b591dd4",
+    "src/pe6203/verified_component_memory.py": "c40282c4a9477250b7bd3148b3b5d80d4bd85547029072308e304101245083b9",
+    "src/pe6203/verified_coverage.py": "58e1a9d92c6615b20cb18fb087869286f15cddb2ffe5502f4cd457eba22c0f2b",
+    "uv.lock": "ff75e4f3c1f0ee9616bcdef2852c6396a22606352131a5ca51c62509225b3775",
+    "configs/evidence-dispatch-dev-v1.json": "16ddae500221fa85a7445f8f2156a84541118b2eb892bfefcb23fdf8d786a435",
+    "configs/evidence-dispatch-updater-v1.json": "a1b76b92e42e4a8795dd93cc9906ac12e97f08683440d5262c5564597f6a3857",
+    "experiments/evidence-dispatch-feedback-v1.json": "bef8dbcec68d9f3bdd7ecc1af011e35d7654e4a0e606f17971893569caf54b61",
+    "experiments/evidence-dispatch-v1.json": "aee7625bd3c2071327ac66820b431fe8860da283fda61b531503599ed0fabfad",
+    "results/raw/evidence-dispatch-pilot-20261101/feedback.json": "bef8dbcec68d9f3bdd7ecc1af011e35d7654e4a0e606f17971893569caf54b61",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/index.js": "c4ff567adcf3c4cdfd655a4d67cd4881e30797754c6aa1139ca7c951dcfe6037",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/models/index.js": "953450a74ad47ea571b7e7944e4ad10691114d786a47c7eb93c923860208ee79",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/models/memory.js": "eedd5dd4dd8c35e590e39f5c10e37731312b55a81d1db00736c97aa968b0f736",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/storage/file-storage.js": "12c93d9250d744ceee195ce40611d0890a549d2e93e183266f70fb5274e7b7ba",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/storage/index.js": "5816efd4dc32c95c3fd627258b3bc9bd023c33e87b7635611c8dd591031a3246",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/storage/storage.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/index.js": "6266eb240fbca71f3608459000e45c1cd911c889fbc647b39366662b43de6c49",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/create.js": "05dffd2df891cf26bfcc694bc9464993d6151c8a1d0aaca853c520562c06932a",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/delete.js": "0dcd81c4f92f11b7122f1b73f7d896e5ca04077321b27a3c33d993a9dc4dd647",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/get.js": "c287100c7be237e205c97c0d691cbeadac269ac010785a9b672d7dd2369c49b1",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/index.js": "aa9ec5d0718a91ecd50513860feaec93a4f4bdfd426dd5150034d2f7a80e7c69",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/list.js": "62e3e7acf0c10c303562730aa7da8afc537e31e76e3903a6f258c32fbce3b13e",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/search.js": "450d80c28f4c7167f43fe9660b21ea80861f0fcbf79319e47ec12c8ddef22200",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/update.js": "33f48eacfd8a6e5fb1dbbfe6cfc1ead105407a2d3d03edf3866efa67b5b85748",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/models/project.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/models/subtask.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/models/task.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/storage/file-storage.js": "9929af1afcfed7b0d353b61adaf335ba3b6dd7ed52c1df284f020129d316bbeb",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/storage/storage.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/analysis/complexity-analysis.js": "ee83ee0635de01cab2c1cb74883139ffff44f775e87505d3c67c0221f3b05f9d",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/analysis/progress-inference.js": "e350d442cc9c4e41272442438cd090da34fdd2a313abde995df581995fe740d0",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/prd/parse-prd.js": "d84ed2420bd56f9c648fe6a730fa61b9a12a3ab01254acbad86b5626859c338d",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/create.js": "62092008b73fe9d556a1ad4ce9e5d3ef23b282656eecd9be3fcd2ba806494bb1",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/delete.js": "be2c744b0bb475b2829f3b26bda4987b4a3c4c696aa75177941eb471c3863917",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/get.js": "4e372bfa9fde66bd030f476f8a34a50bca7626ecf41d2fbafc838c3219835b30",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/list.js": "6e29598bd43fdb0f8345c8ec2f7d025ad5cb2321d1c5df90accc939c6713962b",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/update.js": "7c53820c6f3cea3ecbd6d1fb5e524cf85269e7ddb5a8bc90b3e20e3693981a93",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/recommendations/next-task.js": "6fbf1a90c861e314c15f46bff09294737755b5d4f0c0c87ef14328b0a041c4c4",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/research/research-queries.js": "8828dfe25d6ff6f41d8ef8b426c3d92a98c4ca3d4114f098e5d75e65448bd9f9",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/research/task-research.js": "38756510fd496b99dedf1e531d70268224d25aa97782addf8b826610953d91c0",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/subtasks/create.js": "d3d0bc25563bac56e1f9522702312d8b03f80e92294e062ff166c1075ed0c0ea",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/subtasks/delete.js": "b20acc7f3d9110b89f503b2483a07a4332de4e03d2239518974f0f727b8472c7",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/subtasks/get.js": "7abef8e75da8f3d4ddbca6c30fe74b5431b3d3860e090c4d4ed5dc44af61e06b",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/subtasks/list.js": "fa5cb8a8a02d9f7799c327d673f92a360b84ceb0b3cfc45cd649c9340d792020",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/subtasks/update.js": "3e1d595a7702900aedaee02c090d63f776370a67409372488d5bbdb36e1660b8",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/bulk-create.js": "d36722cbc2ae1b248680a1b434aab1caca6c72b54e9cbc1110e86aa1a866d9c8",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/create.js": "c339f2ff0f38695c9ecb8582720dfe502bdc107bda029da34bee6beff20e6da4",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/delete.js": "4ec715a1cd5de4905a4336b7dc5b5cbc00efb2dbb20c35da68d2836f67420657",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/get.js": "985ac0e25eb17e0d2c72107b1f3e2cea979c7e3b900ca33030623144f8e1860e",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/index.js": "b0a2a2c16b0ae5a3e39aad8ec550f8dfce907f7b563ac3e3a0b9fafd5044771e",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/list.js": "5c507e925e724789c39f33d70200ce89cc27f41f575058bc77385c934e252b80",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/update.js": "bbe2a9bb7f60502937ca4523297700049cf1a4f7dc684c663b17bff67490de6c",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/index.js": "fb6d6cf6addb7da53fdefc71f189c86ab131ca926ecae9ad19297aef63a8ed3d",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/server.js": "6600eb9b943b5aa74252a2087e825d0a35b34f6ffcbfb33c56cf586a3526b6f6",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/utils/storage-config.js": "eae51a0ec8edbf98e5afaccef1e398265c5c7b3838559c5b4927c3aeb411ceac",
+    ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/utils/version.js": "174695e69fef1ce49571c393a778a4076d77677f57835deb3b7273aacc138691",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/index.js": "c4ff567adcf3c4cdfd655a4d67cd4881e30797754c6aa1139ca7c951dcfe6037",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/models/index.js": "953450a74ad47ea571b7e7944e4ad10691114d786a47c7eb93c923860208ee79",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/models/memory.js": "eedd5dd4dd8c35e590e39f5c10e37731312b55a81d1db00736c97aa968b0f736",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/storage/file-storage.js": "12c93d9250d744ceee195ce40611d0890a549d2e93e183266f70fb5274e7b7ba",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/storage/index.js": "5816efd4dc32c95c3fd627258b3bc9bd023c33e87b7635611c8dd591031a3246",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/storage/storage.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/index.js": "6266eb240fbca71f3608459000e45c1cd911c889fbc647b39366662b43de6c49",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/create.js": "05dffd2df891cf26bfcc694bc9464993d6151c8a1d0aaca853c520562c06932a",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/delete.js": "0dcd81c4f92f11b7122f1b73f7d896e5ca04077321b27a3c33d993a9dc4dd647",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/get.js": "c287100c7be237e205c97c0d691cbeadac269ac010785a9b672d7dd2369c49b1",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/index.js": "aa9ec5d0718a91ecd50513860feaec93a4f4bdfd426dd5150034d2f7a80e7c69",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/list.js": "62e3e7acf0c10c303562730aa7da8afc537e31e76e3903a6f258c32fbce3b13e",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/search.js": "450d80c28f4c7167f43fe9660b21ea80861f0fcbf79319e47ec12c8ddef22200",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/agent-memories/tools/memories/update.js": "33f48eacfd8a6e5fb1dbbfe6cfc1ead105407a2d3d03edf3866efa67b5b85748",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/models/project.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/models/subtask.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/models/task.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/storage/file-storage.js": "9929af1afcfed7b0d353b61adaf335ba3b6dd7ed52c1df284f020129d316bbeb",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/storage/storage.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/analysis/complexity-analysis.js": "ee83ee0635de01cab2c1cb74883139ffff44f775e87505d3c67c0221f3b05f9d",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/analysis/progress-inference.js": "e350d442cc9c4e41272442438cd090da34fdd2a313abde995df581995fe740d0",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/prd/parse-prd.js": "d84ed2420bd56f9c648fe6a730fa61b9a12a3ab01254acbad86b5626859c338d",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/create.js": "62092008b73fe9d556a1ad4ce9e5d3ef23b282656eecd9be3fcd2ba806494bb1",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/delete.js": "be2c744b0bb475b2829f3b26bda4987b4a3c4c696aa75177941eb471c3863917",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/get.js": "4e372bfa9fde66bd030f476f8a34a50bca7626ecf41d2fbafc838c3219835b30",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/list.js": "6e29598bd43fdb0f8345c8ec2f7d025ad5cb2321d1c5df90accc939c6713962b",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/update.js": "7c53820c6f3cea3ecbd6d1fb5e524cf85269e7ddb5a8bc90b3e20e3693981a93",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/recommendations/next-task.js": "6fbf1a90c861e314c15f46bff09294737755b5d4f0c0c87ef14328b0a041c4c4",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/research/research-queries.js": "8828dfe25d6ff6f41d8ef8b426c3d92a98c4ca3d4114f098e5d75e65448bd9f9",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/research/task-research.js": "38756510fd496b99dedf1e531d70268224d25aa97782addf8b826610953d91c0",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/subtasks/create.js": "d3d0bc25563bac56e1f9522702312d8b03f80e92294e062ff166c1075ed0c0ea",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/subtasks/delete.js": "b20acc7f3d9110b89f503b2483a07a4332de4e03d2239518974f0f727b8472c7",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/subtasks/get.js": "7abef8e75da8f3d4ddbca6c30fe74b5431b3d3860e090c4d4ed5dc44af61e06b",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/subtasks/list.js": "fa5cb8a8a02d9f7799c327d673f92a360b84ceb0b3cfc45cd649c9340d792020",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/subtasks/update.js": "3e1d595a7702900aedaee02c090d63f776370a67409372488d5bbdb36e1660b8",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/bulk-create.js": "d36722cbc2ae1b248680a1b434aab1caca6c72b54e9cbc1110e86aa1a866d9c8",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/create.js": "c339f2ff0f38695c9ecb8582720dfe502bdc107bda029da34bee6beff20e6da4",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/delete.js": "4ec715a1cd5de4905a4336b7dc5b5cbc00efb2dbb20c35da68d2836f67420657",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/get.js": "985ac0e25eb17e0d2c72107b1f3e2cea979c7e3b900ca33030623144f8e1860e",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/index.js": "b0a2a2c16b0ae5a3e39aad8ec550f8dfce907f7b563ac3e3a0b9fafd5044771e",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/list.js": "5c507e925e724789c39f33d70200ce89cc27f41f575058bc77385c934e252b80",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/update.js": "bbe2a9bb7f60502937ca4523297700049cf1a4f7dc684c663b17bff67490de6c",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/index.js": "fb6d6cf6addb7da53fdefc71f189c86ab131ca926ecae9ad19297aef63a8ed3d",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/server.js": "fe9df3af66d85964ece234e5baa5c13dad3cb3ca4f982e95344b96a04848a972",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/utils/storage-config.js": "eae51a0ec8edbf98e5afaccef1e398265c5c7b3838559c5b4927c3aeb411ceac",
+    ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/utils/version.js": "174695e69fef1ce49571c393a778a4076d77677f57835deb3b7273aacc138691",
+    "configs/evidence-dispatch-validation-1-v1.json": "b67d77a91a300eb82f520ea3a3d133749ac2ff03c7c6bfc91b0d09fed9df36d6",
+    "configs/evidence-dispatch-validation-2-v1.json": "77843aad12d5dc6e12699b6ec890cb844b74e477bf33e4287435b6dada7d267b",
+    "experiments/benchmark-v1.3.json": "d944a0232c3535f01b5ecb872076bb38a6feb8673dbddb73b31ae33729bcbfb5",
+    "experiments/reviewed-coverage-feedback-v1.json": "0bc393a094385ea78e8e191be5fca1e72393225b3c5827a4a83f28c32fb707ec",
+    "experiments/semantic-claim-repair-feedback-v2.json": "8229686919f24356c87e7997409e4bbe696e2b3196777d526d53859aa88a692b",
+    "results/evidence/evidence-dispatch-20261101/archive.py": "809ab17d3413170530ad80e745723be71939f7022fce3fbb3a78a58ec7ae5fa4",
+    "results/evidence/evidence-dispatch-20261101/collect_blind.py": "d04cb8fe40d414b7c45f83407607db232ff02d10b2786c10d05b44a0cd66f112",
+    "results/evidence/evidence-dispatch-20261101/credential-readiness.json": "9b8723bbc1ed2e125974ac6cb6c7bb8b2f2dcd007e1fa9f4342d5319ebe4b6f8",
+    "results/evidence/evidence-dispatch-20261101/prepare_dev.py": "eae9dad76bcc9ae647e9a9efd0c5b2dd972d17ad0ae075969411d6ed4b2f05bb",
+    "results/evidence/evidence-dispatch-20261101/raw_cell_verifier.py": "7da02bad19ea870eaabd55b3b7b814d66f97ad761160d60512693bea626accce",
+    "results/evidence/evidence-dispatch-20261101/research-decision.json": "d06a7e457e9daf21b68573274d323a41cb5751c4c254b7ab2509be835b7a31cb",
+    "results/evidence/evidence-dispatch-20261101/run_model_trial.py": "89fcf61f3509b5f5cb71f8c96d77f756625533d50441eb3f1d8838353de4530f",
+    "results/evidence/evidence-dispatch-20261101/verify_development.py": "dd80b644dbdfd2355688c98ea064f238295f33919cd718d827bf05059c57978a",
+    "results/evidence/method-learning-20261101/sources/amem/memory_layer.py": "dd8f871da00a57a2218de63ba9792336dd5bf040ec4502beaea22739bd865d3c",
+    "results/evidence/method-learning-20261101/sources/expel/agent/expel.py": "7db4e1be3c16dfca589eb2e194cfb4604be224dab32a04f7f03c4529b1dfcf74",
+    "results/evidence/reviewed-coverage-20261101/research-decision.json": "e2f5ee4f4dd02d1abc459c9777c9ceb7dcd1b8ab50b1af5022c23628d3b55904",
+    "results/evidence/reviewed-coverage-20261101/source-review.json": "dc8f2cabbfe3323f132d3678e37aab9ad72e3c5eb663072ac30404ac1703a46e",
+    "results/evidence/semantic-claim-repair-20261101/late-proposal.json": "fd6937defde4e01fd332bd8d583b1a950d8d1b4d080997f652f9bfcf7e2dadc2",
+    "results/evidence/semantic-claim-repair-20261101/middle-proposal.json": "47ceaa3186764df64365d91636db5e00e61f6b3004ae1a30da2a52366d0b7964",
+    "results/evidence/semantic-claim-repair-20261101/semantic-review.json": "cc792d4e50483c09b3ba9b243fee51536a12ff87cf792ee4f4c266a09f1b5b1b",
+    "results/evidence/semantic-claim-repair-20261101/updater-inputs.json": "7f6b857faba33f2180d74a1a98b82482ec4e5d531a797a018f33739b82ad67cc",
+    "results/evidence/semantic-contract-maintenance-20261101/review-decision.json": "19b983d19fcbc509d24e6c3712a4f71602caef792ded7d9e144f260d13fb3b30",
+    "tests/fixtures/dependency-cut-catalogs.json": "3399c21642edd6d5fad89201b4b43370ba104302e7fff0b1800939f6ff1e179d",
+    "tests/fixtures/prefix-workflow-catalogs.json": "e9400e79f206b299882622b8441123aa7422a15e716cb64a76c0492fec3461ae",
+    "tests/fixtures/semantic-maintenance-catalogs.json": "16038dd218757311fbe26eb7a38895254f6eb4464947d7cc799a5320f75b78bf",
+    "tests/test_evidence_dispatch.py": "ae507c28881c659d028fa125a3bd8ff395d4d7945782f31763a7b2342e3e735d",
+    "tests/test_reviewed_coverage.py": "25c2724e4583ecc7738ea946a6e073bcf0860a158597e5ed85d46a3ca78cc2e6",
+    "tests/test_semantic_contract_maintenance.py": "b10e0cd13354a4b799f75e7ad60ac5a7cbd64a14556344fc747bc0635d95782e"
+  },
+  "endpoints": {
+    "agent": "https://openrouter.ai/api/v1",
+    "judge": "https://openrouter.ai/api/v1",
+    "updater": "https://openrouter.ai/api/v1"
+  },
+  "coverage": {
+    "133": {
+      "middle": {
+        "catalog_change_types": [
+          "TOOL",
+          "PARAM",
+          "DESC"
+        ],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 38
+      },
+      "late": {
+        "catalog_change_types": [
+          "TOOL",
+          "PARAM",
+          "DESC"
+        ],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 35
+      }
+    },
+    "283": {
+      "middle": {
+        "catalog_change_types": [
+          "TOOL",
+          "PARAM",
+          "DESC"
+        ],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 28
+      },
+      "late": {
+        "catalog_change_types": [
+          "TOOL",
+          "PARAM",
+          "DESC"
+        ],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 23
+      }
+    },
+    "235": {
+      "middle": {
+        "catalog_change_types": [],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 28
+      },
+      "late": {
+        "catalog_change_types": [],
+        "task_relevance": "unreviewed",
+        "unchanged_tools": 28
+      }
+    }
+  },
+  "formal_evaluation": false,
+  "limitations": [
+    "Development subset; task-level change/retention labels need review",
+    "Under/over-update causal examples and independent holdout remain required",
+    "Selective Patch is deterministic; Full Rewrite is an LLM description rewrite",
+    "1 trajectory repeat(s); five judge ratings are not independent task repeats"
+  ],
+  "retry_policy": "Identical model request: one retry on connection/429/5xx, respecting Retry-After up to 60s. Judge: five slots, at most two logical attempts per slot, first valid rating only; durable request/response/outcome records and judge-only resume; all failed costs retained. No agent-trajectory, tool-call or low-score retries.",
+  "availability_preflight": true,
+  "stop_after_infrastructure_failures": 2,
+  "research": {
+    "spec": {
+      "quality_cases": [
+        {
+          "task_id": 133,
+          "properties": [
+            {
+              "id": "validation",
+              "required": "Provide meaningful expression validation, correctly interpret returned text, and distinguish syntax validity from actual evaluation and Python runtime/security verification."
+            },
+            {
+              "id": "guidance",
+              "required": "Provide usable Python-focused OWASP-related security recommendations: restricted inputs/allowed operations, avoid executing untrusted text as Python, and bound resource use. Do not claim that ignored tool flags establish these controls."
+            },
+            {
+              "id": "implementation_consistency",
+              "required": "Any code recommended as the solution must handle stated benign arithmetic and enforce its declared restrictions; do not use tool checks as proof that generated code was run. No code is required by the task if actionable recommendations suffice."
+            }
+          ],
+          "review": "Use actual calls/observations/final answer. Static AST inspection of generated Python; never execute untrusted generated code. Any unestablished required property is unknown, not pass. Additional nonessential prose is not a new requirement."
+        },
+        {
+          "task_id": 283,
+          "properties": [
+            {
+              "id": "coverage",
+              "required": "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work."
+            },
+            {
+              "id": "structure_and_scope",
+              "required": "Persisted task IDs are nonempty and unique; parent/dependency references exist and are acyclic. Concrete executable leaves have bounded scope; oversized required work is genuinely decomposed. Milestone containers are distinguished from executable leaves. Material unresolved executable work or unassessable scope does not pass merely because it is disclosed."
+            },
+            {
+              "id": "delivery_truth",
+              "required": "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations. A nonempty delivery identifies the actual project and work; absent final delivery is unknown, never pass."
+            },
+            {
+              "id": "scope_preserved",
+              "required": "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings."
+            }
+          ],
+          "prior_rubric": {
+            "task_id": 283,
+            "split": "exposed_changed_task_regression",
+            "provenance": "Original analytics dashboard planning request; archived task store, calls and final answer",
+            "required_properties": [
+              "Persisted project and linked tasks cover customer CSV processing, application log analysis and visualization with concrete executable work.",
+              "Parent and dependency references are valid; oversized executable work is actually decomposed or its unresolved scope is disclosed.",
+              "Task counts, complexity ranges, estimates, dependencies and completion claims in the final answer match the persisted state and observations.",
+              "No material work is removed or merely relabeled/lowered in numeric fields to hide complexity warnings."
+            ],
+            "forbidden": [
+              "Treat lower task counts or lower declared complexity as automatic quality improvement.",
+              "Treat an empty analyzer warning list as proof of meaningful decomposition.",
+              "Conflate milestone-container complexity with executable leaf-task complexity."
+            ],
+            "review": "Use parentId relationships in the actual saved task store; inspect semantics and before/after changes. Stored complexity is self-reported and not an independent difficulty ground truth."
+          },
+          "clarification_before_new_execution": "Same four substantive dimensions as prior283 review; explicitly treat unresolved material executable scope as fail/unknown rather than permitting disclosure alone to pass. No mandatory task count, numeric complexity threshold or hours cap. Do not equate an analyzer label with independent difficulty evidence. Apply equally to both arms.",
+          "review": "Hide methods/TF/PE until all property judgments frozen. Read actual task store and per-mutation states/calls, check concrete coverage, valid references and final claims. Same coordinator, not independent human reviewer."
+        },
+        {
+          "task_id": 235,
+          "properties": [
+            {
+              "id": "charts",
+              "required": "Three requested chart types returned successfully with source values, ordering, provinces/categories and monetary units preserved."
+            },
+            {
+              "id": "summary",
+              "required": "Any substantive final claim about these data matches the inputs; source totals if stated are exact."
+            }
+          ],
+          "review": "Frozen question and actual chart payloads; rendering remains unknown for both arms and is not added as a requirement."
+        }
+      ],
+      "evaluation": {
+        "normal_completion": "Runner execution_status==completed; truncation/max_rounds/error are not normal even if TF high.",
+        "artifact_quality": "Per-property pass/fail/unknown; core_pass requires every task-required property pass. Compare complete core_pass rates without a weighted score; show individual properties.",
+        "pilot_gate": "Strict normal-completion AND all-property core gains on project subset283M/L (2cells/arm) AND whole frozen changed133M/L+283M/L (4cells/arm); TFmean>=SP in each subset.235Lnormal/core/TF>=SP. No per-stage win required; report all stages. Both changed-task families now receive certified updates. No resampling; if any gate fails close the whole policy.",
+        "success_gate": "Each of2freshvalidationblocks individually meets sameproject-subset andwholechangedstrictdual gate plusTFnondecrease and235retention.3repeats/pair/arm perblock; neitherpooledgain norfirstblockgainalone qualifies.",
+        "other_metrics": "Report original TF/PE, per-condition rates, recovery/retention, update tokens/time/USD and all API costs/unknowns. ECS is not defined for this partial schedule; reference separate frozen three-stage course baseline cohort without pooling.",
+        "review_blinding": "Redirectrunnerstdouttofile; do notreadgroupedratings/methodmapuntilall10productjudgmentscommitted. PredeclaredopaquereviewIDs, samecoordinatornotindependenthuman andbehaviorcanrevealstrategy. Staticinspect133code, neverexecuteuntrustedcode; directstoreaudits283; sourcechartpayloads235.",
+        "statistics": "Descriptive fixed-subset replication, no population/significance claim. Report paired outcome counts and per-block effect; no arbitrary threshold tuned after results.",
+        "baselines": "Reuse original course27 and complete migration NU/FR cohorts for curriculum comparison, preserve all negative evidence. Do not substitute those scores as concurrent pilot controls."
+      },
+      "validation_schedule": {
+        "split": "Fresh executions on a predeclared already-exposed task subset; independent from pilot outcomes; not unseen-task generalization.",
+        "blocks": 2,
+        "repeats_per_block_per_condition": 3,
+        "task_stage_pairs": [
+          [
+            133,
+            "middle"
+          ],
+          [
+            133,
+            "late"
+          ],
+          [
+            283,
+            "middle"
+          ],
+          [
+            283,
+            "late"
+          ],
+          [
+            235,
+            "late"
+          ]
+        ],
+        "strategies": [
+          "selective_patch",
+          "evidence_dispatch"
+        ],
+        "knowledge": "Exact candidate bytes frozen after generation review; no changes in either validation block.",
+        "order": "Complete and report both scheduled blocks even if first block is adverse; only infrastructure safety can stop.",
+        "total_validation_trajectories": 60,
+        "independence": "Two sequential batches of fresh actor executions with empty isolated workspaces and no shared actor memory; each has3 repeats percondition. Same exposed original task families and byte-identical knowledge; independent executions, NOT unseen tasks, NOT statistical independence of the provider. No seeds are sent. All developer, diagnostic and viewed exploration runs excluded.",
+        "cells_per_block": 30,
+        "configs": [
+          "configs/evidence-dispatch-validation-1-v1.json",
+          "configs/evidence-dispatch-validation-2-v1.json"
+        ],
+        "config_files": [
+          "configs/evidence-dispatch-validation-1-v1.json",
+          "configs/evidence-dispatch-validation-2-v1.json"
+        ]
+      },
+      "confirmation": {
+        "tasks": [
+          133,
+          283,
+          235
+        ],
+        "stages": [
+          "middle",
+          "late"
+        ],
+        "task_stage_pairs": [
+          [
+            133,
+            "middle"
+          ],
+          [
+            133,
+            "late"
+          ],
+          [
+            283,
+            "middle"
+          ],
+          [
+            283,
+            "late"
+          ],
+          [
+            235,
+            "late"
+          ]
+        ],
+        "strategies": [
+          "selective_patch",
+          "selected_candidate"
+        ],
+        "repeats": 3,
+        "opaque_cell_ids": true
+      },
+      "authorization": {
+        "source": "User explicit same Goal authorization2026-11-01; local edits/tests/commits and frozen models authorized. No new total cap, no push/deploy/messages.",
+        "preflight_calls_max": 2
+      },
+      "failure_handling": "Retain raw output for every scheduled call and all errors/costs; no unknown product property is pass. Consecutive infrastructure failures follow existing stop rule with actual affected cells reported. Resolve authorized infrastructure problems without rerunning completed cells. No selecting favorable repeats. New unknown charges stop as existing ledger requires; oldA1 exception does not apply.",
+      "course": "Integrated report/reproduction alreadydelivered; no slides or speaker scripts. ResearchGoal incomplete.",
+      "champion": "selective_patch",
+      "development": {
+        "tasks": [
+          133,
+          283,
+          235
+        ],
+        "stages": [
+          "middle",
+          "late"
+        ],
+        "task_stage_pairs": [
+          [
+            133,
+            "middle"
+          ],
+          [
+            133,
+            "late"
+          ],
+          [
+            283,
+            "middle"
+          ],
+          [
+            283,
+            "late"
+          ],
+          [
+            235,
+            "late"
+          ]
+        ],
+        "strategies": [
+          "selective_patch",
+          "evidence_dispatch"
+        ],
+        "repeats": 1,
+        "opaque_cell_ids": true
+      },
+      "id": "evidence-dispatch-v1",
+      "status": "candidate_prepared_requires_exact_knowledge_freeze",
+      "candidates": [
+        "evidence_dispatch"
+      ],
+      "model_config": "configs/evidence-dispatch-dev-v1.json",
+      "updater_config": "configs/evidence-dispatch-updater-v1.json",
+      "feedback_probes": "experiments/evidence-dispatch-feedback-v1.json",
+      "generation": {
+        "mechanism": "Change-root/evidence-type dispatch applies exact source-reviewed semantic claim repair and exact source-reviewed redundancy deletion to disjoint affected tools; compiles their union. No question/task-ID routing.",
+        "input": "Old/target native metadata plus two previously frozen task-free evidence certificates. Reuse prior LLM retain/replace content without regeneration; never use benchmark question/answer/scored traces as updater input.",
+        "scope_limit": "Known certified tool versions only, not a learned general router or unseen-environment result. All unrelated fields/tools stay SP.",
+        "review": "Verify both certificates, exact single-policy equivalence, disjoint union in a mixed catalog, unchanged call constraints and exact235 retention. Semantic repair changes2Middle/8Late fields; coverage retains its9/15 safe deletions and500-character stage gate.",
+        "updater_calls": 0,
+        "historical_generation": "The reused claim repair used2LLM requests/USD0.0032346 in its original generation; disclose reuse and human source-review effort, not a newly free generation claim.",
+        "novelty_boundary": "New whole policy combines complementary actions on evidence types. Individual component knowledge is deliberately unchanged from closed versions; no within-task synergy or newly learned wording claimed.",
+        "next": "Freeze10 original dev cells; only all strict gates admit two fresh30-cell blocks with identical candidate bytes."
+      },
+      "execution_order": "Freeze exact union knowledge and ten original dev cells before model calls. Existing complete-block schedule. Only on all dev gates run both predeclared30-cell validation batches. Both arms in this new study use the same backup billing key; frozen model/provider/decoder/budgets/actor execution remain unchanged.",
+      "selection": "Frozen original133Middle/Late+283Middle/Late and235Late; input-complete. Original377lookupclosed. No syntheticbenchmarkrows substituted.",
+      "literature": {
+        "record": "results/evidence/evidence-dispatch-20261101/research-decision.json",
+        "reused_pins": [
+          "results/evidence/semantic-contract-maintenance-20261101/review-decision.json",
+          "results/evidence/reviewed-coverage-20261101/research-decision.json"
+        ]
+      },
+      "cost": "Independent null-cap dev and validation ledgers; zero new updater calls. Attribute historical claim generation USD0.0032346 separately without charging it twice. Backup billing key readiness verified; no provider/model fallback.",
+      "review_integration": "Reuse completed independent review: assess decisions beyond wording, allow deletion, preserve unrelatedknowledge, do not require successful actor episodes for a metadata-only method. No new agent/reviewloop.",
+      "authority": "User fullGoal+samebranch/mainsolewriter/no push; course fixedtask/model/baselines; frozenactorbudget/provider/judge; prior append-only/toolcount assumptions are not permanent bans. User cancels additional slides/speaker scripts.",
+      "credential_policy": {
+        "variable": "OPENROUTER_API_KEY_BACKUP",
+        "application": "Per-process assignment to existing AGENT_API_KEY and JUDGE_API_KEY before unchanged CLI starts; .env remains unchanged. Same key for all study arms and batches.",
+        "reason": "Primary remaining0.173861917 below preceding full-development0.217971504 cost; backup authenticated with6.59447569 remaining. Avoid partial trial interruption. No total cap introduced.",
+        "authority": "User supplied backup credential and explicitly authorized necessary frozen model experiments; credentials are billing/authentication, not the fixed model/provider/decoding/actor protocol."
+      }
+    },
+    "phase": "development",
+    "candidate": null,
+    "confirmation_round": 1
+  },
+  "max_preflight_calls": 2,
+  "shared_adaptations": {
+    "133-late-evidence_dispatch": "adaptations/133-late-evidence_dispatch/adaptation.json",
+    "235-late-selective_patch": "adaptations/235-late-selective_patch/adaptation.json",
+    "133-late-selective_patch": "adaptations/133-late-selective_patch/adaptation.json",
+    "235-late-evidence_dispatch": "adaptations/235-late-evidence_dispatch/adaptation.json",
+    "283-late-selective_patch": "adaptations/283-late-selective_patch/adaptation.json",
+    "283-late-evidence_dispatch": "adaptations/283-late-evidence_dispatch/adaptation.json",
+    "283-middle-evidence_dispatch": "adaptations/283-middle-evidence_dispatch/adaptation.json",
+    "133-middle-selective_patch": "adaptations/133-middle-selective_patch/adaptation.json",
+    "283-middle-selective_patch": "adaptations/283-middle-selective_patch/adaptation.json",
+    "133-middle-evidence_dispatch": "adaptations/133-middle-evidence_dispatch/adaptation.json"
+  }
+}

@@ -1,0 +1,472 @@
+{
+  "schema_version": "1.0",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "version": "early",
+  "source": "live_released_mcp_servers",
+  "tools": [
+    {
+      "tool_id": "ygocdb-mcp-server::search_cards",
+      "server_id": "ygocdb-mcp-server",
+      "version": "early",
+      "name": "search_cards",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "搜索关键字，可以是卡牌名称、效果描述等"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "description": "通过关键字搜索游戏王卡牌，可以搜索卡牌名称、效果文本等。",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "ygocdb-mcp-server",
+        "tool_name": "search_cards"
+      }
+    },
+    {
+      "tool_id": "ygocdb-mcp-server::get_card_by_id",
+      "server_id": "ygocdb-mcp-server",
+      "version": "early",
+      "name": "get_card_by_id",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "游戏王卡牌ID，通常为八位数字"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "description": "通过卡牌ID获取单张游戏王卡牌的详细信息",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "ygocdb-mcp-server",
+        "tool_name": "get_card_by_id"
+      }
+    },
+    {
+      "tool_id": "ygocdb-mcp-server::get_card_image",
+      "server_id": "ygocdb-mcp-server",
+      "version": "early",
+      "name": "get_card_image",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "游戏王卡牌ID，可以使用search_cards工具搜索"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "description": "通过卡牌ID获取游戏王卡牌的图片",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "ygocdb-mcp-server",
+        "tool_name": "get_card_image"
+      }
+    },
+    {
+      "tool_id": "@jinzcdev/leetcode-mcp-server::get_daily_challenge",
+      "server_id": "@jinzcdev/leetcode-mcp-server",
+      "version": "early",
+      "name": "get_daily_challenge",
+      "parameters": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {}
+      },
+      "description": "Retrieves today's LeetCode Daily Challenge problem with complete details, including problem description, constraints, and examples",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@jinzcdev/leetcode-mcp-server",
+        "tool_name": "get_daily_challenge"
+      }
+    },
+    {
+      "tool_id": "@jinzcdev/leetcode-mcp-server::get_problem",
+      "server_id": "@jinzcdev/leetcode-mcp-server",
+      "version": "early",
+      "name": "get_problem",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "titleSlug": {
+            "type": "string",
+            "description": "The URL slug/identifier of the problem (e.g., 'two-sum', 'add-two-numbers') as it appears in the LeetCode URL"
+          }
+        },
+        "required": [
+          "titleSlug"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Retrieves details about a specific LeetCode problem, including its description, examples, constraints, and related information",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@jinzcdev/leetcode-mcp-server",
+        "tool_name": "get_problem"
+      }
+    },
+    {
+      "tool_id": "@jinzcdev/leetcode-mcp-server::search_problems",
+      "server_id": "@jinzcdev/leetcode-mcp-server",
+      "version": "early",
+      "name": "search_problems",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "all-code-essentials",
+              "algorithms",
+              "database",
+              "pandas",
+              "javascript",
+              "shell",
+              "concurrency"
+            ],
+            "default": "all-code-essentials",
+            "description": "Problem category filter (e.g., 'algorithms', 'database', 'shell') to narrow down the problem domain"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "array",
+                "string",
+                "hash-table",
+                "dynamic-programming",
+                "math",
+                "sorting",
+                "greedy",
+                "depth-first-search",
+                "binary-search",
+                "database",
+                "tree",
+                "breadth-first-search",
+                "matrix",
+                "bit-manipulation",
+                "two-pointers",
+                "binary-tree",
+                "heap-priority-queue",
+                "prefix-sum",
+                "stack",
+                "simulation",
+                "graph",
+                "counting",
+                "sliding-window",
+                "design",
+                "backtracking",
+                "enumeration",
+                "linked-list",
+                "union-find",
+                "ordered-set",
+                "monotonic-stack",
+                "number-theory",
+                "trie",
+                "segment-tree",
+                "recursion",
+                "divide-and-conquer",
+                "queue",
+                "combinatorics",
+                "binary-search-tree",
+                "bitmask",
+                "memoization",
+                "geometry",
+                "binary-indexed-tree",
+                "hash-function",
+                "topological-sort",
+                "string-matching",
+                "shortest-path",
+                "rolling-hash",
+                "game-theory",
+                "data-stream",
+                "interactive",
+                "monotonic-queue",
+                "brainteaser",
+                "doubly-linked-list",
+                "merge-sort",
+                "randomized",
+                "quickselect",
+                "counting-sort",
+                "iterator",
+                "probability-and-statistics",
+                "concurrency",
+                "bucket-sort",
+                "suffix-array",
+                "line-sweep",
+                "minimum-spanning-tree",
+                "shell",
+                "reservoir-sampling",
+                "strongly-connected-component",
+                "eulerian-circuit",
+                "radix-sort",
+                "biconnected-component",
+                "rejection-sampling"
+              ]
+            },
+            "description": "List of topic tags to filter problems by (e.g., ['array', 'dynamic-programming', 'tree'])"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "EASY",
+              "MEDIUM",
+              "HARD"
+            ],
+            "description": "Problem difficulty level filter to show only problems of a specific difficulty"
+          },
+          "searchKeywords": {
+            "type": "string",
+            "description": "Keywords to search in problem titles and descriptions"
+          },
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum number of problems to return in a single request (for pagination)"
+          },
+          "offset": {
+            "type": "number",
+            "description": "Number of problems to skip (for pagination)"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Searches for LeetCode problems based on multiple filter criteria including categories, tags, difficulty levels, and keywords, with pagination support",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@jinzcdev/leetcode-mcp-server",
+        "tool_name": "search_problems"
+      }
+    },
+    {
+      "tool_id": "@jinzcdev/leetcode-mcp-server::get_user_profile",
+      "server_id": "@jinzcdev/leetcode-mcp-server",
+      "version": "early",
+      "name": "get_user_profile",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "LeetCode username to retrieve profile information for"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Retrieves profile information about a LeetCode user, including user stats, solved problems, and profile details",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@jinzcdev/leetcode-mcp-server",
+        "tool_name": "get_user_profile"
+      }
+    },
+    {
+      "tool_id": "@jinzcdev/leetcode-mcp-server::get_recent_submissions",
+      "server_id": "@jinzcdev/leetcode-mcp-server",
+      "version": "early",
+      "name": "get_recent_submissions",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "LeetCode username to retrieve recent submissions for"
+          },
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum number of submissions to return (optional, defaults to server-defined limit)"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Retrieves a user's recent submissions on LeetCode Global, including both accepted and failed submissions with detailed metadata",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@jinzcdev/leetcode-mcp-server",
+        "tool_name": "get_recent_submissions"
+      }
+    },
+    {
+      "tool_id": "@jinzcdev/leetcode-mcp-server::get_recent_ac_submissions",
+      "server_id": "@jinzcdev/leetcode-mcp-server",
+      "version": "early",
+      "name": "get_recent_ac_submissions",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "LeetCode username to retrieve recent accepted submissions for"
+          },
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum number of accepted submissions to return (optional, defaults to server-defined limit)"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Retrieves a user's recent accepted (AC) submissions on LeetCode Global, focusing only on successfully completed problems",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@jinzcdev/leetcode-mcp-server",
+        "tool_name": "get_recent_ac_submissions"
+      }
+    },
+    {
+      "tool_id": "@jinzcdev/leetcode-mcp-server::get_user_contest_ranking",
+      "server_id": "@jinzcdev/leetcode-mcp-server",
+      "version": "early",
+      "name": "get_user_contest_ranking",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "LeetCode username to retrieve contest ranking information for"
+          },
+          "attended": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to include only the contests the user has participated in (true) or all contests (false); defaults to true"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Retrieves a user's contest ranking information on LeetCode, including overall ranking, participation history, and performance metrics across contests",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@jinzcdev/leetcode-mcp-server",
+        "tool_name": "get_user_contest_ranking"
+      }
+    },
+    {
+      "tool_id": "@jinzcdev/leetcode-mcp-server::list_problem_solutions",
+      "server_id": "@jinzcdev/leetcode-mcp-server",
+      "version": "early",
+      "name": "list_problem_solutions",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "questionSlug": {
+            "type": "string",
+            "description": "The URL slug/identifier of the problem to retrieve solutions for (e.g., 'two-sum', 'add-two-numbers'). This is the same string that appears in the LeetCode problem URL after '/problems/'"
+          },
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum number of solutions to return per request. Used for pagination and controlling response size. Default is 20 if not specified. Must be a positive integer."
+          },
+          "skip": {
+            "type": "number",
+            "description": "Number of solutions to skip before starting to collect results. Used in conjunction with 'limit' for implementing pagination. Default is 0 if not specified. Must be a non-negative integer."
+          },
+          "orderBy": {
+            "type": "string",
+            "enum": [
+              "HOT",
+              " MOST_RECENT",
+              "MOST_VOTES"
+            ],
+            "default": "HOT",
+            "description": "Sorting criteria for the returned solutions. 'DEFAULT' sorts by LeetCode's default algorithm (typically a combination of recency and popularity), 'MOST_VOTES' sorts by the number of upvotes (highest first), and 'MOST_RECENT' sorts by publication date (newest first)."
+          },
+          "userInput": {
+            "type": "string",
+            "description": "Search term to filter solutions by title, content, or author name. Case insensitive. Useful for finding specific approaches or algorithms mentioned in solutions."
+          },
+          "tagSlugs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Array of tag identifiers to filter solutions by programming languages (e.g., 'python', 'java') or problem algorithm/data-structure tags (e.g., 'dynamic-programming', 'recursion'). Only solutions tagged with at least one of the specified tags will be returned."
+          }
+        },
+        "required": [
+          "questionSlug"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Retrieves a list of community solutions for a specific LeetCode problem, including only metadata like topicId. To view the full content of a solution, use the 'get_problem_solution' tool with the topicId returned by this tool.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@jinzcdev/leetcode-mcp-server",
+        "tool_name": "list_problem_solutions"
+      }
+    },
+    {
+      "tool_id": "@jinzcdev/leetcode-mcp-server::get_problem_solution",
+      "server_id": "@jinzcdev/leetcode-mcp-server",
+      "version": "early",
+      "name": "get_problem_solution",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "topicId": {
+            "type": "string",
+            "description": "The unique topic ID of the solution to retrieve. This ID can be obtained from the 'topicId' field in the response of the 'list_problem_solutions' tool. Format is typically a string of numbers and letters that uniquely identifies the solution in LeetCode's database."
+          }
+        },
+        "required": [
+          "topicId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Retrieves the complete content and metadata of a specific solution, including the full article text, author information, and related navigation links",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@jinzcdev/leetcode-mcp-server",
+        "tool_name": "get_problem_solution"
+      }
+    }
+  ]
+}

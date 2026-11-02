@@ -1,0 +1,20 @@
+{
+  "review_id": "R04",
+  "input_sha256": "d632e5e6d2b4062445e7532ded82b5cea85f5a32707c3559bd20f83d925e18e9",
+  "properties": {
+    "validation": "pass",
+    "guidance": "pass",
+    "implementation_consistency": "fail"
+  },
+  "core_pass": false,
+  "evidence": {
+    "validation": "Reported native grammar checks,6.5 arithmetic result and ignored allow_variables flag agree with calls. Explicitly distinguishes syntax from security and native grammar from Python.",
+    "guidance": "Provides AST allowlist, avoid untrusted eval/exec, resource bounds, process isolation, generic errors/logging and OWASP risk mapping. Initial grouping of literal_eval with code-execution sinks is imprecise but immediately corrects that literal_eval does not execute code; not treated as advice to use it unsafely.",
+    "implementation_consistency": "_check(tree) never recursively visits children. Therefore literal/type/depth/exponent restrictions are not enforced; _eval directly applies operator.pow before bounding. Furthermore the exponent-check branch tests ast.Pow then accesses node.right, which that operator node does not have. Own nested-parentheses rejection test would not reject solely by AST depth because parentheses are removed. These static contradictions invalidate the reference without running dangerous expressions."
+  },
+  "review_phase": "before_arm_mapping_and_scores",
+  "limitations": [
+    "Same coordinator; labels/scores unseen.",
+    "Generated code inspected statically, not executed."
+  ]
+}

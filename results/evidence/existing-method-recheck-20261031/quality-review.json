@@ -1,0 +1,143 @@
+{
+  "status": "reviewed_without_new_judge_calls",
+  "reviewer": "Codex offline source/trace/artifact inspection; not a blinded human evaluation",
+  "rubric": "Unchanged quality_cases in experiments/existing-method-recheck-v1.json",
+  "headline_zh": "现有budget_feedback的规划完成收益未在本次复核中复现；两组完成2/3，预算反馈原始TF/PE更低。保留历史阳性和本次阴性，不晋级。",
+  "cells": [
+    {
+      "cell_id": "cell-001",
+      "findings": [
+        {
+          "property": "Three charts preserve requested values, order and monetary units",
+          "status": "pass"
+        },
+        {
+          "property": "Final factual summary matches source data",
+          "status": "pass"
+        },
+        {
+          "property": "Rendered appearance",
+          "status": "unknown"
+        }
+      ],
+      "review_zh": "三次成功工具调用，5个省份、12个月和6个品类值及单位均正确；摘要正确指出二月和八月下降，没有错误汇总。两种方法使用相同K0，不能把此处相对原Patch的摘要优势归因于知识适应。图表客户端呈现未核验。"
+    },
+    {
+      "cell_id": "cell-002",
+      "findings": [
+        {
+          "property": "Concrete work covers CSV, logs and visualization",
+          "status": "pass"
+        },
+        {
+          "property": "Valid parent/dependency links and observable decomposition",
+          "status": "pass"
+        },
+        {
+          "property": "Final report accurately describes persisted work",
+          "status": "unknown"
+        },
+        {
+          "property": "No material work deleted or relabeled to hide warnings",
+          "status": "pass"
+        }
+      ],
+      "review_zh": "12轮后没有最终回答；41记录=10实际父节点+31叶任务，604叶工时，依赖/父ID有效无环。CSV、日志、可视化、集成工作均有具体内容，末两轮为5项工作新增11个真实子任务。不能沿用旧批次M4-M8空的解释。一次使用1.2/1.3作为依赖ID被拒，随后改用实际UUID恢复。第10轮list_tasks称55条但只含30个不同ID；同轮分析器也分析30条，这是上游层级重复统计问题。"
+    },
+    {
+      "cell_id": "cell-003",
+      "findings": [
+        {
+          "property": "Expression validation and OWASP-related recommendations obtained",
+          "status": "pass"
+        },
+        {
+          "property": "Tool-observed facts accurately represented",
+          "status": "fail"
+        },
+        {
+          "property": "Included Python example consistent with its stated operation",
+          "status": "fail"
+        },
+        {
+          "property": "Complete security verification",
+          "status": "unknown"
+        }
+      ],
+      "review_zh": "两次成功调用并正常结束。工具仅回复语法有效，未报告答案所称depth3。所附compile_safe遍历所有AST子节点，但_ALLOWED_NODES不含Add等运算符；普通1+1会在Add节点被拒，和自带成功测试矛盾。静态检查已定位，无执行生成代码，不能把语法可解析当安全实现通过。"
+    },
+    {
+      "cell_id": "cell-004",
+      "findings": [
+        {
+          "property": "Expression validation, arithmetic result and OWASP-related recommendations obtained",
+          "status": "pass"
+        },
+        {
+          "property": "Capability and security inference respects observed evidence",
+          "status": "fail"
+        },
+        {
+          "property": "Included Python example consistent with its stated operation",
+          "status": "fail"
+        },
+        {
+          "property": "Complete security verification",
+          "status": "unknown"
+        }
+      ],
+      "review_zh": "6次调用并正常结束，2+3*4=14及两个拒绝结果确有观察；但由不支持**推断指数攻击类别不存在、没有标识符，以及用这些工具结果背书新Python实现，都超出证据。冻结服务源码明确支持^；未执行危险幂表达式。_check遍历ast.walk但未允许Add等节点，普通加法仍被拒。未知安全完整性保持unknown。"
+    },
+    {
+      "cell_id": "cell-005",
+      "findings": [
+        {
+          "property": "Concrete work covers CSV, logs and visualization",
+          "status": "pass"
+        },
+        {
+          "property": "Valid parent/dependency links and observable decomposition",
+          "status": "pass"
+        },
+        {
+          "property": "Final report accurately describes persisted work",
+          "status": "unknown"
+        },
+        {
+          "property": "No material work removed just to silence complexity warnings",
+          "status": "pass"
+        }
+      ],
+      "review_zh": "12轮后没有最终回答；58记录=8父节点+50叶任务，538叶工时，依赖及父ID有效无环。七条日志任务首次因把实际UUID中的441b误写为411b而失败，第6轮改正后全部创建；不是七次原参数重试，更不是从未创建。第11轮实际拆分解析器为两个子任务，同时降低并改名父任务为umbrella；真实拆分存在，不能仅凭父级降分认定规避。第12轮仍有7个里程碑复杂度警告，未向用户给出解释。声明复杂度2–4不等于独立验证了难度。"
+    },
+    {
+      "cell_id": "cell-006",
+      "findings": [
+        {
+          "property": "Three charts preserve requested values, order and monetary units",
+          "status": "pass"
+        },
+        {
+          "property": "Final factual summary matches source data",
+          "status": "fail"
+        },
+        {
+          "property": "Rendered appearance",
+          "status": "unknown"
+        }
+      ],
+      "review_zh": "三次成功图表调用的数据、月份及单位均正确；最终文字把月度合计25.4写成23.4，并称只有八月下降，漏掉二月。五个TF/PE均10，原分保留。知识和预算反馈完全相同，不能解释为选择性更新造成退化。"
+    }
+  ],
+  "decision": {
+    "promoted": false,
+    "completion_benefit_repeated": false,
+    "observed_mean_TF_PE_benefit": false,
+    "causal_harm_from_budget_rule": "inconclusive",
+    "course_adequacy": "Mixed/negative results can form a defensible project; brief does not require all-baseline victory, PE+0.5 or flawless incidental details. Existing course27 remains primary. Acceptance of controlled failures and FR interpretation remains a TA question, not resolved by score search.",
+    "next": "Stop this replication. Synthesize evidence before more executions; do not add generic clauses or rerun low scores until favorable. Any next method needs a specific missing/incorrect knowledge mechanism, separately frozen and validated. No new implementation is claimed validated."
+  },
+  "historical_scores_changed": false,
+  "generated_code_executed": false,
+  "new_review_model_calls": 0
+}

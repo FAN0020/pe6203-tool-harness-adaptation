@@ -1,0 +1,51 @@
+{
+  "status": "offline_proposal_not_executed",
+  "trigger": "Remaining course over-update gap: earlier evaluate-rule pair was semantically related and failed to prove unrelated knowledge damage. No need to invent a natural failure.",
+  "kind": "controlled_fault_injection_and_scope-guard_ablation; not a natural budget_feedback failure",
+  "task_id": 430,
+  "stage": "late",
+  "hypothesis": "When adapting to removal of Swiftipedia.search_symbols, an erroneous global name-normalization step corrupts the unrelated Wikipedia readArticle route. Identical valid article arguments should then be sent to an unregistered method; the unmodified route should retrieve the article.",
+  "source_knowledge": "results/raw/tool-migration-pilot-20261031/adaptations/430-late-budget_feedback/knowledge.json",
+  "source_sha256": "a58f6fe3b7a62064b56b6d298aa23fa405877c4950c9190c2d00f9ccb2c58f8d",
+  "exact_diff": {
+    "record": "wikipedia-mcp::readArticle",
+    "path": "routing.tool_name",
+    "control": "readArticle",
+    "fault": "read_article"
+  },
+  "unrelatedness_evidence": "Wikipedia tool identity, schema, description and routing are identical across all three released catalogs, independently of Swiftipedia search_symbols removal. The routing spelling has no dependency on Swiftipedia module/query contract. Sharing a task does not create a routing-name dependency.",
+  "conditions": [
+    "Unmodified existing budget_feedback snapshot",
+    "Same snapshot with only routing.tool_name altered on wikipedia-mcp::readArticle"
+  ],
+  "expected_observations": [
+    "Same-input read-only tool replay: control returns article, faulty route returns unknown-tool error.",
+    "Agent trajectories: if readArticle is selected, observe incorrect dispatch and retrieval failure only in faulty condition; record recovery, output truncation, TF/PE and truthful limitations separately.",
+    "If agent never selects the altered route, full-task causal evidence remains inconclusive even if direct replay demonstrates local failure."
+  ],
+  "scope": {
+    "proposed_new_agent_trajectories": 2,
+    "judge_slots": 10,
+    "new_updater_calls": 0,
+    "public_read_only_replay_calls": 2,
+    "same_model_decoding_budget_judge_as": "experiments/tool-migration-v1.json",
+    "no_deployment": true
+  },
+  "cost_estimate_usd": [
+    0.02,
+    0.08
+  ],
+  "runtime_estimate_minutes": [
+    2,
+    6
+  ],
+  "is_budget_cap": false,
+  "limitations": [
+    "Intentional corruption bypasses the original scope/routing validator; not evidence the developed updater naturally makes this mistake.",
+    "A tool-level failed operation does not guarantee lower final TF: agent may compensate from other tools or prior knowledge.",
+    "One pair cannot establish prevalence, statistical significance, or a general effect size.",
+    "Controlled injection is not automatically course-acceptable; cite exact brief wording and disclose design. Prior negative diagnostics remain unchanged."
+  ],
+  "ta_question_draft_not_sent": "Brief §4.2 asks for an over-update trajectory where unrelated knowledge changes and previously working behavior is damaged. Would a clearly labeled scope-guard ablation that injects one unrelated Wikipedia routing error during a real Swiftipedia tool migration, with identical-call replay and a paired agent trajectory, satisfy this analysis requirement? We would report local retrieval failure separately from final TF and would not claim a naturally occurring updater failure.",
+  "execution_condition": "Review current12-cell migration pilot first; this proposal records the exact intervention and does not itself execute it."
+}

@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PE6203：无效可选参数投影开发结果</title><style>body{font:16px/1.7 system-ui,sans-serif;max-width:1120px;margin:36px auto;padding:0 24px;color:#18232e;background:#fafbfd}h1,h2{line-height:1.3}h1{font-size:30px}h2{margin-top:36px;font-size:22px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{border:1px solid #cbd5df;padding:9px;text-align:left}th{background:#eaf0f5}a{color:#125a91}.notice{border-left:5px solid #b04c23;padding:14px 20px;background:#fff3eb}.small{color:#52606d;font-size:14px}code{background:#eef2f5;padding:1px 4px}li{margin:7px 0}.scroll{overflow:auto}</style><body>
+<h1>无效可选参数投影：完成率局部改善，完整质量仍未通过</h1>
+<p class="small">2026-11-01 · 同一完整 Goal · 原 benchmark 133 Middle/Late + 235 Late · 9 条开发运行</p>
+<div class="notice"><strong>决定：关闭本具体版本，不启动两批独立验证。</strong>主候选正常完成 1/2，原 SP 0/2；完整产物合格均 0/2。同期描述修订组完成 2/2、质量 0/2，它仅作消融对照，不能事后选为胜者。完整 Goal 保持 active、未完成。</div>
+<h2>失败证据与本轮问题</h2>
+<p>上一轮描述修订降低调用数并提高 TF/PE，仍没有双提升。本轮检验：在正确描述已经说明参数无效后，是否还需要从模型看到的 schema 中移除这些无效选择，才能改善完整交付？这里针对选择和知识表示，不增加执行轮次或产物预算。</p>
+<p>另一个候选是依赖传播。源码显示数学工具共用解析器，但新增参数没有被处理函数读取；共享实现不等于变化传播。Late 的 batch→标量替代也已写入上一版，因此本轮没有仅换位置重复它。候选比较和限制来源见<a href="../results/evidence/optional-parameter-projection-20261101/research-decision.json">决策记录</a>。</p>
+<h2>文献、源码与合法边界</h2>
+<p>复用 <a href="https://arxiv.org/html/2401.06201v3">EasyTool v3</a> 和作者 <a href="https://github.com/microsoft/JARVIS/tree/7624cf388b47334ff8a0868e7d862dde18cfda86/easytool">固定源码 7624cf3</a>：它整理冗余文档并提供经核查的用法；发布实现分开选择工具、API 和参数（toolbench.py:140），读取预生成文档（data_process.py:29）。本轮只借鉴经验证地减少决策材料；“源码证明无效的可选参数投影”是本项目扩展，不声称作者已实现它，也没有移植多阶段 actor。</p>
+<p>课程 brief 将 schema 列入 harness 工具知识。先前“必须逐字段等于原生 schema”是原 SP 和已关闭候选的实现约束。新候选明确改变模型看到的知识 schema；原生 server/schema、参数转发、执行器、模型、供应商、解码、单次预算、judge 和验收保持不变。所有必需参数和有效原生能力保留，不删除任务要求。旧协议和基线没有改写。</p>
+<p>源文件 handler SHA 为 <code>fe63b227…2c39</code>，仅读取 expression；两阶段 dispatcher 接受待删除参数省略。完整哈希和位置在<a href="../results/evidence/optional-parameter-projection-20261101/source-manifest.json">原生源码清单</a>。声明“无效”依赖源码审查与原生检验，不仅是 JSON 结构检查。</p>
+<h2>冻结与实际执行</h2>
+<p><code>8e06de6</code> 先冻结 20 次通用原生调用：三种表达式、三种参数设置、两个阶段，加各一条必需参数缺失负控制。全部通过省略等价性和负控制要求；这不代表 benchmark 成功。</p>
+<p>主候选复用上一版完整、固定的 LLM 描述修订，然后仅删除 validate_syntax 的无效可选属性：Middle 为 detailed/allow_variables，Late 为 detailed/show_ast/check_balanced/max_depth。Late 必需 allow_variables 保留。其余知识逐字一致；235 三组知识完全一致。完整知识字符量仅减少约 0.4%/1.2%，字符不等于 token。</p>
+<p><code>3b8a6ae</code> 冻结三组共 9 条开发及条件 18+18 验证日程；<code>a709448</code> 冻结全部知识和审查映射。原 SP 是同期直接对照，描述修订组仅作机制消融，主候选预先唯一指定。任务、数据、执行顺序、重复数、失败处理、单独 ledger 和严格门槛见<a href="../experiments/optional-parameter-projection-v1.json">完整协议</a>。</p>
+<p>runner 93931 退出 0，9/9 evaluated，45/45 原评分槽位。<code>49ab4e6</code> 在揭示方法和 TF/PE 前提交了全部产物判定。审查人为同一协调者，行为可能泄露方法；不称独立人工。只做静态 AST/控制流检查和良性标准库参照计算，没有执行生成的 Python。</p>
+<h2>原变化任务结果</h2><div class="scroll"><table><tr><th>策略</th><th>正常完成</th><th>完整产物合格</th><th>TF</th><th>PE</th><th>工具调用</th></tr><tr><td>原 SP</td><td>0/2</td><td>0/2</td><td>9.3</td><td>7.6</td><td>24</td></tr><tr><td>描述修订（诊断）</td><td>2/2</td><td>0/2</td><td>10.0</td><td>7.9</td><td>18</td></tr><tr><td>参数投影（主候选）</td><td>1/2</td><td>0/2</td><td>9.8</td><td>6.8</td><td>30</td></tr></table></div>
+<p>三组 235 均完成且 TF/PE 为 10；产物质量为 SP 0/1，描述修订 1/1，参数投影 1/1。SP 把年度月销售合计写成 23.4M，实际 25.4M。由于三组知识完全相同，保持样本差异不能归因于补丁。ECS 因部分阶段日程不适用。</p>
+<div class="scroll"><table><tr><th>审查 ID</th><th>原题/阶段</th><th>策略</th><th>停止状态</th><th>TF</th><th>PE</th><th>产物</th></tr><tr><td>P08</td><td>133/late</td><td>参数投影（主候选）</td><td>output_truncated</td><td>9.6</td><td>7</td><td>失败</td></tr><tr><td>P04</td><td>133/middle</td><td>原 SP</td><td>output_truncated</td><td>10</td><td>8.8</td><td>失败</td></tr><tr><td>P02</td><td>133/late</td><td>原 SP</td><td>output_truncated</td><td>8.6</td><td>6.4</td><td>失败</td></tr><tr><td>P05</td><td>235/late</td><td>参数投影（主候选）</td><td>completed</td><td>10</td><td>10</td><td>通过</td></tr><tr><td>P01</td><td>235/late</td><td>原 SP</td><td>completed</td><td>10</td><td>10</td><td>失败</td></tr><tr><td>P09</td><td>235/late</td><td>描述修订（诊断）</td><td>completed</td><td>10</td><td>10</td><td>通过</td></tr><tr><td>P07</td><td>133/middle</td><td>参数投影（主候选）</td><td>completed</td><td>10</td><td>6.6</td><td>失败</td></tr><tr><td>P03</td><td>133/late</td><td>描述修订（诊断）</td><td>completed</td><td>10</td><td>9.6</td><td>失败</td></tr><tr><td>P06</td><td>133/middle</td><td>描述修订（诊断）</td><td>completed</td><td>10</td><td>6.2</td><td>失败</td></tr></table></div>
+<h2>判别结果和结论边界</h2>
+<p>原 SP 在 9 次验证调用里使用了 12 个无效参数值；描述修订和投影组各为 0。投影移除了选择，但没有进一步减少实际无效参数使用，调用数和完成数反而弱于同期描述修订组。这削弱了“剩余失败主要由这些可选参数选择造成”的解释；不能据单次条件运行推断所有 schema 投影无效。</p>
+<p>完整输出仍出现未接入的资源检查、错误的返回类型、缺少函数绑定、对原生语法的错误概括等。描述修订组两条均正常结束却仍不合格，说明截断不足以解释所有质量失败。停止字段仅证明截断发生，不能证明其根因。</p>
+<p><strong>验收敏感性：</strong>P08 主代码可解析，但它提供的回归测试要求拒绝 20 层冗余括号，实际 AST 已去掉括号、主实现会接受。若忽略该矛盾并将 P08 算作通过，开发门槛会改变。冻结验收要求所推荐代码与声明一致，故保留失败，不能事后删除测试或改分。P05 的“约29%”相对精确29.588%被作为粗略近似接受；更严格处理会影响保持项，但不能修复主报告的变化任务质量失败。</p>
+<p>所有原判定、元数据和敏感性说明见<a href="../results/evidence/optional-parameter-projection-20261101/decision.json">结果</a>、<a href="../results/evidence/optional-parameter-projection-20261101/interpretation.json">解释</a>。同一描述修订知识上一轮完成1/2、本轮2/2，亦提示运行波动；任何一轮都不是未见任务验证。</p>
+<h2>费用、复现和下一步</h2>
+<p>新增 76 笔 API 请求：29 actor、45 judge、2 预检，总费用 <strong>USD0.090926484</strong>，未知0。没有新增 updater 调用；复用 v2 的一次性生成费用0.003234600单独披露，不重复计入本轮。没有新增总费用或 token 上限。</p>
+<p>74 项针对性测试通过；离线复核覆盖373原始文件、338源文件、全部运行/评分/费用。<a href="../results/evidence/optional-parameter-projection-20261101/reproduction.txt">复现说明</a>包含协议、冻结提交、原始失败、归档和无 API 复算命令。</p>
+<p>不再换一个同类参数子集重试。后续仍须围绕完整产物构造寻找有源码依据的行为或依赖变化；当前 security-hardening-prompt-builder 不在目录变化列表中，不能仅因输出错误就把它任意列为受影响知识。尚无下一准入候选，也没有证明合法方法空间穷尽。</p>
+<p>NU/FR及课程三阶段证据独立保留；最终课程整合报告、复现提交包、10分钟展示及under/over-update归因核对仍待完成。它们不能替代尚未完成的严格双提升 Goal。本轮有实际机制与运行证据，属于进展；没有将 Goal 标记 complete 或 blocked。</p></body></html>

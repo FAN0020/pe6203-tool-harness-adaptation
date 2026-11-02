@@ -1,0 +1,91 @@
+{
+  "id": "native-batch-probes-v1",
+  "base_commit": "dc4125a",
+  "type": "task-free-native-admission-not-benchmark",
+  "stage": "late",
+  "server": "@pimzino/agentic-tools-mcp",
+  "model_calls": 0,
+  "sources": [
+    {
+      "path": ".cache/mcpevol/original/node_modules/@pimzino/agentic-tools-mcp/dist/server.js",
+      "sha256": "e9ea50500abee910ea70d8c3e088a49cef6bff2b2f4edc5b12ace3843c720508"
+    },
+    {
+      "path": ".cache/mcpevol/original/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/prd/parse-prd.js",
+      "sha256": "d84ed2420bd56f9c648fe6a730fa61b9a12a3ab01254acbad86b5626859c338d"
+    },
+    {
+      "path": ".cache/mcpevol/original/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/list.js",
+      "sha256": "5c507e925e724789c39f33d70200ce89cc27f41f575058bc77385c934e252b80"
+    },
+    {
+      "path": ".cache/mcpevol/original/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/storage/file-storage.js",
+      "sha256": "9929af1afcfed7b0d353b61adaf335ba3b6dd7ed52c1df284f020129d316bbeb"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/server.js",
+      "sha256": "6600eb9b943b5aa74252a2087e825d0a35b34f6ffcbfb33c56cf586a3526b6f6"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/prd/parse-prd.js",
+      "sha256": "d84ed2420bd56f9c648fe6a730fa61b9a12a3ab01254acbad86b5626859c338d"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/list.js",
+      "sha256": "5c507e925e724789c39f33d70200ce89cc27f41f575058bc77385c934e252b80"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/storage/file-storage.js",
+      "sha256": "9929af1afcfed7b0d353b61adaf335ba3b6dd7ed52c1df284f020129d316bbeb"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/server.js",
+      "sha256": "fe9df3af66d85964ece234e5baa5c13dad3cb3ca4f982e95344b96a04848a972"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/prd/parse-prd.js",
+      "sha256": "d84ed2420bd56f9c648fe6a730fa61b9a12a3ab01254acbad86b5626859c338d"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/list.js",
+      "sha256": "5c507e925e724789c39f33d70200ce89cc27f41f575058bc77385c934e252b80"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/storage/file-storage.js",
+      "sha256": "9929af1afcfed7b0d353b61adaf335ba3b6dd7ed52c1df284f020129d316bbeb"
+    }
+  ],
+  "positive_paragraphs": [
+    "- CANARY_ALPHA\nPayload: ALPHA=17. Preserve this record verbatim.",
+    "- CANARY_BETA\nPayload: BETA=29. Preserve this separate record verbatim.",
+    "- CANARY_GAMMA\nPayload: GAMMA=43. Preserve this separate record verbatim."
+  ],
+  "negative_grammar": "Build CANARY_DELTA\n\nTask: CANARY_EPSILON",
+  "negative_long": "- CANARY_LONG\nPayload: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX END_CANARY_MUST_NOT_VANISH",
+  "sequence": [
+    "create_project",
+    "parse_prd(3paragraphs,generateSubtasks=true,estimateComplexity=true)",
+    "list_tasks(flat,all)",
+    "create_task(container)",
+    "update_task(ALPHA,parent=container,dependsOn=BETA)",
+    "list_tasks(flat,all)",
+    "parse_prd(negativegrammar)",
+    "list_tasks(flat,all)",
+    "parse_prd(over500paragraph)",
+    "list_tasks(flat,all)",
+    "parse_prd(same3paragraphsagain)",
+    "list_tasks(flat,all)"
+  ],
+  "calls": 12,
+  "checks": [
+    "Exactly3uniquevalidtasks with namesandentireparagraphdetails preserved afterpositiveimport;noimplicitparents/dependencies despitegenerateSubtasks=true.",
+    "Actualflatresponse suppliesallcreatedIDs once;nativeupdatecreatesvalidexplicitparent/dependencylinkswithoutcontentloss.",
+    "Negativegrammar createsfallbackgeneralrecord,notsemanticexpectedtasks.",
+    "Over500ASCIIparagraphstoredprefix500plusellipsis,tailmarkerabsent: unsuitableforlosslessimport.",
+    "Repeatingimportcreates3newIDswithsametitles;nonidempotent.",
+    "Allrawresponsesandpersistedstate retainedbeforeassertions;nooverride/serverpatch;stoponunexpectedfailure,do notrepeat completed calls."
+  ],
+  "scope": "Only independently generatedASCIIcanaries,notbenchmarkcontent/answers. Sourceandstateusedasnativecontractevidenceonly,notactortrainingexamplesorqualitysuccess.",
+  "decision_rule": "Ifpositivepreservation/IDs/explicitlinks fail,do not admit batch route. Negativecontrols constrainanyfutureknowledge;they arenotbenchmarkfailures. Ifadmitted,newmodeltrialrequiresseparatepre-registration.",
+  "limits": "Inheritedparse_prd isunchangedacrossstages. Anyfuturecandidate must targetactualchangedcreate_project record and its projectIdproducer-consumer workflow, leaveunrelatedrecords protected; do not claim the parser itself was newlyaddedor thatit fixes a nativecodechange. Noautomaticmodeltrialfromthisprotocol."
+}

@@ -1,0 +1,115 @@
+{
+  "id": "observation-coverage-native-v1",
+  "purpose": "Test whether distinct stored dependency/priority/complexity states are distinguishable through each native read versus latest write receipt. No benchmark inputs.",
+  "stages": [
+    "middle",
+    "late"
+  ],
+  "server": "@pimzino/agentic-tools-mcp",
+  "project": {
+    "name": "Observation coverage canary",
+    "description": "Independent native projection and invalidation check."
+  },
+  "nodes": [
+    {
+      "key": "A",
+      "name": "Observation canary A",
+      "details": "Independent observation marker A λ.",
+      "priority": 2,
+      "complexity": 4,
+      "estimatedHours": 2.5,
+      "tags": [
+        "obs-canary-δ"
+      ],
+      "status": "blocked",
+      "parent": null,
+      "dependencies": []
+    },
+    {
+      "key": "B",
+      "name": "Observation canary B",
+      "details": "Independent observation marker B λ.",
+      "priority": 2,
+      "complexity": 4,
+      "estimatedHours": 2.5,
+      "tags": [
+        "obs-canary-δ"
+      ],
+      "status": "blocked",
+      "parent": null,
+      "dependencies": []
+    },
+    {
+      "key": "C",
+      "name": "Observation canary C",
+      "details": "Independent observation marker C λ.",
+      "priority": 2,
+      "complexity": 4,
+      "estimatedHours": 2.5,
+      "tags": [
+        "obs-canary-δ"
+      ],
+      "status": "blocked",
+      "parent": "A",
+      "dependencies": [
+        "B"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/create.js",
+      "sha256": "62092008b73fe9d556a1ad4ce9e5d3ef23b282656eecd9be3fcd2ba806494bb1"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/create.js",
+      "sha256": "c339f2ff0f38695c9ecb8582720dfe502bdc107bda029da34bee6beff20e6da4"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/update.js",
+      "sha256": "bbe2a9bb7f60502937ca4523297700049cf1a4f7dc684c663b17bff67490de6c"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/get.js",
+      "sha256": "985ac0e25eb17e0d2c72107b1f3e2cea979c7e3b900ca33030623144f8e1860e"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/list.js",
+      "sha256": "5c507e925e724789c39f33d70200ce89cc27f41f575058bc77385c934e252b80"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/storage/file-storage.js",
+      "sha256": "9929af1afcfed7b0d353b61adaf335ba3b6dd7ed52c1df284f020129d316bbeb"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/projects/create.js",
+      "sha256": "62092008b73fe9d556a1ad4ce9e5d3ef23b282656eecd9be3fcd2ba806494bb1"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/create.js",
+      "sha256": "c339f2ff0f38695c9ecb8582720dfe502bdc107bda029da34bee6beff20e6da4"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/update.js",
+      "sha256": "bbe2a9bb7f60502937ca4523297700049cf1a4f7dc684c663b17bff67490de6c"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/get.js",
+      "sha256": "985ac0e25eb17e0d2c72107b1f3e2cea979c7e3b900ca33030623144f8e1860e"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/tools/tasks/list.js",
+      "sha256": "5c507e925e724789c39f33d70200ce89cc27f41f575058bc77385c934e252b80"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/@pimzino/agentic-tools-mcp/dist/features/task-management/storage/file-storage.js",
+      "sha256": "9929af1afcfed7b0d353b61adaf335ba3b6dd7ed52c1df284f020129d316bbeb"
+    }
+  ],
+  "schedule": "Eachstage: createproject,createA/B/C,getC,flatlist,hierarchylist,updateC(depB→A,priority2→3,complexity4→5),same3reads,negative missingdependency,updateC estimatedHours0,getC,flatlist. Exactly15calls/stage,2catalogs total.",
+  "native_calls": 30,
+  "admission": "All frozen checks bothstages; anyfailure closesv1 withoutresampling. Observational equivalence of three reads after storedstatechanges; successfulwrite receipts distinguishexactvalues;0estimatedisplayambiguity is explicitly expected,not a failure hidden afterresults. Negativewrite must preservebyte-state.",
+  "input_boundary": "Independent generic canary, no original/syntheticbenchmark Q/A/scoredtraces, statefiles evaluationonly; IDs fromreceipts. Never trainsactor or updater onbenchmark evidence.",
+  "cost": "0LLMcalls,0tokens,USD0; retain allcalls andstate; no new totalcap",
+  "scope": "Mechanism prerequisite only; not development or validation; same native environments unmodified."
+}

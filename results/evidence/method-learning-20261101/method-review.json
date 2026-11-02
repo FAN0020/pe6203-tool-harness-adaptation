@@ -1,0 +1,97 @@
+{
+  "papers": [
+    {
+      "id": "ace",
+      "paper": "ACE · 2510.04618v1 · 2025-10-06",
+      "url": "https://arxiv.org/html/2510.04618v1",
+      "sections": "3.1、3.2",
+      "mechanism": "条目ID与helpful/harmful计数、分工反思与局部合并；实现另有相似条目合并。",
+      "code": [
+        "ace/ace.py:510",
+        "playbook_utils.py:50",
+        "playbook_utils.py:96",
+        "ace/core/bulletpoint_analyzer.py:273"
+      ],
+      "old_gap": "旧delta_notes是确定性追加说明，没有Generator/Reflector/Curator循环或效用计数。",
+      "implementation_limit": "此SHA的apply_curator_operations只实现ADD，UPDATE/DELETE等标成TODO；不能把论文所有编辑能力都说成该函数已经实现。",
+      "repo": "ace-agent/ace",
+      "sha": "82709de050e1db6e6ef2f07bcb0393560b94992a",
+      "commit_date": "2026-08-24T18:49:59Z"
+    },
+    {
+      "id": "amem",
+      "paper": "A-MEM · 2502.12110v1 · 2025-02-17",
+      "url": "https://arxiv.org/html/2502.12110v1",
+      "sections": "3.1–3.3",
+      "mechanism": "结构化记忆、语义检索和邻居演化；演化可以修改相关旧记忆，而非只向新条目追加文字。",
+      "code": [
+        "memory_layer.py:777",
+        "memory_layer.py:819",
+        "memory_layer.py:828",
+        "memory_layer.py:945"
+      ],
+      "old_gap": "旧linked_notes只按同服务词项相似度取两个邻居；没有完整图演化或执行期检索。",
+      "implementation_limit": "核读的是作者论文复现实验仓库的2026版本，晚于v1；README另链接生产库A-mem-sys。没有声称本地复现其效果或读过新FlexA-MEM全文。",
+      "repo": "WujiangXu/AgenticMemory",
+      "sha": "f9a173dec325d84fcc97e7828775c7b241c33466",
+      "commit_date": "2026-10-28T19:40:57Z"
+    },
+    {
+      "id": "reflexion",
+      "paper": "Reflexion · NeurIPS 2023 proceedings",
+      "url": "https://proceedings.neurips.cc/paper_files/paper/2023/file/1b44b878bb782e6954cd888628510e90-Paper-Conference.pdf",
+      "sections": "复用既有section2阅读；此次核读编程实现",
+      "mechanism": "测试执行反馈推动代码反思与后续尝试；可执行检验与语言反思不同。",
+      "code": [
+        "programming_runs/reflexion.py:8",
+        "programming_runs/reflexion.py:43",
+        "programming_runs/executors/py_executor.py:11"
+      ],
+      "old_gap": "旧feedback_notes是事前冻结的工具探针记忆，没有整任务反思重试。",
+      "implementation_limit": "完整执行循环会增加任务尝试/模型调用或反馈通道，不可直接放进当前固定agent协议。",
+      "repo": "noahshinn/reflexion",
+      "sha": "218cf0ef1df84b05ce379dd4a8e47f17766733a0",
+      "commit_date": "2025-01-14T07:53:43Z"
+    },
+    {
+      "id": "expel",
+      "paper": "ExpeL · 2308.10144v3 · 2024-12-20",
+      "url": "https://arxiv.org/html/2308.10144v3",
+      "sections": "4.1–4.3",
+      "mechanism": "比较同任务成功与失败经验；以增删改和支持计数整理规则，再检索成功示例。成功经验也可能低效，不能照单全收。",
+      "code": [
+        "agent/expel.py:124",
+        "agent/expel.py:287",
+        "agent/expel.py:665",
+        "agent/expel.py:696"
+      ],
+      "old_gap": "旧候选没有成功/失败成对经验、规则支持计数与淘汰；只用原生调用成败不能声称已实现ExpeL。",
+      "implementation_limit": "当前updater边界只容许元数据及冻结通用探针，不得输入原benchmark题目、答案或评分轨迹；论文的任务示例检索不可原样照搬。",
+      "repo": "LeapLabTHU/ExpeL",
+      "sha": "e41ec9a24823e7b560c561ab191441b56d9bcefc",
+      "commit_date": "2024-12-20T05:28:00Z"
+    },
+    {
+      "id": "voyager",
+      "paper": "Voyager · 2305.16291v2 · 2023-10-19",
+      "url": "https://arxiv.org/html/2305.16291v2",
+      "sections": "2.2、2.3",
+      "mechanism": "把成功后接纳的可执行程序作为技能存储和检索，程序与执行环境共同构成复用条件。",
+      "code": [
+        "voyager/agents/skill.py:53",
+        "voyager/agents/skill.py:61",
+        "voyager/agents/skill.py:114",
+        "voyager/voyager.py:353"
+      ],
+      "old_gap": "旧document_sequence曾提供短格式例子，但没有可执行程序库和成功门控；不能把换一种顺序说明称为程序记忆。",
+      "implementation_limit": "官方实现不仅把技能放进prompt，也将程序送入环境执行。当前候选只能把代码作为工具知识数据，不能偷加执行钩子或候选专用文件。",
+      "repo": "MineDojo/Voyager",
+      "sha": "55e45a880755d0c8c66ca7fb5fe7962ac8974f89",
+      "commit_date": "2023-07-27T07:35:42Z"
+    }
+  ],
+  "primary_only": true,
+  "reading_date": "2026-11-01",
+  "code_executed": false,
+  "scope": "Original three readings reused; original implementations inspected; two additional mechanisms ExpeL/Voyager read. No upstream full histories, datasets or rollouts loaded."
+}

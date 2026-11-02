@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PE6203 完成率与任务质量 · 后续研究方案</title>
+<style>body{font:17px/1.65 system-ui,sans-serif;color:#182437;background:#f5f7fa;margin:auto;max-width:1000px;padding:32px}main{background:white;padding:36px;border-radius:12px}h1{font-size:30px;line-height:1.3}h2{font-size:22px;margin-top:32px}table{border-collapse:collapse;width:100%;font-size:15px}td,th{padding:10px;text-align:left;border-bottom:1px solid #d9e0e8}th{background:#eef3f8}a{color:#175da8}code{font-size:14px;overflow-wrap:anywhere}.note{border-left:4px solid #b57d13;padding:10px 16px;background:#fff8e7}.small{font-size:14px;color:#526074}li{margin:7px 0}@media(max-width:650px){body{padding:12px}main{padding:20px}table{font-size:13px}}</style>
+<main>
+<h1>先验证现有候选是否同时改善完成率和任务质量</h1>
+<p class="note"><strong>状态：12 条已结束；费用 US$0.157216447，候选未通过预定判据。</strong>这是独立后续研究。已交付课程报告、27 条主实验、历史评分和失败记录均保持冻结。两组均完成 4/6，未证明双重改善。<a href="completion-quality-results.html">查看完整结果及限制</a>。以下保留执行前方案与估算；机器协议未改动。</p>
+
+<h2>已有证据与候选选择</h2>
+<p>优先复核现有 <code>budget_feedback</code>，不增加新变体。它在 Selective Patch 更新后的相关工具上保留已验证的 schema、description 和 routing，加入范围充分性、冻结探测观察及预算使用规则；未变化的工具记录不改。工具选择仍由 agent 决定。</p>
+<table><thead><tr><th>历史开发实验：各 6 条</th><th>正常完成</th><th>TF</th><th>PE</th><th>Agent + judge USD</th></tr></thead><tbody>
+<tr><td>Selective Patch</td><td>5/6</td><td>10</td><td>8.9333</td><td>0.076240</td></tr>
+<tr><td>budget_feedback</td><td>6/6</td><td>10</td><td>8.9667</td><td>0.038507</td></tr>
+<tr><td>sufficiency_feedback</td><td>3/6</td><td>9.9667</td><td>8.7333</td><td>0.079587</td></tr>
+</tbody></table>
+<p>这些是暴露过任务上的单次开发结果。budget_feedback 的 task283 Middle 最终声称“每个任务复杂度 2–4”，但存档显示三个里程碑的复杂度为 5；仅叶任务符合 2–4。因此尚未证明质量提升。Late 的原 Patch 用 61 次工具调用创建 52 个任务后耗尽轮数；候选用 36 次调用创建 29 个任务并返回答案。任务少不自动意味着质量更好，需要检查实际工作是否完整、重复及可执行。</p>
+<p class="small">离线复算来源：<a href="../results/evidence/completion-quality-20261031/development-v3/facts.json">原始事实提取</a>。18 个知识条件已离线核对，其中 12 个 Middle/Late 条件与历史存档完全一致；Early 和保持任务的工具记录均为 K0。见 <a href="../results/evidence/completion-quality-20261031/freeze-audit.json">知识冻结核查</a>。历史 R1/R2/R3 及其未通过、网络失败和未知费用不删除、不重新认定为成功。</p>
+
+<h2>第一轮最小实验：12 条，不是 108 条</h2>
+<table><thead><tr><th>任务</th><th>角色</th><th>阶段</th><th>两种策略，各 1 次</th></tr></thead><tbody>
+<tr><td>133：安全数学操作</td><td>参数变化后的恢复</td><td>Middle / Late</td><td>原 Patch / budget_feedback</td></tr>
+<tr><td>235：销售图表</td><td>未变化能力保持</td><td>Middle / Late</td><td>原 Patch / budget_feedback</td></tr>
+<tr><td>283：项目任务分解</td><td>参数、描述及可选工具新增</td><td>Middle / Late</td><td>原 Patch / budget_feedback</td></tr>
+</tbody></table>
+<p>两组使用同一个 DeepSeek 模型、温度 0、4096 输出 token、12 轮、同任务和原 judge 协议；共 60 个有效评分槽。只比较工具知识差异。混合顺序执行并保留全部失败。task235 两组知识相同，其波动不解释为补丁因果效果。</p>
+<p>这一轮补充课程主实验，不能替代 Early/Middle/Late × No Update/Full Rewrite/Patch 的课程矩阵。没有新的 Early 数据就不计算候选 ECS，也不把旧 Early 结果拼成新试验。三类变化的实际触达继续逐条记录，不能因目录存在变化就声称任务测到了它。</p>
+
+<h2>如何判断“更好”</h2>
+<ol>
+<li><strong>完成率：</strong>候选在四个变化任务条件中正常完成更多，且保持任务的完成数不降低。截断、轮数耗尽与网络故障分开列出。</li>
+<li><strong>官方质量：</strong>TF 平均值不低于对照，逐格 TF/PE 与所有判分理由保留。PE 没有必须 +0.5 的门槛。</li>
+<li><strong>独立质量证据：</strong>按预先固定的属性逐项记录通过 / 失败 / 未知和证据。至少一项产物正确性改善，或双方均有最终答案时的准确性改善；不得新增实质性质量退化。仅从“没答案”变为“有答案”不同时算成两项胜利。</li>
+</ol>
+<p>任务 133 检查验证、求值与安全建议是否准确，未执行的安全保证不算通过。任务 235 检查三种图表的真实载荷、源数据、单位及最终数字。任务 283 检查 CSV／日志／可视化三部分的实际分解、父子与依赖关系，以及最终总结是否与存储状态一致。复杂度数字由 agent 填写，不能单独证明可执行性。语义判断标明审阅人，不冒称盲审；不把这些属性加成任意综合分。</p>
+<p><strong>停止条件：</strong>若完整 12 条支持以上三项，只报告该子集的观察优势；若质量持平、证据未知、网络不完整或出现退化，则不宣布胜出。后续只针对明确缺口提方案，每次扩展另行批准。不自动跑新候选、重复、81/108 条确认或 Netlify。</p>
+
+<h2>费用、边界与下一步</h2>
+<p>历史同样两组的 12 条轨迹及 60 次评分合计 <strong>US$0.11474742</strong>，记录运行时间约 <strong>7.6 分钟</strong>。新一轮预计 <strong>US$0.12–0.30、10–20 分钟</strong>；这是按旧账单外推，不能保证当前价格、缓存与网络相同。已批准预算上限 US$1。</p>
+<p class="note">费用保护已接入 agent、judge 和预检：按公开的 1,048,576 token 上下文和供应商单价上限，每次 4096 token 输出请求先预留 US$0.319488，收到实际费用后结算；未知费用、价格越界或剩余预算不足就停止。两组采用相同保护，旧实验不受影响。此保证以供应商遵守公开上下文与 max_price 接口约定为前提；未更改账户限额。</p>
+<p>课程的 TA 待确认事项仍独立保留：受控 under-update 是否被接受、尚未证实的“无关知识修改→损害”over-update、Full Rewrite 再生成范围和覆盖子类型。新候选性能再好，也不能自动填补这些证据缺口。</p>
+<p>完整协议：<a href="../experiments/completion-quality-v1.json">completion-quality-v1.json</a>；交接：<a href="../HANDOVER.md">HANDOVER.md</a>。离线复核命令：</p>
+<pre><code>.venv/bin/python scripts/audit_completion_quality.py \
+  results/evidence/selective-search-20261031/development-v3.tar.gz \
+  --output /tmp/pe6203-quality-review-NEW</code></pre>
+<p class="small">输出目录必须是新的；脚本只读归档，不运行其中代码、工具或模型，不改变旧评分，不作自动质量判定。</p>
+</main></html>

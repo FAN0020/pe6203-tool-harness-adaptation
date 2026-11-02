@@ -1,0 +1,915 @@
+{
+  "projects": [
+    {
+      "id": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "name": "Customer Analytics Dashboard",
+      "description": "End-to-end analytics dashboard delivering three data domains into one product surface:\n\n1) CUSTOMER DATA (CSV): scheduled ingestion of customer CSV exports -> schema validation, cleaning/deduplication, PII masking, warehouse load.\n2) APPLICATION LOGS: ingestion and parsing of application log files -> error-rate, latency and traffic metrics -> anomaly detection.\n3) VISUALIZATION: reusable chart components, KPI tiles, time-series and log-explorer views composed into an interactive dashboard backed by a query API.\n\nStructure: 5 milestones, each decomposed into leaf tasks with an execution complexity of 6 or below. Milestone records are roll-up containers, not single execution units.\nNon-functional targets: WCAG AA accessibility, PII-safe by default, cost-guarded queries, observable pipelines.\n\nTags: analytics, dashboard, data-pipeline, csv-ingestion, log-analysis, visualization",
+      "createdAt": "2026-11-01T12:42:54.458Z",
+      "updatedAt": "2026-11-01T12:42:54.458Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "83bccfc5-d40e-4da9-b9b9-3bebbcaa0134",
+      "name": "M1 — Customer CSV Ingestion & Processing",
+      "details": "MILESTONE / ROLL-UP CONTAINER (never executed as one unit; work happens in its child tasks).\n\nGoal: turn raw customer CSV exports into clean, typed, PII-safe, partitioned tables that the dashboard can query.\n\nExit criteria:\n- A documented data contract for customer CSV files (columns, types, nullability, PII classification).\n- Repeatable scheduled job that ingests new files, quarantines bad rows instead of failing the run, and is idempotent on re-run.\n- Cleaning/dedup/normalization rules implemented and covered by tests.\n- PII masked before data lands in any analytics-accessible table.\n- Data quality checks run on every load and publish pass/fail metrics.\n- Processed data written to partitioned warehouse tables with documented partitioning/clustering.\n\nComplexity here reflects coordination across children, not a single task to execute. Sum of child estimates ≈ 78h.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:03.470Z",
+      "updatedAt": "2026-11-01T12:43:03.470Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 6,
+      "status": "in-progress",
+      "tags": [
+        "milestone",
+        "customer-data",
+        "etl"
+      ],
+      "estimatedHours": 78,
+      "level": 0
+    },
+    {
+      "id": "e518c955-a283-4ac4-af89-9d94e8bfa32a",
+      "name": "M2 — Application Log Analysis Pipeline",
+      "details": "MILESTONE / ROLL-UP CONTAINER (executed through its child tasks).\n\nGoal: make application log files queryable and turn them into reliability metrics (error rate, latency percentiles, traffic by endpoint) plus anomaly signals.\n\nExit criteria:\n- Log source inventory: every log stream, its format, rotation/retention, and owner documented.\n- Ingestion covers both live tail and backfill of historical files.\n- Parser extracts structured fields (timestamp, level, service, endpoint, status, duration, trace id).\n- Pre-aggregated metrics tables power the dashboard without full-scan queries.\n- Anomaly detection flags error-rate and latency spikes with a documented, tunable threshold.\n- Retention/sampling policy agreed and implemented so log storage cost stays bounded.\n\nComplexity reflects coordination across children. Sum of child estimates ≈ 84h.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:03.473Z",
+      "updatedAt": "2026-11-01T12:43:03.473Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "log-analysis",
+        "observability"
+      ],
+      "estimatedHours": 84,
+      "level": 0
+    },
+    {
+      "id": "8fa5c5b1-cf9c-4c6a-9998-afcb14042800",
+      "name": "M3 — Dashboard Query API & Access Layer",
+      "details": "MILESTONE / ROLL-UP CONTAINER (executed through its child tasks).\n\nGoal: a stable, secured query API that the dashboard frontend calls, so the UI never talks to the warehouse directly.\n\nExit criteria:\n- Versioned API contract documented (endpoints, params, pagination, error model, sample payloads).\n- Query service reads from the processed customer and log metric tables with a documented cache strategy.\n- Authentication + authorization enforced, including row-level scoping so a user only sees permitted customer data.\n- Rate limiting and per-query cost guards (max scanned bytes / timeout) in place.\n\nSum of child estimates ≈ 50h.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:03.475Z",
+      "updatedAt": "2026-11-01T12:43:03.475Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "api",
+        "security"
+      ],
+      "estimatedHours": 50,
+      "level": 0
+    },
+    {
+      "id": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "name": "M4 — Visualization Components & Dashboard UI",
+      "details": "MILESTONE / ROLL-UP CONTAINER (executed through its child tasks).\n\nGoal: ship the actual dashboard: a KPI summary row, time-series exploration, a customer cohort/funnel view, and a searchable log explorer — built from reusable components.\n\nExit criteria:\n- KPI catalog with agreed definitions/formulas so numbers match across views.\n- Reusable chart primitives documented in a lightweight component inventory.\n- Each view implemented against the real query API (no mock-only components left behind).\n- WCAG AA: keyboard reachable controls, text alternatives/data tables for charts, sufficient contrast.\n- Acceptable render performance with realistic data volumes.\n\nSum of child estimates ≈ 120h.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:03.476Z",
+      "updatedAt": "2026-11-01T12:44:17.823Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "visualization",
+        "frontend"
+      ],
+      "estimatedHours": 128,
+      "level": 0
+    },
+    {
+      "id": "162d2b2d-bada-442d-97eb-b2dad6432b8e",
+      "name": "M5 — QA, Deployment & Operations",
+      "details": "MILESTONE / ROLL-UP CONTAINER (executed through its child tasks).\n\nGoal: make the whole stack testable, deployable and operable by someone other than its author.\n\nExit criteria:\n- Deterministic fixture datasets (small CSV + sample logs) available for tests.\n- Unit coverage on transforms/parsers, integration coverage across ingest -> load -> API.\n- CI runs lint + tests; CD deploys to staging on merge and to prod behind an approval gate.\n- Pipeline health dashboards + alerts (freshness, failure, row-count drift).\n- Runbook: how to re-run a failed load, backfill a date range, rotate credentials, roll back.\n\nSum of child estimates ≈ 72h.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:03.479Z",
+      "updatedAt": "2026-11-01T12:44:22.122Z",
+      "dependsOn": [],
+      "priority": 7,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "qa",
+        "deployment",
+        "operations"
+      ],
+      "estimatedHours": 82,
+      "level": 0
+    },
+    {
+      "id": "11e412b9-390e-4c4c-a3b0-91bf26941739",
+      "name": "M1.1 Document customer CSV schema & data contract",
+      "details": "Inventory 3-5 representative customer CSV exports and write a single data contract doc.\n\nInclude per column: name, inferred type, nullable?, max length, allowed value set/enum, example value, source system owner.\nAlso classify every column as PII / sensitive / non-sensitive, and note known quirks (mixed date formats, locale decimal separators, trailing summary rows, duplicate header rows, inconsistent casing of country/state).\n\nDeliverable: data-contract.md + a machine-readable schema file (JSON/YAML) that the validator and ingestion job both import.\nDone when: schema file is committed, reviewed by whoever owns the customer export, and the validator consumes it.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "83bccfc5-d40e-4da9-b9b9-3bebbcaa0134",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:14.629Z",
+      "updatedAt": "2026-11-01T12:43:14.629Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 3,
+      "status": "in-progress",
+      "tags": [
+        "customer-data",
+        "schema",
+        "documentation"
+      ],
+      "estimatedHours": 6,
+      "level": 1
+    },
+    {
+      "id": "ea316a4f-4e30-4e97-8b62-e9cef1dc86ef",
+      "name": "M1.2 Build CSV ingestion job (discovery, decode, quarantine)",
+      "details": "Implement the ingestion entry point for customer CSV files.\n\nScope:\n- Discover new/updated files in the landing location (or from a manifest) and record processed files so a re-run is idempotent (checksum + filename ledger).\n- Stream-read the file rather than loading it fully into memory.\n- Handle encoding detection (UTF-8 with/without BOM, common legacy encodings) and delimiter/quote/escape variance.\n- Validate each row against the schema from M1.1; route invalid rows to a quarantine table with the reason and raw line, and continue the run.\n- Emit run metrics: rows read, rows accepted, rows quarantined, duration.\n\nDeliverable: ingestion module + CLI/job entry point + unit tests for encoding, malformed rows and idempotent re-run.\nDone when: pointing it at the fixture files produces the same accepted/quarantined counts on two consecutive runs.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "83bccfc5-d40e-4da9-b9b9-3bebbcaa0134",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:14.632Z",
+      "updatedAt": "2026-11-01T12:43:14.632Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "customer-data",
+        "ingestion",
+        "etl"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "1defdb88-ca68-4787-a5a2-a64a8c79b94c",
+      "name": "M1.3 Implement cleaning, dedup & normalization transforms",
+      "details": "Pure, unit-testable transforms applied after schema validation.\n\nScope:\n- Trim/collapse whitespace, normalize unicode, fix casing conventions.\n- Parse dates into ISO-8601 UTC, with the mixed-format rules captured in M1.1; reject rather than guess when ambiguous.\n- Coerce numerics/currency with locale handling; record what was coerced.\n- Normalize country/state to ISO codes, emails to lowercase (hash happens in M1.4).\n- Deduplicate: define the business key (e.g. customer_id) and a survivorship rule for conflicting duplicate rows (most recent updated_at wins, tie-break by source priority).\n- Attach lineage columns: source_file, ingested_at, row_hash.\n\nDeliverable: transforms package with one test per rule, including a duplicate-conflict case.\nDone when: a fixture set containing duplicates, bad dates and mixed casing yields the expected canonical output.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "83bccfc5-d40e-4da9-b9b9-3bebbcaa0134",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:14.635Z",
+      "updatedAt": "2026-11-01T12:43:28.463Z",
+      "dependsOn": [
+        "11e412b9-390e-4c4c-a3b0-91bf26941739",
+        "ea316a4f-4e30-4e97-8b62-e9cef1dc86ef"
+      ],
+      "priority": 9,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "customer-data",
+        "transform",
+        "data-quality"
+      ],
+      "estimatedHours": 20,
+      "level": 1
+    },
+    {
+      "id": "9ccb75db-5213-406d-a032-f09f0c9ede9a",
+      "name": "M1.4 Enforce PII masking & retention rules",
+      "details": "Make analytics-accessible customer data PII-safe by construction.\n\nScope:\n- Using the PII classification from M1.1, define handling per field: drop, hash (salted, non-reversible), tokenize, or partial mask (e.g. j***@domain).\n- Apply masking BEFORE the load step so raw values never reach analytics tables; raw landing zone keeps original files with restricted access and a documented TTL.\n- Add a guard test that fails the build if a known PII column name appears unmasked in an analytics table schema.\n- Document retention: how long raw files are kept, how deletion requests propagate to processed tables.\n\nDeliverable: masking module + policy doc + guard test.\nDone when: the guard test proves no unmasked PII column can reach the analytics schema, and a sample deletion request is traceable end-to-end.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "83bccfc5-d40e-4da9-b9b9-3bebbcaa0134",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:14.637Z",
+      "updatedAt": "2026-11-01T12:43:28.464Z",
+      "dependsOn": [
+        "11e412b9-390e-4c4c-a3b0-91bf26941739",
+        "1defdb88-ca68-4787-a5a2-a64a8c79b94c"
+      ],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "customer-data",
+        "pii",
+        "compliance",
+        "security"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "cbe58c69-547f-47f7-b8d7-8614208c7f57",
+      "name": "M1.5 Build data quality validation suite",
+      "details": "Post-load checks that run on every load and publish results as metrics.\n\nChecks to implement:\n- Schema drift: expected columns/types vs actual.\n- Volumetrics: row count within +/- X% of trailing 7-day average.\n- Uniqueness of business key; null rate per critical column under threshold.\n- Freshness: max(ingested_at) within SLA window.\n- Referential sanity for any lookup/enum columns.\n\nBehaviour: critical failures block promotion of the partition and alert; warnings are recorded only.\nDeliverable: checks config (declarative) + runner + results table.\nDone when: deliberately corrupted fixture data triggers each check exactly once with a clear message.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "83bccfc5-d40e-4da9-b9b9-3bebbcaa0134",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:14.639Z",
+      "updatedAt": "2026-11-01T12:43:28.466Z",
+      "dependsOn": [
+        "1defdb88-ca68-4787-a5a2-a64a8c79b94c"
+      ],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "customer-data",
+        "data-quality",
+        "testing"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "08d80418-0fe9-4db5-930b-5121716de734",
+      "name": "M1.6 Load processed data into partitioned warehouse tables",
+      "details": "Write the cleaned, masked dataset to its analytics home.\n\nScope:\n- Define target table DDL (customer_current + partitioned history), types aligned to M1.1.\n- Choose partitioning (by ingest date) and clustering keys based on the dashboard's actual filter patterns (M4.1 will confirm; use customer_id + segment as a starting assumption).\n- Load strategy: atomic partition swap or MERGE on business key so readers never see partial data.\n- Add table/column descriptions and a small data dictionary.\n\nDeliverable: DDL scripts (versioned) + load step + a query that shows partition pruning is effective on a typical dashboard filter.\nDone when: a load creates one new partition, existing partitions are untouched, and a date-filtered sample query scans only the target partition.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "83bccfc5-d40e-4da9-b9b9-3bebbcaa0134",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:14.640Z",
+      "updatedAt": "2026-11-01T12:43:38.134Z",
+      "dependsOn": [
+        "ea316a4f-4e30-4e97-8b62-e9cef1dc86ef",
+        "1defdb88-ca68-4787-a5a2-a64a8c79b94c",
+        "9ccb75db-5213-406d-a032-f09f0c9ede9a",
+        "cbe58c69-547f-47f7-b8d7-8614208c7f57"
+      ],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "customer-data",
+        "warehouse",
+        "etl"
+      ],
+      "estimatedHours": 14,
+      "level": 1
+    },
+    {
+      "id": "7daa76ef-359f-4dc6-8639-d8471a1613a7",
+      "name": "M2.1 Inventory log sources & define log format spec",
+      "details": "Short discovery task so parsing work is not guesswork.\n\nProduce a table of every application log stream: service name, file path / stream, format (JSON lines, plaintext, syslog, framework default), rotation & retention, volume per day, timezone of timestamps, and owning team.\n\nThen capture 20-30 real sample lines per format (redacted of secrets/tokens) and write a format spec: field name, type, nullability, example, extraction approach (native JSON field vs regex named group).\n\nDeliverable: log-sources.md + sample fixture file per format.\nDone when: each format has at least one sample and every field the dashboard needs is mapped to a source field.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "e518c955-a283-4ac4-af89-9d94e8bfa32a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:28.452Z",
+      "updatedAt": "2026-11-01T12:43:28.452Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 3,
+      "status": "in-progress",
+      "tags": [
+        "log-analysis",
+        "discovery",
+        "documentation"
+      ],
+      "estimatedHours": 6,
+      "level": 1
+    },
+    {
+      "id": "0fead882-0148-459a-a7b0-466922101266",
+      "name": "M2.2 Build log ingestion job with historical backfill",
+      "details": "Move log files/lines into the store the pipeline reads from.\n\nScope:\n- Two modes: (a) incremental tail of new lines from the current offset (b) backfill over a date range of archived files.\n- Track per-source offsets/watermarks so restarts neither duplicate nor skip records; write partition-by-hour so late-arriving lines are handled.\n- Compress on write and drop obvious noise (health-check spam) at ingest with a documented filter list.\n- Backpressure: cap ingest rate so a large backfill does not starve the live path.\n\nDeliverable: ingest job with both modes + checkpoint store + tests for restart-mid-file and duplicate delivery.\nDone when: killing the job mid-file and restarting produces no lost lines and no duplicates on the backfill range.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "e518c955-a283-4ac4-af89-9d94e8bfa32a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:28.454Z",
+      "updatedAt": "2026-11-01T12:43:38.137Z",
+      "dependsOn": [
+        "7daa76ef-359f-4dc6-8639-d8471a1613a7"
+      ],
+      "priority": 9,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "ingestion",
+        "etl"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "a881cac7-b963-42db-a386-1029fe4893a1",
+      "name": "M2.3 Implement log parser & field extraction",
+      "details": "Turn raw log lines into a typed record per the M2.1 format spec.\n\nScope:\n- Per-format parsers (JSON lines passthrough, regex/Grok for plaintext) emitting a common record: timestamp (UTC), level, service, host, endpoint/route, status_code, duration_ms, trace_id, message, raw.\n- Multi-line stack traces grouped with their parent error line.\n- Unparseable lines go to a parse-failure sample table with a counter, never silently dropped.\n- Track parse success rate per source as a metric.\n\nDeliverable: parser modules + per-format unit tests (happy path, malformed line, multiline stack trace, timezone edge case).\nDone when: fixture samples from every source parse at >=99% success and a deliberately broken line is counted, not lost.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "e518c955-a283-4ac4-af89-9d94e8bfa32a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:28.456Z",
+      "updatedAt": "2026-11-01T12:43:38.139Z",
+      "dependsOn": [
+        "7daa76ef-359f-4dc6-8639-d8471a1613a7",
+        "0fead882-0148-459a-a7b0-466922101266"
+      ],
+      "priority": 9,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "parsing",
+        "etl"
+      ],
+      "estimatedHours": 18,
+      "level": 1
+    },
+    {
+      "id": "85d14643-566c-4408-aac8-0aa3e15aae3d",
+      "name": "M2.4 Build pre-aggregated reliability metrics tables",
+      "details": "Pre-compute the numbers the dashboard renders, at 1-minute and 1-hour granularity.\n\nMetrics per service + endpoint + status class:\n- Request count, error count, error rate (5xx, 4xx separately).\n- Latency percentiles p50/p95/p99 from duration_ms (document the percentile method - exact vs t-digest - and its error bound).\n- Unique trace count, top error messages (normalized, top 20).\n\nImplementation: incremental rollup job over hourly partitions, idempotent per (date, hour, service) so a re-run overwrites cleanly.\nDeliverable: rollup job + DDL + a validation query comparing rollup counts to raw counts for a sample day (<0.5% drift).\nDone when: dashboard-typical queries hit only the rollup tables and return in under 2s on realistic volume.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "e518c955-a283-4ac4-af89-9d94e8bfa32a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:28.457Z",
+      "updatedAt": "2026-11-01T12:43:38.141Z",
+      "dependsOn": [
+        "a881cac7-b963-42db-a386-1029fe4893a1"
+      ],
+      "priority": 9,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "metrics",
+        "aggregation"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "be795937-3aae-4f79-9018-84fdffb08370",
+      "name": "M2.5 Add anomaly detection for error-rate & latency spikes",
+      "details": "Flag deviations worth a human look, without drowning the team in noise.\n\nScope:\n- Baseline per service/endpoint using a rolling 7-day same-weekday-hour profile (seasonality-aware).\n- Detect: error-rate above baseline + N sigma, p95 latency above baseline, and sudden zero-traffic (service down signal).\n- Severity levels + minimum-duration guard (e.g. must hold 5 minutes) to suppress single-minute blips.\n- Output to an anomalies table: window, metric, observed vs expected, severity, contributing dimensions.\n- Tunable thresholds in config, not code.\n\nDeliverable: detector job + backtest report over 30 days of history showing flagged windows and a rough false-positive rate.\nDone when: backtest correctly flags at least one known past incident and the FP rate is judged acceptable by the team.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "e518c955-a283-4ac4-af89-9d94e8bfa32a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:28.459Z",
+      "updatedAt": "2026-11-01T12:43:38.143Z",
+      "dependsOn": [
+        "85d14643-566c-4408-aac8-0aa3e15aae3d"
+      ],
+      "priority": 7,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "anomaly-detection",
+        "metrics"
+      ],
+      "estimatedHours": 20,
+      "level": 1
+    },
+    {
+      "id": "2acfa129-c10a-4243-acca-2f02b1ef2229",
+      "name": "M2.6 Implement log retention, sampling & cost controls",
+      "details": "Keep storage growth predictable.\n\nScope:\n- Tiering: hot (7-14 days, full detail), warm (90 days, rollups only), cold/archive (raw compressed, restore on request).\n- Sampling policy for very high-volume debug-level lines (keep all WARN/ERROR; sample INFO/DEBUG at a documented rate with trace_id-aware keeping).\n- Enforce retention with a scheduled cleanup job and a dry-run mode.\n- Publish storage bytes by tier and by service so cost is visible.\n\nDeliverable: retention config + cleanup job + cost visibility query.\nDone when: dry-run over current data shows exactly which partitions would expire, and no query in the dashboard reads data older than the hot/warm boundaries without falling back to archive.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "e518c955-a283-4ac4-af89-9d94e8bfa32a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:28.461Z",
+      "updatedAt": "2026-11-01T12:43:38.145Z",
+      "dependsOn": [
+        "7daa76ef-359f-4dc6-8639-d8471a1613a7"
+      ],
+      "priority": 6,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "cost",
+        "retention"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "f70d33b2-d763-4508-998e-f0b810d4caa2",
+      "name": "M3.1 Define query API contract & error model",
+      "details": "Specify the interface before building it, driven by the views the dashboard needs.\n\nEndpoints to specify (read-only): KPIs summary, customer segment breakdown, customer cohort/funnel, log time-series (metric + interval + filters), log explorer search, anomaly list.\n\nFor each: query params (date range, interval, segment, service, endpoint, severity, pagination cursor), response shape with units and nullability, max ranges allowed, and a consistent error envelope (code, message, details, request_id).\n\nDeliverable: OpenAPI spec (or equivalent) + example payloads + a shared generated client/types for the frontend.\nDone when: frontend and backend agree on the spec and a mock server serving the examples unblocks M4 work.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "8fa5c5b1-cf9c-4c6a-9998-afcb14042800",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:38.146Z",
+      "updatedAt": "2026-11-01T12:43:38.146Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 4,
+      "status": "in-progress",
+      "tags": [
+        "api",
+        "contract",
+        "documentation"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "4b9046ed-e863-41a1-b13d-9460977d21d2",
+      "name": "M3.2 Implement query service with caching",
+      "details": "Implement the read path behind the API contract, using the M1.6 customer tables and M2.4 rollups.\n\nScope:\n- Parameterized queries only (no string-built SQL); one handler per endpoint in M3.1.\n- Always push date-range filters into the partition key so queries prune.\n- Cache: short-TTL (30-60s) response cache keyed by normalized query, plus a longer TTL for historic (closed) periods; explicit invalidation hook when a new partition loads.\n- Structured logging of query duration, rows scanned, cache hit/miss.\n\nDeliverable: service + integration tests against fixture warehouse + a simple load test (e.g. 20 rps for 5 minutes).\nDone when: p95 latency is under target at the expected concurrency and repeated identical requests hit the cache.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "8fa5c5b1-cf9c-4c6a-9998-afcb14042800",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:38.148Z",
+      "updatedAt": "2026-11-01T12:43:50.378Z",
+      "dependsOn": [
+        "f70d33b2-d763-4508-998e-f0b810d4caa2",
+        "08d80418-0fe9-4db5-930b-5121716de734",
+        "85d14643-566c-4408-aac8-0aa3e15aae3d"
+      ],
+      "priority": 8,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "api",
+        "backend",
+        "performance"
+      ],
+      "estimatedHours": 18,
+      "level": 1
+    },
+    {
+      "id": "a61ae843-95a1-4414-8d11-d55d03a3ec0b",
+      "name": "M3.3 Implement authentication & row-level authorization",
+      "details": "Ensure a viewer only sees customer data they are entitled to.\n\nScope:\n- Integrate with the existing identity provider (session/token validation, no bespoke password store).\n- Role model: viewer (aggregates only), analyst (row-level detail within their region/segment), admin.\n- Enforce row-level scoping in the query layer (mandatory filter injection), not in the UI.\n- Deny-by-default tests: a viewer requesting detail rows gets 403; an analyst scoped to region A cannot retrieve region B rows even with a hand-crafted request.\n\nDeliverable: auth middleware + policy definitions + authorization test suite.\nDone when: the negative tests pass and no endpoint returns unscoped customer rows.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "8fa5c5b1-cf9c-4c6a-9998-afcb14042800",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:38.149Z",
+      "updatedAt": "2026-11-01T12:43:50.381Z",
+      "dependsOn": [
+        "f70d33b2-d763-4508-998e-f0b810d4caa2",
+        "9ccb75db-5213-406d-a032-f09f0c9ede9a"
+      ],
+      "priority": 9,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "api",
+        "security",
+        "authorization"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "66039926-925f-4a9b-9282-73da586d9d11",
+      "name": "M3.4 Add rate limiting & query cost guards",
+      "details": "Protect the warehouse from expensive or abusive requests.\n\nScope:\n- Per-user and per-IP rate limits with sensible burst allowance; 429 with Retry-After.\n- Cost guards: hard max date range per endpoint, max rows/pages, statement timeout, and a scan-bytes ceiling that rejects rather than runs.\n- Anomalous-usage logging (one user issuing many heavy queries) with an alert.\n- Config-driven limits so they can be tuned without a deploy.\n\nDeliverable: middleware/config + tests that a too-wide range and a too-large page are rejected with clear errors.\nDone when: guard tests pass and a documented \"cost of a typical dashboard session\" figure exists.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "8fa5c5b1-cf9c-4c6a-9998-afcb14042800",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:38.150Z",
+      "updatedAt": "2026-11-01T12:43:50.383Z",
+      "dependsOn": [
+        "4b9046ed-e863-41a1-b13d-9460977d21d2"
+      ],
+      "priority": 6,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "api",
+        "cost",
+        "reliability"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "8994102b-e3a8-404d-8588-022c54ae2a52",
+      "name": "M4.1 Write KPI catalog & dashboard information architecture",
+      "details": "Agree what the dashboard answers before drawing charts.\n\nDeliver:\n- 8-12 KPIs with exact formula, grain, source table/column, filters applied, and known caveats. Example: Active customers (30d), New customers, Churn-risk count, Revenue per segment, Error rate (5xx %), p95 latency, Requests/min, Open anomalies.\n- For each KPI: owner, target/threshold, and how it should be displayed (number + trend, sparkline, gauge).\n- Page layout IA: which cards sit where, default date range, default filters, and the drill-down path from each KPI.\n\nDeliverable: kpi-catalog.md + wireframe (low-fi is fine).\nDone when: a stakeholder confirms the definitions and no two KPIs compute the same name differently.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:50.385Z",
+      "updatedAt": "2026-11-01T12:43:50.385Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 4,
+      "status": "in-progress",
+      "tags": [
+        "visualization",
+        "discovery",
+        "metrics"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "25b20e93-92cb-4007-8ca7-d6f4fe40bf81",
+      "name": "M4.2 Build chart primitives & design tokens",
+      "details": "Foundation components every view reuses, so we build each chart once.\n\nScope:\n- Tokens: color palette (categorical + sequential, contrast-checked), typography scale, spacing, elevation.\n- Wrappers: <ChartFrame> (title, subtitle, loading, empty, error states, download CSV), <TimeSeriesChart>, <BarBreakdown>, <DataTable>, <TrendDelta>.\n- Consistent number formatting (compact, thousands separators, %, ms) and timezone-aware axis labels.\n- Loading/empty/error state built into each primitive so no view invents its own.\n\nDeliverable: component library entries + a small storybook/gallery page rendering each with fixture data.\nDone when: all primitives render in isolation with the four states (loading, empty, error, data) and pass contrast checks.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:50.387Z",
+      "updatedAt": "2026-11-01T12:44:01.230Z",
+      "dependsOn": [
+        "8994102b-e3a8-404d-8588-022c54ae2a52"
+      ],
+      "priority": 8,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "components"
+      ],
+      "estimatedHours": 20,
+      "level": 1
+    },
+    {
+      "id": "abb4724e-5f19-4d1e-8f1e-ab63511db684",
+      "name": "M4.3 Build KPI summary tiles",
+      "details": "The top row of the dashboard: at-a-glance numbers from the KPI catalog.\n\nScope:\n- Tile rendering value + unit + delta vs previous period with direction-aware colouring (and an up/down arrow or sign, never colour alone).\n- Each tile fetches from the KPIs endpoint; partial failure shows a per-tile error, not a blank page.\n- Clicking a tile applies the corresponding filter/drill-down defined in M4.1.\n- Covers the 8-12 KPIs from M4.1 — if more than 12, split into primary row + secondary row rather than shrinking text.\n\nDeliverable: tile component + wiring to real API + tests for delta formatting and error isolation.\nDone when: tiles show correct numbers against a hand-verified fixture and survive an endpoint failure gracefully.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:50.389Z",
+      "updatedAt": "2026-11-01T12:44:01.231Z",
+      "dependsOn": [
+        "25b20e93-92cb-4007-8ca7-d6f4fe40bf81",
+        "4b9046ed-e863-41a1-b13d-9460977d21d2"
+      ],
+      "priority": 7,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "kpi"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "1faae357-4d3f-46d3-9e16-806cc96d845d",
+      "name": "M4.4 Build time-series exploration view",
+      "details": "The core charting surface for metrics over time.\n\nScope:\n- Metric selector (error rate, request count, p50/p95/p99 latency), interval selector (1m/1h/1d) with automatic downsampling when the range is too wide, and date-range picker.\n- Filters: service, endpoint, status class. Filters must be reflected in the URL so a view is shareable/bookmarkable.\n- Tooltip with exact values + timestamp in the viewer's timezone; brush-to-zoom on the x-axis.\n- Handle sparse/missing buckets explicitly (gap vs zero) and show a partial-data marker for the most recent incomplete interval.\n\nDeliverable: view component + URL state handling + tests for interval auto-selection and missing buckets.\nDone when: toggling filters produces shareable URLs and the chart renders correctly for 1h, 7d and 90d ranges.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:50.390Z",
+      "updatedAt": "2026-11-01T12:44:01.233Z",
+      "dependsOn": [
+        "25b20e93-92cb-4007-8ca7-d6f4fe40bf81",
+        "4b9046ed-e863-41a1-b13d-9460977d21d2"
+      ],
+      "priority": 8,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "charts"
+      ],
+      "estimatedHours": 18,
+      "level": 1
+    },
+    {
+      "id": "7a9837d3-7343-4e80-a9eb-e006024a25ef",
+      "name": "M4.5 Build customer segment & cohort breakdown views",
+      "details": "The customer-data half of the dashboard, built on the M1.6 tables.\n\nScope:\n- Segment breakdown: customers/revenue by segment, region, plan; sortable bar/table with % of total.\n- Cohort view: signup-month cohorts with retention by period (month 0..N); render as a heatmap-style table with accessible text values.\n- Funnel: signup -> activated -> active step counts with drop-off percentages (definition of each step taken from M4.1 and written on the card).\n- Small-cohort suppression: cells below a threshold (e.g. n<10) are masked so individuals can't be inferred.\n\nDeliverable: two views + tests for percentage math and small-cell suppression.\nDone when: totals reconcile with a SQL cross-check and no cell below the suppression threshold is displayed.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:43:50.391Z",
+      "updatedAt": "2026-11-01T12:44:01.235Z",
+      "dependsOn": [
+        "8994102b-e3a8-404d-8588-022c54ae2a52",
+        "25b20e93-92cb-4007-8ca7-d6f4fe40bf81",
+        "4b9046ed-e863-41a1-b13d-9460977d21d2"
+      ],
+      "priority": 7,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "customer-data"
+      ],
+      "estimatedHours": 14,
+      "level": 1
+    },
+    {
+      "id": "b846d238-6d9f-4adf-8172-445d36a7852a",
+      "name": "M4.6 Build log explorer & error drill-down view",
+      "details": "Where someone investigating an incident actually works.\n\nScope:\n- Faceted search over parsed logs: service, level, time range, endpoint, status, free-text query on message; result count shown before running heavy queries.\n- Paginated/cursor results with virtualized rows (no thousands of DOM nodes).\n- Row expansion shows full message + grouped stack trace + trace_id link-out.\n- \"Copy permalink\" that reproduces the exact query and range.\n- Guardrails: queries outside the retention window or too broad are rejected with a clear message and a one-click \"narrow to last hour\" suggestion.\n\nDeliverable: explorer view + virtualized table + tests for query serialization and permalink round-trip.\nDone when: a p95-loading search over 7 days of fixture logs stays responsive and permalinks restore identical results.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:01.220Z",
+      "updatedAt": "2026-11-01T12:44:17.807Z",
+      "dependsOn": [
+        "25b20e93-92cb-4007-8ca7-d6f4fe40bf81",
+        "4b9046ed-e863-41a1-b13d-9460977d21d2",
+        "66039926-925f-4a9b-9282-73da586d9d11"
+      ],
+      "priority": 8,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "log-analysis"
+      ],
+      "estimatedHours": 18,
+      "level": 1
+    },
+    {
+      "id": "47bb56da-c3bb-413c-9c80-3a26b5e5d8c1",
+      "name": "M4.7 Build anomaly panel & alert timeline",
+      "details": "Surface the M2.5 anomalies in the UI so they are actionable rather than a table nobody reads.\n\nScope:\n- Timeline/list of anomalies: severity badge, metric, window, observed vs expected (e.g. \"error rate 4.2% vs 0.3% expected\"), affected service/endpoint.\n- Each item expands to a pre-filtered link into the time-series view and log explorer for that window.\n- Filter by severity and service; acknowledge/snooze an anomaly (state stored, not just local).\n- Empty state that says \"no anomalies in this range\" with the detection windows listed, so silence is interpretable.\n\nDeliverable: panel component + acknowledge API call + tests for severity sorting and empty state.\nDone when: a seeded anomaly from the backtest appears with correct links and can be acknowledged.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:01.222Z",
+      "updatedAt": "2026-11-01T12:44:17.811Z",
+      "dependsOn": [
+        "25b20e93-92cb-4007-8ca7-d6f4fe40bf81",
+        "be795937-3aae-4f79-9018-84fdffb08370"
+      ],
+      "priority": 6,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "anomaly-detection"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "42f2a55d-ca0b-4efc-93de-2f4f49a1dd88",
+      "name": "M4.8 Compose dashboard page, layout & responsive behaviour",
+      "details": "Assemble the views into the actual page and make the global controls work.\n\nScope:\n- Global filter bar (date range, segment, service) that all cards subscribe to, with a single source of truth in URL state.\n- Grid layout per the M4.1 wireframe: KPI row, time-series, customer breakdown/cohort, log explorer, anomaly panel.\n- Responsive breakpoints: cards stack, charts get minimum sensible height, tables scroll horizontally rather than crushing columns.\n- Per-card loading skeletons and independent error boundaries so one slow endpoint does not blank the page.\n- Save/restore a \"view\" preset (the filter combination) and a reset-to-defaults control.\n\nDeliverable: composed page + filter bar + layout tests at 3 breakpoints (sm/md/lg).\nDone when: changing a global filter updates every subscribed card, and a single failing card leaves the rest of the page usable.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:01.224Z",
+      "updatedAt": "2026-11-01T12:44:17.814Z",
+      "dependsOn": [
+        "abb4724e-5f19-4d1e-8f1e-ab63511db684",
+        "1faae357-4d3f-46d3-9e16-806cc96d845d",
+        "7a9837d3-7343-4e80-a9eb-e006024a25ef",
+        "b846d238-6d9f-4adf-8172-445d36a7852a",
+        "47bb56da-c3bb-413c-9c80-3a26b5e5d8c1"
+      ],
+      "priority": 7,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "frontend",
+        "layout"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "d10e7878-3af9-4a9a-814d-ac89fa7d54ce",
+      "name": "M4.9 Run accessibility review & fix WCAG AA issues",
+      "details": "Make the dashboard usable with keyboard and screen reader.\n\nChecklist to verify and fix:\n- Every interactive control (range picker, metric selector, filters, table sort) reachable and operable by keyboard with visible focus.\n- Charts have a text alternative: an adjacent collapsible data table and an aria-describedby summary (\"error rate peaked 4.2% at 14:05\").\n- Colour is never the only signal (delta arrows, severity labels, patterns/shapes for categorical series).\n- Contrast >= 4.5:1 for text, >= 3:1 for UI/graphical objects; verify palette from M4.2.\n- Form labels, landmark regions, page title, and logical heading order; table headers properly scoped.\n\nDeliverable: audit notes + fixes + automated axe check in CI with a documented allowlist (empty preferred).\nDone when: keyboard-only walkthrough of every view completes without traps and axe reports no serious/critical issues.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:01.226Z",
+      "updatedAt": "2026-11-01T12:44:17.818Z",
+      "dependsOn": [
+        "42f2a55d-ca0b-4efc-93de-2f4f49a1dd88"
+      ],
+      "priority": 6,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "accessibility",
+        "frontend"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "d32494bf-d44f-4cc8-9f6e-333624265c8c",
+      "name": "M4.10 Tune frontend performance with realistic data volumes",
+      "details": "Make sure the dashboard is still usable beyond the demo dataset.\n\nScope:\n- Define a realistic load profile (e.g. 500k customer rows, 30 days of logs at production rate) and a synthetic generator/fixture at that scale.\n- Measure: initial load, time-to-interactive, chart render, explorer pagination latency.\n- Fix the top offenders only (code-split heavy chart libs, paginate/virtualize, memoize transforms, debounce filters, downsample series client-side when >N points).\n- Set a performance budget and record before/after numbers so regressions are visible.\n\nDeliverable: perf report + budget config in CI + applied fixes.\nDone when: each measured path meets the budget (or the exception is documented and accepted).",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "4400b771-92f7-4c12-997a-ee194aec504a",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:01.228Z",
+      "updatedAt": "2026-11-01T12:44:17.821Z",
+      "dependsOn": [
+        "42f2a55d-ca0b-4efc-93de-2f4f49a1dd88"
+      ],
+      "priority": 5,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "visualization",
+        "performance",
+        "frontend"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "b76a0f5e-8bf1-4a65-aef7-a8128bd38227",
+      "name": "M5.1 Create deterministic test fixtures & seed data",
+      "details": "Shared fixtures everything else tests against, so results are reproducible.\n\nDeliver:\n- Customer CSVs: a clean small set (~50 rows), plus adversarial variants — duplicate customers with conflicting rows, bad dates, mixed encodings, missing required field, extra unknown column, empty file.\n- Log fixtures: 20-30 lines per supported format, including a malformed line, a multi-line stack trace, and a timezone/DST boundary case.\n- A synthetic generator for volume tests (parameterized row count / log rate) with a fixed seed.\n- Fixtures live in the repo under a documented path; no PII — all values fake but realistically shaped.\n\nDone when: `make fixtures` (or equivalent) regenerates byte-identical output and every test in M5.2/M5.3 consumes these instead of ad-hoc data.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "162d2b2d-bada-442d-97eb-b2dad6432b8e",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:12.127Z",
+      "updatedAt": "2026-11-01T12:44:12.127Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 3,
+      "status": "in-progress",
+      "tags": [
+        "qa",
+        "testing",
+        "fixtures"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "4159941e-4cd9-4e38-b31a-140bbf44bbde",
+      "name": "M5.2 Unit tests for transforms & parsers",
+      "details": "Close the loop on the pure-logic layer (M1.3 transforms, M2.3 parsers, M1.4 masking).\n\nScope:\n- One test per documented rule; table-driven where possible (input row -> expected output row).\n- Masking tests assert the PII value cannot be recovered and that hashes are salted/stable per tenant.\n- Parser tests cover each format's happy path plus the malformed/multiline/DST cases from M5.1.\n- Assert on failure messages, not just pass/fail, so debugging is fast.\n\nTarget: >=80% line coverage on the transform/parser packages; coverage reported in CI but no blanket enforcement on UI code.\nDone when: the suite runs in under 2 minutes locally and a deliberately introduced bug in a transform is caught.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "162d2b2d-bada-442d-97eb-b2dad6432b8e",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:12.130Z",
+      "updatedAt": "2026-11-01T12:44:22.110Z",
+      "dependsOn": [
+        "b76a0f5e-8bf1-4a65-aef7-a8128bd38227",
+        "1defdb88-ca68-4787-a5a2-a64a8c79b94c",
+        "a881cac7-b963-42db-a386-1029fe4893a1",
+        "9ccb75db-5213-406d-a032-f09f0c9ede9a"
+      ],
+      "priority": 7,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "qa",
+        "testing",
+        "unit-tests"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "1ebb352c-ef1a-413f-acc4-f792aa7c817b",
+      "name": "M5.3 Write integration & end-to-end pipeline tests",
+      "details": "Prove the pieces work together, not just in isolation.\n\nScenarios (each with fixture input and asserted output):\n1. CSV fixture -> ingest -> transform -> mask -> load -> API returns expected aggregates and zero unmasked PII.\n2. Log fixture -> ingest -> parse -> rollup -> API returns expected error rate and p95.\n3. Re-running any stage twice produces identical results (idempotency).\n4. Bad-row path: invalid CSV rows are quarantined and the run still succeeds with correct counts.\n5. Authz: viewer/analyst scoping enforced through the full stack.\n\nRun against an ephemeral/local warehouse (containerized) so anyone can run it; seed via M5.1 fixtures.\nDone when: all five scenarios pass in a clean checkout with one command.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "162d2b2d-bada-442d-97eb-b2dad6432b8e",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:12.132Z",
+      "updatedAt": "2026-11-01T12:44:22.113Z",
+      "dependsOn": [
+        "b76a0f5e-8bf1-4a65-aef7-a8128bd38227",
+        "08d80418-0fe9-4db5-930b-5121716de734",
+        "85d14643-566c-4408-aac8-0aa3e15aae3d",
+        "4b9046ed-e863-41a1-b13d-9460977d21d2",
+        "a61ae843-95a1-4414-8d11-d55d03a3ec0b"
+      ],
+      "priority": 8,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "qa",
+        "testing",
+        "integration"
+      ],
+      "estimatedHours": 16,
+      "level": 1
+    },
+    {
+      "id": "68f9006b-5d75-489a-a9a0-3caa11451b27",
+      "name": "M5.4 Set up CI pipeline (lint, typecheck, tests, build)",
+      "details": "A single required check that gates merges.\n\nPipeline stages, in order and fast-failing: format/lint -> typecheck -> unit tests -> integration tests (containerized warehouse) -> build artifacts -> accessibility check (axe) -> schema/PII guard test.\n\nScope:\n- Cache dependencies; target under 10 minutes total.\n- Upload test reports/coverage as artifacts; surface flaky tests explicitly rather than retrying silently.\n- Branch protection: pipeline must pass before merge to main.\n\nDone when: a PR with a deliberate lint error, a failing unit test and a PII-guard violation is blocked at the right stage with a clear message.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "162d2b2d-bada-442d-97eb-b2dad6432b8e",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:12.133Z",
+      "updatedAt": "2026-11-01T12:44:22.115Z",
+      "dependsOn": [
+        "4159941e-4cd9-4e38-b31a-140bbf44bbde",
+        "1ebb352c-ef1a-413f-acc4-f792aa7c817b"
+      ],
+      "priority": 7,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "ci",
+        "devops",
+        "qa"
+      ],
+      "estimatedHours": 14,
+      "level": 1
+    },
+    {
+      "id": "5f1cd5f6-99cb-4891-861f-ace4458f3ceb",
+      "name": "M5.5 Set up staging & production deployment with rollback",
+      "details": "Ship safely and reversibly.\n\nScope:\n- Environments: staging (auto-deploy on merge to main, seeded with fixtures) and production (manual approval gate).\n- Deploy units: warehouse DDL migrations, pipeline jobs (scheduled), query API, frontend. Each independently deployable; migrations run forward-only with a tested rollback or a documented compensating step.\n- Smoke test post-deploy: hit key API endpoints, assert non-empty KPI response and no auth bypass.\n- Rollback: one command/button to return to the previous version; document the data implications (do not roll back destructive migrations blindly).\n\nDone when: a staged release can be deployed and rolled back to the prior version in staging with data intact, and the production approval gate is enforced.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "162d2b2d-bada-442d-97eb-b2dad6432b8e",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:12.136Z",
+      "updatedAt": "2026-11-01T12:44:22.116Z",
+      "dependsOn": [
+        "68f9006b-5d75-489a-a9a0-3caa11451b27"
+      ],
+      "priority": 7,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "cd",
+        "devops",
+        "release"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "1b2bc3bb-7b5d-4a40-8906-1311e3bdc8ee",
+      "name": "M5.6 Add monitoring & alerting for pipelines and API",
+      "details": "Know when it breaks before a stakeholder tells you.\n\nScope:\n- Metrics: job success/failure/duration per pipeline stage, rows/quarantined counts, freshness lag, API error rate + p95 latency, cache hit rate, query cost per day.\n- Alerts (with runbook link in the alert body): pipeline failed, freshness SLA breached, data-quality critical failure, API error rate above threshold, cost anomaly.\n- A small operations dashboard reusing the M4.2 primitives (dogfooding the components).\n- Alert routing: one on-call channel; no silent-only-log alerts.\n\nDone when: a forced pipeline failure and a forced freshness breach both page the on-call channel within the expected window, and each alert links to the relevant runbook section.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "162d2b2d-bada-442d-97eb-b2dad6432b8e",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:12.137Z",
+      "updatedAt": "2026-11-01T12:44:22.118Z",
+      "dependsOn": [
+        "5f1cd5f6-99cb-4891-861f-ace4458f3ceb"
+      ],
+      "priority": 6,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "operations",
+        "monitoring",
+        "alerting"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "c48f4d3b-87c6-486e-bb0f-6cfdaef60b0d",
+      "name": "M5.7 Write runbook, docs & handover",
+      "details": "Make the system operable and understood by someone who did not build it.\n\nContents:\n- Architecture diagram (sources -> landing -> transforms -> warehouse -> API -> UI) with the owner of each hop.\n- How to: add a new CSV source, add a new log format, add a KPI and its chart, change a retention policy.\n- Incident procedures: re-run a failed load, backfill a date range, restore from archive, revoke a user, roll back a release.\n- Data dictionary + PII map pointer, plus known limitations and \"what this dashboard does not measure\".\n- Handover session: walk through runbook with the receiving team and record gaps they find.\n\nDone when: someone not on the build team completes a dry-run of two incident procedures using only the docs, and the gaps found are fixed.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "162d2b2d-bada-442d-97eb-b2dad6432b8e",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:12.139Z",
+      "updatedAt": "2026-11-01T12:44:22.120Z",
+      "dependsOn": [
+        "5f1cd5f6-99cb-4891-861f-ace4458f3ceb",
+        "1b2bc3bb-7b5d-4a40-8906-1311e3bdc8ee"
+      ],
+      "priority": 6,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "documentation",
+        "operations",
+        "handover"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "3c5a252a-f838-4af0-b52b-803fb8f1d7f9",
+      "name": "M1.3a Normalize & type-cast customer fields",
+      "details": "First half of the transform work: turn validated strings into correct, canonical values.\n\nScope:\n- Whitespace/unicode cleanup and casing conventions (names, emails lowercased, country/state trimmed).\n- Date parsing to ISO-8601 UTC using only the formats listed in M1.1; ambiguous values raise a typed error rather than guessing.\n- Numeric/currency coercion with locale handling; emit a coercion record (field, raw value, parsed value) for audit.\n- Country/state to ISO-3166 codes; unknown values pass through flagged, never silently dropped.\n\nDeliverable: normalize module + table-driven tests per rule.\nDone when: a fixture row with mixed casing, a European decimal comma and a DD/MM/YYYY date comes out canonical, and an ambiguous date is rejected with a clear message.",
+      "projectId": "5d106290-cbcd-497e-b3e7-a8e32f9bae42",
+      "parentId": "1defdb88-ca68-4787-a5a2-a64a8c79b94c",
+      "completed": false,
+      "createdAt": "2026-11-01T12:44:40.589Z",
+      "updatedAt": "2026-11-01T12:44:40.589Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "customer-data",
+        "transform"
+      ],
+      "estimatedHours": 10,
+      "level": 2
+    }
+  ],
+  "subtasks": [],
+  "migration": {
+    "version": "1.8.1"
+  }
+}

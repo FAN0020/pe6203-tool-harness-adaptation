@@ -1,0 +1,269 @@
+{
+  "schema_version": "1.0",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "version": "late",
+  "tools": [
+    {
+      "tool_id": "wikipedia-mcp::search",
+      "server_id": "wikipedia-mcp",
+      "version": "early",
+      "name": "search",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search term for Wikipedia"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "wikipedia-mcp",
+        "tool_name": "search"
+      }
+    },
+    {
+      "tool_id": "wikipedia-mcp::readArticle",
+      "server_id": "wikipedia-mcp",
+      "version": "early",
+      "name": "readArticle",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the Wikipedia article to read"
+          },
+          "pageId": {
+            "type": "number",
+            "description": "The page ID of the Wikipedia article to read"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "wikipedia-mcp",
+        "tool_name": "readArticle"
+      }
+    },
+    {
+      "tool_id": "swiftipedia-mcp-server::get_symbol_details",
+      "server_id": "swiftipedia-mcp-server",
+      "version": "late",
+      "name": "get_symbol_details",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "description": "Get complete documentation for a specific symbol including description, parameters, return type, availability, and other canonical metadata. Use this when you want the authoritative symbol record; for a quicker combined summary that also bundles examples and relationships, use get_symbol_overview. For detailed exploration of relationships (protocols, inheritance, usage), use get_related_symbols. For resolving multiple symbols at once, use get_symbols_batch instead.",
+      "usage_rules": [
+        "Environment update: use this tool's current contract. Required arguments: path (string). A new or changed tool is optional unless its capability is needed by the request. Use this capability only for an unmet requirement. Reuse successful evidence of the needed fact or state instead of rechecking it through another tool. Optional capabilities do not add user requirements. Preserve necessary safety checks. Correct the underlying cause of a diagnostic; do not change stored data merely to silence the diagnostic.",
+        "Work within the existing turn and output limits. Group small independent calls only when their inputs are already known; await dependent results and keep arguments concise. Complete the required work and essential checks, then give a concise evidence-based final answer instead of reproducing full tool outputs. Do not add optional follow-up work."
+      ],
+      "output_schema": null,
+      "routing": {
+        "server_id": "swiftipedia-mcp-server",
+        "tool_name": "get_symbol_details"
+      }
+    },
+    {
+      "tool_id": "swiftipedia-mcp-server::get_examples",
+      "server_id": "swiftipedia-mcp-server",
+      "version": "late",
+      "name": "get_examples",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "description": "Get all code examples for a symbol. Returns Swift code snippets extracted from the documentation. Use this when you only need examples; for a single-call overview that also includes details and relationships, use get_symbol_overview.",
+      "usage_rules": [
+        "Environment update: use this tool's current contract. Required arguments: path (string). A new or changed tool is optional unless its capability is needed by the request. Use this capability only for an unmet requirement. Reuse successful evidence of the needed fact or state instead of rechecking it through another tool. Optional capabilities do not add user requirements. Preserve necessary safety checks. Correct the underlying cause of a diagnostic; do not change stored data merely to silence the diagnostic.",
+        "Work within the existing turn and output limits. Group small independent calls only when their inputs are already known; await dependent results and keep arguments concise. Complete the required work and essential checks, then give a concise evidence-based final answer instead of reproducing full tool outputs. Do not add optional follow-up work."
+      ],
+      "output_schema": null,
+      "routing": {
+        "server_id": "swiftipedia-mcp-server",
+        "tool_name": "get_examples"
+      }
+    },
+    {
+      "tool_id": "swiftipedia-mcp-server::browse_module",
+      "server_id": "swiftipedia-mcp-server",
+      "version": "late",
+      "name": "browse_module",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "enum": [
+              "swiftui",
+              "unionchat",
+              "uniontabview",
+              "unionkeychain"
+            ],
+            "description": "Module name. Required for module browsing and also used to scope text-based symbol search when query is provided."
+          },
+          "category": {
+            "type": "string",
+            "description": "Optional: filter by category (e.g. 'struct', 'protocol', 'method')"
+          },
+          "query": {
+            "type": "string",
+            "description": "Optional: text search query (e.g. 'Button', 'VStack alignment', 'List selection'). When provided, this tool returns symbol search results scoped to the selected module instead of a plain module listing."
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results (default: 50 for browsing, also used for query-based search)",
+            "default": 50
+          }
+        },
+        "required": [
+          "module"
+        ]
+      },
+      "description": "List symbols in a module or category, or perform text-based symbol discovery within a module. Useful for discovering available APIs before drilling into details, examples, relationships, or using the combined get_symbol_overview workflow. When query is provided, this tool also performs the former symbol search behavior and returns matching symbols using fuzzy name/description search.",
+      "usage_rules": [
+        "Environment update: use this tool's current contract. Required arguments: module (string). A new or changed tool is optional unless its capability is needed by the request. Use this capability only for an unmet requirement. Reuse successful evidence of the needed fact or state instead of rechecking it through another tool. Optional capabilities do not add user requirements. Preserve necessary safety checks. Correct the underlying cause of a diagnostic; do not change stored data merely to silence the diagnostic.",
+        "Work within the existing turn and output limits. Group small independent calls only when their inputs are already known; await dependent results and keep arguments concise. Complete the required work and essential checks, then give a concise evidence-based final answer instead of reproducing full tool outputs. Do not add optional follow-up work."
+      ],
+      "output_schema": null,
+      "routing": {
+        "server_id": "swiftipedia-mcp-server",
+        "tool_name": "browse_module"
+      }
+    },
+    {
+      "tool_id": "swiftipedia-mcp-server::get_related_symbols",
+      "server_id": "swiftipedia-mcp-server",
+      "version": "late",
+      "name": "get_related_symbols",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Symbol path (e.g. '/documentation/swiftui/view')"
+          },
+          "relationship_type": {
+            "type": "string",
+            "enum": [
+              "all",
+              "inherits",
+              "conforms",
+              "uses",
+              "used_by"
+            ],
+            "description": "Optional: filter by relationship type (default: 'all')",
+            "default": "all"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results (default: 20)",
+            "default": 20
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "description": "Discover symbols related to a given symbol through inheritance, protocol conformance, and usage relationships. Best for relationship-only exploration of the API graph; if you want details, examples, and relationships together in one response, use get_symbol_overview.",
+      "usage_rules": [
+        "Environment update: use this tool's current contract. Required arguments: path (string). A new or changed tool is optional unless its capability is needed by the request. Use this capability only for an unmet requirement. Reuse successful evidence of the needed fact or state instead of rechecking it through another tool. Optional capabilities do not add user requirements. Preserve necessary safety checks. Correct the underlying cause of a diagnostic; do not change stored data merely to silence the diagnostic.",
+        "Work within the existing turn and output limits. Group small independent calls only when their inputs are already known; await dependent results and keep arguments concise. Complete the required work and essential checks, then give a concise evidence-based final answer instead of reproducing full tool outputs. Do not add optional follow-up work."
+      ],
+      "output_schema": null,
+      "routing": {
+        "server_id": "swiftipedia-mcp-server",
+        "tool_name": "get_related_symbols"
+      }
+    },
+    {
+      "tool_id": "swiftipedia-mcp-server::get_symbol_overview",
+      "server_id": "swiftipedia-mcp-server",
+      "version": "late",
+      "name": "get_symbol_overview",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Symbol path (e.g. '/documentation/swiftui/button')"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "description": "Get a consolidated overview for a specific symbol by combining the core details, code examples, and related symbols into one response. Use this for fast single-symbol exploration when you want a balanced summary without making multiple tool calls.",
+      "usage_rules": [
+        "Environment update: use this tool's current contract. Required arguments: path (string). A new or changed tool is optional unless its capability is needed by the request. Use this capability only for an unmet requirement. Reuse successful evidence of the needed fact or state instead of rechecking it through another tool. Optional capabilities do not add user requirements. Preserve necessary safety checks. Correct the underlying cause of a diagnostic; do not change stored data merely to silence the diagnostic.",
+        "Work within the existing turn and output limits. Group small independent calls only when their inputs are already known; await dependent results and keep arguments concise. Complete the required work and essential checks, then give a concise evidence-based final answer instead of reproducing full tool outputs. Do not add optional follow-up work."
+      ],
+      "output_schema": null,
+      "routing": {
+        "server_id": "swiftipedia-mcp-server",
+        "tool_name": "get_symbol_overview"
+      }
+    },
+    {
+      "tool_id": "swiftipedia-mcp-server::get_symbols_batch",
+      "server_id": "swiftipedia-mcp-server",
+      "version": "late",
+      "name": "get_symbols_batch",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of symbol paths (e.g. ['/documentation/swiftui/button', '/documentation/swiftui/text'])"
+          }
+        },
+        "required": [
+          "paths"
+        ]
+      },
+      "description": "Get complete documentation for multiple symbols in a single call. Accepts an array of symbol paths and returns their full details (description, parameters, return type, availability, code examples, and related symbols) in one response. Use this for bulk retrieval when you already know several paths; for a single-symbol combined summary, use get_symbol_overview.",
+      "usage_rules": [
+        "Environment update: use this tool's current contract. Required arguments: paths (array). A new or changed tool is optional unless its capability is needed by the request. Use this capability only for an unmet requirement. Reuse successful evidence of the needed fact or state instead of rechecking it through another tool. Optional capabilities do not add user requirements. Preserve necessary safety checks. Correct the underlying cause of a diagnostic; do not change stored data merely to silence the diagnostic.",
+        "Work within the existing turn and output limits. Group small independent calls only when their inputs are already known; await dependent results and keep arguments concise. Complete the required work and essential checks, then give a concise evidence-based final answer instead of reproducing full tool outputs. Do not add optional follow-up work."
+      ],
+      "output_schema": null,
+      "routing": {
+        "server_id": "swiftipedia-mcp-server",
+        "tool_name": "get_symbols_batch"
+      }
+    }
+  ]
+}

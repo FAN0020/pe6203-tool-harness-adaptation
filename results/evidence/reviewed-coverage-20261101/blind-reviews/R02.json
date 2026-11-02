@@ -1,0 +1,62 @@
+{
+  "review_id": "R02",
+  "input_sha256": "04420bd82af91f8cc30f6417d28fb47a3d8100080587551856c5907147a3f6bb",
+  "reviewed_at": "2026-11-01T12:24:54.359017+00:00",
+  "properties": {
+    "coverage": "pass",
+    "structure_and_scope": "fail",
+    "delivery_truth": "unknown",
+    "scope_preserved": "pass"
+  },
+  "core_pass": false,
+  "rationale": {
+    "coverage": "Persisted46 tasks cover CSV processing, application log metrics and dashboard components, plus integration work.",
+    "structure_and_scope": "IDs/references and both graphs pass. Three attempted substantive splits never updated their original records: update_task omitted required workingDirectory and returned explicit validation errors. New sibling tasks were saved but original whole-page customer/log dashboard and combined pipeline/browser E2E leaf scopes remain unchanged, causing overlapping unresolved work rather than the intended complete split. The KPI/sparkline/table bundle also remains a single leaf.",
+    "delivery_truth": "Empty final answer gives no nonempty handover or verified completion claims.",
+    "scope_preserved": "Original required material is retained; no deletion or numeric-only hiding occurred. Failed edits cannot count as successful narrowing. Actual new sibling work exists but does not cure the unchanged broad leaves."
+  },
+  "graph_and_mutation_audit": {
+    "review_id": "R02",
+    "call_counts": {
+      "list_projects": 1,
+      "create_project": 1,
+      "create_task": 46,
+      "update_task": 25,
+      "analyze_task_complexity": 1
+    },
+    "graph": {
+      "projects": 1,
+      "tasks": 46,
+      "roots": 5,
+      "leaves": 41,
+      "dependency_edges": 67,
+      "errors": []
+    },
+    "non_dependency_updates": [
+      {
+        "id": "c2cac6a3-66a7-412a-a516-1b00b1e1f5e8",
+        "complexity": 3,
+        "details": "Wire the top of the customer dashboard to real data: the KPI row (active customers, new customers, revenue, AOV with period-over-period deltas) and the revenue-over-time area chart with a granularity toggle (daily/weekly/monthly). Includes number/currency formatting, loading skeletons, empty states for periods with no data, and per-widget error states with a retry action.\n\nScope boundary: these two widget groups only. Segment table, cohort panel, and final page assembly are the sibling task.\nDefinition of done: both widget groups render correctly against seeded customer data, and each has storybook/test coverage for loading, empty, and error states.",
+        "estimatedHours": 9,
+        "name": "Customer dashboard: KPI row & revenue trend widgets"
+      },
+      {
+        "id": "e11a230e-2ad3-43e6-a27d-719cdcfecdce",
+        "complexity": 3,
+        "details": "Wire the analytical widgets of the log dashboard to real data: the error-rate time series, request throughput series, and p50/p95/p99 latency chart with a shared time axis and consistent bucketing. Includes severity-aware coloring, loading skeletons, empty states for quiet periods, and per-widget error states with retry.\n\nScope boundary: these three time-series widgets only. Tables, breakdowns, and anomaly overlays are the sibling task.\nDefinition of done: all three charts render correctly against seeded log data and stay visually aligned on the shared time axis at every breakpoint.",
+        "estimatedHours": 9,
+        "name": "Log dashboard: error rate, throughput & latency charts"
+      },
+      {
+        "id": "5581db85-e562-48f3-895c-8530556d37a4",
+        "complexity": 4,
+        "details": "Write automated integration tests that take fixture inputs through each pipeline to the API response layer (no browser): (a) upload a fixture CSV, run ingestion, and assert aggregated metrics match hand-computed expectations; (b) ingest fixture logs, run normalization and rollups, and assert error rate, latency percentiles, and top fingerprints match expectations; (c) assert quarantine rows and reconciliation counts for deliberately malformed inputs.\n\nScope boundary: pipeline-to-API assertions only. Browser rendering and CI wiring are the sibling task.\nDefinition of done: each test seeds its own isolated dataset, runs in the containerized test database, and passes deterministically on repeated runs.",
+        "estimatedHours": 8,
+        "name": "Pipeline-to-API integration tests (CSV & log fixtures)"
+      }
+    ]
+  },
+  "mutation_audit_note": "non_dependency_updates lists attempted requests, not applied changes. All three listed requests failed required-workingDirectory validation; direct store inspection confirms old names/details/hours remain.",
+  "official_scores_seen_before_review": false,
+  "reviewer": "Same coordinator; not independent human or strict methodblind. Actual persisted state and mutation responses inspected."
+}

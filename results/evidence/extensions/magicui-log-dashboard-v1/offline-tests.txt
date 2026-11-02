@@ -1,0 +1,185 @@
+........................................................................ [ 17%]
+........................................................................ [ 34%]
+........................................................................ [ 51%]
+........................................................................ [ 69%]
+........................................................................ [ 86%]
+.........................................FFF............                 [100%]
+=================================== FAILURES ===================================
+______ test_vanilla_reference_accepts_matching_stage_before_api_preflight ______
+
+tmp_path = PosixPath('/private/var/folders/h0/bnvcw08s11zf6vd_7_19_46r0000gn/T/pytest-of-fanysmacpro/pytest-98/test_vanilla_reference_accepts0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109983dd0>
+
+    def test_vanilla_reference_accepts_matching_stage_before_api_preflight(tmp_path, monkeypatch):
+        """A correct stage snapshot must reach credential checks, not fail the guard."""
+        root = Path(__file__).resolve().parents[1]
+        monkeypatch.setattr(
+            runner,
+            "source",
+            lambda _root: (
+                {
+                    "commit": "test-commit",
+                    "dataset_revision": "test-release",
+                    "stages": {"late": {}},
+                },
+                tmp_path,
+            ),
+        )
+        monkeypatch.setattr(
+            runner,
+            "load_task",
+            lambda upstream, task_id: {
+                "idx": 139,
+                "question": "test task",
+                "servers": {"server": []},
+            },
+        )
+        monkeypatch.setattr(runner, "server_profiles", lambda *_: {"server": {}})
+        knowledge_path = tmp_path / "correct.json"
+        knowledge_path.write_text(
+            json.dumps(
+                {
+                    "benchmark_commit": "test-commit",
+                    "version": "late",
+                    "tools": [tool("server", "get_item", "late")],
+                }
+            )
+        )
+        config = json.loads((root / "configs/full-catalog-smoke.json").read_text())
+        config.update(
+            root=str(tmp_path),
+            output_dir=str(tmp_path / "correct-run"),
+            knowledge_path=str(knowledge_path),
+        )
+        monkeypatch.delenv("AGENT_API_KEY", raising=False)
+        _, result = runner.run(139, "late", "current_metadata_smoke", 0, config)
+        assert result["status"] == "blocked"
+>       assert "Configure AGENT_API_KEY" in result["errors"][0]["message"]
+E       AssertionError: assert 'Configure AGENT_API_KEY' in 'test_vanilla_reference_accepts_matching_stage_before_api_preflight.<locals>.<lambda>() takes 2 positional arguments but 3 were given'
+
+tests/test_vanilla_agent.py:293: AssertionError
+_______ test_vanilla_reference_rejects_stale_tool_knowledge[early-early] _______
+
+tmp_path = PosixPath('/private/var/folders/h0/bnvcw08s11zf6vd_7_19_46r0000gn/T/pytest-of-fanysmacpro/pytest-98/test_vanilla_reference_rejects0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1094d6a50>
+envelope_version = 'early', record_version = 'early'
+
+    @pytest.mark.parametrize(
+        "envelope_version,record_version",
+        [("early", "early"), ("late", "early")],
+    )
+    def test_vanilla_reference_rejects_stale_tool_knowledge(
+        tmp_path, monkeypatch, envelope_version, record_version
+    ):
+        """The development reference is not allowed to masquerade as No Update."""
+        root = Path(__file__).resolve().parents[1]
+        monkeypatch.setattr(
+            runner,
+            "source",
+            lambda _root: (
+                {
+                    "commit": "test-commit",
+                    "dataset_revision": "test-release",
+                    "stages": {"late": {}},
+                },
+                tmp_path,
+            ),
+        )
+        monkeypatch.setattr(
+            runner,
+            "load_task",
+            lambda upstream, task_id: {
+                "idx": 139,
+                "question": "test task",
+                "servers": {"server": []},
+            },
+        )
+        monkeypatch.setattr(runner, "server_profiles", lambda *_: {"server": {}})
+        knowledge_path = tmp_path / "knowledge.json"
+        knowledge_path.write_text(
+            json.dumps(
+                {
+                    "benchmark_commit": "test-commit",
+                    "version": envelope_version,
+                    "tools": [tool("server", "get_item", record_version)],
+                }
+            )
+        )
+        config = json.loads((root / "configs/full-catalog-smoke.json").read_text())
+        config.update(
+            root=str(tmp_path),
+            output_dir=str(tmp_path / "result"),
+            knowledge_path=str(knowledge_path),
+        )
+        trace, result = runner.run(139, "late", "current_metadata_smoke", 0, config)
+        assert result["status"] == "blocked"
+        assert result["TF"] is None and result["PE"] is None
+>       assert "requires the knowledge envelope" in result["errors"][0]["message"]
+E       AssertionError: assert 'requires the knowledge envelope' in 'test_vanilla_reference_rejects_stale_tool_knowledge.<locals>.<lambda>() takes 2 positional arguments but 3 were given'
+
+tests/test_vanilla_agent.py:347: AssertionError
+_______ test_vanilla_reference_rejects_stale_tool_knowledge[late-early] ________
+
+tmp_path = PosixPath('/private/var/folders/h0/bnvcw08s11zf6vd_7_19_46r0000gn/T/pytest-of-fanysmacpro/pytest-98/test_vanilla_reference_rejects1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1095a97f0>
+envelope_version = 'late', record_version = 'early'
+
+    @pytest.mark.parametrize(
+        "envelope_version,record_version",
+        [("early", "early"), ("late", "early")],
+    )
+    def test_vanilla_reference_rejects_stale_tool_knowledge(
+        tmp_path, monkeypatch, envelope_version, record_version
+    ):
+        """The development reference is not allowed to masquerade as No Update."""
+        root = Path(__file__).resolve().parents[1]
+        monkeypatch.setattr(
+            runner,
+            "source",
+            lambda _root: (
+                {
+                    "commit": "test-commit",
+                    "dataset_revision": "test-release",
+                    "stages": {"late": {}},
+                },
+                tmp_path,
+            ),
+        )
+        monkeypatch.setattr(
+            runner,
+            "load_task",
+            lambda upstream, task_id: {
+                "idx": 139,
+                "question": "test task",
+                "servers": {"server": []},
+            },
+        )
+        monkeypatch.setattr(runner, "server_profiles", lambda *_: {"server": {}})
+        knowledge_path = tmp_path / "knowledge.json"
+        knowledge_path.write_text(
+            json.dumps(
+                {
+                    "benchmark_commit": "test-commit",
+                    "version": envelope_version,
+                    "tools": [tool("server", "get_item", record_version)],
+                }
+            )
+        )
+        config = json.loads((root / "configs/full-catalog-smoke.json").read_text())
+        config.update(
+            root=str(tmp_path),
+            output_dir=str(tmp_path / "result"),
+            knowledge_path=str(knowledge_path),
+        )
+        trace, result = runner.run(139, "late", "current_metadata_smoke", 0, config)
+        assert result["status"] == "blocked"
+        assert result["TF"] is None and result["PE"] is None
+>       assert "requires the knowledge envelope" in result["errors"][0]["message"]
+E       AssertionError: assert 'requires the knowledge envelope' in 'test_vanilla_reference_rejects_stale_tool_knowledge.<locals>.<lambda>() takes 2 positional arguments but 3 were given'
+
+tests/test_vanilla_agent.py:347: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_vanilla_agent.py::test_vanilla_reference_accepts_matching_stage_before_api_preflight
+FAILED tests/test_vanilla_agent.py::test_vanilla_reference_rejects_stale_tool_knowledge[early-early]
+FAILED tests/test_vanilla_agent.py::test_vanilla_reference_rejects_stale_tool_knowledge[late-early]
+3 failed, 413 passed, 13 deselected in 11.20s

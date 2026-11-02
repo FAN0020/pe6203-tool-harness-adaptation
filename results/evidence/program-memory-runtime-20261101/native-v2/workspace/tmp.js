@@ -1,0 +1,1 @@
+const fs=require('node:fs');const cp=require('node:child_process');const output=cp.execFileSync(process.execPath,['build.cjs'],{encoding:'utf8',timeout:20000});console.log(JSON.stringify({build_output:output,files:['public/app.js','public/styles.css'].map(path=>({path,bytes:fs.statSync(path).size}))}));

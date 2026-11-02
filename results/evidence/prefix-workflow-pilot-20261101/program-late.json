@@ -1,0 +1,54 @@
+{
+  "intent": "Persist custom slide content as separate page records when template bulk generation is unsuitable.",
+  "precondition": "Fresh project with its initial cover. Each body is one slide's Markdown, with no document frontmatter or slide separator.",
+  "bindings": "$path/$title/$author identify the project; $first_body is its cover body; $next_body is the next intended page's body.",
+  "steps": [
+    {
+      "call": "create_slidev",
+      "args": {
+        "path": "$path",
+        "title": "$title",
+        "author": "$author"
+      }
+    },
+    {
+      "call": "set_page",
+      "args": {
+        "index": 0,
+        "layout": "cover",
+        "content": "$first_body"
+      }
+    },
+    {
+      "call": "add_page",
+      "args": {
+        "layout": "default",
+        "content": "$next_body"
+      },
+      "repeat": "for each subsequent intended slide",
+      "postcondition": "Successful output is the next page index; earlier page bodies remain persisted."
+    },
+    {
+      "call": "apply_theme",
+      "args": {
+        "themeName": "dark"
+      }
+    },
+    {
+      "call": "get_all_slides",
+      "args": {}
+    },
+    {
+      "call": "load_slidev",
+      "args": {
+        "path": "$path"
+      }
+    },
+    {
+      "call": "get_all_slides",
+      "args": {}
+    }
+  ],
+  "invariant": "Each set/add call commits one page. The loop does not require a complete document string. Final records must contain all intended page bodies in order; reload verifies persisted state.",
+  "scope": "Generic verified procedure; page content and complete task coverage remain the caller's responsibility. Does not clear an already populated project."
+}

@@ -1,0 +1,64 @@
+---
+layout: cover
+transition: slide-left
+theme: dark
+---
+
+# Heldout Document
+
+CANARY_HELDOUT_0=314279
+
+Independent synthetic document.
+
+
+---
+layout: default
+transition: slide-left
+---
+
+# Inventory
+
+- First item
+- Second item
+
+CANARY_HELDOUT_1=757186
+
+---
+layout: default
+transition: slide-left
+---
+
+# Measurements
+
+| Item | State |
+| :--- | :--- |
+| Alpha | ready |
+| Beta | stable |
+
+CANARY_HELDOUT_2=494115
+
+---
+layout: default
+transition: slide-left
+---
+
+# Local sample
+
+```js
+const message = 'preserve this';
+```
+
+CANARY_HELDOUT_3=152142
+
+---
+layout: default
+transition: slide-left
+---
+
+# Unicode transfer
+
+中文摘要 · café · Δ
+
+**Content remains intact.**
+
+CANARY_HELDOUT_4=754189

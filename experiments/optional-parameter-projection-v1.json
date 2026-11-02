@@ -1,0 +1,149 @@
+{
+  "quality_cases": [
+    {
+      "task_id": 133,
+      "properties": [
+        {
+          "id": "validation",
+          "required": "Provide meaningful expression validation, correctly interpret returned text, and distinguish syntax validity from actual evaluation and Python runtime/security verification."
+        },
+        {
+          "id": "guidance",
+          "required": "Provide usable Python-focused OWASP-related security recommendations: restricted inputs/allowed operations, avoid executing untrusted text as Python, and bound resource use. Do not claim that ignored tool flags establish these controls."
+        },
+        {
+          "id": "implementation_consistency",
+          "required": "Any code recommended as the solution must handle stated benign arithmetic and enforce its declared restrictions; do not use tool checks as proof that generated code was run. No code is required by the task if actionable recommendations suffice."
+        }
+      ],
+      "review": "Use actual calls/observations/final answer. Static AST inspection of generated Python; never execute untrusted generated code. Any unestablished required property is unknown, not pass. Additional nonessential prose is not a new requirement."
+    },
+    {
+      "task_id": 235,
+      "properties": [
+        {
+          "id": "charts",
+          "required": "Three requested chart types returned successfully with source values, ordering, provinces/categories and monetary units preserved."
+        },
+        {
+          "id": "summary",
+          "required": "Any substantive final claim about these data matches the inputs; source totals if stated are exact."
+        }
+      ],
+      "review": "Frozen question and actual chart payloads; rendering remains unknown for both arms and is not added as a requirement."
+    }
+  ],
+  "evaluation": {
+    "normal_completion": "Runner execution_status==completed; truncation/max_rounds/error are not normal even if TF high.",
+    "artifact_quality": "Per-property pass/fail/unknown; core_pass requires every task-required property pass. Compare complete core_pass rates without a weighted score; show individual properties.",
+    "pilot_gate": "Only optional_parameter_projection can promote: strictly higher changed-task normal completion AND all-property corepass counts than concurrent SP on133M/L, meanTF>=SP;235completion/core/TF>=SP. Otherwise stop without validation. Diagnostic direct arm cannot be selected posthoc. No resampling.",
+    "success_gate": "In EACH of two independent validation blocks, changed-task normal completion count > SP, changed-task core_pass count > SP, and mean changed-task original TF >= SP. Retention completion/core_pass counts and mean TF >= SP in each block. Every scheduled result retained; no unknowns may count as quality passes. No requirement to win every cell or baseline.",
+    "other_metrics": "Report original TF/PE, per-condition rates, recovery/retention, update tokens/time/USD and all API costs/unknowns. ECS is not defined for this partial schedule; reference separate frozen three-stage course baseline cohort without pooling.",
+    "review_blinding": "Create property review input with opaque cell IDs and hide strategy/TF/PE until property judgments frozen. Same rubric in pilot and validation. Five judges are ratings, not executions.",
+    "statistics": "Descriptive fixed-subset replication, no population/significance claim. Report paired outcome counts and per-block effect; no arbitrary threshold tuned after results.",
+    "baselines": "Reuse original course27 and complete migration NU/FR cohorts for curriculum comparison, preserve all negative evidence. Do not substitute those scores as concurrent pilot controls."
+  },
+  "validation_schedule": {
+    "split": "Fresh executions on a predeclared already-exposed task subset; independent from pilot outcomes; not unseen-task generalization.",
+    "blocks": 2,
+    "repeats_per_block_per_condition": 3,
+    "task_stage_pairs": [
+      [
+        133,
+        "middle"
+      ],
+      [
+        133,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "optional_parameter_projection"
+    ],
+    "knowledge": "Freeze exact candidate from pilot, byte-identical in validation. No tuning, selection or low-score reruns.",
+    "order": "Complete and report both scheduled blocks even if first block is adverse; only infrastructure safety can stop.",
+    "total_validation_trajectories": 36
+  },
+  "fairness": {
+    "model_provider": "Unchanged pinned DigitalOcean and model from existing-method-recheck-v1",
+    "decode": "temperature0,4096 output tokens,12rounds,900s; unchanged five first-valid judge slots with original1000-character observation truncation",
+    "other": "Same original questions, server source/runtime/native schemas, model/provider/decode/budgets, five judges, isolated workspaces and product acceptance. Only knowledge differs. Candidate removes selected unused optional schema properties; retained property constraints, required list, native validation and forwarding remain unchanged. No tool removal or argument injection."
+  },
+  "id": "optional-parameter-projection-v1",
+  "status": "native_admission_passed_exact_transform_and_conditional_schedule_frozen_before_model",
+  "champion": "selective_patch",
+  "candidates": [
+    "semantic_contract_direct",
+    "optional_parameter_projection"
+  ],
+  "model_config": "configs/optional-parameter-projection-v1.json",
+  "updater_config": "configs/optional-parameter-projection-updater-v1.json",
+  "feedback_probes": "experiments/optional-parameter-projection-feedback-v1.json",
+  "generation": {
+    "rule": "Compile byte-identical v2 claim decisions, then delete only certified optional unused validate_syntax property entries: Middle detailed/allow_variables; Late detailed/show_ast/check_balanced/max_depth. Preserve Late requiredallow_variables and every other field. Deterministic projection; no new updater model calls.",
+    "inputs": "Frozen v2 task-free proposals, catalogs and20 native omission probes with source hashes. No question/answer/scored trajectory enters transformation.",
+    "primary": "optional_parameter_projection only. v2 direct is a contemporaneous diagnostic ablation, never eligible as fallback winner.",
+    "semantic_checks": "Source audit confirms handler reads only expression; dispatcher accepts omission; 20-case diagnostic passed. The model-visible schema is intentionally a projection of native schema; original native schema/runtime and every realized tool operation remain unchanged."
+  },
+  "development": {
+    "tasks": [
+      133,
+      235
+    ],
+    "stages": [
+      "middle",
+      "late"
+    ],
+    "task_stage_pairs": [
+      [
+        133,
+        "middle"
+      ],
+      [
+        133,
+        "late"
+      ],
+      [
+        235,
+        "late"
+      ]
+    ],
+    "strategies": [
+      "selective_patch",
+      "semantic_contract_direct",
+      "optional_parameter_projection"
+    ],
+    "repeats": 1,
+    "opaque_cell_ids": true
+  },
+  "selection": "Same already-exposed original133M/L+235L as previous round. All9conditions run once. No newtask subset chosen from observed outcomes; no syntheticbenchmark.",
+  "execution_order": "Existing cells_for(make_cells), Random1729 shuffle then seed sorting; publish exact plan beforecalls. No trajectory retries. Readouts changes-before-final/write etc supplementary only.",
+  "mechanism": "Replace description-only denial of ineffective controls with static erasure of those OPTIONAL choices in model-facing knowledge. Preserve required arguments, all actual native capability, tool names/routes, executor, prompt, budgets and rubric.",
+  "dependencies": "20/20 native omission-equivalence and required-negative controls passed. All original task inputs/runtimes complete and reused. This is not an actor correctness proof.",
+  "failure_rule": "Any preparation/source hash/schema-preservation or knowledge review failure stops before models. All scheduled actor/judge outcomes retained with unchanged recovery; no low-score trajectory retries.",
+  "authorization": {
+    "approved": true,
+    "source": "Currentuserexplicitauthorization",
+    "total_cost_limit_usd": null,
+    "total_trajectory_cap": null,
+    "push": false,
+    "deploy": false
+  },
+  "validation_independence": "Fresh disjoint executions on same predeclared exposed133M/L+235L families,3repeats percondition perblock,2blocks of18; same candidate byte-for-byte after dev. No unseen-task claim or seed determinism. Both blocks retained even if first adverse; no knowledge tuning.",
+  "costs": "One new dedicated actor/judge/preflight ledger; no new updater calls. Prior v2 generation cost USD0.003234600 disclosed as reused one-time method construction cost, not double-counted in new marginal spend. Each validation block gets distinctledger; no total cap.",
+  "stop_rule": "Only optional_parameter_projection can promote: strictly higher changed-task normal completion AND all-property corepass counts than concurrent SP on133M/L, meanTF>=SP;235completion/core/TF>=SP. Otherwise stop without validation. Diagnostic direct arm cannot be selected posthoc. No resampling.",
+  "primary": "optional_parameter_projection",
+  "diagnostic_only": [
+    "semantic_contract_direct"
+  ],
+  "mechanism_readouts": {
+    "primary": "Completion/core/TF gates as above.",
+    "diagnostic": "Compare projection versus concurrent identical corrected descriptions with full optional schema: optional-parameter use, calls, final length/truncation, individual properties. Small sample cannot distinguish all representation-length channels; raw tokens and all failures retained."
+  },
+  "boundary_review": "Course explicitly includes schema as harness knowledge; previous exact-native-schema equality was a baseline/closed-candidate implementation choice. Native executable contract and actor loop remain frozen. See research-decision.json authority; no externally imposed boundary silently removed."
+}

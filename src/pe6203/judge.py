@@ -86,6 +86,7 @@ async def evaluate_slots(client, output, prompts, config, emit):
     """First valid rating per slot; append-only attempts and bounded, resumable recovery."""
     from .benchmark import digest, read_json
     from .request_retry import failure_details, request_async
+    from .spend_guard import complete_async
 
     output = Path(output)
     policy = config["judge_recovery"]
@@ -178,8 +179,11 @@ async def evaluate_slots(client, output, prompts, config, emit):
 
             try:
                 response = await request_async(
-                    lambda: client.chat.completions.create(
-                        messages=[{"role": "user", "content": prompt}], **settings
+                    lambda: complete_async(
+                        client,
+                        config.get("spend_guard"),
+                        messages=[{"role": "user", "content": prompt}],
+                        **settings,
                     ),
                     config.get("request_retry"),
                     on_retry,

@@ -1,0 +1,455 @@
+FFFFFFFFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+_________ test_verbatim_programs_only_extend_two_of_seven_descriptions _________
+
+    def test_verbatim_programs_only_extend_two_of_seven_descriptions():
+        old,target,context=inputs();pristine=deepcopy((old,target,context))
+>       knowledge,changes,cost=adapt(old,target,STRATEGY,context)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_verified_component_memory.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+strategy = 'verified_component_memory'
+context = {'feedback': [{'args': {'probe': 'frozen_native_contract_and_category_readiness'}, 'result': {'empty_input_schema': Tr...environment_id': 'program-memory-shared-runtime-v1', ...}, 'server': '@magicuidesign/mcp', 'stage': 'late', ...}, ...]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: verified_component_memory
+
+src/pe6203/baselines.py:110: ValueError
+_______________ test_unverified_program_memory_rejected[missing] _______________
+
+mutation = 'missing'
+
+    @pytest.mark.parametrize("mutation",["missing","duplicate","code","proof","environment"])
+    def test_unverified_program_memory_rejected(mutation):
+        old,target,context=inputs();rows=context["feedback"]
+        if mutation=="missing":rows.pop()
+        elif mutation=="duplicate":rows.append(deepcopy(rows[-1]))
+        elif mutation=="code":rows[-1]["result"]["content"]+='\n// substituted code'
+        elif mutation=="proof":rows[-1]["result"]["environment_proof_sha256"]='0'*64
+        else:rows[-1]["result"]["environment_id"]='unverified-runtime'
+        with pytest.raises(ValueError,match="program"):
+>           adapt(old,target,STRATEGY,context)
+
+tests/test_verified_component_memory.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+strategy = 'verified_component_memory'
+context = {'feedback': [{'args': {'probe': 'frozen_native_contract_and_category_readiness'}, 'result': {'empty_input_schema': Tr...2', 'environment_id': 'program-memory-shared-runtime-v1', ...}, 'server': '@magicuidesign/mcp', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: verified_component_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'missing'
+
+    @pytest.mark.parametrize("mutation",["missing","duplicate","code","proof","environment"])
+    def test_unverified_program_memory_rejected(mutation):
+        old,target,context=inputs();rows=context["feedback"]
+        if mutation=="missing":rows.pop()
+        elif mutation=="duplicate":rows.append(deepcopy(rows[-1]))
+        elif mutation=="code":rows[-1]["result"]["content"]+='\n// substituted code'
+        elif mutation=="proof":rows[-1]["result"]["environment_proof_sha256"]='0'*64
+        else:rows[-1]["result"]["environment_id"]='unverified-runtime'
+>       with pytest.raises(ValueError,match="program"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'program'
+E         Actual message: 'Unsupported strategy: verified_component_memory'
+
+tests/test_verified_component_memory.py:53: AssertionError
+______________ test_unverified_program_memory_rejected[duplicate] ______________
+
+mutation = 'duplicate'
+
+    @pytest.mark.parametrize("mutation",["missing","duplicate","code","proof","environment"])
+    def test_unverified_program_memory_rejected(mutation):
+        old,target,context=inputs();rows=context["feedback"]
+        if mutation=="missing":rows.pop()
+        elif mutation=="duplicate":rows.append(deepcopy(rows[-1]))
+        elif mutation=="code":rows[-1]["result"]["content"]+='\n// substituted code'
+        elif mutation=="proof":rows[-1]["result"]["environment_proof_sha256"]='0'*64
+        else:rows[-1]["result"]["environment_id"]='unverified-runtime'
+        with pytest.raises(ValueError,match="program"):
+>           adapt(old,target,STRATEGY,context)
+
+tests/test_verified_component_memory.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+strategy = 'verified_component_memory'
+context = {'feedback': [{'args': {'probe': 'frozen_native_contract_and_category_readiness'}, 'result': {'empty_input_schema': Tr...environment_id': 'program-memory-shared-runtime-v1', ...}, 'server': '@magicuidesign/mcp', 'stage': 'late', ...}, ...]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: verified_component_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'duplicate'
+
+    @pytest.mark.parametrize("mutation",["missing","duplicate","code","proof","environment"])
+    def test_unverified_program_memory_rejected(mutation):
+        old,target,context=inputs();rows=context["feedback"]
+        if mutation=="missing":rows.pop()
+        elif mutation=="duplicate":rows.append(deepcopy(rows[-1]))
+        elif mutation=="code":rows[-1]["result"]["content"]+='\n// substituted code'
+        elif mutation=="proof":rows[-1]["result"]["environment_proof_sha256"]='0'*64
+        else:rows[-1]["result"]["environment_id"]='unverified-runtime'
+>       with pytest.raises(ValueError,match="program"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'program'
+E         Actual message: 'Unsupported strategy: verified_component_memory'
+
+tests/test_verified_component_memory.py:53: AssertionError
+________________ test_unverified_program_memory_rejected[code] _________________
+
+mutation = 'code'
+
+    @pytest.mark.parametrize("mutation",["missing","duplicate","code","proof","environment"])
+    def test_unverified_program_memory_rejected(mutation):
+        old,target,context=inputs();rows=context["feedback"]
+        if mutation=="missing":rows.pop()
+        elif mutation=="duplicate":rows.append(deepcopy(rows[-1]))
+        elif mutation=="code":rows[-1]["result"]["content"]+='\n// substituted code'
+        elif mutation=="proof":rows[-1]["result"]["environment_proof_sha256"]='0'*64
+        else:rows[-1]["result"]["environment_id"]='unverified-runtime'
+        with pytest.raises(ValueError,match="program"):
+>           adapt(old,target,STRATEGY,context)
+
+tests/test_verified_component_memory.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+strategy = 'verified_component_memory'
+context = {'feedback': [{'args': {'probe': 'frozen_native_contract_and_category_readiness'}, 'result': {'empty_input_schema': Tr...environment_id': 'program-memory-shared-runtime-v1', ...}, 'server': '@magicuidesign/mcp', 'stage': 'late', ...}, ...]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: verified_component_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'code'
+
+    @pytest.mark.parametrize("mutation",["missing","duplicate","code","proof","environment"])
+    def test_unverified_program_memory_rejected(mutation):
+        old,target,context=inputs();rows=context["feedback"]
+        if mutation=="missing":rows.pop()
+        elif mutation=="duplicate":rows.append(deepcopy(rows[-1]))
+        elif mutation=="code":rows[-1]["result"]["content"]+='\n// substituted code'
+        elif mutation=="proof":rows[-1]["result"]["environment_proof_sha256"]='0'*64
+        else:rows[-1]["result"]["environment_id"]='unverified-runtime'
+>       with pytest.raises(ValueError,match="program"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'program'
+E         Actual message: 'Unsupported strategy: verified_component_memory'
+
+tests/test_verified_component_memory.py:53: AssertionError
+________________ test_unverified_program_memory_rejected[proof] ________________
+
+mutation = 'proof'
+
+    @pytest.mark.parametrize("mutation",["missing","duplicate","code","proof","environment"])
+    def test_unverified_program_memory_rejected(mutation):
+        old,target,context=inputs();rows=context["feedback"]
+        if mutation=="missing":rows.pop()
+        elif mutation=="duplicate":rows.append(deepcopy(rows[-1]))
+        elif mutation=="code":rows[-1]["result"]["content"]+='\n// substituted code'
+        elif mutation=="proof":rows[-1]["result"]["environment_proof_sha256"]='0'*64
+        else:rows[-1]["result"]["environment_id"]='unverified-runtime'
+        with pytest.raises(ValueError,match="program"):
+>           adapt(old,target,STRATEGY,context)
+
+tests/test_verified_component_memory.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+strategy = 'verified_component_memory'
+context = {'feedback': [{'args': {'probe': 'frozen_native_contract_and_category_readiness'}, 'result': {'empty_input_schema': Tr...environment_id': 'program-memory-shared-runtime-v1', ...}, 'server': '@magicuidesign/mcp', 'stage': 'late', ...}, ...]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: verified_component_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'proof'
+
+    @pytest.mark.parametrize("mutation",["missing","duplicate","code","proof","environment"])
+    def test_unverified_program_memory_rejected(mutation):
+        old,target,context=inputs();rows=context["feedback"]
+        if mutation=="missing":rows.pop()
+        elif mutation=="duplicate":rows.append(deepcopy(rows[-1]))
+        elif mutation=="code":rows[-1]["result"]["content"]+='\n// substituted code'
+        elif mutation=="proof":rows[-1]["result"]["environment_proof_sha256"]='0'*64
+        else:rows[-1]["result"]["environment_id"]='unverified-runtime'
+>       with pytest.raises(ValueError,match="program"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'program'
+E         Actual message: 'Unsupported strategy: verified_component_memory'
+
+tests/test_verified_component_memory.py:53: AssertionError
+_____________ test_unverified_program_memory_rejected[environment] _____________
+
+mutation = 'environment'
+
+    @pytest.mark.parametrize("mutation",["missing","duplicate","code","proof","environment"])
+    def test_unverified_program_memory_rejected(mutation):
+        old,target,context=inputs();rows=context["feedback"]
+        if mutation=="missing":rows.pop()
+        elif mutation=="duplicate":rows.append(deepcopy(rows[-1]))
+        elif mutation=="code":rows[-1]["result"]["content"]+='\n// substituted code'
+        elif mutation=="proof":rows[-1]["result"]["environment_proof_sha256"]='0'*64
+        else:rows[-1]["result"]["environment_id"]='unverified-runtime'
+        with pytest.raises(ValueError,match="program"):
+>           adapt(old,target,STRATEGY,context)
+
+tests/test_verified_component_memory.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+strategy = 'verified_component_memory'
+context = {'feedback': [{'args': {'probe': 'frozen_native_contract_and_category_readiness'}, 'result': {'empty_input_schema': Tr...environment_id': 'program-memory-shared-runtime-v1', ...}, 'server': '@magicuidesign/mcp', 'stage': 'late', ...}, ...]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: verified_component_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+mutation = 'environment'
+
+    @pytest.mark.parametrize("mutation",["missing","duplicate","code","proof","environment"])
+    def test_unverified_program_memory_rejected(mutation):
+        old,target,context=inputs();rows=context["feedback"]
+        if mutation=="missing":rows.pop()
+        elif mutation=="duplicate":rows.append(deepcopy(rows[-1]))
+        elif mutation=="code":rows[-1]["result"]["content"]+='\n// substituted code'
+        elif mutation=="proof":rows[-1]["result"]["environment_proof_sha256"]='0'*64
+        else:rows[-1]["result"]["environment_id"]='unverified-runtime'
+>       with pytest.raises(ValueError,match="program"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'program'
+E         Actual message: 'Unsupported strategy: verified_component_memory'
+
+tests/test_verified_component_memory.py:53: AssertionError
+______ test_no_change_middle_and_unrelated_retention_do_not_read_memories ______
+
+    def test_no_change_middle_and_unrelated_retention_do_not_read_memories():
+        old,target,_=inputs()
+>       assert adapt(old,old,STRATEGY,{})[0]==old
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_verified_component_memory.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+strategy = 'verified_component_memory', context = {}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: verified_component_memory
+
+src/pe6203/baselines.py:110: ValueError
+_____________ test_validator_rejects_any_extra_change[parameters] ______________
+
+field = 'parameters'
+
+    @pytest.mark.parametrize("field",["parameters","routing","usage_rules","description"])
+    def test_validator_rejects_any_extra_change(field):
+>       from pe6203.verified_component_memory import validate_memory
+E       ModuleNotFoundError: No module named 'pe6203.verified_component_memory'
+
+tests/test_verified_component_memory.py:69: ModuleNotFoundError
+_______________ test_validator_rejects_any_extra_change[routing] _______________
+
+field = 'routing'
+
+    @pytest.mark.parametrize("field",["parameters","routing","usage_rules","description"])
+    def test_validator_rejects_any_extra_change(field):
+>       from pe6203.verified_component_memory import validate_memory
+E       ModuleNotFoundError: No module named 'pe6203.verified_component_memory'
+
+tests/test_verified_component_memory.py:69: ModuleNotFoundError
+_____________ test_validator_rejects_any_extra_change[usage_rules] _____________
+
+field = 'usage_rules'
+
+    @pytest.mark.parametrize("field",["parameters","routing","usage_rules","description"])
+    def test_validator_rejects_any_extra_change(field):
+>       from pe6203.verified_component_memory import validate_memory
+E       ModuleNotFoundError: No module named 'pe6203.verified_component_memory'
+
+tests/test_verified_component_memory.py:69: ModuleNotFoundError
+_____________ test_validator_rejects_any_extra_change[description] _____________
+
+field = 'description'
+
+    @pytest.mark.parametrize("field",["parameters","routing","usage_rules","description"])
+    def test_validator_rejects_any_extra_change(field):
+>       from pe6203.verified_component_memory import validate_memory
+E       ModuleNotFoundError: No module named 'pe6203.verified_component_memory'
+
+tests/test_verified_component_memory.py:69: ModuleNotFoundError
+_______________ test_task_answer_context_is_not_an_updater_input _______________
+
+    def test_task_answer_context_is_not_an_updater_input():
+        old,target,context=inputs();context["answer"]="must not be seen"
+        with pytest.raises(ValueError,match="task and score inputs are forbidden"):
+>           adapt(old,target,STRATEGY,context)
+
+tests/test_verified_component_memory.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+new_metadata = {'benchmark_commit': '888c779a0fe735f612ca62bdd1fdd7c9e6bf8701', 'schema_version': '1.0', 'source': 'recorded_native_c...rameters': {'$schema': 'http://json-schema.org/draft-07/schema#', 'properties': {}, 'type': 'object'}, ...}, ...], ...}
+strategy = 'verified_component_memory'
+context = {'answer': 'must not be seen', 'feedback': [{'args': {'probe': 'frozen_native_contract_and_category_readiness'}, 'resu...environment_id': 'program-memory-shared-runtime-v1', ...}, 'server': '@magicuidesign/mcp', 'stage': 'late', ...}, ...]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: verified_component_memory
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+    def test_task_answer_context_is_not_an_updater_input():
+        old,target,context=inputs();context["answer"]="must not be seen"
+>       with pytest.raises(ValueError,match="task and score inputs are forbidden"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'task and score inputs are forbidden'
+E         Actual message: 'Unsupported strategy: verified_component_memory'
+
+tests/test_verified_component_memory.py:81: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_verified_component_memory.py::test_verbatim_programs_only_extend_two_of_seven_descriptions
+FAILED tests/test_verified_component_memory.py::test_unverified_program_memory_rejected[missing]
+FAILED tests/test_verified_component_memory.py::test_unverified_program_memory_rejected[duplicate]
+FAILED tests/test_verified_component_memory.py::test_unverified_program_memory_rejected[code]
+FAILED tests/test_verified_component_memory.py::test_unverified_program_memory_rejected[proof]
+FAILED tests/test_verified_component_memory.py::test_unverified_program_memory_rejected[environment]
+FAILED tests/test_verified_component_memory.py::test_no_change_middle_and_unrelated_retention_do_not_read_memories
+FAILED tests/test_verified_component_memory.py::test_validator_rejects_any_extra_change[parameters]
+FAILED tests/test_verified_component_memory.py::test_validator_rejects_any_extra_change[routing]
+FAILED tests/test_verified_component_memory.py::test_validator_rejects_any_extra_change[usage_rules]
+FAILED tests/test_verified_component_memory.py::test_validator_rejects_any_extra_change[description]
+FAILED tests/test_verified_component_memory.py::test_task_answer_context_is_not_an_updater_input
+12 failed in 0.24s

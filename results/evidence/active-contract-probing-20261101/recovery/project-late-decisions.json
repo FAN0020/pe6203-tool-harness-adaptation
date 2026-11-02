@@ -1,0 +1,288 @@
+{
+  "decisions": [
+    {
+      "id": "C001",
+      "action": "retain",
+      "after": "Discover and overview all projects in the current workspace with concise project details and progress context. Best for project-focused navigation and portfolio browsing when you do not need a full workspace health summary. Use `review_project_status` when you want a deeper execution snapshot for one specific project.",
+      "evidence": [],
+      "reason": "No probe tests whether list_projects fulfills this framing; P3 shows enumeration of two projects only, insufficient to justify any descriptive change."
+    },
+    {
+      "id": "C002",
+      "action": "retain",
+      "after": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead.",
+      "evidence": [],
+      "reason": "No probe exercised relative paths, --claude flag behavior, or path validation; retained unchanged."
+    },
+    {
+      "id": "C003",
+      "action": "retain",
+      "after": "Launch new projects with structured organization, detailed documentation, and optional ownership, due date, and tag metadata. Establishes a focused foundation for task planning, accountability, categorization, and timeline awareness across your development workflow.",
+      "evidence": [],
+      "reason": "Schema adds owner/dueDate/tags but no probe tested project creation with those fields or their persistence; schema presence alone does not justify changing descriptive text."
+    },
+    {
+      "id": "C004",
+      "action": "retain",
+      "after": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead.",
+      "evidence": [],
+      "reason": "No probe exercised create_project path handling or --claude behavior."
+    },
+    {
+      "id": "C005",
+      "action": "retain",
+      "after": "The name of the new project",
+      "evidence": [],
+      "reason": "Unchanged schema field; no probe contradicts it."
+    },
+    {
+      "id": "C006",
+      "action": "retain",
+      "after": "A detailed description of the project",
+      "evidence": [],
+      "reason": "Unchanged schema field; no probe contradicts it."
+    },
+    {
+      "id": "C007",
+      "action": "retain",
+      "after": "Optional owner or responsible person for the project",
+      "evidence": [],
+      "reason": "New optional parameter; no probe tested acceptance or persistence of owner."
+    },
+    {
+      "id": "C008",
+      "action": "retain",
+      "after": "Optional due date or target completion date for the project",
+      "evidence": [],
+      "reason": "New optional parameter; no probe tested acceptance or persistence of dueDate."
+    },
+    {
+      "id": "C009",
+      "action": "retain",
+      "after": "Optional tags for categorizing the project",
+      "evidence": [],
+      "reason": "New optional parameter; no probe tested acceptance or persistence of tags."
+    },
+    {
+      "id": "C010",
+      "action": "retain",
+      "after": "Access comprehensive project details including metadata, creation dates, and descriptive context. Best for retrieving the canonical project record when planning or reporting. Use `review_project_status` for aggregated task progress, blockers, and next-action signals.",
+      "evidence": [],
+      "reason": "No probe called get_project; the referenced review_project_status probe (P1) failed, but that does not confirm get_project output content."
+    },
+    {
+      "id": "C011",
+      "action": "retain",
+      "after": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead.",
+      "evidence": [],
+      "reason": "No probe exercised get_project path handling."
+    },
+    {
+      "id": "C012",
+      "action": "retain",
+      "after": "The unique identifier of the project to retrieve",
+      "evidence": [],
+      "reason": "Unchanged schema field; no probe contradicts it."
+    },
+    {
+      "id": "C013",
+      "action": "replace",
+      "after": "Generate an execution-focused status snapshot for a single project by summarizing open work, completed progress, blockers, ready-to-start tasks, and in-progress activity. Note: a native probe with a valid project and fixture tasks failed with \"storage.getTasksByProject is not a function\"; successful status output is therefore not confirmed, and this tool may return an error rather than a snapshot.",
+      "evidence": [
+        "P1"
+      ],
+      "reason": "P1 called review_project_status with a valid project and fixture tasks and received an isError result referencing a missing storage method, so the described successful summary output is unverified for this version."
+    },
+    {
+      "id": "C014",
+      "action": "retain",
+      "after": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead.",
+      "evidence": [],
+      "reason": "Path-handling claim untested by probes; retained."
+    },
+    {
+      "id": "C015",
+      "action": "retain",
+      "after": "ID of the project to review",
+      "evidence": [],
+      "reason": "Schema field description unchanged; P1 used a valid projectId without schema rejection, but that does not warrant text change."
+    },
+    {
+      "id": "C016",
+      "action": "retain",
+      "after": "Include completed tasks in sampled status sections",
+      "evidence": [],
+      "reason": "No successful status output was observed, so behavior of this option is unconfirmed; no change justified."
+    },
+    {
+      "id": "C017",
+      "action": "retain",
+      "after": "Maximum number of tasks to show per status section",
+      "evidence": [],
+      "reason": "Behavior untested by a successful call; retained."
+    },
+    {
+      "id": "C018",
+      "action": "retain",
+      "after": "Explore and organize tasks with hierarchical filtering, project scoping, and progress visibility. Best for inspecting task trees and active work items when you want task-level detail instead of a workspace-wide health summary. Use `review_project_status` when you prefer a concise project summary with readiness and blocker signals.",
+      "evidence": [],
+      "reason": "No probe called list_tasks; the referenced review_project_status probe failure does not establish list_tasks behavior."
+    },
+    {
+      "id": "C019",
+      "action": "retain",
+      "after": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead.",
+      "evidence": [],
+      "reason": "No probe exercised list_tasks path handling."
+    },
+    {
+      "id": "C020",
+      "action": "retain",
+      "after": "ID of the project to list tasks for",
+      "evidence": [],
+      "reason": "Unchanged schema field; untested by probes."
+    },
+    {
+      "id": "C021",
+      "action": "retain",
+      "after": "Filter to tasks under this parent (optional)",
+      "evidence": [],
+      "reason": "Untested; retained."
+    },
+    {
+      "id": "C022",
+      "action": "retain",
+      "after": "Show tasks in hierarchical tree format (default: true)",
+      "evidence": [],
+      "reason": "Untested; retained."
+    },
+    {
+      "id": "C023",
+      "action": "retain",
+      "after": "Include completed tasks in results (default: true)",
+      "evidence": [],
+      "reason": "Untested; retained."
+    },
+    {
+      "id": "C024",
+      "action": "retain",
+      "after": "Browse stored memories with category filters and result limits for focused knowledge retrieval. Best for targeted memory review when you need to inspect or recall captured context rather than assess the entire workspace.",
+      "evidence": [],
+      "reason": "No probe called list_memories; retained."
+    },
+    {
+      "id": "C025",
+      "action": "retain",
+      "after": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead.",
+      "evidence": [],
+      "reason": "No probe exercised list_memories path handling."
+    },
+    {
+      "id": "C026",
+      "action": "retain",
+      "after": "Filter to memories in this specific category",
+      "evidence": [],
+      "reason": "Untested; retained."
+    },
+    {
+      "id": "C027",
+      "action": "retain",
+      "after": "Maximum number of memories to return (default: 50)",
+      "evidence": [],
+      "reason": "Untested; retained."
+    },
+    {
+      "id": "C028",
+      "action": "retain",
+      "after": "Get prioritized next-step task recommendations based on dependencies, priority, and task readiness. Use this when the workspace is already understood and you need the most actionable work item rather than a broader health assessment.",
+      "evidence": [],
+      "reason": "P4 returned a recommendation for one fixture task, consistent with this description; no contradiction justifies change."
+    },
+    {
+      "id": "C029",
+      "action": "retain",
+      "after": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead.",
+      "evidence": [],
+      "reason": "Probe used an absolute workspace path successfully, but no test covers relative paths or --claude behavior; retained."
+    },
+    {
+      "id": "C030",
+      "action": "retain",
+      "after": "Filter recommendations to a specific project",
+      "evidence": [],
+      "reason": "P4 used projectId and returned project-scoped progress; consistent with the description, no change needed."
+    },
+    {
+      "id": "C031",
+      "action": "retain",
+      "after": "Maximum number of task recommendations to return",
+      "evidence": [],
+      "reason": "P4 used maxRecommendations: 3 and returned one item; consistent, untested at other values."
+    },
+    {
+      "id": "C032",
+      "action": "retain",
+      "after": "Whether to factor in task complexity for recommendations",
+      "evidence": [],
+      "reason": "P4 output included complexity-based reasoning but the option was not explicitly tested; retained."
+    },
+    {
+      "id": "C033",
+      "action": "retain",
+      "after": "Preferred task tags to prioritize in recommendations",
+      "evidence": [],
+      "reason": "Untested; retained."
+    },
+    {
+      "id": "C034",
+      "action": "retain",
+      "after": "Whether to exclude blocked tasks from recommendations",
+      "evidence": [],
+      "reason": "P4 used excludeBlocked: true and only the pending fixture task appeared, consistent with the description; no change needed."
+    },
+    {
+      "id": "C035",
+      "action": "replace",
+      "after": "Assess the overall health of your workspace by summarizing projects, task hierarchy, completion signals, and stored memories. Note: a native probe with fixture projects, tasks, and includeMemories/includeCompletedTasks enabled failed with \"storage.getTasksByProject is not a function\"; successful workspace health output is therefore not confirmed, and this tool may return an error rather than a summary.",
+      "evidence": [
+        "P2"
+      ],
+      "reason": "P2 invoked review_workspace_health against seeded projects/tasks and received an isError referencing a missing storage method, so the claimed aggregation output is unverified."
+    },
+    {
+      "id": "C036",
+      "action": "retain",
+      "after": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead.",
+      "evidence": [],
+      "reason": "Path-handling claim untested by probes; retained."
+    },
+    {
+      "id": "C037",
+      "action": "retain",
+      "after": "Optional project ID to focus the review on a single project",
+      "evidence": [],
+      "reason": "P2 did not pass projectId, so this option's behavior is untested; retained."
+    },
+    {
+      "id": "C038",
+      "action": "retain",
+      "after": "Include memory summary signals in the workspace review",
+      "evidence": [],
+      "reason": "P2 passed includeMemories but the call errored, so no memory summary behavior was observed; retained."
+    },
+    {
+      "id": "C039",
+      "action": "retain",
+      "after": "Include completed tasks in the review summary",
+      "evidence": [],
+      "reason": "P2 passed includeCompletedTasks but the call errored, so behavior unconfirmed; retained."
+    },
+    {
+      "id": "C040",
+      "action": "retain",
+      "after": "Maximum number of items to sample per section",
+      "evidence": [],
+      "reason": "P2 passed maxItems but the call errored; behavior unconfirmed."
+    }
+  ]
+}

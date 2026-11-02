@@ -1,0 +1,147 @@
+{
+  "id": "weather-provenance-probes-v1",
+  "status": "frozen_before_native_calls",
+  "scope": "New Middle/Late weather advice provenance and unchanged real forecast readiness; no agent or judge evaluation.",
+  "source": [
+    {
+      "path": ".cache/mcpevol/original/node_modules/mcp-weather-demo/build/index.js",
+      "sha256": "6575467405a23dc53fe92503c608b4f1237690736a8707f1fde1f7a1dc785aa9"
+    },
+    {
+      "path": ".cache/mcpevol/original/node_modules/mcp-weather-demo/package.json",
+      "sha256": "970d15f99e0b5a1ddce14e4b810a4597f0b6c9c7e75638af4f42bec5415e211a"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/mcp-weather-demo/build/index.js",
+      "sha256": "06cbfa26ac2d4ef0c8619b5476d660a779e039808c3d5c6e33068ad6eda7a4f4"
+    },
+    {
+      "path": ".cache/mcpevol/iter3/node_modules/mcp-weather-demo/package.json",
+      "sha256": "970d15f99e0b5a1ddce14e4b810a4597f0b6c9c7e75638af4f42bec5415e211a"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/mcp-weather-demo/build/index.js",
+      "sha256": "0bc5f6f09f8d024c523c430ac12f8eddb5d16945b3165ffb6d046f65823219f8"
+    },
+    {
+      "path": ".cache/mcpevol/iter5/node_modules/mcp-weather-demo/package.json",
+      "sha256": "970d15f99e0b5a1ddce14e4b810a4597f0b6c9c7e75638af4f42bec5415e211a"
+    },
+    {
+      "path": "configs/server-profiles.json",
+      "sha256": "770dabad9acb1196cf97695dc9424a504c3315d276aaa0e8d22944aeaeb8468d"
+    },
+    {
+      "path": "src/pe6203/transport.py",
+      "sha256": "d7ceb1f783bc55a20809a1ad50f89e6af2c6f1bbccb2d322e75120b63b591dd4"
+    },
+    {
+      "path": "src/pe6203/experiment.py",
+      "sha256": "965d8c8cafa049591e3a8e86a7ddb59e406894e73a38757d563388a6b39a11d4"
+    },
+    {
+      "path": "results/evidence/benchmark-inventory.json",
+      "sha256": "25b725f09df65210dbef1f5afc37f059635f700c2fd35763d0f521d4ab4d2b54"
+    }
+  ],
+  "model_calls": 0,
+  "catalog_calls": 3,
+  "tool_calls": 7,
+  "server": "mcp-weather-demo",
+  "shared_profile": {
+    "entry": "build/index.js"
+  },
+  "stages": [
+    "early",
+    "middle",
+    "late"
+  ],
+  "calls": {
+    "early": [
+      {
+        "tool": "get-forecast",
+        "arguments": {
+          "latitude": 34.05,
+          "longitude": -118.24
+        },
+        "kind": "real_forecast_readiness"
+      }
+    ],
+    "middle": [
+      {
+        "tool": "get-weather-advice",
+        "arguments": {
+          "latitude": 12,
+          "longitude": -20,
+          "unit": "C",
+          "activity": "outdoor",
+          "includeHydration": false
+        },
+        "kind": "synthetic_provenance"
+      },
+      {
+        "tool": "get-weather-advice",
+        "arguments": {
+          "latitude": 12,
+          "longitude": 140,
+          "unit": "C",
+          "activity": "outdoor",
+          "includeHydration": false
+        },
+        "kind": "synthetic_provenance"
+      },
+      {
+        "tool": "get-forecast",
+        "arguments": {
+          "latitude": 34.05,
+          "longitude": -118.24
+        },
+        "kind": "real_forecast_readiness"
+      }
+    ],
+    "late": [
+      {
+        "tool": "get-weather-advice",
+        "arguments": {
+          "latitude": 12,
+          "longitude": -20,
+          "unit": "C",
+          "activity": "outdoor",
+          "includeHydration": false
+        },
+        "kind": "synthetic_provenance"
+      },
+      {
+        "tool": "get-weather-advice",
+        "arguments": {
+          "latitude": 12,
+          "longitude": 140,
+          "unit": "C",
+          "activity": "outdoor",
+          "includeHydration": false
+        },
+        "kind": "synthetic_provenance"
+      },
+      {
+        "tool": "get-forecast",
+        "arguments": {
+          "latitude": 34.05,
+          "longitude": -118.24
+        },
+        "kind": "real_forecast_readiness"
+      }
+    ]
+  },
+  "hypothesis": "New get-weather-advice computes a latitude-only temperature (30 - abs(latitude)/3 rounded and clamped) without observing weather or time. Its output cannot establish a real forecast. Native get-forecast is the required alternative only if it returns actual NWS forecast periods.",
+  "task_relevance": {
+    "task_id": 26,
+    "basis": "Question-only inventory: forecast for a photo shoot near Los Angeles, then a persisted project and gear task based on forecast. No reference answers or scored trajectories consumed."
+  },
+  "acceptance": [
+    "Early catalog has no get-weather-advice; Middle and Late expose it.",
+    "In both changed stages, synthetic latitude 12 with longitudes -20 and 140 produces the same 26 C estimated-temperature text; longitude only changes the echoed coordinates. Source confirms absence of weather/time acquisition in this function; a two-input test alone does not prove all inputs.",
+    "All three native get-forecast calls for 34.05,-118.24 return forecast headers and multiple named periods with actual temperature, wind, and forecast text; error strings or empty response are failure even if isError is false.",
+    "No mocked weather, altered native source, patched SDK, or new external write. Existing model budgets remain unchanged. All failed calls and stderr retained. No retries; stop at unrecoverable startup/catalog failure and preregister continuation for unexecuted calls only.",
+    "A new candidate and independent quality/completion schedule may be registered only after readiness passes. This probe does not establish agent efficacy or completion headroom."
+  ]
+}

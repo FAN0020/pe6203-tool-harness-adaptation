@@ -1,0 +1,81 @@
+{
+  "decisions": [
+    {
+      "id": "C001",
+      "action": "retain",
+      "after": "Validate mathematical expression syntax against grammar",
+      "evidence": [],
+      "reason": "No probe result contradicts the general validation description; probes tested only specific parameters."
+    },
+    {
+      "id": "C002",
+      "action": "retain",
+      "after": "Mathematical expression to validate",
+      "evidence": [],
+      "reason": "Parameter description remains accurate for the tested input; no justification to change."
+    },
+    {
+      "id": "C003",
+      "action": "unknown",
+      "after": "If true, return a more detailed validation result when supported",
+      "evidence": [],
+      "reason": "No probe exercised the detailed option, so its behavior is untested and uncertain."
+    },
+    {
+      "id": "C004",
+      "action": "replace",
+      "after": "Whether variable references are allowed is accepted as a parameter, but current probe results do not demonstrate enforcement: a variable reference returned valid both when set true and when set false.",
+      "evidence": [
+        "P1",
+        "P2"
+      ],
+      "reason": "P1 and P2 accepted the parameter but produced identical valid results for the same variable expression, so the claimed control is not evidenced."
+    },
+    {
+      "id": "C005",
+      "action": "unknown",
+      "after": "If true, include the abstract syntax tree (AST) structure in the validation result",
+      "evidence": [],
+      "reason": "No probe tested show_ast output, so the claim is unverified."
+    },
+    {
+      "id": "C006",
+      "action": "unknown",
+      "after": "If true, perform additional validation to ensure all brackets and parentheses are properly balanced",
+      "evidence": [],
+      "reason": "No probe tested unbalanced input or the check_balanced toggle; behavior unverified."
+    },
+    {
+      "id": "C007",
+      "action": "replace",
+      "after": "Maximum allowed nesting depth for expressions. Parameter is accepted with the stated range, but enforcement is not demonstrated: with max_depth set to 1, a nested expression '((1+2))' still returned valid.",
+      "evidence": [
+        "P3"
+      ],
+      "reason": "P3 accepted max_depth=1 yet returned valid for a more deeply nested expression, contradicting the stated failure behavior."
+    },
+    {
+      "id": "C008",
+      "action": "replace",
+      "after": "Intended to evaluate multiple mathematical expressions in one call, but the current native handler failed with an internal error ('handleBatchEvaluate is not a function'); per-expression results were not returned.",
+      "evidence": [
+        "P4"
+      ],
+      "reason": "P4 shows the batch handler errored rather than producing batch results, so the described capability is not demonstrated."
+    },
+    {
+      "id": "C009",
+      "action": "retain",
+      "after": "Array of mathematical expressions to evaluate",
+      "evidence": [],
+      "reason": "Schema-level description of the parameter remains valid; the handler failure does not contradict input schema semantics."
+    },
+    {
+      "id": "C010",
+      "action": "unknown",
+      "after": "If true, stop processing on first error; if false, continue and report all results",
+      "evidence": [],
+      "reason": "Batch handler failed before returning per-expression results, so stop_on_error semantics were not observed."
+    }
+  ]
+}

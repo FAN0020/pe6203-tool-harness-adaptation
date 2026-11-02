@@ -1,0 +1,12 @@
+{
+  "review_id": "R04",
+  "code_sha256": "c534b028e7f3ab2f7273dbc37d4d13b11e1106607d45a3ee7ea8d95240da26dd",
+  "parsed": true,
+  "executed": false,
+  "methods": {
+    "evaluate": "def evaluate(self, expression: str):\n        if not isinstance(expression, str) or len(expression) > 1000:\n            raise UnsafeExpressionError(\"Expression too long or wrong type\")\n        try:\n            tree = ast.parse(expression, mode=\"eval\")   # parse ONLY as expression\n        except SyntaxError as e:\n            raise UnsafeExpressionError(f\"Syntax error: {e.msg}\") from e\n        return self.visit(tree.body)",
+    "visit_Constant": "def visit_Constant(self, node):\n        # bool is a subclass of int -> explicitly reject\n        if isinstance(node.value, bool) or not isinstance(node.value, (int, float)):\n            raise UnsafeExpressionError(\"Only numeric constants allowed\")\n        return node.value",
+    "visit_Name": "def visit_Name(self, node):\n        if node.id in self.variables:\n            return self.variables[node.id]\n        raise UnsafeExpressionError(f\"Undefined variable: {node.id}\")",
+    "_bounded": "def _bounded(self, value):\n        if abs(value) > self.max_magnitude:\n            raise UnsafeExpressionError(\"Result magnitude exceeds limit\")\n        return value"
+  }
+}

@@ -1,0 +1,197 @@
+                                                VOYAGER: An Open-Ended Embodied Agent
+                                                     with Large Language Models
+
+
+                                                    Guanzhi Wang1 2 # , Yuqi Xie3 , Yunfan Jiang4∗ , Ajay Mandlekar1∗ ,
+                                                 Chaowei Xiao1 5 , Yuke Zhu1 3 , Linxi “Jim” Fan1† # , Anima Anandkumar1 2†
+                                                          1
+                                                            NVIDIA, 2 Caltech, 3 UT Austin, 4 Stanford, 5 UW Madison
+                                                       ∗
+                                                         Equal contribution † Equal advising # Corresponding authors
+
+
+
+
+arXiv:2305.16291v2 [cs.AI] 19 Oct 2023
+                                                                      https://voyager.minedojo.org
+
+                                                                                    Abstract
+                                                 We introduce VOYAGER, the first LLM-powered embodied lifelong learning agent
+                                                 in Minecraft that continuously explores the world, acquires diverse skills, and
+                                                 makes novel discoveries without human intervention. VOYAGER consists of three
+                                                 key components: 1) an automatic curriculum that maximizes exploration, 2) an
+                                                 ever-growing skill library of executable code for storing and retrieving complex
+                                                 behaviors, and 3) a new iterative prompting mechanism that incorporates environ-
+                                                 ment feedback, execution errors, and self-verification for program improvement.
+                                                 VOYAGER interacts with GPT-4 via blackbox queries, which bypasses the need for
+                                                 model parameter fine-tuning. The skills developed by VOYAGER are temporally
+                                                 extended, interpretable, and compositional, which compounds the agent’s abilities
+                                                 rapidly and alleviates catastrophic forgetting. Empirically, VOYAGER shows
+                                                 strong in-context lifelong learning capability and exhibits exceptional proficiency
+                                                 in playing Minecraft. It obtains 3.3× more unique items, travels 2.3× longer
+                                                 distances, and unlocks key tech tree milestones up to 15.3× faster than prior SOTA.
+                                                 VOYAGER is able to utilize the learned skill library in a new Minecraft world to
+                                                 solve novel tasks from scratch, while other techniques struggle to generalize.
+
+
+
+
+                                         Figure 1: VOYAGER discovers new Minecraft items and skills continually by self-driven exploration,
+                                         significantly outperforming the baselines. X-axis denotes the number of prompting iterations.
+
+
+                                                                                         1
+             Automatic Curriculum                         Iterative Prompting Mechanism                           Skill Library
+
+
+                                                                                                                  Mine Wood Log
+
+                                                                                                                  Make Crafting Table
+
+                    Make Crafting Table                                                                           Craft Stone Sword
+
+                                             New 
+                                                Skill 
+         Make Furnace
+
+                              Combat 
+       Task                                                 Retrieval
+                              Zombie                                                                              Craft Shield
+
+                                                                                                                  Cook Steak
+
+    Mine Wood Log                                                                                                 Combat Zombie
+                                                Env Feedback
+       Code as            Refine Program
+                                              Execution Errors      Actions
+
+
+
+                      Mine Diamond        Update 
+                                                Add New Skill
+                                          Exploration 
+
+                                          Progress
+                                                          Environment         Self-Verification
+
+Figure 2: VOYAGER consists of three key components: an automatic curriculum for open-ended
+exploration, a skill library for increasingly complex behaviors, and an iterative prompting mechanism
+that uses code as action space.
+
+
+1    Introduction
+Building generally capable embodied agents that continuously explore, plan, and develop new skills
+in open-ended worlds is a grand challenge for the AI community [1–5]. Classical approaches
+employ reinforcement learning (RL) [6, 7] and imitation learning [8–10] that operate on primitive
+actions, which could be challenging for systematic exploration [11–15], interpretability [16–18], and
+generalization [19–21]. Recent advances in large language model (LLM) based agents harness the
+world knowledge encapsulated in pre-trained LLMs to generate consistent action plans or executable
+policies [16, 22, 19]. They are applied to embodied tasks like games and robotics [23–27], as well as
+NLP tasks without embodiment [28–30]. However, these agents are not lifelong learners that can
+progressively acquire, update, accumulate, and transfer knowledge over extended time spans [31, 32].
+Let us consider Minecraft as an example. Unlike most other games studied in AI [33, 34, 10],
+Minecraft does not impose a predefined end goal or a fixed storyline but rather provides a unique
+playground with endless possibilities [23]. Minecraft requires players to explore vast, procedurally
+generated 3D terrains and unlock a tech tree using gathered resources. Human players typically start
+by learning the basics, such as mining wood and cooking food, before advancing to more complex
+tasks like combating monsters and crafting diamond tools. We argue that an effective lifelong learning
+agent should have similar capabilities as human players: (1) propose suitable tasks based on its
+current skill level and world state, e.g., learn to harvest sand and cactus before iron if it finds itself in
+a desert rather than a forest; (2) refine skills based on environmental feedback and commit mastered
+skills to memory for future reuse in similar situations (e.g. fighting zombies is similar to fighting
+spiders); (3) continually explore the world and seek out new tasks in a self-driven manner.
+Towards these goals, we introduce VOYAGER, the first LLM-powered embodied lifelong learning
+agent to drive exploration, master a wide range of skills, and make new discoveries continually
+without human intervention in Minecraft. VOYAGER is made possible through three key modules
+(Fig. 2): 1) an automatic curriculum that maximizes exploration; 2) a skill library for storing
+and retrieving complex behaviors; and 3) a new iterative prompting mechanism that generates
+executable code for embodied control. We opt to use code as the action space instead of low-level
+motor commands because programs can naturally represent temporally extended and compositional
+actions [16, 22], which are essential for many long-horizon tasks in Minecraft. VOYAGER interacts
+with a blackbox LLM (GPT-4 [35]) through prompting and in-context learning [36–38]. Our approach
+bypasses the need for model parameter access and explicit gradient-based training or finetuning.
+More specifically, VOYAGER attempts to solve progressively harder tasks proposed by the automatic
+curriculum, which takes into account the exploration progress and the agent’s state. The curriculum
+is generated by GPT-4 based on the overarching goal of “discovering as many diverse things as
+possible”. This approach can be perceived as an in-context form of novelty search [39, 40]. VOYAGER
+incrementally builds a skill library by storing the action programs that help solve a task successfully.
+
+
+                                                                    2
+              Inventory (5/36): {'oak_planks': 3, 'stick':                 Reasoning: Since you have a wooden pickaxe and some stones, it would be
+              4, 'crafting_table': 1, 'stone': 3,              GPT-4       beneficial to upgrade your pickaxe to a stone pickaxe for better efficiency.
+
+              'wooden_pickaxe': 1}                                         Task: Craft 1 stone pickaxe.
+
+              Biome: river
+                                                Reasoning: Since you have a fishing rod in your inventory and you are near a river
+              Inventory (4/36): {'sugar_cane': 3, 'paper':     GPT-4       biome, it would be a good opportunity to catch some fish for food and experience. 
+
+              3, 'fishing_rod': 1, 'wooden_pickaxe': 1}                    Task: Catch 1 fish.
+
+              Nearby entities: pig, cat, villager
+                        Reasoning: Your hunger is at 0, which means you need to find food to replenish
+              Health: 12/20
+                                  GPT-4       your hunger. Since there are pigs nearby, you can kill one to obtain raw porkchops.
+
+              Hunger: 0/20                                                 Task: Kill 1 pig.
+
+              Inventory (6/36): {'furnace': 1,                             Reasoning: You have raw iron and coal, and you have a furnace. It's time to smelt
+              'stone_pickaxe': 1, 'oak_planks': 7,             GPT-4       the iron to make iron ingots, which can be used to craft better tools and armor.
+
+              'crafting_table': 1, 'raw_iron': 4, 'coal': 1}               Task: Smelt 4 raw iron.
+
+              Time: night
+                                                 Reasoning: Since it's night and there's a zombie nearby, it's a good opportunity to
+              Nearby entities: zombie
+                         GPT-4       try killing the zombie now that you have a stone sword and a shield equipped.
+
+              Equipment: 'stone_sword', 'shield'                           Task: Kill 1 zombie.
+
+
+Figure 3: Tasks proposed by the automatic curriculum. We only display the partial prompt for brevity.
+See Appendix, Sec. A.3 for the full prompt structure.
+
+
+Each program is indexed by the embedding of its description, which can be retrieved in similar
+situations in the future. Complex skills can be synthesized by composing simpler programs, which
+compounds VOYAGER’s capabilities rapidly over time and alleviates catastrophic forgetting in other
+continual learning methods [31, 32].
+However, LLMs struggle to produce the correct action code consistently in one shot [41]. To address
+this challenge, we propose an iterative prompting mechanism that: (1) executes the generated
+program to obtain observations from the Minecraft simulation (such as inventory listing and nearby
+creatures) and error trace from the code interpreter (if any); (2) incorporates the feedback into GPT-4’s
+prompt for another round of code refinement; and (3) repeats the process until a self-verification
+module confirms the task completion, at which point we commit the program to the skill library (e.g.,
+craftStoneShovel() and combatZombieWithSword()) and query the automatic curriculum for
+the next milestone (Fig. 2).
+Empirically, VOYAGER demonstrates strong in-context lifelong learning capabilities. It can construct
+an ever-growing skill library of action programs that are reusable, interpretable, and generalizable
+to novel tasks. We evaluate VOYAGER systematically against other LLM-based agent techniques
+(e.g., ReAct [29], Reflexion [30], AutoGPT [28]) in MineDojo [23], an open-source Minecraft AI
+framework. VOYAGER outperforms prior SOTA by obtaining 3.3× more unique items, unlocking key
+tech tree milestones up to 15.3× faster, and traversing 2.3× longer distances. We further demonstrate
+that VOYAGER is able to utilize the learned skill library in a new Minecraft world to solve novel tasks
+from scratch, while other methods struggle to generalize.
+
+2     Method
+VOYAGER consists of three novel components: (1) an automatic curriculum (Sec. 2.1) that suggests
+objectives for open-ended exploration, (2) a skill library (Sec. 2.2) for developing increasingly
+complex behaviors, and (3) an iterative prompting mechanism (Sec. 2.3) that generates executable
+code for embodied control. Full prompts are presented in Appendix, Sec. A.
+
+2.1   Automatic Curriculum
+
+Embodied agents encounter a variety of objectives with different complexity levels in open-ended
+environments. An automatic curriculum offers numerous benefits for open-ended exploration, ensur-
+ing a challenging but manageable learning process, fostering curiosity-driven intrinsic motivation
+for agents to learn and explore, and encouraging the development of general and flexible problem-
+solving strategies [42–44]. Our automatic curriculum capitalizes on the internet-scale knowledge
+contained within GPT-4 by prompting it to provide a steady stream of new tasks or challenges. The
+curriculum unfolds in a bottom-up fashion, allowing for considerable adaptability and responsiveness
+to the exploration progress and the agent’s current state (Fig. 3). As VOYAGER progresses to harder
+self-driven goals, it naturally learns a variety of skills, such as “mining a diamond”.
+
+
+                                                                       3
+

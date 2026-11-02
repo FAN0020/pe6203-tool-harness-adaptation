@@ -1,0 +1,92 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PE6203 · 既有方法复核与研究取舍</title>
+<style>body{font:16px/1.7 system-ui,sans-serif;color:#182437;background:#f5f7fa;margin:auto;max-width:1150px;padding:28px}main{background:white;padding:34px;border-radius:12px}h1{font-size:30px;line-height:1.3}h2{font-size:22px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;text-align:left;border-bottom:1px solid #d9e0e8;vertical-align:top}th{background:#eef3f8}a{color:#175da8}code,pre{font-size:13px;overflow-wrap:anywhere}pre{white-space:pre-wrap;background:#eef3f8;padding:12px}.note{border-left:4px solid #b57d13;padding:12px 16px;background:#fff8e7}.scroll{overflow-x:auto}summary{cursor:pointer;font-weight:600;margin-top:12px}.small{font-size:14px;color:#526074}@media(max-width:650px){body{padding:10px}main{padding:18px}}</style><main>
+<h1>既有方法复核：保留收益，也保留反例</h1>
+<p class="note">现有budget_feedback的规划完成收益未在本次复核中复现；两组完成2/3，预算反馈原始TF/PE更低。保留历史阳性和本次阴性，不晋级。</p>
+<p>2026-10-31 · 无新策略。预先固定task283 Middle（历史阳性）、133 Late（安全建议反例）、235 Late（不变任务），原Selective Patch与budget_feedback各一次，共6轨迹／30原协议评分。此处是独立研究附录，不替换27条课程主实验或共享Slides。</p>
+<h2>本轮原始结果</h2><table><tr><th>方法</th><th>正常结束</th><th>变化任务</th><th>不变任务</th><th>TF</th><th>PE</th><th>更新tokens / USD</th></tr>
+<tr><td>budget_feedback</td><td>2/3</td><td>1/2</td><td>1/1</td><td>8.9333</td><td>8.0000</td><td>0 / 0</td></tr>
+<tr><td>selective_patch</td><td>2/3</td><td>1/2</td><td>1/1</td><td>9.8000</td><td>9.4000</td><td>0 / 0</td></tr>
+</table><p>不对这个不完整的两阶段子集计算ECS；正常结束、任务内容和judge分数分开。原始TF/PE未因发现评分错误而修改。</p>
+<table><tr><th>Cell</th><th>Task / stage</th><th>方法</th><th>终态 / 轮数</th><th>TF</th><th>PE</th></tr>
+<tr><td>cell-001</td><td>235 / late</td><td>budget_feedback</td><td>completed / 2</td><td>10</td><td>10</td></tr>
+<tr><td>cell-002</td><td>283 / middle</td><td>selective_patch</td><td>max_rounds / 12</td><td>9.6</td><td>9.2</td></tr>
+<tr><td>cell-003</td><td>133 / late</td><td>selective_patch</td><td>completed / 2</td><td>9.8</td><td>9</td></tr>
+<tr><td>cell-004</td><td>133 / late</td><td>budget_feedback</td><td>completed / 3</td><td>9.4</td><td>6.6</td></tr>
+<tr><td>cell-005</td><td>283 / middle</td><td>budget_feedback</td><td>max_rounds / 12</td><td>7.4</td><td>7.4</td></tr>
+<tr><td>cell-006</td><td>235 / late</td><td>selective_patch</td><td>completed / 2</td><td>10</td><td>10</td></tr>
+</table><h2>独立检查：分数不能代替事实</h2>
+<details open><summary>cell-001 · 235 late · budget_feedback</summary><p>三次成功工具调用，5个省份、12个月和6个品类值及单位均正确；摘要正确指出二月和八月下降，没有错误汇总。两种方法使用相同K0，不能把此处相对原Patch的摘要优势归因于知识适应。图表客户端呈现未核验。</p><p>TF原评分：[10, 10, 10, 10, 10]；PE原评分：[10, 10, 10, 10, 10]</p></details>
+<details open><summary>cell-002 · 283 middle · selective_patch</summary><p>12轮后没有最终回答；41记录=10实际父节点+31叶任务，604叶工时，依赖/父ID有效无环。CSV、日志、可视化、集成工作均有具体内容，末两轮为5项工作新增11个真实子任务。不能沿用旧批次M4-M8空的解释。一次使用1.2/1.3作为依赖ID被拒，随后改用实际UUID恢复。第10轮list_tasks称55条但只含30个不同ID；同轮分析器也分析30条，这是上游层级重复统计问题。</p><p>TF原评分：[10, 10, 8, 10, 10]；PE原评分：[9, 9, 9, 10, 9]</p></details>
+<details open><summary>cell-003 · 133 late · selective_patch</summary><p>两次成功调用并正常结束。工具仅回复语法有效，未报告答案所称depth3。所附compile_safe遍历所有AST子节点，但_ALLOWED_NODES不含Add等运算符；普通1+1会在Add节点被拒，和自带成功测试矛盾。静态检查已定位，无执行生成代码，不能把语法可解析当安全实现通过。</p><p>TF原评分：[9, 10, 10, 10, 10]；PE原评分：[5, 10, 10, 10, 10]</p></details>
+<details open><summary>cell-004 · 133 late · budget_feedback</summary><p>6次调用并正常结束，2+3*4=14及两个拒绝结果确有观察；但由不支持**推断指数攻击类别不存在、没有标识符，以及用这些工具结果背书新Python实现，都超出证据。冻结服务源码明确支持^；未执行危险幂表达式。_check遍历ast.walk但未允许Add等节点，普通加法仍被拒。未知安全完整性保持unknown。</p><p>TF原评分：[9, 10, 9, 10, 9]；PE原评分：[5, 8, 5, 8, 7]</p></details>
+<details open><summary>cell-005 · 283 middle · budget_feedback</summary><p>12轮后没有最终回答；58记录=8父节点+50叶任务，538叶工时，依赖及父ID有效无环。七条日志任务首次因把实际UUID中的441b误写为411b而失败，第6轮改正后全部创建；不是七次原参数重试，更不是从未创建。第11轮实际拆分解析器为两个子任务，同时降低并改名父任务为umbrella；真实拆分存在，不能仅凭父级降分认定规避。第12轮仍有7个里程碑复杂度警告，未向用户给出解释。声明复杂度2–4不等于独立验证了难度。</p><p>TF原评分：[9, 10, 9, 5, 4]；PE原评分：[7, 9, 7, 7, 7]</p></details>
+<details open><summary>cell-006 · 235 late · selective_patch</summary><p>三次成功图表调用的数据、月份及单位均正确；最终文字把月度合计25.4写成23.4，并称只有八月下降，漏掉二月。五个TF/PE均10，原分保留。知识和预算反馈完全相同，不能解释为选择性更新造成退化。</p><p>TF原评分：[10, 10, 10, 10, 10]；PE原评分：[10, 10, 10, 10, 10]</p></details>
+<h2>故障属于哪一层</h2>
+<table><tr><th>观察</th><th>支持的判断</th><th>不支持的判断</th></tr>
+<tr><td>两组规划耗尽12轮</td><td>本次完成收益未复现；已有实际产物</td><td>不能自动说工具更新失败或整个任务内容为空</td></tr>
+<tr><td>BF七个日志任务使用错误父UUID</td><td>参数抄写错误；改正后均成功创建</td><td>不是七次原参数重试；没有证明知识缺参</td></tr>
+<tr><td>层级列表55条，但只有30个不同ID</td><td>上游把子任务重复计数；后续另创建11条，最终41</td><td>不能把工具错误数字全归因于agent或judge凭空捏造</td></tr>
+<tr><td>Python示例拒绝Add节点；指数推论越界</td><td>回答代码/推理缺陷；已用静态证据定位</td><td>不是已确认under-update或over-update；不等于完整安全审计</td></tr>
+<tr><td>多份judge理由虚构最终回答、错误重试次数</td><td>计数/事实问题与1000字符观察截断需分别披露</td><td>不能自行修正历史分数或由TF差值断言补丁因果</td></tr></table>
+<h2>所有近期对照放在一起看</h2><p>以下按cohort分开。七组已从原始归档重新核算一致；不是把不同任务、供应商或复用轨迹混成一个统计样本。matched-existing已明确复用budget-contract的3条BF，禁止重复计入总量。早期策略搜索和网络中断记录仍在原研究报告中。</p>
+<table><tr><th>研究 / 方法</th><th>正常结束</th><th>TF</th><th>PE</th><th>主要限制</th></tr>
+<tr><td>初次完成/质量比较<br>selective_patch</td><td>4/6</td><td>9.9667</td><td>9.0000</td><td>供应商混用；两组完成4/6</td></tr>
+<tr><td>初次完成/质量比较<br>budget_feedback</td><td>4/6</td><td>10.0000</td><td>8.8000</td><td>供应商混用；两组完成4/6</td></tr>
+<tr><td>具体预算规则候选<br>budget_feedback</td><td>3/3</td><td>9.9333</td><td>9.7333</td><td>候选未胜；三格不是三阶段</td></tr>
+<tr><td>具体预算规则候选<br>budget_contract</td><td>3/3</td><td>9.8667</td><td>8.9333</td><td>候选未胜；三格不是三阶段</td></tr>
+<tr><td>已有方法补充比较<br>selective_patch</td><td>2/6</td><td>9.4000</td><td>8.3667</td><td>3条复用，两个批次；有实际产物收益也有反例</td></tr>
+<tr><td>已有方法补充比较<br>budget_feedback</td><td>6/6</td><td>9.8000</td><td>9.2667</td><td>3条复用，两个批次；有实际产物收益也有反例</td></tr>
+<tr><td>追加证据规则候选<br>evidence_scope</td><td>1/3</td><td>9.6000</td><td>9.0667</td><td>候选完成更低；不晋级</td></tr>
+<tr><td>追加证据规则候选<br>budget_feedback</td><td>2/3</td><td>9.8000</td><td>9.4667</td><td>候选完成更低；不晋级</td></tr>
+<tr><td>Swift工具迁移<br>selective_patch</td><td>3/3</td><td>9.9333</td><td>7.4667</td><td>四方法同一任务三阶段；单次且代码有附加错误</td></tr>
+<tr><td>Swift工具迁移<br>no_update</td><td>1/3</td><td>9.9333</td><td>6.1333</td><td>四方法同一任务三阶段；单次且代码有附加错误</td></tr>
+<tr><td>Swift工具迁移<br>full_rewrite</td><td>1/3</td><td>9.9333</td><td>8.6667</td><td>四方法同一任务三阶段；单次且代码有附加错误</td></tr>
+<tr><td>Swift工具迁移<br>budget_feedback</td><td>3/3</td><td>9.9333</td><td>7.5333</td><td>四方法同一任务三阶段；单次且代码有附加错误</td></tr>
+<tr><td>每日题实时信息迁移<br>selective_patch</td><td>3/3</td><td>10.0000</td><td>9.8000</td><td>四方法均3/3；只NU缺当日内容，BF非PE最高</td></tr>
+<tr><td>每日题实时信息迁移<br>no_update</td><td>3/3</td><td>8.9333</td><td>8.6667</td><td>四方法均3/3；只NU缺当日内容，BF非PE最高</td></tr>
+<tr><td>每日题实时信息迁移<br>full_rewrite</td><td>3/3</td><td>9.9333</td><td>9.6000</td><td>四方法均3/3；只NU缺当日内容，BF非PE最高</td></tr>
+<tr><td>每日题实时信息迁移<br>budget_feedback</td><td>3/3</td><td>10.0000</td><td>9.3333</td><td>四方法均3/3；只NU缺当日内容，BF非PE最高</td></tr>
+</table><p>历史matched-existing中BF完成6/6、原SP2/6，task283 Middle的具体拆分和356h汇总真实改善，仍是有效的局部阳性。初次比较没有完成收益，本次复核两组2/3且BF分数较低，说明不能据那一批次宣称稳定胜者。迁移实验支持更新知识恢复工具/内容，但不足以证明额外预算规则普遍提高质量。Early及task235相同K0的差异不能归因于适应。</p>
+<h2>方法与课程交付的边界</h2><p>原Selective Patch：目录差异 → 显式依赖影响范围 → 仅复制受影响目标字段 → 验证schema/routing与不变记录。budget_feedback在变化/新增记录追加参数变化说明、固定公开探测反馈和必要工作/预算规则；本轮六份知识与历史对应版本相同，没有新增规则，也没有把任务、答案或judge反馈送入updater。</p>
+<p>No Update保留K0。Full Rewrite重建完整目标目录，LLM重新生成全部description；schema、output schema、routing和已有usage rules复制目标值。该实现解释已披露，是否满足教师对“全部知识再生成”的预期仍列入TA问题；不能改实现后沿用旧分数。四方法迁移研究有同一模型/供应商/预算的三阶段对照，但与原3任务课程主表保持独立。</p>
+<p>课程27条／135评分／10,959历史文件及4诊断再次离线复核通过。主实验费用仍为已知$0.40691929208加1笔未知，不能因本轮无未知费用而把旧未知项置零。原Patch九个PE仍是：133＝10/8/7；235＝10/10/10；283＝9/9.4/8.6；合计82，平均82/9＝9.1111。课程要求TF、PE、ECS、恢复、保持、更新成本和失败分析，不要求PE+0.5、胜过所有baseline或每个附加句子完美。当前方法可作为透明的研究交付；“稳定提高完成率与任务质量”的更强研究结论尚未成立。</p>
+<table><tr><th>必需内容</th><th>已有证据</th><th>仍需说明</th></tr>
+<tr><td>三方法 / 三阶段 / TF PE ECS</td><td>原课程27条；迁移附录四方法三阶段</td><td>不混合不同cohort；ECS总体SD与样本SD分别报告</td></tr>
+<tr><td>Tool / Parameter / Description</td><td>原覆盖表与430/90真实删除/迁移补充</td><td>环境存在、任务相关、实际触达三个层次不可混淆</td></tr>
+<tr><td>恢复 / 保持 / 成本</td><td>迁移工具和当日题恢复；235原数据保持；逐请求账本</td><td>代码/摘要反例保留；零updateAPI不等于零开发或探测成本</td></tr>
+<tr><td>under-update</td><td>受控缺allow_variables导致8次缺参拒绝</td><td>受控机制confirmed；不是原updater自然遗漏；TA适用性未确认</td></tr>
+<tr><td>over-update</td><td>无关Wikipedia路由readArticle→read_article导致两次读取失败；控制成功</td><td>受控局部损害confirmed；保护验证器会拒绝它；两条完整任务都结束；TA适用性未确认</td></tr>
+<tr><td>报告 / 复现 / 展示</td><td>课程PDF、源代码/原始包、13主讲+5Q&A Slides和讲稿已存在</td><td>研究附录未自动覆盖冻结交付；团队排练、TA答复及正式提交需团队完成</td></tr></table>
+<p>TA问题草稿（不发送）：明确披露的受控缺参与无关路由局部失败是否足以满足§4.2？若不足，需补哪种证据？FR完整记录重建但保护schema/routing、复制usage rules是否满足§§2/4.1？这些是要求解释问题，继续优化分数不能替代澄清。旧相关usage-rule对照仍仅suggestive，六条chart负诊断仍保留。</p>
+<h2>公平、费用与复现</h2><p>两方法实际均DigitalOcean，模型deepseek/deepseek-v4.1-flash-1017、temperature0、4096输出tokens、12轮、相同原始任务和五槽judge。固定单次执行条件用于公平比较；没有总费用/轨迹额度或provider价格门槛。日期、服务及隐藏后端版本仍会变化。此处一格一次是定点复核，不能称统计显著或独立保护测试。</p>
+<p>65请求＝33 agent＋30 judge＋2预检。已知US$0.116399760，未知0项；账本首尾305.26秒。更新模型调用／tokens／API费用均0；两方法更新时间分别见复算JSON。金额来自响应，不是独立账户账单。</p>
+<p>复核结论：不晋级budget_feedback，不低分重跑直到赢，不启动81/108矩阵。已找到局部收益，也已记录未复现和质量缺陷。任何后续改动应先找到具体缺失/错误的知识机制；目前UUID抄写、生成代码错误和上游计数问题不能自动成为追加通用规则的理由。</p>
+<pre>python3 results/evidence/existing-method-recheck-20261031/verify_trial.py
+python3 results/evidence/existing-method-recheck-20261031/check_artifacts.py
+python3 results/evidence/existing-method-recheck-20261031/check_math_examples.py
+python3 results/evidence/existing-method-recheck-20261031/check_observations.py</pre>
+<p>源码冻结e59c430；266文件原始归档SHA-256：4733c0c06af382f09d806835dad6b07d74105ff3bdb3e43cb330638fd5f29d40</p><h2>审阅入口</h2><p>
+<a href="../results/evidence/existing-method-recheck-20261031/trial-verification.json">trial-verification.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/quality-review.json">quality-review.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/judge-audit.json">judge-audit.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/artifact-checks.json">artifact-checks.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/math-example-checks.json">math-example-checks.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/observation-checks.json">observation-checks.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/historical-reverification.json">historical-reverification.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/course-reverification.json">course-reverification.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/postrun-freeze.json">postrun-freeze.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/raw-manifest.json">raw-manifest.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/raw-trial.tar.gz">raw-trial.tar.gz</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/source-e59c430.tar.gz">source-e59c430.tar.gz</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/source-manifest.json">source-manifest.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/upstream-source-manifest.json">upstream-source-manifest.json</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/upstream-source.tar.gz">upstream-source.tar.gz</a> ·
+<a href="../results/evidence/existing-method-recheck-20261031/reproduction.json">reproduction.json</a> ·
+<a href="matched-existing-results.html">matched-existing-results.html</a> ·
+<a href="tool-migration-results.html">tool-migration-results.html</a> ·
+<a href="daily-migration-results.html">daily-migration-results.html</a> ·
+<a href="routing-fault-results.html">routing-fault-results.html</a> ·
+<a href="selective-strategy-search.html">selective-strategy-search.html</a> ·
+<a href="../submission/report-final.html">冻结课程报告</a> · <a href="../HANDOVER.md">HANDOVER</a></p></main></html>

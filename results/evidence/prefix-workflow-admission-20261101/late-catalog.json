@@ -1,0 +1,585 @@
+{
+  "_meta": null,
+  "nextCursor": null,
+  "tools": [
+    {
+      "name": "get_slidev_usage",
+      "title": null,
+      "description": "Get comprehensive usage documentation of Slidev including layouts, animations, and components",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "check_environment",
+      "title": null,
+      "description": "Check if Node.js and slidev-cli is ready",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "create_slidev",
+      "title": null,
+      "description": "Create a new Slidev project. You need to ask user for title and author to continue the task. After building slides, use export_slidev to generate PDF or static HTML.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The path where to create the Slidev project"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the presentation"
+          },
+          "author": {
+            "type": "string",
+            "description": "The author of the presentation"
+          }
+        },
+        "required": [
+          "path",
+          "title",
+          "author"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "load_slidev",
+      "title": null,
+      "description": "Load existing Slidev project and get the current Slidev markdown content",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The path to the existing Slidev project"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "make_cover",
+      "title": null,
+      "description": "Create or update Slidev cover page",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the presentation"
+          },
+          "subtitle": {
+            "type": "string",
+            "description": "The subtitle of the presentation"
+          },
+          "author": {
+            "type": "string",
+            "description": "The author of the presentation"
+          },
+          "background": {
+            "type": "string",
+            "description": "The background image URL"
+          },
+          "pythonStringTemplate": {
+            "type": "string",
+            "description": "Python string template for custom cover layout"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "add_page",
+      "title": null,
+      "description": "Add new page to the presentation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Markdown format text to describe page content"
+          },
+          "layout": {
+            "type": "string",
+            "description": "Slidev layout name (default: \"default\")",
+            "default": "default"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "set_page",
+      "title": null,
+      "description": "Set the content of a specific page",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number",
+            "description": "The index of the page to set (0 is cover)"
+          },
+          "content": {
+            "type": "string",
+            "description": "The markdown content to set"
+          },
+          "layout": {
+            "type": "string",
+            "description": "The layout of the page",
+            "default": "default"
+          }
+        },
+        "required": [
+          "index",
+          "content"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "get_page",
+      "title": null,
+      "description": "Get the content of a specific page",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number",
+            "description": "The index of the page to get"
+          }
+        },
+        "required": [
+          "index"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "get_all_slides",
+      "title": null,
+      "description": "Get all slides with full content, layout, and metadata. Use get_slide_structure for a compact structural overview of the presentation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "get_slide_structure",
+      "title": null,
+      "description": "Get a compact structural summary of the current presentation, including slide count, layout usage, cover presence, and per-slide metadata without requiring a full content review",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "create_bulk_slides",
+      "title": null,
+      "description": "Create a complete presentation with multiple slides at once based on topic",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "The main topic of the presentation"
+          },
+          "slideCount": {
+            "type": "number",
+            "description": "Number of slides to generate (default: 10)",
+            "default": 10
+          },
+          "style": {
+            "type": "string",
+            "enum": [
+              "minimal",
+              "detailed",
+              "visual",
+              "academic"
+            ],
+            "description": "Presentation style",
+            "default": "detailed"
+          },
+          "includeAnimations": {
+            "type": "boolean",
+            "description": "Include animations in slides",
+            "default": true
+          },
+          "includeCode": {
+            "type": "boolean",
+            "description": "Include code examples",
+            "default": false
+          },
+          "includeImages": {
+            "type": "boolean",
+            "description": "Include images in slides",
+            "default": true
+          },
+          "theme": {
+            "type": "string",
+            "description": "Theme to apply",
+            "default": "default"
+          },
+          "customInstructions": {
+            "type": "string",
+            "description": "Additional custom instructions for slide generation"
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional custom title for the cover slide"
+          },
+          "subtitle": {
+            "type": "string",
+            "description": "Optional custom subtitle for the cover slide"
+          },
+          "preserveCover": {
+            "type": "boolean",
+            "description": "Keep the existing cover slide unchanged",
+            "default": false
+          },
+          "author": {
+            "type": "string",
+            "description": "Optional author name for the cover slide"
+          },
+          "clearExistingSlides": {
+            "type": "boolean",
+            "description": "Clear existing slides before adding generated slides (default: true)",
+            "default": true
+          },
+          "defaultLayout": {
+            "type": "string",
+            "description": "Fallback layout for generated slides when no layout is specified",
+            "default": "default"
+          }
+        },
+        "required": [
+          "topic"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "apply_theme",
+      "title": null,
+      "description": "Apply a theme to the presentation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "themeName": {
+            "type": "string",
+            "enum": [
+              "corporate",
+              "creative",
+              "minimal",
+              "dark",
+              "custom"
+            ],
+            "description": "Predefined theme name or \"custom\""
+          },
+          "customTheme": {
+            "type": "object",
+            "description": "Custom theme configuration (if themeName is \"custom\")",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "primaryColor": {
+                "type": "string"
+              },
+              "secondaryColor": {
+                "type": "string"
+              },
+              "backgroundColor": {
+                "type": "string"
+              },
+              "fontFamily": {
+                "type": "string"
+              },
+              "fontSize": {
+                "type": "string"
+              },
+              "transition": {
+                "type": "string"
+              },
+              "customCSS": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "themeName"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "add_animation",
+      "title": null,
+      "description": "Add animation to a specific slide",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "slideIndex": {
+            "type": "number",
+            "description": "Index of the slide to add animation to"
+          },
+          "animationType": {
+            "type": "string",
+            "enum": [
+              "v-click",
+              "v-after",
+              "v-click-hide",
+              "v-motion",
+              "transition"
+            ],
+            "description": "Type of animation"
+          },
+          "target": {
+            "type": "string",
+            "description": "Target element or text to animate"
+          },
+          "options": {
+            "type": "object",
+            "description": "Animation options"
+          }
+        },
+        "required": [
+          "slideIndex",
+          "animationType"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "add_component",
+      "title": null,
+      "description": "Add a component (Tweet, Youtube, Video, etc.) to a slide",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "slideIndex": {
+            "type": "number",
+            "description": "Index of the slide to add component to"
+          },
+          "componentType": {
+            "type": "string",
+            "enum": [
+              "Tweet",
+              "Youtube",
+              "SlidevVideo",
+              "Arrow",
+              "Toc",
+              "Link",
+              "LightOrDark",
+              "Transform",
+              "AutoFitText"
+            ],
+            "description": "Type of component to add"
+          },
+          "props": {
+            "type": "object",
+            "description": "Component properties"
+          },
+          "children": {
+            "type": "string",
+            "description": "Component children content"
+          }
+        },
+        "required": [
+          "slideIndex",
+          "componentType"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "review_slides",
+      "title": null,
+      "description": "Review the current presentation and get quality suggestions on clarity, flow, and improvements. Use get_slide_structure for a structural summary.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "websearch",
+      "title": null,
+      "description": "Extract content from a URL for presentation material. If the user provides a URL, ask them to search the web themselves and provide the relevant text content.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL to fetch content from"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "start_slidev",
+      "title": null,
+      "description": "Return the command to start Slidev HTTP server for live preview. Use export_slidev to produce a final PDF or static HTML output.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "search_npm_packages",
+      "title": null,
+      "description": "Search for npm packages by query",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query for npm packages"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "search_slidev_themes",
+      "title": null,
+      "description": "Search for available Slidev themes on npm",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    },
+    {
+      "name": "export_slidev",
+      "title": null,
+      "description": "Return the CLI command to export the current Slidev presentation to PDF or static HTML using the slidev export command",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "pdf",
+              "html"
+            ],
+            "description": "Export format: \"pdf\" for a PDF file, \"html\" for a static HTML bundle (default: \"pdf\")",
+            "default": "pdf"
+          },
+          "outputPath": {
+            "type": "string",
+            "description": "Optional output file or directory path for the exported file"
+          }
+        }
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": null,
+      "_meta": null,
+      "execution": null
+    }
+  ]
+}

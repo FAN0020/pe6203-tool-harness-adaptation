@@ -1,0 +1,133 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Artifact contract：开发对照负结果</title><style>body{font:16px/1.6 system-ui;margin:auto;max-width:1100px;padding:40px;color:#182235;background:#f5f7fa}h1{font-size:34px}table{border-collapse:collapse;width:100%;background:white;font-size:14px}td,th{padding:10px;border:1px solid #dce2ea;text-align:left}.card{padding:20px;background:white;border:1px solid #dce2ea;border-radius:12px;margin:20px 0}.bad{border-left:6px solid #b83240}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}img{max-width:100%}a{color:#2058aa}small{color:#596579}</style>
+<h1>Artifact contract 未改善完成率与完整产物质量</h1><p>2026-11-01 · PE6203选择性工具知识适应研究 · 原有证据保持冻结</p>
+<div class="card bad"><b>开发门槛不通过，不进入36条验证；研究Goal仍未完成。</b><p>变化任务457：正常完成均0/2；完整产物通过均0/2。原Selective Patch的TF4.0/PE6.6，候选TF2.0/PE6.0。保持任务235两组均完成、TF/PE10，但摘要错误使完整产物检查均未通过。</p></div>
+<div class="card"><h2>干预与边界</h2><p>只在已变化的create_bulk_slides追加一条经36次合成探测确认的持久化效果知识：生成模板数不等于文件页数，customInstructions未生效，重复调用保留旧页，默认覆盖封面重置主题；明确内容可经add_page/set_page写入。其他字段不变，235两组精确K0。没有任务事实、参考答案或评分输入updater。</p><p>模型、DigitalOcean供应商、温度0、4096输出tokens、12轮、900秒、5个原协议judge均固定。每个judge是一次评分，不是一次独立agent重复。此处仅开发试验，不能宣称可复现改善或总体显著性。</p></div>
+<h2>全部结果</h2><table><thead><tr><th>匿名审阅ID</th><th>任务</th><th>阶段</th><th>方法</th><th>执行状态</th><th>TF</th><th>PE</th><th>全部必需属性</th></tr></thead><tbody><tr><td>B01</td><td>235</td><td>late</td><td>artifact_contract</td><td>completed</td><td>10</td><td>10</td><td>False</td></tr><tr><td>B02</td><td>457</td><td>late</td><td>selective_patch</td><td>output_truncated</td><td>3.6</td><td>6.2</td><td>False</td></tr><tr><td>B05</td><td>457</td><td>middle</td><td>selective_patch</td><td>max_rounds</td><td>4.4</td><td>7</td><td>False</td></tr><tr><td>B03</td><td>457</td><td>late</td><td>artifact_contract</td><td>output_truncated</td><td>1.4</td><td>6.8</td><td>False</td></tr><tr><td>B06</td><td>457</td><td>middle</td><td>artifact_contract</td><td>output_truncated</td><td>2.6</td><td>5.2</td><td>False</td></tr><tr><td>B04</td><td>235</td><td>late</td><td>selective_patch</td><td>completed</td><td>10</td><td>10</td><td>False</td></tr></tbody></table>
+<div class="card"><h2>真实产物与终止机制</h2><p>候选两个deck都只留下默认封面；两次最后请求的4096输出tokens全部被供应商计为reasoning，没有内容或工具调用。原SP Late留下17页模板/重复内容，最后同样在reasoning阶段截断；原SP Middle到12轮时只写了部分正文，正文的嵌套frontmatter导致根主题丢失和白底浅色字。不能把这些失败统一归为漏参数，也不能归咎于已正常工作的PDF环境。</p><p>25个实际页面均在固定渲染器中生成DOM/截图并核对原文件hash。所有方法/TF/PE在6份属性审阅提交554e7b4后才揭示。审阅者是同一协调者，非独立人类；行为可能泄露方法。外部封面图片的跨命令网络阻断未被证实，单封面的整套设计判定为unknown；两份实际正文的白底/低对比失败不依赖外部图片。</p>
+<figure><img src="../results/evidence/artifact-contract-runtime-pilot-20261031/render/B05/B05-page05.png"><figcaption>原SP Middle的实际页面：正文内容尚未完成，浅色文本出现在白底上。没有事后修图或补写页面。</figcaption></figure></div>
+<div class="card"><h2>基础环境修复与中止批</h2><p>在模型前固定原生canvas依赖、只读本机PDF URL与等价旧式schema转换；原PDF内容不变。固定Slidev53.0.0/default0.25.0与发布工具dark样式的本地主题支持两组。</p><p>首个模型批次因check_environment找不到本地CLI而尝试全局npm安装，中止于2条已评分、第三条执行已落盘但评分未完。随后仅修正共用PATH并将npm prefix/cache约束到workspace；三个阶段环境检查均直接返回53.0.0。6份知识逐字未变。中止批全部保存，不混入上表、不据此挑选策略。全局npm现显示CLI53.0.0；没有运行前清单，无法完全重建其副作用，未卸载用户包。</p></div>
+<div class="card"><h2>费用与复核</h2><p>本批71次API请求＝39 agent＋30 judge＋2预检；已知$0.087692292，未知0，含预检$0.00001296，约220.58秒。更新模型调用/tokens/USD均0；逐次更新时间、tokens、响应ID和原评分见机器复核结果。中止批另计$0.040542072＋1笔未知费用；$0.319488只是预留，不能当实付。两批合计已知$0.128234364＋1笔未知。</p><p>691个本批原始文件、135个源码/配置文件、711个中止原始文件均已归档；5390个中止运行产生的依赖缓存留在本机并列出hash。ECS不适用于此局部日程；课程27条与NU/FR/历史ECS另行保留，未混池。</p><pre>python3 results/evidence/artifact-contract-runtime-pilot-20261031/verify_trial.py</pre><p><a href="../results/evidence/artifact-contract-runtime-pilot-20261031/trial-verification.json">独立离线复核结果</a> · <a href="../experiments/artifact-contract-runtime-v1.json">冻结协议</a> · <a href="../results/evidence/artifact-contract-runtime-pilot-20261031/termination-diagnostic.json">终止指标投影</a></p></div>
+<h2>逐属性证据</h2><details><summary>B01 · artifact_contract · 235 late</summary><pre>{
+  &quot;review_id&quot;: &quot;B01&quot;,
+  &quot;task_id&quot;: 235,
+  &quot;input_sha256&quot;: &quot;bdcc9950d1dd7a9a97e251ce9d47c38d75d5cc3e90224c5d2ae08cf831b89bfa&quot;,
+  &quot;properties&quot;: {
+    &quot;charts&quot;: &quot;pass&quot;,
+    &quot;summary&quot;: &quot;fail&quot;
+  },
+  &quot;core_pass&quot;: false,
+  &quot;evidence&quot;: {
+    &quot;charts&quot;: &quot;Successful returnedspecs preserve5province values,12monthly valuesinorder,6category/regionvalues andmillionyuan units.&quot;,
+    &quot;summary&quot;: &quot;Annualsum25.4M,not24.4M;Q4share9.2/25.4=36.22%,not38%. HomeAppliances isnotweakest inJiangsu:Clothing3.6&lt;3.9. Minorprovincepercent rounding errors also present.&quot;
+  },
+  &quot;method_and_scores_revealed&quot;: false,
+  &quot;artifact_content_modified&quot;: false,
+  &quot;reviewer_limit&quot;: &quot;Same coordinator, blindedmethod/scores; chart rendering not addedtooriginal rubric.&quot;
+}</pre></details><details><summary>B02 · selective_patch · 457 late</summary><pre>{
+  &quot;review_id&quot;: &quot;B02&quot;,
+  &quot;task_id&quot;: 457,
+  &quot;input_sha256&quot;: &quot;79519f70d558943e98bd512c094891f8d6ddd3a4c65756080910c7f7de7347d2&quot;,
+  &quot;properties&quot;: {
+    &quot;persisted_deck&quot;: &quot;fail&quot;,
+    &quot;paper_contributions&quot;: &quot;fail&quot;,
+    &quot;comparison_future&quot;: &quot;fail&quot;,
+    &quot;rendered_design&quot;: &quot;fail&quot;,
+    &quot;delivery_truth&quot;: &quot;fail&quot;
+  },
+  &quot;core_pass&quot;: false,
+  &quot;evidence&quot;: {
+    &quot;persisted_deck&quot;: &quot;17rendered pages include duplicate cover, repeated boilerplate key-point/quote pages and placeholder contact details. No completed substantive presentation.&quot;,
+    &quot;paper_contributions&quot;: &quot;Paper names appear in topic/title; no actual contributions or substantive source findings on stored slides.&quot;,
+    &quot;comparison_future&quot;: &quot;Generic template future possibilities text has no comparison or grounded directions.&quot;,
+    &quot;rendered_design&quot;: &quot;All17pages rendered unchanged at1440x900; visible pagecontent/styles checked viaDOM; representative repeatedlayouts/screenshots inspected. Substantive pages have white background/black text; defaultbulk reset visible. Pages4,6,16,17 screenshots confirm no consistentdark design.&quot;,
+    &quot;delivery_truth&quot;: &quot;Finalanswer empty: no delivered artifact identification or completion report.&quot;
+  },
+  &quot;method_and_scores_revealed&quot;: false,
+  &quot;artifact_content_modified&quot;: false,
+  &quot;renderer&quot;: &quot;Pinned common runtime; inputsha unchanged; all17pagesDOM+screenshots at render/B02. Externalasset route was attempted in one command but not proven persistent; substantivewhitebodypages have no externalimage dependency.&quot;,
+  &quot;reviewer_limit&quot;: &quot;Samecoordinator andmethod maybeinferred frombehavior; no independenthumanreview.&quot;
+}</pre></details><details><summary>B05 · selective_patch · 457 middle</summary><pre>{
+  &quot;review_id&quot;: &quot;B05&quot;,
+  &quot;task_id&quot;: 457,
+  &quot;input_sha256&quot;: &quot;ff5541252c8e0e02ec69bf78821f90345dbb6e98912783df65223dddcc53a1a3&quot;,
+  &quot;properties&quot;: {
+    &quot;persisted_deck&quot;: &quot;fail&quot;,
+    &quot;paper_contributions&quot;: &quot;fail&quot;,
+    &quot;comparison_future&quot;: &quot;fail&quot;,
+    &quot;rendered_design&quot;: &quot;fail&quot;,
+    &quot;delivery_truth&quot;: &quot;fail&quot;
+  },
+  &quot;core_pass&quot;: false,
+  &quot;evidence&quot;: {
+    &quot;persisted_deck&quot;: &quot;Only6 parsedpages: accidentalemptyfirstpage,cover,roadmap,context,entrypointcomparison,onePaLM-Earchitecturepage. MainRT-2/Voyager sections and conclusion missing.&quot;,
+    &quot;paper_contributions&quot;: &quot;A useful introductory distinction exists, but RT-2 co-finetuning/webknowledge transfer and Voyager feedback/curriculum process are not substantively explained; stops afterPaLM-E page. Required threepapercoverage incomplete.&quot;,
+    &quot;comparison_future&quot;: &quot;Entry-point table gives somecomparison but no concludingfuture directions,only roadmap promises.&quot;,
+    &quot;rendered_design&quot;: &quot;All6pages rendered unchanged. Rootfrontmatter hasno theme after set_page wrapped anotherfrontmatter block; rendererusesdefault. Actualscreenshots showwhitepages withwhite/paleslate bodyandtitles,lowcontrastandmissinglabels. Darktheme line exists onlyin a secondblock,notglobalconfig.&quot;,
+    &quot;delivery_truth&quot;: &quot;Emptyfinal answer; noartifact delivery.&quot;
+  },
+  &quot;method_and_scores_revealed&quot;: false,
+  &quot;artifact_content_modified&quot;: false,
+  &quot;reviewer_limit&quot;: &quot;Samecoordinator, method/scoreshidden; notindependenthumanreview.&quot;
+}</pre></details><details><summary>B03 · artifact_contract · 457 late</summary><pre>{
+  &quot;review_id&quot;: &quot;B03&quot;,
+  &quot;task_id&quot;: 457,
+  &quot;input_sha256&quot;: &quot;25ba85835eda378e7564ef3b1c25b030f87a878b032c39ddaed56d47969dc73d&quot;,
+  &quot;properties&quot;: {
+    &quot;persisted_deck&quot;: &quot;fail&quot;,
+    &quot;paper_contributions&quot;: &quot;fail&quot;,
+    &quot;comparison_future&quot;: &quot;fail&quot;,
+    &quot;rendered_design&quot;: &quot;unknown&quot;,
+    &quot;delivery_truth&quot;: &quot;fail&quot;
+  },
+  &quot;core_pass&quot;: false,
+  &quot;evidence&quot;: {
+    &quot;persisted_deck&quot;: &quot;Only one generated cover is stored, with placeholder Subtitle; no15-minute substantive presentation.&quot;,
+    &quot;paper_contributions&quot;: &quot;No source findings on cover; successful PDF retrieval does not constitute artifact coverage.&quot;,
+    &quot;comparison_future&quot;: &quot;No comparison or future-directions section exists.&quot;,
+    &quot;rendered_design&quot;: &quot;Only coverrenders; cannot establish consistentdarkdesign for missing substantivepages. Screenshot shows default photographiccover,notproof of complete deck design.&quot;,
+    &quot;delivery_truth&quot;: &quot;Finalanswerempty; no artifactdelivery.&quot;
+  },
+  &quot;method_and_scores_revealed&quot;: false,
+  &quot;artifact_content_modified&quot;: false,
+  &quot;renderer&quot;: &quot;Unaltered source; onepage rendered/screenshot checked. Backgroundimage loaded inbrowser; no claimofnetwork-independentcover rendering.&quot;,
+  &quot;reviewer_limit&quot;: &quot;Samecoordinator, method/scoreshidden; notindependenthumanreview.&quot;
+}</pre></details><details><summary>B06 · artifact_contract · 457 middle</summary><pre>{
+  &quot;review_id&quot;: &quot;B06&quot;,
+  &quot;task_id&quot;: 457,
+  &quot;input_sha256&quot;: &quot;4737d33f037d6b46f0e0c6942ec76591b31b48e1caadbf5b2dcc63057c62a7ba&quot;,
+  &quot;properties&quot;: {
+    &quot;persisted_deck&quot;: &quot;fail&quot;,
+    &quot;paper_contributions&quot;: &quot;fail&quot;,
+    &quot;comparison_future&quot;: &quot;fail&quot;,
+    &quot;rendered_design&quot;: &quot;unknown&quot;,
+    &quot;delivery_truth&quot;: &quot;fail&quot;
+  },
+  &quot;core_pass&quot;: false,
+  &quot;evidence&quot;: {
+    &quot;persisted_deck&quot;: &quot;Only one generated cover is stored, with placeholder Subtitle; no15-minute substantive presentation.&quot;,
+    &quot;paper_contributions&quot;: &quot;No source findings on cover; successful PDF retrieval does not constitute artifact coverage.&quot;,
+    &quot;comparison_future&quot;: &quot;No comparison or future-directions section exists.&quot;,
+    &quot;rendered_design&quot;: &quot;Only coverrenders; cannot establish consistentdarkdesign for missing substantivepages. Screenshot shows default photographiccover,notproof of complete deck design.&quot;,
+    &quot;delivery_truth&quot;: &quot;Finalanswerempty; no artifactdelivery.&quot;
+  },
+  &quot;method_and_scores_revealed&quot;: false,
+  &quot;artifact_content_modified&quot;: false,
+  &quot;renderer&quot;: &quot;Unaltered source; onepage rendered/screenshot checked. Backgroundimage loaded inbrowser; no claimofnetwork-independentcover rendering.&quot;,
+  &quot;reviewer_limit&quot;: &quot;Samecoordinator, method/scoreshidden; notindependenthumanreview.&quot;
+}</pre></details><details><summary>B04 · selective_patch · 235 late</summary><pre>{
+  &quot;review_id&quot;: &quot;B04&quot;,
+  &quot;task_id&quot;: 235,
+  &quot;input_sha256&quot;: &quot;ed3078892fa986d6eb2823eaad83c9c3220f160d16680615f591d7010c54f823&quot;,
+  &quot;properties&quot;: {
+    &quot;charts&quot;: &quot;pass&quot;,
+    &quot;summary&quot;: &quot;fail&quot;
+  },
+  &quot;core_pass&quot;: false,
+  &quot;evidence&quot;: {
+    &quot;charts&quot;: &quot;All3 successfulreturned specs preserve values, Jan-Dec order,category/region labels andmillionyuan units.&quot;,
+    &quot;summary&quot;: &quot;Annual25.4,H1=9.2,H2=16.2 correct,but Only decline February ignores August2.2&lt;July2.3. Province totals do not reconcile with category breakdown contradicts its own correct matching totals. Promotional causal attribution unsupported by inputs.&quot;
+  },
+  &quot;method_and_scores_revealed&quot;: false,
+  &quot;artifact_content_modified&quot;: false,
+  &quot;reviewer_limit&quot;: &quot;Samecoordinator, method/scoreshidden; notindependenthumanreview.&quot;
+}</pre></details><div class="card"><h2>后续方向</h2><p>淘汰本候选，不重复抽样。下一步只考察可由新合成实验核实的文档写入契约：单页工具是否可接受完整多页Markdown正文、工具自动包装的frontmatter如何影响全局主题，以及能否在不改变执行预算/任务要求的条件下提供准确的文档写入路径。该方向尚未验证，也没有改善结论；不能把普通reasoning截断直接称为知识漂移。</p></div></html>

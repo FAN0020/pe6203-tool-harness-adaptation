@@ -1,0 +1,119 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____ test_thinking_contract_keeps_metadata_and_unrelated_rules_unchanged ______
+
+    def test_thinking_contract_keeps_metadata_and_unrelated_rules_unchanged():
+        old, target = thinking_catalog(), thinking_catalog("late")
+        before = deepcopy((old, target))
+>       knowledge, changes, cost = adapt(
+            old, target, "thinking_contract", {"feedback": [thinking_observation()]}
+        )
+
+tests/test_patch_variants.py:285: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': 'pinned', 'schema_version': '1.0', 'tools': [{'description': 'Read one record by query.', 'name':...rs': {'properties': {'query': {'type': 'string'}}, 'required': ['query'], 'type': 'object'}, ...}], 'version': 'early'}
+new_metadata = {'benchmark_commit': 'pinned', 'schema_version': '1.0', 'tools': [{'description': 'Read one record by query. New Late ...ers': {'properties': {'query': {'type': 'string'}}, 'required': ['query'], 'type': 'object'}, ...}], 'version': 'late'}
+strategy = 'thinking_contract'
+context = {'feedback': [{'args': {'probe': 'synthetic_state_views'}, 'result': {'kind': 'thinking_contract_v1', 'parallel_invali...terminal_active_paths': [], ...}, 'server': '@modelcontextprotocol/server-sequential-thinking', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: thinking_contract
+
+src/pe6203/baselines.py:110: ValueError
+___ test_thinking_contract_requires_matching_stage_and_actual_changed_basis ____
+
+    def test_thinking_contract_requires_matching_stage_and_actual_changed_basis():
+        old, target = thinking_catalog(), thinking_catalog("late")
+>       candidate, _, _ = adapt(
+            old, target, "thinking_contract", {"feedback": [thinking_observation("middle")]}
+        )
+
+tests/test_patch_variants.py:303: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': 'pinned', 'schema_version': '1.0', 'tools': [{'description': 'Read one record by query.', 'name':...rs': {'properties': {'query': {'type': 'string'}}, 'required': ['query'], 'type': 'object'}, ...}], 'version': 'early'}
+new_metadata = {'benchmark_commit': 'pinned', 'schema_version': '1.0', 'tools': [{'description': 'Read one record by query. New Late ...ers': {'properties': {'query': {'type': 'string'}}, 'required': ['query'], 'type': 'object'}, ...}], 'version': 'late'}
+strategy = 'thinking_contract'
+context = {'feedback': [{'args': {'probe': 'synthetic_state_views'}, 'result': {'kind': 'thinking_contract_v1', 'parallel_invali...rminal_active_paths': [], ...}, 'server': '@modelcontextprotocol/server-sequential-thinking', 'stage': 'middle', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: thinking_contract
+
+src/pe6203/baselines.py:110: ValueError
+_____ test_thinking_contract_rejects_unverified_facts_or_missing_fallback ______
+
+    def test_thinking_contract_rejects_unverified_facts_or_missing_fallback():
+        old, target = thinking_catalog(), thinking_catalog("late")
+        evidence = thinking_observation()
+        evidence["result"]["single_path_terminal_ready"] = True
+        with pytest.raises(ValueError, match="thinking contract"):
+>           adapt(old, target, "thinking_contract", {"feedback": [evidence]})
+
+tests/test_patch_variants.py:332: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+old_knowledge = {'benchmark_commit': 'pinned', 'schema_version': '1.0', 'tools': [{'description': 'Read one record by query.', 'name':...rs': {'properties': {'query': {'type': 'string'}}, 'required': ['query'], 'type': 'object'}, ...}], 'version': 'early'}
+new_metadata = {'benchmark_commit': 'pinned', 'schema_version': '1.0', 'tools': [{'description': 'Read one record by query. New Late ...ers': {'properties': {'query': {'type': 'string'}}, 'required': ['query'], 'type': 'object'}, ...}], 'version': 'late'}
+strategy = 'thinking_contract'
+context = {'feedback': [{'args': {'probe': 'synthetic_state_views'}, 'result': {'kind': 'thinking_contract_v1', 'parallel_invali...terminal_active_paths': [], ...}, 'server': '@modelcontextprotocol/server-sequential-thinking', 'stage': 'late', ...}]}
+
+    def adapt(old_knowledge, new_metadata, strategy, context=None):
+        """Return (knowledge, diff_log, update_cost); no task or judge inputs are used."""
+        from .patch_variants import VARIANTS
+        from .patch_variants import adapt as variant_adapt
+    
+        if strategy in VARIANTS:
+            return variant_adapt(old_knowledge, new_metadata, strategy, context)
+        if strategy == "selective_patch":
+            from .selective import adapt as selective_adapt
+    
+            return selective_adapt(old_knowledge, new_metadata, context)
+        if strategy not in {"no_update", "full_rewrite"}:
+>           raise ValueError(f"Unsupported strategy: {strategy}")
+E           ValueError: Unsupported strategy: thinking_contract
+
+src/pe6203/baselines.py:110: ValueError
+
+During handling of the above exception, another exception occurred:
+
+    def test_thinking_contract_rejects_unverified_facts_or_missing_fallback():
+        old, target = thinking_catalog(), thinking_catalog("late")
+        evidence = thinking_observation()
+        evidence["result"]["single_path_terminal_ready"] = True
+>       with pytest.raises(ValueError, match="thinking contract"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'thinking contract'
+E         Actual message: 'Unsupported strategy: thinking_contract'
+
+tests/test_patch_variants.py:331: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_patch_variants.py::test_thinking_contract_keeps_metadata_and_unrelated_rules_unchanged
+FAILED tests/test_patch_variants.py::test_thinking_contract_requires_matching_stage_and_actual_changed_basis
+FAILED tests/test_patch_variants.py::test_thinking_contract_rejects_unverified_facts_or_missing_fallback
+3 failed, 36 deselected in 0.15s

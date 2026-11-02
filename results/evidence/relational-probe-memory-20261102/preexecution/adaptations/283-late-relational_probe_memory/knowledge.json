@@ -1,0 +1,1839 @@
+{
+  "schema_version": "1.0",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "version": "late",
+  "tools": [
+    {
+      "tool_id": "@modelcontextprotocol/server-sequential-thinking::sequentialthinking",
+      "server_id": "@modelcontextprotocol/server-sequential-thinking",
+      "version": "late",
+      "name": "sequentialthinking",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "thought": {
+            "type": "string",
+            "description": "Your current thinking step"
+          },
+          "nextThoughtNeeded": {
+            "type": "boolean",
+            "description": "Whether another thought step is needed"
+          },
+          "thoughtNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Current thought number (numeric value, e.g., 1, 2, 3)"
+          },
+          "totalThoughts": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Estimated total thoughts needed (numeric value, e.g., 5, 10)"
+          },
+          "isRevision": {
+            "type": "boolean",
+            "description": "Whether this revises previous thinking"
+          },
+          "revisesThought": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Which thought is being reconsidered"
+          },
+          "branchFromThought": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Branching point thought number"
+          },
+          "branchId": {
+            "type": "string",
+            "description": "Branch identifier"
+          },
+          "needsMoreThoughts": {
+            "type": "boolean",
+            "description": "If more thoughts are needed"
+          },
+          "thoughtPriority": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ],
+            "description": "Priority level of this thought indicating its importance to the overall reasoning chain"
+          },
+          "confidenceScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence level in this thought's validity, ranging from 0.0 (no confidence) to 1.0 (complete confidence)"
+          }
+        },
+        "required": [
+          "thought",
+          "nextThoughtNeeded",
+          "thoughtNumber",
+          "totalThoughts"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "A detailed tool for dynamic and reflective problem-solving through sequential thoughts.\nThis tool helps analyze problems through a flexible thinking process that can adapt and evolve.\nEach thought can build on, question, or revise previous insights as understanding deepens.\n\nWhen to use this tool:\n- Breaking down complex problems into ordered steps\n- Planning and design with room for revision along a single reasoning path\n- Analysis that might need course correction within a linear progression\n- Problems where the full scope might not be clear initially\n- Problems that require a multi-step solution with maintained context\n- Tasks that need to maintain context over multiple sequential steps\n- Situations where irrelevant information needs to be filtered out\n- When you need ONE coherent chain of reasoning rather than exploring multiple paths\n\nFor exploring multiple solution approaches simultaneously, use the parallel-thinking tool instead.\nOnce you have completed sequential or parallel thinking, use the convergent-synthesis tool to unify insights.\n\nKey features:\n- You can adjust total_thoughts up or down as you progress\n- You can question or revise previous thoughts\n- You can add more thoughts even after reaching what seemed like the end\n- You can express uncertainty and explore alternative approaches\n- Not every thought needs to build linearly - you can branch or backtrack\n- Generates a solution hypothesis\n- Verifies the hypothesis based on the Chain of Thought steps\n- Repeats the process until satisfied\n- Provides a correct answer\n\nParameters explained:\n- thought: Your current thinking step, which can include:\n  * Regular analytical steps\n  * Revisions of previous thoughts\n  * Questions about previous decisions\n  * Realizations about needing more analysis\n  * Changes in approach\n  * Hypothesis generation\n  * Hypothesis verification\n- nextThoughtNeeded: True if you need more thinking, even if at what seemed like the end\n- thoughtNumber: Current number in sequence (can go beyond initial total if needed)\n- totalThoughts: Current estimate of thoughts needed (can be adjusted up/down)\n- isRevision: A boolean indicating if this thought revises previous thinking\n- revisesThought: If is_revision is true, which thought number is being reconsidered\n- branchFromThought: If branching, which thought number is the branching point\n- branchId: Identifier for the current branch (if any)\n- needsMoreThoughts: If reaching end but realizing more thoughts needed\n\nYou should:\n1. Start with an initial estimate of needed thoughts, but be ready to adjust\n2. Feel free to question or revise previous thoughts\n3. Don't hesitate to add more thoughts if needed, even at the \"end\"\n4. Express uncertainty when present\n5. Mark thoughts that revise previous thinking or branch into new paths\n6. Ignore information that is irrelevant to the current step\n7. Generate a solution hypothesis when appropriate\n8. Verify the hypothesis based on the Chain of Thought steps\n9. Repeat the process until satisfied with the solution\n10. Provide a single, ideally correct answer as the final output\n11. Only set nextThoughtNeeded to false when truly done and a satisfactory answer is reached\n12. If multiple hypotheses or approaches were explored, consider using convergent-synthesis afterward",
+      "usage_rules": [],
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "thoughtNumber": {
+            "type": "number"
+          },
+          "totalThoughts": {
+            "type": "number"
+          },
+          "nextThoughtNeeded": {
+            "type": "boolean"
+          },
+          "branches": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "thoughtHistoryLength": {
+            "type": "number"
+          },
+          "thoughtPriority": {
+            "type": "string"
+          },
+          "confidenceScore": {
+            "type": "number"
+          },
+          "averageConfidence": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "thoughtNumber",
+          "totalThoughts",
+          "nextThoughtNeeded",
+          "branches",
+          "thoughtHistoryLength"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "routing": {
+        "server_id": "@modelcontextprotocol/server-sequential-thinking",
+        "tool_name": "sequentialthinking"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::list_projects",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "late",
+      "name": "list_projects",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          }
+        },
+        "required": [
+          "workingDirectory"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Discover and overview all projects in the current workspace with concise project details and progress context. Best for project-focused navigation and portfolio browsing when you do not need a full workspace health summary. Use `review_project_status` when you want a deeper execution snapshot for one specific project.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "list_projects"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::create_project",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "late",
+      "name": "create_project",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the new project"
+          },
+          "description": {
+            "type": "string",
+            "description": "A detailed description of the project"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Optional owner or responsible person for the project"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "Optional due date or target completion date for the project"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional tags for categorizing the project"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "name",
+          "description"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Launch new projects with structured organization, detailed documentation, and optional ownership, due date, and tag metadata. Establishes a focused foundation for task planning, accountability, categorization, and timeline awareness across your development workflow.",
+      "usage_rules": [
+        "Observed state-linked contract evidence: {\"initial_record_counts\":{\"projects\":2,\"subtasks\":0,\"tasks\":3},\"kind\":\"same_session_native_observations\",\"limits\":\"One synthetic state and sequence, not a guarantee for other inputs. Symbols denote receipt-verified created IDs. Native return and persisted change are distinct. Incidental timestamps and absolute workspace paths omitted. Initial unrelated records represented only by counts. This is evidence, not a task plan or a requirement to repeat calls.\",\"observations\":[{\"arguments\":{\"description\":\"Synthetic contract probe with optional metadata.\",\"dueDate\":\"2026-02-02\",\"name\":\"SyntheticLabelA\",\"owner\":\"SynthOwnerA\",\"tags\":[\"synth-tag-a\",\"synth-tag-b\"],\"workingDirectory\":\"$WORKSPACE\"},\"native_exception\":null,\"persisted_delta\":{\"projects\":{\"added\":[{\"description\":\"Synthetic contract probe with optional metadata.\\n\\nTags: synth-tag-a, synth-tag-b\",\"id\":\"$P1.project_id\",\"name\":\"SyntheticLabelA\"}],\"changed\":[],\"removed\":[]}},\"returned\":{\"content\":[{\"text\":\"✅ Project created successfully!\\n\\n**SyntheticLabelA** (ID: $P1.project_id)\\nDescription: Synthetic contract probe with optional metadata.\\n\\nTags: synth-tag-a, synth-tag-b\\nTags: synth-tag-a, synth-tag-b\\nCreated: <timestamp>\\n\\nYou can now add tasks to this project using the create_task tool.\",\"type\":\"text\"}],\"isError\":false},\"step\":\"P1\",\"tool\":\"create_project\"},{\"arguments\":{\"id\":\"$P1.project_id\",\"workingDirectory\":\"$WORKSPACE\"},\"native_exception\":null,\"persisted_delta\":{},\"returned\":{\"content\":[{\"text\":\"**SyntheticLabelA** (ID: $P1.project_id)\\n\\n**Description:** Synthetic contract probe with optional metadata.\\n\\nTags: synth-tag-a, synth-tag-b\\n\\n**Created:** <timestamp>\\n**Last Updated:** <timestamp>\\n\\n**Progress Summary:**\\nTasks: 0/0 completed\\n\\nUse list_tasks with projectId=\\\"$P1.project_id\\\" to see all tasks in this project.\",\"type\":\"text\"}],\"isError\":false},\"step\":\"P2\",\"tool\":\"get_project\"},{\"arguments\":{\"details\":\"Synthetic task under the newly created project.\",\"name\":\"SyntheticLabelTaskA\",\"priority\":4,\"projectId\":\"$P1.project_id\",\"status\":\"pending\",\"tags\":[\"synth-task-tag\"],\"workingDirectory\":\"$WORKSPACE\"},\"native_exception\":null,\"persisted_delta\":{\"tasks\":{\"added\":[{\"completed\":false,\"dependsOn\":[],\"details\":\"Synthetic task under the newly created project.\",\"id\":\"$P3.task_id\",\"level\":0,\"name\":\"SyntheticLabelTaskA\",\"priority\":4,\"projectId\":\"$P1.project_id\",\"status\":\"pending\",\"tags\":[\"synth-task-tag\"]}],\"changed\":[],\"removed\":[]}},\"returned\":{\"content\":[{\"text\":\"✅ Task created successfully!\\n\\n**→ SyntheticLabelTaskA** (ID: $P3.task_id)\\nTop-level task\\nProject: SyntheticLabelA\\nLevel: 0 (Top-level)\\nPath: SyntheticLabelA → SyntheticLabelTaskA\\n\\n📋 **Task Details:**\\n• Details: Synthetic task under the newly created project.\\n• Priority: 4/10\\n• Complexity: Not set/10\\n• Status: pending\\n• Tags: synth-task-tag\\n• Dependencies: None\\n• Estimated Hours: Not set\\n• Created: <timestamp>\\n\\n🎯 **Next Steps:**\\n• Break down into smaller tasks using create_task with parentId for complex work\\n• Use `get_next_task_recommendation` to see if this task is ready to work on\\n• Update progress using `update_task` as you work\\n• Use `list_tasks` with projectId and parentId to see the task hierarchy\",\"type\":\"text\"}],\"isError\":false},\"step\":\"P3\",\"tool\":\"create_task\"}]}"
+      ],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "create_project"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::get_project",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "late",
+      "name": "get_project",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the project to retrieve"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Access comprehensive project details including metadata, creation dates, and descriptive context. Best for retrieving the canonical project record when planning or reporting. Use `review_project_status` for aggregated task progress, blockers, and next-action signals.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "get_project"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::update_project",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "update_project",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the project to update"
+          },
+          "name": {
+            "type": "string",
+            "description": "New name for the project (optional)"
+          },
+          "description": {
+            "type": "string",
+            "description": "New description for the project (optional)"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Evolve and refine your project information as requirements change and scope develops. Maintain accurate project documentation with flexible updates to names and descriptions, ensuring your project data stays current and meaningful throughout the development lifecycle.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "update_project"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::delete_project",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "delete_project",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the project to delete"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be set to true to confirm deletion (safety measure)"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id",
+          "confirm"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Safely remove completed or obsolete projects from your workspace with built-in confirmation safeguards. Permanently cleans up project data while protecting against accidental deletions, helping maintain an organized and current project portfolio.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "delete_project"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::list_tasks",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "late",
+      "name": "list_tasks",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "projectId": {
+            "type": "string",
+            "description": "ID of the project to list tasks for"
+          },
+          "parentId": {
+            "type": "string",
+            "description": "Filter to tasks under this parent (optional)"
+          },
+          "showHierarchy": {
+            "type": "boolean",
+            "description": "Show tasks in hierarchical tree format (default: true)"
+          },
+          "includeCompleted": {
+            "type": "boolean",
+            "description": "Include completed tasks in results (default: true)"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "projectId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Explore and organize tasks with hierarchical filtering, project scoping, and progress visibility. Best for inspecting task trees and active work items when you want task-level detail instead of a workspace-wide health summary. Use `review_project_status` when you prefer a concise project summary with readiness and blocker signals.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "list_tasks"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::create_task",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "create_task",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name/title of the new task"
+          },
+          "details": {
+            "type": "string",
+            "description": "Detailed description of what the task involves"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "The ID of the project this task belongs to"
+          },
+          "parentId": {
+            "type": "string",
+            "description": "Parent task ID for unlimited nesting (optional - creates top-level task if not specified)"
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of task IDs that must be completed before this task"
+          },
+          "priority": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Task priority level (1-10, where 10 is highest priority)"
+          },
+          "complexity": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Estimated complexity/effort (1-10, where 10 is most complex)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in-progress",
+              "blocked",
+              "done"
+            ],
+            "description": "Initial task status (defaults to pending)"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for categorization and filtering"
+          },
+          "estimatedHours": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Estimated time to complete in hours"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "name",
+          "details",
+          "projectId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Transform project goals into actionable, trackable tasks with advanced features including dependencies, priorities, complexity estimation, and workflow management. Build structured workflows that break down complex projects into manageable components with unlimited hierarchy depth.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "create_task"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::get_task",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "get_task",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the task to retrieve"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Deep-dive into task specifics with comprehensive details including progress status, creation history, and full context. Essential for task analysis, status reporting, and understanding dependencies when planning work or conducting progress reviews.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "get_task"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::update_task",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "update_task",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the task to update"
+          },
+          "name": {
+            "type": "string",
+            "description": "New name/title for the task (optional)"
+          },
+          "details": {
+            "type": "string",
+            "description": "New detailed description for the task (optional)"
+          },
+          "completed": {
+            "type": "boolean",
+            "description": "Mark task as completed (true) or incomplete (false) (optional)"
+          },
+          "parentId": {
+            "type": "string",
+            "description": "Updated parent task ID for moving between hierarchy levels (optional - use null/empty to move to top level)"
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Updated array of task IDs that must be completed before this task"
+          },
+          "priority": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Updated task priority level (1-10, where 10 is highest priority)"
+          },
+          "complexity": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Updated complexity/effort estimate (1-10, where 10 is most complex)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in-progress",
+              "blocked",
+              "done"
+            ],
+            "description": "Updated task status"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Updated tags for categorization and filtering"
+          },
+          "estimatedHours": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Updated estimated time to complete in hours"
+          },
+          "actualHours": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Actual time spent on the task in hours"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Adapt and refine tasks with comprehensive updates including dependencies, priorities, complexity, status, tags, and time tracking. Keep your workflow current and accurate with advanced project management capabilities including unlimited hierarchy movement.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "update_task"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::delete_task",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "delete_task",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the task to delete"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be set to true to confirm deletion (safety measure)"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id",
+          "confirm"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Streamline your workflow by safely removing obsolete or completed tasks with built-in confirmation protection. Maintain a clean, focused task environment while preventing accidental data loss through required confirmation safeguards.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "delete_task"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::migrate_subtasks",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "migrate_subtasks",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          }
+        },
+        "required": [
+          "workingDirectory"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Migrate existing subtasks to the unified task model. This tool converts all subtasks to tasks with parentId for unlimited nesting depth. Run this once after upgrading to ensure data compatibility.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "migrate_subtasks"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::move_task",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "move_task",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "taskId": {
+            "type": "string",
+            "description": "The unique identifier of the task to move"
+          },
+          "newParentId": {
+            "type": "string",
+            "description": "The ID of the new parent task (optional - leave empty for top level)"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "taskId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Move a task to a different parent in the hierarchy. Set newParentId to move under another task, or leave empty to move to top level. Supports unlimited nesting depth.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "move_task"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::list_subtasks",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "list_subtasks",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "taskId": {
+            "type": "string",
+            "description": "Filter subtasks to only those belonging to this task (optional)"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Filter subtasks to only those in this project (optional)"
+          }
+        },
+        "required": [
+          "workingDirectory"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Navigate your detailed work breakdown with granular subtask visibility and flexible filtering options. Perfect for sprint planning, daily standups, and detailed progress tracking across the complete project hierarchy from high-level goals to specific implementation steps.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "list_subtasks"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::create_subtask",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "create_subtask",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name/title of the new subtask"
+          },
+          "details": {
+            "type": "string",
+            "description": "Detailed description of what the subtask involves"
+          },
+          "taskId": {
+            "type": "string",
+            "description": "The ID of the parent task this subtask belongs to"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "name",
+          "details",
+          "taskId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Break down complex tasks into precise, actionable subtasks with detailed specifications and clear ownership. Enable granular progress tracking and team coordination by decomposing work into manageable, measurable components within your hierarchical project structure.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "create_subtask"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::get_subtask",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "get_subtask",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the subtask to retrieve"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Examine subtask details with comprehensive context including parent task relationships, progress status, and implementation specifics. Essential for detailed work planning, progress assessment, and understanding the complete scope of granular work items.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "get_subtask"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::update_subtask",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "update_subtask",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the subtask to update"
+          },
+          "name": {
+            "type": "string",
+            "description": "New name/title for the subtask (optional)"
+          },
+          "details": {
+            "type": "string",
+            "description": "New detailed description for the subtask (optional)"
+          },
+          "completed": {
+            "type": "boolean",
+            "description": "Mark subtask as completed (true) or incomplete (false) (optional)"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Fine-tune subtask specifications and track completion progress with flexible updates to names, descriptions, and status. Maintain accurate, up-to-date work records that reflect evolving requirements and real-time progress in your detailed project execution.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "update_subtask"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::delete_subtask",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "delete_subtask",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the subtask to delete"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be set to true to confirm deletion (safety measure)"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id",
+          "confirm"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Clean up your detailed work breakdown by safely removing completed or obsolete subtasks with confirmation safeguards. Maintain focus on current priorities while preserving data integrity through required confirmation protocols.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "delete_subtask"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::create_memory",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "create_memory",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "title": {
+            "type": "string",
+            "description": "Short title for the memory (max 50 characters for better file organization)"
+          },
+          "content": {
+            "type": "string",
+            "description": "Detailed memory content/text (no character limit)"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Optional metadata as key-value pairs for additional context"
+          },
+          "category": {
+            "type": "string",
+            "description": "Optional category to organize memories (e.g., \"user_preferences\", \"project_context\")"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "title",
+          "content"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Capture and preserve important information, insights, or context as searchable memories with intelligent file-based storage. Ideal for building a knowledge base of user preferences, technical decisions, project context, or any information you want to remember and retrieve later with organized categorization.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "create_memory"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::search_memories",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "search_memories",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "query": {
+            "type": "string",
+            "description": "The search query text to find matching memories"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Maximum number of results to return (default: 10)"
+          },
+          "threshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Minimum relevance threshold 0-1 (default: 0.3)"
+          },
+          "category": {
+            "type": "string",
+            "description": "Filter results to memories in this specific category"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "query"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Intelligently search through your stored memories using advanced text matching algorithms to quickly find relevant information. Features multi-field search across titles, content, and metadata with customizable relevance scoring - perfect for retrieving past decisions, preferences, or contextual information when you need it most.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "search_memories"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::get_memory",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "get_memory",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the memory to retrieve"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Access comprehensive memory details including full content, metadata, creation history, and categorization. Essential for reviewing stored knowledge, understanding context, and retrieving complete information when making decisions or referencing past insights.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "get_memory"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::list_memories",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "late",
+      "name": "list_memories",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "category": {
+            "type": "string",
+            "description": "Filter to memories in this specific category"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Maximum number of memories to return (default: 50)"
+          }
+        },
+        "required": [
+          "workingDirectory"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Browse stored memories with category filters and result limits for focused knowledge retrieval. Best for targeted memory review when you need to inspect or recall captured context rather than assess the entire workspace.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "list_memories"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::update_memory",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "update_memory",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the memory to update"
+          },
+          "title": {
+            "type": "string",
+            "description": "New title for the memory (max 50 characters for better file organization)"
+          },
+          "content": {
+            "type": "string",
+            "description": "New detailed content for the memory (no character limit)"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "New metadata as key-value pairs (replaces existing metadata)"
+          },
+          "category": {
+            "type": "string",
+            "description": "New category for organizing the memory"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Evolve and refine your stored knowledge with flexible updates to content, categorization, and metadata. Keep your memory repository current and accurate as understanding deepens, ensuring your knowledge base remains a reliable source of up-to-date insights and decisions.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "update_memory"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::delete_memory",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "delete_memory",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the memory to delete"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be set to true to confirm deletion (safety measure)"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "id",
+          "confirm"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Safely remove outdated or irrelevant memories from your knowledge repository with built-in confirmation safeguards. Maintain a clean, focused memory collection while protecting against accidental loss of valuable information through required confirmation protocols.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "delete_memory"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::parse_prd",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "parse_prd",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "projectId": {
+            "type": "string",
+            "description": "ID of the project to add tasks to"
+          },
+          "prdContent": {
+            "type": "string",
+            "description": "Content of the Product Requirements Document to parse"
+          },
+          "generateSubtasks": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to generate subtasks for complex tasks"
+          },
+          "defaultPriority": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 5,
+            "description": "Default priority for generated tasks (1-10)"
+          },
+          "estimateComplexity": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to estimate complexity for tasks"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "projectId",
+          "prdContent"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Parse a Product Requirements Document (PRD) and automatically generate structured tasks with dependencies, priorities, and complexity estimates. Transform high-level requirements into actionable task breakdowns with intelligent analysis.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "parse_prd"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::get_next_task_recommendation",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "late",
+      "name": "get_next_task_recommendation",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Filter recommendations to a specific project"
+          },
+          "maxRecommendations": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 3,
+            "description": "Maximum number of task recommendations to return"
+          },
+          "considerComplexity": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to factor in task complexity for recommendations"
+          },
+          "preferredTags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Preferred task tags to prioritize in recommendations"
+          },
+          "excludeBlocked": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to exclude blocked tasks from recommendations"
+          }
+        },
+        "required": [
+          "workingDirectory"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Get prioritized next-step task recommendations based on dependencies, priority, and task readiness. Use this when the workspace is already understood and you need the most actionable work item rather than a broader health assessment.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "get_next_task_recommendation"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::analyze_task_complexity",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "analyze_task_complexity",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "taskId": {
+            "type": "string",
+            "description": "Specific task ID to analyze (if not provided, analyzes all tasks)"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Filter analysis to a specific project"
+          },
+          "complexityThreshold": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 7,
+            "description": "Complexity threshold above which tasks should be broken down"
+          },
+          "suggestBreakdown": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to suggest specific task breakdowns"
+          },
+          "autoCreateSubtasks": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to automatically create suggested subtasks"
+          }
+        },
+        "required": [
+          "workingDirectory"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Analyze task complexity and suggest breaking down overly complex tasks into smaller, manageable subtasks. Intelligent complexity analysis to identify tasks that should be split for better productivity and progress tracking.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "analyze_task_complexity"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::infer_task_progress",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "infer_task_progress",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Filter analysis to a specific project"
+          },
+          "scanDepth": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 3,
+            "description": "Directory depth to scan for code files"
+          },
+          "fileExtensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              ".js",
+              ".ts",
+              ".jsx",
+              ".tsx",
+              ".py",
+              ".java",
+              ".cs",
+              ".go",
+              ".rs"
+            ],
+            "description": "File extensions to analyze"
+          },
+          "autoUpdateTasks": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to automatically update task status based on inference"
+          },
+          "confidenceThreshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.7,
+            "description": "Confidence threshold for auto-updating tasks (0-1)"
+          }
+        },
+        "required": [
+          "workingDirectory"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Analyze the codebase to infer which tasks appear to be completed based on code changes, file creation, and implementation evidence. Intelligent progress inference to automatically track task completion from code analysis.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "infer_task_progress"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::research_task",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "research_task",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "taskId": {
+            "type": "string",
+            "description": "ID of the task to research"
+          },
+          "researchAreas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Specific areas to research (auto-generated if not provided)"
+          },
+          "saveToMemories": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to save research findings to memories"
+          },
+          "checkExistingMemories": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to check existing memories first"
+          },
+          "researchDepth": {
+            "type": "string",
+            "enum": [
+              "quick",
+              "standard",
+              "comprehensive"
+            ],
+            "default": "standard",
+            "description": "Depth of research to perform"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "taskId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Guide the AI agent to perform comprehensive web research for a task, with intelligent research suggestions and automatic memory storage of findings. Combines web research capabilities with local knowledge caching for optimal research workflow.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "research_task"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::generate_research_queries",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "early",
+      "name": "generate_research_queries",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "taskId": {
+            "type": "string",
+            "description": "ID of the task to generate research queries for"
+          },
+          "queryTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "implementation",
+                "best_practices",
+                "troubleshooting",
+                "alternatives",
+                "performance",
+                "security",
+                "examples",
+                "tools"
+              ]
+            },
+            "description": "Types of queries to generate"
+          },
+          "includeAdvanced": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include advanced search operators and techniques"
+          },
+          "targetYear": {
+            "type": "number",
+            "default": 2026,
+            "description": "Target year for recent information (default: current year)"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "taskId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Generate intelligent, targeted web search queries for task research. Provides structured search strategies to help AI agents find the most relevant information efficiently with optimized search terms and techniques.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "generate_research_queries"
+      }
+    },
+    {
+      "tool_id": "@modelcontextprotocol/server-sequential-thinking::convergent-synthesis",
+      "server_id": "@modelcontextprotocol/server-sequential-thinking",
+      "version": "late",
+      "name": "convergent-synthesis",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "synthesisId": {
+            "type": "string",
+            "description": "Unique identifier for this synthesis session"
+          },
+          "sourcePaths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of path/chain identifiers being synthesized"
+          },
+          "convergencePoints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Key insights where multiple paths agree"
+          },
+          "contradictions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "point": {
+                  "type": "string"
+                },
+                "conflictingPaths": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "point",
+                "conflictingPaths"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Points where reasoning paths conflict"
+          },
+          "evidenceWeighting": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "strong",
+                "moderate",
+                "weak"
+              ]
+            },
+            "description": "Assessment of evidence strength per path"
+          },
+          "resolutionStrategy": {
+            "type": "string",
+            "enum": [
+              "evidence_based",
+              "logical_priority",
+              "contextual_fit",
+              "consensus"
+            ],
+            "description": "How contradictions are resolved"
+          },
+          "synthesizedConclusion": {
+            "type": "string",
+            "description": "The unified final answer or conclusion"
+          },
+          "confidenceLevel": {
+            "type": "string",
+            "enum": [
+              "high",
+              "moderate",
+              "low"
+            ],
+            "description": "Confidence in the synthesized conclusion"
+          },
+          "traceability": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Mapping of conclusion elements to source paths"
+          },
+          "openQuestions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Remaining uncertainties or areas needing exploration"
+          }
+        },
+        "required": [
+          "synthesisId",
+          "sourcePaths",
+          "convergencePoints",
+          "evidenceWeighting",
+          "resolutionStrategy",
+          "synthesizedConclusion",
+          "confidenceLevel"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "A tool for synthesizing and unifying insights from multiple reasoning paths or extended thought chains.\nThis tool helps consolidate findings from sequential-thinking or parallel-thinking sessions into a coherent,\nwell-justified final answer by identifying common themes, resolving contradictions, and weighing evidence.\n\nWhen to use this tool:\n- After completing multiple parallel-thinking paths that need unification\n- When sequential-thinking produced multiple hypotheses requiring integration\n- To resolve contradictions between different reasoning approaches\n- When you need to weigh evidence from diverse analytical paths\n- To produce a final, consolidated answer from exploratory thinking\n- When multiple valid perspectives need to be balanced into one conclusion\n\nKey features:\n- Aggregates insights from multiple thinking sessions\n- Identifies convergence points and contradictions\n- Weighs evidence strength across different reasoning paths\n- Resolves conflicts through logical prioritization\n- Produces a unified, well-justified final answer\n- Maintains traceability to source reasoning paths\n\nParameters explained:\n- synthesisId: Unique identifier for this synthesis session\n- sourcePaths: Array of path/thought chain identifiers being synthesized (e.g., [\"sequential_chain_1\", \"path_a\", \"path_b\"])\n- convergencePoints: Key insights or conclusions that multiple paths agree on\n- contradictions: Points where reasoning paths conflict or disagree\n- evidenceWeighting: Assessment of which paths provide stronger evidence (e.g., {\"path_a\": \"strong\", \"path_b\": \"moderate\"})\n- resolutionStrategy: How contradictions are being resolved (\"evidence_based\", \"logical_priority\", \"contextual_fit\")\n- synthesizedConclusion: The unified final answer or conclusion\n- confidenceLevel: Confidence in the synthesized conclusion (\"high\", \"moderate\", \"low\")\n- traceability: Mapping of conclusion elements back to source paths\n- openQuestions: Any remaining uncertainties or areas needing further exploration\n\nYou should:\n1. Clearly identify all source reasoning paths being synthesized\n2. Extract and list convergence points where paths agree\n3. Identify and document contradictions between paths\n4. Assess the strength of evidence from each path\n5. Apply a clear resolution strategy for conflicts\n6. Produce a synthesized conclusion that integrates the best insights\n7. Indicate confidence level based on evidence consistency\n8. Maintain traceability so the conclusion can be audited\n9. Note any open questions that synthesis could not resolve",
+      "usage_rules": [],
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "synthesisId": {
+            "type": "string"
+          },
+          "sourcePathCount": {
+            "type": "number"
+          },
+          "convergencePointCount": {
+            "type": "number"
+          },
+          "contradictionCount": {
+            "type": "number"
+          },
+          "resolutionStrategy": {
+            "type": "string"
+          },
+          "confidenceLevel": {
+            "type": "string"
+          },
+          "synthesizedConclusion": {
+            "type": "string"
+          },
+          "openQuestionCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "synthesisId",
+          "sourcePathCount",
+          "convergencePointCount",
+          "contradictionCount",
+          "resolutionStrategy",
+          "confidenceLevel",
+          "synthesizedConclusion",
+          "openQuestionCount"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "routing": {
+        "server_id": "@modelcontextprotocol/server-sequential-thinking",
+        "tool_name": "convergent-synthesis"
+      }
+    },
+    {
+      "tool_id": "@modelcontextprotocol/server-sequential-thinking::parallel-thinking",
+      "server_id": "@modelcontextprotocol/server-sequential-thinking",
+      "version": "late",
+      "name": "parallel-thinking",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pathId": {
+            "type": "string",
+            "description": "Identifier for the current reasoning path"
+          },
+          "thought": {
+            "type": "string",
+            "description": "Current thinking step within this path"
+          },
+          "pathNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Current path number"
+          },
+          "totalPaths": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Total number of paths being explored"
+          },
+          "thoughtInPath": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Thought number within this specific path"
+          },
+          "pathStatus": {
+            "type": "string",
+            "enum": [
+              "active",
+              "completed",
+              "abandoned",
+              "merged"
+            ],
+            "description": "Status of this path"
+          },
+          "relatedPaths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Related or conflicting path IDs"
+          },
+          "convergenceDetected": {
+            "type": "boolean",
+            "description": "Whether converging with other paths"
+          },
+          "needsNewPath": {
+            "type": "boolean",
+            "description": "Whether to create a new parallel path"
+          },
+          "readyForSynthesis": {
+            "type": "boolean",
+            "description": "Whether ready to synthesize all paths"
+          }
+        },
+        "required": [
+          "pathId",
+          "thought",
+          "pathNumber",
+          "totalPaths",
+          "thoughtInPath",
+          "pathStatus",
+          "readyForSynthesis"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "A tool for exploring multiple solution paths or perspectives simultaneously.\nThis tool enables concurrent analysis of different approaches, allowing you to evaluate\nmultiple hypotheses, strategies, or viewpoints before converging on a solution.\n\nWhen to use this tool:\n- Exploring multiple solution strategies simultaneously\n- Comparing different approaches or perspectives\n- Brainstorming where diverse ideas should be developed in parallel\n- Problems with multiple valid solution paths\n- Decision-making that requires evaluating trade-offs between options\n- Creative problem-solving that benefits from divergent thinking\n- Situations where you want to avoid premature commitment to one approach\n\nKey features:\n- Maintain multiple independent reasoning paths\n- Each path can have its own chain of thoughts\n- Paths can be compared, merged, or eliminated\n- Supports convergence when paths lead to similar conclusions\n- Allows switching between paths or creating new ones\n- Final synthesis combines insights from all paths\n\nParameters explained:\n- pathId: Identifier for the current reasoning path (e.g., \"approach_a\", \"strategy_1\")\n- thought: Current thinking step within this path\n- pathNumber: Current path number in sequence\n- totalPaths: Total number of paths being explored\n- thoughtInPath: Which thought number within this specific path\n- pathStatus: Status of this path (\"active\", \"completed\", \"abandoned\", \"merged\")\n- relatedPaths: Other path IDs that relate to or conflict with this one\n- convergenceDetected: Whether this path is converging with others\n- needsNewPath: Whether a new parallel path should be created\n- readyForSynthesis: Whether all paths are ready to be synthesized into a final answer\n\nYou should:\n1. Start by identifying distinct approaches or perspectives to explore\n2. Develop each path independently with its own reasoning chain\n3. Note when paths converge or conflict\n4. Abandon paths that prove unproductive\n5. Create new paths if promising directions emerge\n6. Mark readyForSynthesis as true when paths are adequately explored\n7. Use the convergent-synthesis tool to unify insights from all viable paths into a final solution",
+      "usage_rules": [],
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "pathId": {
+            "type": "string"
+          },
+          "pathNumber": {
+            "type": "number"
+          },
+          "totalPaths": {
+            "type": "number"
+          },
+          "thoughtInPath": {
+            "type": "number"
+          },
+          "pathStatus": {
+            "type": "string"
+          },
+          "activePaths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "convergencePoints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "pathId",
+          "pathNumber",
+          "totalPaths",
+          "thoughtInPath",
+          "pathStatus",
+          "activePaths",
+          "convergencePoints"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "routing": {
+        "server_id": "@modelcontextprotocol/server-sequential-thinking",
+        "tool_name": "parallel-thinking"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::review_project_status",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "late",
+      "name": "review_project_status",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "projectId": {
+            "type": "string",
+            "description": "ID of the project to review"
+          },
+          "includeCompletedTasks": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include completed tasks in sampled status sections"
+          },
+          "maxTasks": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 5,
+            "description": "Maximum number of tasks to show per status section"
+          }
+        },
+        "required": [
+          "workingDirectory",
+          "projectId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Generate an execution-focused status snapshot for a single project by summarizing open work, completed progress, blockers, ready-to-start tasks, and in-progress activity. Ideal when you want a concise operational review instead of browsing the full task hierarchy or the entire workspace.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "review_project_status"
+      }
+    },
+    {
+      "tool_id": "@pimzino/agentic-tools-mcp::review_workspace_health",
+      "server_id": "@pimzino/agentic-tools-mcp",
+      "version": "late",
+      "name": "review_workspace_health",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "workingDirectory": {
+            "type": "string",
+            "description": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead."
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Optional project ID to focus the review on a single project"
+          },
+          "includeMemories": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include memory summary signals in the workspace review"
+          },
+          "includeCompletedTasks": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include completed tasks in the review summary"
+          },
+          "maxItems": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25,
+            "description": "Maximum number of items to sample per section"
+          }
+        },
+        "required": [
+          "workingDirectory"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "description": "Assess the overall health of your workspace by summarizing projects, task hierarchy, completion signals, and stored memories. Ideal for quickly understanding organization quality, identifying gaps, and deciding what to work on next across the full agentic workspace. Use `review_project_status` when you want an operational snapshot of one project instead of a cross-workspace review.",
+      "usage_rules": [],
+      "output_schema": null,
+      "routing": {
+        "server_id": "@pimzino/agentic-tools-mcp",
+        "tool_name": "review_workspace_health"
+      }
+    }
+  ]
+}

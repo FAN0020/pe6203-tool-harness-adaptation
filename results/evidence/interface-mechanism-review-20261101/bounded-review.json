@@ -1,0 +1,151 @@
+{
+  "id": "interface-mechanism-review-20261101",
+  "status": "bounded_design_admission_completed_no_candidate",
+  "research_base": "7dbeab7",
+  "goal_complete": false,
+  "scope": "接手续研：完成此前三条未完成文献线索，定向核对原457工具知识及最近四条原题开发的工具名；不重新评旧分，不全量读轨迹，不启动新模型。",
+  "five_class_evidence": "results/evidence/experience-gated-learning-20261101/bounded-review.json",
+  "new_diagnostic": "results/evidence/interface-mechanism-review-20261101/diagnostic.json",
+  "findings": [
+    {
+      "level": "direct",
+      "claim": "457 Early/Middle均19工具，全部description均1113字符；Late21工具，description合计1732字符。create_bulk_slides三个阶段的description均74字符；Middle相对Early仅此工具parameters改变。",
+      "limit": "字符不是模型token；不含参数schema和观察返回，不能据此否定全部上下文负担。"
+    },
+    {
+      "level": "direct",
+      "claim": "create_bulk_slides在Early已存在，Middle/Late均是参数变化。初步“隔离新增工具”假设的新增前提不成立，未形成候选。",
+      "limit": "不否定一般工具过滤；也不证明删掉此工具必无收益。"
+    },
+    {
+      "level": "direct",
+      "claim": "最近四条原457开发的W02/W04/W05/W06均未实际调用create_bulk_slides，set_page/add_page也均为0。",
+      "limit": "这是既有调用表的新投影，不是新执行。工具定义暴露可能仍有影响；未建立因果。"
+    },
+    {
+      "level": "observation",
+      "claim": "早先规则、实际写入例子和逐页流程已存在；最新短上下文训练也未正常完成。只做描述压缩或再加例子尚无区别于旧版本的机制依据。",
+      "limit": "不把这些具体失败外推到所有知识适应方法。"
+    }
+  ],
+  "papers": [
+    {
+      "name": "EasyTool",
+      "paper": "https://arxiv.org/html/2401.06201v3",
+      "version": "2401.06201v3; 2024-03-27",
+      "sections_read": [
+        "3.2",
+        "4.1-4.3",
+        "Table2"
+      ],
+      "repo": "https://github.com/microsoft/JARVIS",
+      "sha": "7624cf388b47334ff8a0868e7d862dde18cfda86",
+      "code_locations": [
+        "easytool/data_process.py:29 toolbench_process consumes prepared instruction JSON",
+        "easytool/easytool/toolbench.py:45 choose_tool",
+        "easytool/easytool/toolbench.py:85 choose_API",
+        "easytool/easytool/toolbench.py:140 choose_parameter",
+        "easytool/easytool/toolbench.py:370 retrieval",
+        "easytool/README.md:30 data construction entry"
+      ],
+      "mechanism": "去除文档冗余、统一功能说明，加入经调用核查的场景/参数示例。官方运行路径分开选择工具、API和参数；data_process.py读取预生成instruction而非执行论文两步重写。",
+      "decision": "不准入“只压缩457描述/再加示例”：描述已经短，旧document_sequence已含参数示例。移植官方多阶段执行器会改变固定agent协议。论文方法不被整体否定。"
+    },
+    {
+      "name": "Play2Prompt",
+      "paper": "https://arxiv.org/html/2503.14432v2",
+      "version": "2503.14432v2; 2025-06-12",
+      "sections_read": [
+        "2.3-2.5"
+      ],
+      "repo": "https://github.com/wfangtw/play2prompt",
+      "sha": "124c0261cbeb7349f0bb46990558a1377c2aa0fd",
+      "code_locations": [
+        "example_method.py:31 step",
+        "example_method.py:47 bounded invocation rejection sampling",
+        "example_method.py:76 QA construction",
+        "description_method.py:27 step",
+        "description_method.py:67 critique_descriptions",
+        "description_method.py:129 generate_description_from_documentation",
+        "description_method.py:187 load_examples",
+        "beam_search.py:26 search",
+        "beam_search.py:129 prune",
+        "base_method.py:21 produce_answer_from_api_call"
+      ],
+      "mechanism": "先探索有效单工具调用，再逆向生成问答；用困难示例评估候选description，固定深度束搜索。官方反思输入包含instructions、answers和ground-truth调用。",
+      "decision": "直接移植越过当前答案仅评测/冻结投影边界；缩成单工具采集来获得正例也不能重开已关闭训练。仅留下元数据重写不再是该学习机制，且与旧笔记机制重叠。未运行作者代码、搜索或训练。",
+      "license": "根LICENSE请求404；只保留固定URL/hash及本机缓存，不分发作者源码。"
+    },
+    {
+      "name": "Trace-Free+ / Learning to Rewrite Tool Descriptions",
+      "paper": "https://arxiv.org/html/2602.20426v2",
+      "earlier_version_read": "2602.20426v1 sections3.1-3.3",
+      "version": "2602.20426v2; 2026-04-29",
+      "sections_read": [
+        "3.1-3.2",
+        "4.1 evaluation protocol"
+      ],
+      "official_link_evidence": "https://huggingface.co/intuit/agent-tool-optimizer",
+      "repo": "https://github.com/intuit-ai-research/tool-optimizer",
+      "sha": "c86928d9e5fb6ea5ca4f82fe7883f0780002312f",
+      "code_locations": [
+        "src/agent_tool_optimizer/inference/data/tool_prompt.txt:1-34",
+        "src/agent_tool_optimizer/inference/application/prompts_builder.py:44 build_dataset_from_local_data",
+        "src/agent_tool_optimizer/inference/application/prompts_builder.py:201 read_prompt_template",
+        "src/agent_tool_optimizer/inference_main.py:48 model CLI",
+        "src/agent_tool_optimizer/inference/application/hf_inference.py:18 sampling and :46 model loading",
+        "src/agent_tool_optimizer/inference/application/vllm_inference.py:19 sampling and :54 model loading"
+      ],
+      "mechanism": "对描述生成器做trace-rich到trace-free课程训练，部署时仅输入工具名、schema和原描述。核心评估含teacher-forcing；v2的扩容实验另用自主执行。",
+      "decision": "官方发布的Qwen派生重写器会替换当前冻结更新器模型；复制其提示到现有模型不等于转移已学表征。不可把teacher-forcing工具选择结果当本研究自主产物完成。当前没有可准入的独特实现。"
+    }
+  ],
+  "additional_screening": [
+    {
+      "name": "静态隔离create_bulk_slides",
+      "decision": "不准入",
+      "reason": "新增前提为假，四条新投影无实际调用；删除已存在能力仍需明确scope和保留能力证明。当前尚无足够机制证据，未修改catalog或runner。"
+    },
+    {
+      "name": "Less-is-More / ToolScope",
+      "sources": [
+        "https://arxiv.org/html/2411.15399v1",
+        "https://toolscope.github.io/"
+      ],
+      "decision": "仅初筛，不作为已核定实现来源",
+      "reason": "前者查询驱动的推荐/动态检索改变执行边界；后者涉及语义合并/重标注和查询过滤。当前未核定作者实现SHA，不以搜索命中替代源码核验。无需继续追此筛选路线，除非出现明确范围内新设计。"
+    }
+  ],
+  "candidate_decisions": {
+    "easytool_description_compression": "not_admitted_insufficient_new_mechanism",
+    "play2prompt_direct_transfer": "not_admitted_feedback_boundary",
+    "trace_free_plus_weights": "not_admitted_fixed_updater_model",
+    "static_added_tool_quarantine": "not_admitted_false_added_tool_premise"
+  },
+  "execution": {
+    "new_agent_calls": 0,
+    "new_judge_calls": 0,
+    "new_updater_calls": 0,
+    "new_model_usd": "0",
+    "new_native_calls": 0,
+    "new_candidate_knowledge": false,
+    "development_started": false,
+    "validation_started": false,
+    "old_scores_modified": false
+  },
+  "course_check": {
+    "brief_path": "/Users/fanysmacpro/Documents/Graduate_learning/PE6203-BoAn/group_project/PE6203 Group Project 4 - Tool Harness Adaptation under Environment Change.docx",
+    "brief_sha256": "6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d",
+    "read_scope": "原brief全部正文和旧requirements_map；未复查全部交付物，不提升旧满足状态。",
+    "authority": "旧course-completion-plan中的暂停/审批/可选研究描述均不覆盖新版Goal；新的双提升与两批验证仍是用户要求。",
+    "still_required": [
+      "双提升及两批严格验证",
+      "原SP/NU/FR分cohort指标、恢复/保持、成本",
+      "有证据的under-update/over-update案例及归因限制",
+      "最终报告、复现包、10分钟展示与5分钟Q&A核对"
+    ],
+    "complete": false
+  },
+  "next_boundary": "这三条交接线索已核读，不再把其搜索/归档当进展。下一轮需要当前可评估原benchmark中的新、具体、可反驳的知识决策机制，且能在固定actor/updater/反馈边界内实现。没有这种证据时如实报告机制证据不足；不重跑旧候选、缩训练题、换模型或扩大单次预算来强行过门槛。",
+  "claim_limit": "本轮是有新证据的设计准入复盘；不是性能验证、不是方法空间穷尽、不是Goal完成。未push、部署或外发。"
+}

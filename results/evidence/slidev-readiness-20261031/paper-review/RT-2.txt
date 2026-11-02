@@ -1,0 +1,190 @@
+                                                                                                                                           https://robotics-transformer2.github.io
+                                                                                                                                                                       2023-8-1
+
+
+
+                                         RT-2: Vision-Language-Action Models Transfer
+                                         Web Knowledge to Robotic Control
+                                         Anthony Brohan, Noah Brown, Justice Carbajal, Yevgen Chebotar, Xi Chen, Krzysztof Choromanski,
+                                         Tianli Ding, Danny Driess, Avinava Dubey, Chelsea Finn, Pete Florence, Chuyuan Fu,
+                                         Montse Gonzalez Arenas, Keerthana Gopalakrishnan, Kehang Han, Karol Hausman, Alexander Herzog,
+                                         Jasmine Hsu, Brian Ichter, Alex Irpan, Nikhil Joshi, Ryan Julian, Dmitry Kalashnikov, Yuheng Kuang,
+                                         Isabel Leal, Lisa Lee, Tsang-Wei Edward Lee, Sergey Levine, Yao Lu, Henryk Michalewski, Igor Mordatch,
+                                         Karl Pertsch, Kanishka Rao, Krista Reymann, Michael Ryoo, Grecia Salazar, Pannag Sanketi,
+                                         Pierre Sermanet, Jaspiar Singh, Anikait Singh, Radu Soricut, Huong Tran, Vincent Vanhoucke, Quan Vuong,
+                                         Ayzaan Wahid, Stefan Welker, Paul Wohlhart, Jialin Wu, Fei Xia, Ted Xiao, Peng Xu, Sichun Xu, Tianhe Yu,
+                                         and Brianna Zitkovich
+                                         Google DeepMind. Authors listed in alphabetical order, with contributions listed in Appendix A.
+
+
+
+
+arXiv:2307.15818v1 [cs.RO] 28 Jul 2023
+                                         We study how vision-language models trained on Internet-scale data can be incorporated directly into
+                                         end-to-end robotic control to boost generalization and enable emergent semantic reasoning. Our goal is
+                                         to enable a single end-to-end trained model to both learn to map robot observations to actions and enjoy
+                                         the benefits of large-scale pretraining on language and vision-language data from the web. To this end,
+                                         we propose to co-fine-tune state-of-the-art vision-language models on both robotic trajectory data and
+                                         Internet-scale vision-language tasks, such as visual question answering. In contrast to other approaches,
+                                         we propose a simple, general recipe to achieve this goal: in order to fit both natural language responses
+                                         and robotic actions into the same format, we express the actions as text tokens and incorporate them
+                                         directly into the training set of the model in the same way as natural language tokens. We refer to
+                                         such category of models as vision-language-action models (VLA) and instantiate an example of such
+                                         a model, which we call RT-2. Our extensive evaluation (6k evaluation trials) shows that our approach
+                                         leads to performant robotic policies and enables RT-2 to obtain a range of emergent capabilities from
+                                         Internet-scale training. This includes significantly improved generalization to novel objects, the ability
+                                         to interpret commands not present in the robot training data (such as placing an object onto a particular
+                                         number or icon), and the ability to perform rudimentary reasoning in response to user commands (such
+                                         as picking up the smallest or largest object, or the one closest to another object). We further show that
+                                         incorporating chain of thought reasoning allows RT-2 to perform multi-stage semantic reasoning, for
+                                         example figuring out which object to pick up for use as an improvised hammer (a rock), or which type
+                                         of drink is best suited for someone who is tired (an energy drink).
+
+
+                                         1. Introduction
+                                         High-capacity models pretrained on broad web-scale datasets provide an effective and powerful
+                                         platform for a wide range of downstream tasks: large language models can enable not only fluent text
+                                         generation (Anil et al., 2023; Brohan et al., 2022; OpenAI, 2023) but emergent problem-solving (Cobbe
+                                         et al., 2021; Lewkowycz et al., 2022; Polu et al., 2022) and creative generation of prose (Brown
+                                         et al., 2020; OpenAI, 2023) and code (Chen et al., 2021), while vision-language models enable
+                                         open-vocabulary visual recognition (Kirillov et al., 2023; Minderer et al., 2022; Radford et al., 2021)
+                                         and can even make complex inferences about object-agent interactions in images (Alayrac et al., 2022;
+                                         Chen et al., 2023a,b; Driess et al., 2023; Hao et al., 2022; Huang et al., 2023; Wang et al., 2022). Such
+                                         semantic reasoning, problem solving, and visual interpretation capabilities would be tremendously
+                                         useful for generalist robots that must perform a variety of tasks in real-world environments. However,
+
+
+                                         Corresponding author(s): chebotar@google.com, tianheyu@google.com, karolhausman@google.com
+                                         © 2023 Google DeepMind. All rights reserved
+                                    RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control
+
+
+       Internet-Scale VQA + Robot Action Data              Vision-Language-Action Models for Robot Control                                             Closed-Loop
+                                                                                                                                                       Robot Control
+                          Q: What is happening            Q: What should the robot
+                             in the image?                   do to <task>? A: …       RT-2               Large Language Model
+                          A: 311 423 170 55 244
+                                 A grey donkey walks
+                                 down the street.
+                                                                                                                                                        Put the strawberry
+                                                                                                                                                       into the correct bowl
+      Q: Que puis-je faire avec                                                           ViT
+         ces objets?
+      A: 3455 1144 189 25673
+        Faire cuire un gâteau.
+                                                                                                                             ΔT = [0.1,∘ -0.2, 0]
+
+                         Q: What should the robot
+                                                                                     A: 132 114 128 5 25 156
+                                                                                                               De-Tokenize   ΔR = [10 , 25∘, -7∘]   Pick the nearly falling bag
+
+                            do to <task>?                                                                                       Robot Action
+                         A: 132 114 128 5 25 156
+                          ΔTranslation = [0.1, -0.2, 0]
+                          ΔRotation = [10∘, 25∘, -7∘ ]    Co-Fine-Tune                                                                   Deploy
+                                                                                                                                                    Pick object that is di erent
+
+
+
+Figure 1 | RT-2 overview: we represent robot actions as another language, which can be cast into text tokens and
+trained together with Internet-scale vision-language datasets. During inference, the text tokens are de-tokenized
+into robot actions, enabling closed loop control. This allows us to leverage the backbone and pretraining
+of vision-language models in learning robotic policies, transferring some of their generalization, semantic
+understanding, and reasoning to robotic control. We demonstrate examples of RT-2 execution on the project
+website: robotics-transformer2.github.io.
+
+it is unclear how robots should acquire such capabilities. While a brute force approach might entail
+collecting millions of robotic interaction trials, the most capable language and vision-language models
+are trained on billions of tokens and images from the web (Alayrac et al., 2022; Chen et al., 2023a,b;
+ ff
+
+
+
+
+Huang et al., 2023) – an amount unlikely to be matched with robot data in the near future. On the
+other hand, directly applying such models to robotic tasks is also difficult: such models reason about
+semantics, labels, and textual prompts, whereas robots require grounded low-level actions, such
+as Cartesian end-effector commands. While a number of recent works have sought to incorporate
+language models (LLMs) and vision-language models (VLMs) into robotics (Ahn et al., 2022; Driess
+et al., 2023; Vemprala et al., 2023), such methods generally address only the “higher level” aspects of
+robotic planning, essentially taking the role of a state machine that interprets commands and parses
+them into individual primitives (such as picking and placing objects), which are then executed by
+separate low-level controllers that themselves do not benefit from the rich semantic knowledge of
+Internet-scale models during training. Therefore, in this paper we ask: can large pretrained vision-
+language models be integrated directly into low-level robotic control to boost generalization and
+enable emergent semantic reasoning?
+    To this end, we explore an approach that is both simple and surprisingly effective: we directly
+train vision-language models designed for open-vocabulary visual question answering and visual
+dialogue to output low-level robot actions, along with solving other Internet-scale vision-language
+tasks. Although such models are typically trained to produce natural language tokens, we can train
+them on robotic trajectories by tokenizing the actions into text tokens and creating “multimodal
+sentences” (Driess et al., 2023) that “respond” to robotic instructions paired with camera observations
+by producing corresponding actions. In this way, vision-language models can be directly trained to
+act as instruction following robotic policies. This simple approach is in contrast with prior alternatives
+for incorporating VLMs into robot policies (Shridhar et al., 2022a) or designing new vision-language-
+action architectures from scratch (Reed et al., 2022): instead, pre-existing vision-language models,
+with already-amortized significant compute investment, are trained without any new parameters to
+output text-encoded actions. We refer to this category of models as vision-language-action (VLA)
+models. We instantiate VLA models by building on the protocol proposed for RT-1 (Brohan et al.,
+2022), using a similar dataset, but expanding the model to use a large vision-language backbone.
+Hence we refer to our model as RT-2 (Robotics Transformer 2). We provide an overview in Figure 1.
+
+
+
+                                                                                                                                                                                   2
+                    RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control
+
+
+
+    We observe that robotic policies derived from such vision-language models exhibit a range of
+remarkable capabilities, combining the physical motions learned from the robot data with the ability
+to interpret images and text learned from web data into a single model. Besides the expected benefit
+of dramatically improving generalization to novel objects and semantically varied instructions, we
+observe a number of emergent capabilities. While the model’s physical skills are still limited to the
+distribution of skills seen in the robot data, the model acquires the ability to deploy those skills in
+new ways by interpreting images and language commands using knowledge gleaned from the web.
+Some example highlights are shown in Figure 2. The model is able to re-purpose pick and place
+skills learned from robot data to place objects near semantically indicated locations, such as specific
+numbers or icons, despite those cues not being present in the robot data. The model can also interpret
+relations between objects to determine which object to pick and where to place it, despite no such
+relations being provided in the robot demonstrations. Furthermore, if we augment the command
+with chain of thought prompting, the model is able to make even more complex semantic inferences,
+such as figuring out which object to pick up for use as an improvised hammer (a rock), or which type
+of drink is best suited for someone who is tired (an energy drink).
+    Our main contribution is RT-2, a family of models derived from fine-tuning large vision-language
+models trained on web-scale data to directly act as generalizable and semantically aware robotic
+policies. Our experiments investigate models with up to 55B parameters trained on Internet data
+and instruction-annotated robotic trajectories from previous work (Brohan et al., 2022). Over the
+course of 6k robotic evaluations, we show that RT-2 enable significant improvements to generalization
+over objects, scenes, and instructions, and exhibit a breadth of emergent capabilities inherited from
+web-scale vision-language pretraining.
+
+
+2. Related Work
+Vision-language models. There are several categories of Vision-Language Models (VLMs) (Gan et al.,
+2022), with perhaps two most relevant: (1) representation-learning models, e.g. CLIP (Radford
+et al., 2021), which learn common embeddings for both modalities, and (2) visual language models
+of the form {vision, text} → {text} which learn to take vision and language as input and provide
+free-form text. Both categories have been used to provide pretraining for a wide variety of applied
+to downstream applications such as object classification (Radford et al., 2021), detection (Gu et al.,
+2021), and segmentation (Ghiasi et al., 2021). In this work, we focus on the latter category (Alayrac
+et al., 2022; Chen et al., 2023a,b; Driess et al., 2023; Hao et al., 2022; Li et al., 2023, 2019; Lu
+et al., 2019). These models are generally trained on many different tasks, such as image captioning,
+vision-question answering (VQA), and general language tasks on multiple datasets at the same time.
+While prior works study VLMs for a wide range of problems and settings including in robotics, our
+focus is on how the capabilities of VLMs can be extended to robotics closed-loop control by endowing
+them with the ability to predict robot actions, thus leveraging the knowledge already present in VLMs
+to enable new levels of generalization.
+    Generalization in robot learning. Developing robotic controllers that can broadly succeed in a
+variety of scenarios is a long-standing goal in robotics research (Kaelbling, 2020; Smith and Coles,
+1973). A promising approach for enabling generalization in robotic manipulation is by learning from
+large and diverse datasets (Dasari et al., 2019; Levine et al., 2018; Pinto and Gupta, 2016). By doing
+so, prior methods have demonstrated how robots can generalize to novel object instances (Finn and
+Levine, 2017; Levine et al., 2018; Mahler et al., 2017; Pinto and Gupta, 2016; Young et al., 2021), to
+tasks involving novel combinations of objects and skills (Dasari and Gupta, 2021; Finn et al., 2017;
+James et al., 2018; Jang et al., 2021; Yu et al., 2018), to new goals or language instructions (Jang
+et al., 2021; Jiang et al., 2022; Liu et al., 2022; Mees et al., 2022; Nair et al., 2022a; Pong et al.,
+
+
+                                                                                                     3
+

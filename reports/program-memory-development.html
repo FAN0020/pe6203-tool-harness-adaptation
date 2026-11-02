@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>程序记忆开发试验 · PE6203</title><style>
+:root{color-scheme:light;--ink:#162638;--muted:#526174;--line:#d6dfe8;--paper:#fff;--bg:#f3f6f9;--accent:#165b77}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 system-ui,-apple-system,"PingFang SC",sans-serif}main{max-width:1080px;margin:36px auto;padding:36px;background:var(--paper);border:1px solid var(--line);border-radius:18px}h1{font-size:32px;line-height:1.35;margin:8px 0 20px}h2{font-size:22px;margin-top:36px}p{margin:12px 0}a{color:var(--accent);overflow-wrap:anywhere}code{font-size:.86em;overflow-wrap:anywhere}.eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em}.notice{padding:18px 22px;border-left:5px solid #a35b21;background:#fff5e8}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}.card{border:1px solid var(--line);border-radius:10px;padding:16px}.card strong{display:block;font-size:24px}.muted{color:var(--muted);font-size:14px}.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:680px;font-size:14px}td,th{text-align:left;border-bottom:1px solid var(--line);padding:12px;vertical-align:top}th{background:#edf3f7}footer{margin-top:36px;border-top:1px solid var(--line);padding-top:18px;font-size:14px;color:var(--muted)}@media(max-width:650px){main{margin:12px;padding:20px;border-radius:12px}h1{font-size:27px}.grid{grid-template-columns:1fr}h2{font-size:21px}}
+</style></head><body><main>
+<div class="eyebrow">PE6203 · CONTROLLED SYNTHETIC EXTENSION · 2026-11-01</div>
+<h1>经验证的组件程序记忆：开发未晋级</h1>
+<div class="notice">两组都未生成解析器、统计 JSON 或网页；正常完成与实际产物通过均为 0/1。候选 PE 上升，但没有完成率或质量改善。按事前严格门槛停止此版本，不运行两批验证，也不重复抽样。原 benchmark Goal 仍未完成。</div>
+<div class="grid"><div class="card"><span>正常完成 · SP / 候选</span><strong>0/1 · 0/1</strong><span class="muted">合成任务900101</span></div><div class="card"><span>实际产物通过 · SP / 候选</span><strong>0/1 · 0/1</strong><span class="muted">缺少全部三个必需文件</span></div><div class="card"><span>模型费用 · 全部44请求</span><strong>$0.040018260</strong><span class="muted">22 agent + 20 judge + 2 preflight</span></div></div>
+<h2>失败证据 → 原始方法 → 新机制</h2>
+<p>此前参数路由候选确实避开了失效的精确接口，但仍取回两大类源码，并在写产物前截断。其他定向历史试验也出现“调用减少、PE提高，完成与正确产物不提高”。这支持研究知识被执行和复用的环节；并不证明所有记忆方法无效。完整的五类失败复盘、事实/观察/假说区分见<a href="method-learning-and-program-memory.html">上一轮有边界的经验与源码复盘</a>。</p>
+<p>本轮主要借鉴 <a href="https://arxiv.org/abs/2305.16291v2">Voyager v2（2023-10-19）</a>的“把经过执行验证的程序作为记忆内容”。作者仓库固定 <code>55e45a880755d0c8c66ca7fb5fe7962ac8974f89</code>，关键实现为<a href="https://github.com/MineDojo/Voyager/blob/55e45a880755d0c8c66ca7fb5fe7962ac8974f89/voyager/agents/skill.py#L53">skill.py 的 programs / add_skill / retrieve_skills</a>与<a href="https://github.com/MineDojo/Voyager/blob/55e45a880755d0c8c66ca7fb5fe7962ac8974f89/voyager/voyager.py#L353">成功后写入技能的分支</a>。区别是：这里只把源码值写入受影响工具知识，未实现课程、动态检索、执行器注入或额外 agent 重试，不能声称复现完整 Voyager。</p>
+<p>同时复用并核对 ACE v1、A-MEM v1、Reflexion 及 ExpeL v3的原始论文与官方固定源码。三个候选分别是结果信用驱动的经验维护、存储与检索分离、程序值记忆。前者尚缺不含 benchmark 答案的通用成功/失败经验对；动态检索需要改动当前固定执行器。本轮选择程序记忆，先补足双方相同的运行环境，再做最低成本开发对照。<a href="../results/evidence/method-learning-20261101/method-review.json">五篇版本及关键源码记录</a> · <a href="../results/evidence/method-learning-20261101/candidate-designs.json">原候选比较</a></p>
+<h2>确切干预与环境就绪</h2>
+<p>保留原七处路由描述差异，并在其中两个类别工具记录内附上完整原生源码：animated-gradient-text（871字节）和 meteors（1610字节）。选择规则在查看代码结果前已固定：每类选源码最短组件，同长按名称；失败不换下一个。新增内容是可执行程序值，而非另一组预算或工具规避提示。知识不含日志解析器、统计结果、完整页面或已评分 benchmark 轨迹。</p>
+<p>第一次直接 Node 准入失败保留。随后单独声明共同 React/TSX、别名、样式与构建环境：覆盖全部23个归档类别程序的依赖和官方样式，23个均可编译；仅预选两段组件做了桌面/手机渲染、属性变形及移除动画的负控制。第一次原生构建因成功工具的 stderr 进度文本被标为错误；修正双方共用构建脚本的诊断输出后，另一次预注册原生调用及渲染通过。未改原生工具、SDK或评分。</p>
+<p>依赖1649项的字节/符号链接、包锁、Node24.13.0构建路径、代码和样式均封存。原生代码执行器执行裸 <code>node</code> 时仍走其既有 PATH，本轮两组回执均显示26.5.0；不能把所有子命令也描述为24.13.0。没有在试验中改变环境。<a href="../results/evidence/program-memory-runtime-20261101/environment-proof.json">共同环境证明</a> · <a href="../experiments/verified-component-memory-v1.json">精确知识差异</a></p>
+<h2>输入与事前验收</h2>
+<p>原 MagicUI 任务171/217/246的既有缺口结论复用；377为“原始输入缺失，当前不可评估”，查找与等待路线永久关闭，未计作策略失败。本轮没有纳入可评估的原变化题。保持任务235沿用完整原始输入与精确相同K0。NU / Full Rewrite历史课程对照全部保留。</p>
+<p>独立扩展900101/900102/900103分别使用预定种子700101/700102/700103。七天混合级别、零错误日、多行续行、跨日轮转日志规则不变。输入、oracle、检查器、模型、知识与4+12+12条件日程在模型前封存。两组只得到相同日志与共同构建支持；oracle和检查器不提供给agent或更新器。</p>
+<p>开发必须完成与core各自严格优于SP，TF不下降，235完成/core/TF不下降，才可进入两批独立验证；每批仍须单独严格双提升。草稿曾同时保留旧宽松门槛，已在零模型调用时移除冲突并提交；最终模型前冻结为 <code>316befc</code>。开发前准备的证据文件路径错误、lint失败与修正均保留。429离线测试通过，15项integration未重跑；两项共同构建边界测试已单独通过。</p>
+<p><a href="../experiments/extensions/program-memory-dashboard-v1/protocol.json">冻结协议</a> · <a href="../results/evidence/extensions/program-memory-dashboard-v1/input-audit.json">输入独立复算</a> · <a href="../results/evidence/extensions/program-memory-dashboard-v1/preexecution.json">1805文件源快照</a></p>
+<h2>分开报告：合成开发与原保持题</h2>
+<div class="scroll"><table><thead><tr><th>范围</th><th>方法</th><th>正常完成</th><th>实际core</th><th>官方TF</th><th>官方PE</th><th>ECS</th></tr></thead><tbody>
+<tr><td>合成900101</td><td>SP</td><td>0/1</td><td>0/1</td><td>1</td><td>5.2</td><td>不适用</td></tr>
+<tr><td>合成900101</td><td>程序记忆候选</td><td>0/1</td><td>0/1</td><td>1</td><td>7.0</td><td>不适用</td></tr>
+<tr><td>原保持235</td><td>SP</td><td>1/1</td><td>0/1</td><td>10</td><td>8.2</td><td>不适用</td></tr>
+<tr><td>原保持235</td><td>程序记忆候选</td><td>1/1</td><td>0/1</td><td>10</td><td>7.0</td><td>不适用</td></tr>
+</tbody></table></div>
+<p>ECS缺少匹配Early/Middle评分，保留null，不填0。全部20个评分槽均为协议要求的首个有效评分，供应商均DigitalOcean、模型与解码和4096/12轮预算不变。更新器模型调用/tokens/USD均0；没有未知费用。官方TF高分不替代实际产物审查。</p>
+<p>235两组均返回数值、排序与单位正确的图表规格，但候选把12月相对2月的倍数写成约2.9（实际3.18）；SP称三类商品均约为江苏的1.3–1.4倍，家电实际为1.15。两组K0相同，不把这些随机解读差异归因于适应。渲染仍按原规则记未知。</p>
+<h2>机制发生了什么，哪些还不能解释</h2>
+<p><strong>直接证据：</strong>候选明确识别了知识中已有的两个源码，却仍调用一次完整TextAnimations类别，返回62090个序列化字符；没有将记忆源码写成文件或执行构建。候选避开了SP的失效批量调用，但两组都调用7次工具。最后都以 <code>finish_reason=length</code> 使用满4096tokens：SP全为reasoning，候选3865为reasoning，剩余输出为未执行的半截调用文本。所有必需产物均不存在。</p>
+<p><strong>观察：</strong>候选在React/纯HTML选择、可选组件与验证方式之间多次展开；最后prompt33186tokens，SP19444。<strong>尚待检验：</strong>静态提供正确源码不足以约束采用与组装路径，可选设计扩张可能占用了写产物的空间。上下文增大、规划和截断同时出现，不能据此给出单一因果结论。新协议和旧路由扩展的环境、种子不同，不能将跨轮差异当作受控消融。</p>
+<p>本轮否定的是“这一确切程序记忆组合足以满足严格双提升”的开发假说，不是否定程序记忆整类方法。不得把再追加通用“先写文件”提示当作已学习的新机制，也不得重试此版本直到获胜。下一候选须先建立不同机制与非答案学习信号：例如结果信用候选所需的通用程序成功/失败对，目前仍未通过准入。<a href="../results/evidence/extensions/program-memory-dashboard-v1/mechanism-projection.json">事实、观察与假说投影</a></p>
+<h2>审查限制与复核</h2>
+<p>四份质量审查在 <code>70d98a0</code> 提交后才读取官方分数。随机标签未完全隐藏方法：原始回答和工具文本中的workspace路径暴露单元编号。因此明确记为遮蔽评分的同一协调者审查，不能称完全方法盲审或独立人工审查；未重采样替换。合成core失败还由独立文件检查直接确认。页面不存在，页面验收记未通过，未用自测页面代替agent产物。浏览器检查器自身的正控制和动画负控制均通过。</p>
+<p>原始725文件、1805冻结源文件、20评分槽、费用与严格晋级条件已经无网络离线复算通过。所有最初负准入、原生错误收据、开发失败和正控制保留。两批验证数据/日程保留未执行。<a href="../results/evidence/extensions/program-memory-dashboard-v1/decision.json">逐单元结果及成本</a> · <a href="../results/evidence/extensions/program-memory-dashboard-v1/verification.json">离线复核结果</a> · <a href="../results/evidence/extensions/program-memory-dashboard-v1/verify_trial.py">复核脚本</a></p>
+<footer>分支 codex/completion-quality-study · 未推送、部署或外发 · 本页仅报告独立扩展开发与原题保持结果，不能据此宣称原 benchmark Goal 完成。</footer>
+</main></body></html>

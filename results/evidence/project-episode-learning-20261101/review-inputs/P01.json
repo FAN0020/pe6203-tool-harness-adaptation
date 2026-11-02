@@ -1,0 +1,98 @@
+{
+  "episode": "P01",
+  "task_id": 900401,
+  "execution_status": "completed",
+  "answer": "All records are saved and verified. Here's the summary:\n\n## Saved project\n\n**Cobalt planning ledger** — ID `9c796838-58de-4097-9b7f-fb62134325cb`\nDescription: *Fictional project for exact preservation of supplied work records and references.*\n\n## Record counts\n\n| Metric | Count |\n|---|---|\n| **Total records** | **6** |\n| **Root records** (top-level, no parent) | **2** — R01, R02 |\n| **Non-root records** (nested) | **4** — R03, R05 (under R01); R04, R06 (under R02) |\n\n## Saved records\n\n| Key | Name | Stored ID | Parent | Priority | Complexity | Est. hrs | Tags | Status |\n|---|---|---|---|---|---|---|---|---|\n| R01 | Cobalt record R01 | `75419c12…cf34e` | — (root) | 8 | 4 | 11 | synthetic, group1 | pending |\n| R02 | Cobalt record R02 | `6d605817…2643a` | — (root) | 8 | 5 | 7 | synthetic, group2 | pending |\n| R03 | Cobalt record R03 | `1e5d07f3…014a9` | R01 | 6 | 4 | 5 | synthetic, group1 | pending |\n| R04 | Cobalt record R04 | `aa6d0a66…e4d6` | R02 | 2 | 5 | 12 | synthetic, group2 | pending |\n| R05 | Cobalt record R05 | `d70571d0…61408` | R01 | 4 | 2 | 12 | synthetic, group1 | pending |\n| R06 | Cobalt record R06 | `df4088b4…82966` | R02 | 3 | 6 | 5 | synthetic, group2 | pending |\n\n## Relationships — saved as supplied\n\n**Yes, all supplied relationships were resolved from symbolic keys to real stored task IDs and saved.**\n\n**Parent relationships (4 of 4 saved):**\n- R03 → parent R01 ✅\n- R05 → parent R01 ✅\n- R04 → parent R02 ✅\n- R06 → parent R02 ✅\n\nVerified by querying each parent's children: R01 returns exactly {R03, R05}; R02 returns exactly {R04, R06}. R01 and R02 confirmed as level-0 root tasks.\n\n**Dependencies (3 of 3 saved):**\n- R04 → depends on R03 (`1e5d07f3…014a9`) ✅\n- R05 → depends on R04 (`aa6d0a66…e4d6`) ✅\n- R06 → depends on R05 (`d70571d0…61408`) ✅\n\nEach dependent task reports exactly 1 dependency, and each points at the intended record. R01, R02 and R03 correctly have no dependencies, matching the input.\n\n## Fidelity notes\n\n- All supplied **names, details (including ledger markers 52322, 75898, 67768, 73376, 42609, 17731), priorities, complexities, estimatedHours and tags** were stored verbatim.\n- **All 6 records remain `pending` and incomplete** — 0 completed. These are stored work definitions only; no work was performed, and no record was marked done.\n- No records were redesigned, merged, renamed, or added — the supplied set of 6 is the complete and exact set stored.\n- One reporting caveat: the project-wide hierarchy view printed \"Total: 10 tasks,\" which is an inflated display count (it counts the 4 non-root records twice, once nested and once in its flat section). The true total is 6, confirmed by each record having a single unique ID and by per-parent child listings returning 2 + 2. The `review_project_status` tool was also unavailable due to an internal storage API error, so the counts above were verified through the task hierarchy and per-task lookups instead.",
+  "properties": {
+    "records": "pass",
+    "fields": "pass",
+    "structure": "pass"
+  },
+  "expected_counts": {
+    "total_records": 6,
+    "root_records": 2,
+    "non_root_records": 4
+  },
+  "project": [
+    {
+      "id": "9c796838-58de-4097-9b7f-fb62134325cb",
+      "name": "Cobalt planning ledger",
+      "description": "Fictional project for exact preservation of supplied work records and references.",
+      "createdAt": "2026-11-01T09:01:43.694Z",
+      "updatedAt": "2026-11-01T09:01:43.694Z"
+    }
+  ],
+  "store_path": "review-artifacts/P01/tasks.json",
+  "store_sha256": "2b35e4c474b0b55cc5d5ed9f530fb0ecddd0d2de8c3c0d76fbf195ae8d72a537",
+  "trace_sha256": "b0b7605ee4cbaf23be69d6c2e2757465cd1b6ac83d25c8c0460058382567ac57",
+  "calls": [
+    {
+      "native_tool": "list_projects",
+      "isError": false
+    },
+    {
+      "native_tool": "review_workspace_health",
+      "isError": true
+    },
+    {
+      "native_tool": "create_project",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "create_task",
+      "isError": false
+    },
+    {
+      "native_tool": "list_tasks",
+      "isError": false
+    },
+    {
+      "native_tool": "get_task",
+      "isError": false
+    },
+    {
+      "native_tool": "get_task",
+      "isError": false
+    },
+    {
+      "native_tool": "get_task",
+      "isError": false
+    },
+    {
+      "native_tool": "get_task",
+      "isError": false
+    },
+    {
+      "native_tool": "review_project_status",
+      "isError": true
+    },
+    {
+      "native_tool": "list_tasks",
+      "isError": false
+    },
+    {
+      "native_tool": "list_tasks",
+      "isError": false
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "selection_protocol": "Select coverage by released mutation metadata and official task/server mapping before any new task model outcome. Do not inspect official answers or scores for selection. Existing tasks133/235/283 remain retained; additions cannot replace historical failures.",
+  "new_model_calls": 0,
+  "mutation_sources": {
+    ".cache/mcpevol/upstream/src/custom/data/mutation/HYBRID/HYBRID/HYBRID/HYBRID/evolution.json": "43d7deba235cb60190ae8db805235551cde015f71f81829d374ec49b14418d2b",
+    ".cache/mcpevol/upstream/src/custom/data/mutation/HYBRID/HYBRID/HYBRID/evolution.json": "d78c551f0136a7b0ad17fcb519e27aeb14b0b885fcb0a6309e98b2526bdc9431",
+    ".cache/mcpevol/upstream/src/custom/data/mutation/HYBRID/HYBRID/evolution.json": "9186e5959df32b933bf88689d71454e98793bfcaf4c8b65478cc24ba2abf5a08",
+    ".cache/mcpevol/upstream/src/custom/data/mutation/HYBRID/evolution.json": "26d3e98c1464ab8b784bc37c3e7dc2c223038d1d3f06931cee56b76fb01acd46"
+  },
+  "task_dataset_sha256": "b51d09d93afa94b08a67281a95ee8b4c7d69953816adf6769a996e26274bb023",
+  "removed_tool_records": [
+    {
+      "source": ".cache/mcpevol/upstream/src/custom/data/mutation/HYBRID/HYBRID/HYBRID/HYBRID/evolution.json",
+      "server": "swiftipedia-mcp-server",
+      "deleted_tool": "search_symbols",
+      "migration_target": "browse_module",
+      "summary": "Removed the obsolete search_symbols tool from the MCP tools list and migrated its text-based symbol discovery functionality into browse_module so callers can still discover APIs by module/category and now also by free-text query.",
+      "diff_hunks": [
+        {
+          "old_code": "            {\n                name: \"search_symbols\",\n                description: \"Search for SwiftUI/Swift API symbols using text-based queries. Returns matching symbols with name, type, module, description, and URL. Supports fuzzy matching on symbol names and searches in descriptions. For relationship-based discovery (inheritance, conformance), use get_related_symbols instead. To fetch full documentation for multiple result paths at once, pass them to get_symbols_batch.\",\n                inputSchema: {\n                    type: \"object\",\n                    properties: {\n                        query: {\n                            type: \"string\",\n                            description: \"Search query (e.g. 'Button', 'VStack alignment', 'List selection')\",\n                        },\n                        module: {\n                            type: \"string\",\n                            enum: [\"swiftui\", \"unionchat\", \"uniontabview\", \"unionkeychain\"],\n                            description: \"Optional: filter by module\",\n                        },\n                        limit: {\n                            type: \"number\",\n                            description: \"Maximum number of results (default: 10)\",\n                            default: 10,\n                        },\n                    },\n                    required: [\"query\"],\n                },\n            },",
+          "new_code": "",
+          "file_name": "swiftipedia-mcp-server/dist/index.js"
+        },
+        {
+          "old_code": "            {\n                name: \"browse_module\",\n                description: \"List all symbols in a module or category. Useful for discovering available APIs before drilling into details, examples, relationships, or using the combined get_symbol_overview workflow.\",\n                inputSchema: {\n                    type: \"object\",\n                    properties: {\n                        module: {\n                            type: \"string\",\n                            enum: [\"swiftui\", \"unionchat\", \"uniontabview\", \"unionkeychain\"],\n                            description: \"Module name\",\n                        },\n                        category: {\n                            type: \"string\",\n                            description: \"Optional: filter by category (e.g. 'struct', 'protocol', 'method')\",\n                        },\n                        limit: {\n                            type: \"number\",\n                            description: \"Maximum number of results (default: 50)\",\n                            default: 50,\n                        },\n                    },\n                    required: [\"module\"],\n                },\n            },",
+          "new_code": "            {\n                name: \"browse_module\",\n                description: \"List symbols in a module or category, or perform text-based symbol discovery within a module. Useful for discovering available APIs before drilling into details, examples, relationships, or using the combined get_symbol_overview workflow. When query is provided, this tool also performs the former symbol search behavior and returns matching symbols using fuzzy name/description search.\",\n                inputSchema: {\n                    type: \"object\",\n                    properties: {\n                        module: {\n                            type: \"string\",\n                            enum: [\"swiftui\", \"unionchat\", \"uniontabview\", \"unionkeychain\"],\n                            description: \"Module name. Required for module browsing and also used to scope text-based symbol search when query is provided.\",\n                        },\n                        category: {\n                            type: \"string\",\n                            description: \"Optional: filter by category (e.g. 'struct', 'protocol', 'method')\",\n                        },\n                        query: {\n                            type: \"string\",\n                            description: \"Optional: text search query (e.g. 'Button', 'VStack alignment', 'List selection'). When provided, this tool returns symbol search results scoped to the selected module instead of a plain module listing.\",\n                        },\n                        limit: {\n                            type: \"number\",\n                            description: \"Maximum number of results (default: 50 for browsing, also used for query-based search)\",\n                            default: 50,\n                        },\n                    },\n                    required: [\"module\"],\n                },\n            },",
+          "file_name": "swiftipedia-mcp-server/dist/index.js"
+        },
+        {
+          "old_code": "            case \"search_symbols\": {\n                const { query, module, limit = 10 } = args;\n                const results = await api.searchSymbols(query, module, limit);\n                return {\n                    content: [\n                        {\n                            type: \"text\",\n                            text: JSON.stringify(results, null, 2),\n                        },\n                    ],\n                };\n            }",
+          "new_code": "",
+          "file_name": "swiftipedia-mcp-server/dist/index.js"
+        },
+        {
+          "old_code": "            case \"browse_module\": {\n                const { module, category, limit = 50 } = args;\n                const symbols = await api.browseModule(module, category, limit);\n                return {\n                    content: [\n                        {\n                            type: \"text\",\n                            text: JSON.stringify(symbols, null, 2),\n                        },\n                    ],\n                };\n            }",
+          "new_code": "            case \"browse_module\": {\n                const { module, category, query, limit = 50 } = args;\n                const symbols = query\n                    ? await api.searchSymbols(query, module, limit)\n                    : await api.browseModule(module, category, limit);\n                return {\n                    content: [\n                        {\n                            type: \"text\",\n                            text: JSON.stringify(symbols, null, 2),\n                        },\n                    ],\n                };\n            }",
+          "file_name": "swiftipedia-mcp-server/dist/index.js"
+        }
+      ],
+      "official_selected_tasks": [
+        {
+          "task_id": 72,
+          "question": "I'm putting together a short SwiftUI training handout and want to include some example code for creating expandable lists.  \n    Could you find the relevant SwiftUI API that handles disclosure-style list items and pull its usage examples?  \n    Also, I need to create a small appendix by pulling pages 2–4 from the PaLM‑E PDF and pages 5–7 from the Voyager PDF in my local folder, then merge those excerpts into one combined PDF.",
+          "servers": {
+            "swiftipedia-mcp-server": [
+              "search_symbols",
+              "get_examples"
+            ],
+            "@cablate/mcp-doc-forge": [
+              "pdf_splitter",
+              "pdf_merger"
+            ]
+          },
+          "removed_tool_in_official_task_map": true
+        },
+        {
+          "task_id": 430,
+          "question": "I'm learning iOS development and keep hearing about \"declarative UI\" in the context of SwiftUI. Can you give me a good explanation of what declarative programming means in general, and then show me some concrete SwiftUI code examples that demonstrate this approach?",
+          "servers": {
+            "wikipedia-mcp": [
+              "search",
+              "readArticle"
+            ],
+            "swiftipedia-mcp-server": [
+              "search_symbols",
+              "get_examples"
+            ]
+          },
+          "removed_tool_in_official_task_map": true
+        }
+      ]
+    },
+    {
+      "source": ".cache/mcpevol/upstream/src/custom/data/mutation/HYBRID/HYBRID/evolution.json",
+      "server": "@modelcontextprotocol/server-filesystem",
+      "deleted_tool": "read_file",
+      "migration_target": "read_text_file",
+      "summary": "Removed the deprecated 'read_file' tool which was explicitly marked as obsolete in favor of 'read_text_file'. The read_text_file tool already implements identical functionality including the optional 'head' parameter for reading first N lines. No migration logic changes needed as read_text_file already handles all use cases.",
+      "diff_hunks": [
+        {
+          "old_code": "server.registerTool(\"read_file\", {\n    title: \"Read File (Deprecated)\",\n    description: \"Read the complete contents of a file as text. DEPRECATED: Use read_text_file instead.\",\n    inputSchema: ReadTextFileArgsSchema.shape,\n    outputSchema: { content: z.string() },\n    annotations: { readOnlyHint: true }\n}, readTextFileHandler);",
+          "new_code": "",
+          "file_name": "@modelcontextprotocol/server-filesystem/dist/index.js"
+        },
+        {
+          "old_code": "server.registerTool(\"read_text_file\", {\n    title: \"Read Text File\",\n    description: \"Read the complete contents of a file from the file system as text. \" +\n        \"Handles various text encodings and provides detailed error messages \" +\n        \"if the file cannot be read. Use this tool when you need to examine \" +\n        \"the contents of a single file. Use the 'head' parameter to read only \" +\n        \"the first N lines of a file. Operates on the file as text regardless of extension. \" +\n        \"Only works within allowed directories.\",\n    inputSchema: {\n        path: z.string(),\n        head: z.number().optional().describe(\"If provided, returns only the first N lines of the file\")\n    },\n    outputSchema: { content: z.string() },\n    annotations: { readOnlyHint: true }\n}, readTextFileHandler);",
+          "new_code": "server.registerTool(\"read_text_file\", {\n    title: \"Read Text File\",\n    description: \"Read the complete contents of a file from the file system as text. \" +\n        \"This is the primary tool for reading text files, replacing the deprecated 'read_file' tool. \" +\n        \"Handles various text encodings and provides detailed error messages \" +\n        \"if the file cannot be read. Use this tool when you need to examine \" +\n        \"the contents of a single file. Use the 'head' parameter to read only \" +\n        \"the first N lines of a file. Operates on the file as text regardless of extension. \" +\n        \"Only works within allowed directories.\",\n    inputSchema: {\n        path: z.string(),\n        head: z.number().optional().describe(\"If provided, returns only the first N lines of the file\")\n    },\n    outputSchema: { content: z.string() },\n    annotations: { readOnlyHint: true }\n}, readTextFileHandler);",
+          "file_name": "@modelcontextprotocol/server-filesystem/dist/index.js"
+        }
+      ],
+      "official_selected_tasks": [
+        {
+          "task_id": 9,
+          "question": "I need help reviewing yesterday’s application activity logs.  \n    First, find yesterday’s log file somewhere under my MCP directory (it should have “yesterday” in the filename), then read its contents so we can understand what’s inside.  \n    After that, please set up a structured plan of tasks for analyzing the log, summarizing key events, and preparing a short report for me.",
+          "servers": {
+            "@modelcontextprotocol/server-filesystem": [
+              "search_files",
+              "read_text_file"
+            ],
+            "@kazuph/mcp-taskmanager": [
+              "request_planning"
+            ]
+          },
+          "removed_tool_in_official_task_map": false
+        },
+        {
+          "task_id": 24,
+          "question": "I want to turn yesterday’s log entries into actionable tasks. Please read the file at txt/log_yesterday.txt, analyze the problems mentioned in it, and then add a set of “To Do” items into a new task file named logs_tasks.md based on what needs follow‑up.",
+          "servers": {
+            "@modelcontextprotocol/server-filesystem": [
+              "read_text_file"
+            ],
+            "server-sequential-thinking": [
+              "sequentialthinking"
+            ],
+            "mcp-tasks": [
+              "tasks_setup",
+              "tasks_add"
+            ]
+          },
+          "removed_tool_in_official_task_map": false
+        }
+      ]
+    },
+    {
+      "source": ".cache/mcpevol/upstream/src/custom/data/mutation/HYBRID/HYBRID/evolution.json",
+      "server": "@jinzcdev/leetcode-mcp-server",
+      "deleted_tool": "get_daily_challenge",
+      "migration_target": "get_problem",
+      "summary": "Removed the standalone get_daily_challenge tool, which fetched today's daily challenge with a hardcoded current date. Its functionality is absorbed into get_problem by adding an optional 'daily' flag parameter that triggers the daily challenge fetch path instead of a slug-based lookup.",
+      "diff_hunks": [
+        {
+          "old_code": "        // Daily challenge tool\n        this.server.tool(\"get_daily_challenge\", \"Retrieves today's LeetCode Daily Challenge problem with complete details, including problem description, constraints, and examples\", {}, async () => {\n            const data = await this.leetcodeService.fetchDailyChallenge();\n            return {\n                content: [\n                    {\n                        type: \"text\",\n                        text: JSON.stringify({\n                            date: new Date().toISOString().split(\"T\")[0],\n                            problem: data\n                        })\n                    }\n                ]\n            };\n        });\n        // Problem details tool\n        // Problem hints tool",
+          "new_code": "        // Problem details tool\n        // Problem hints tool",
+          "file_name": "@jinzcdev/leetcode-mcp-server/build/mcp/tools/problem-tools.js"
+        },
+        {
+          "old_code": "        this.server.tool(\"get_problem\", \"Retrieves complete details about a specific LeetCode problem, including its full description, examples, constraints, test cases, and all related information. Use this for comprehensive problem analysis\", {\n            titleSlug: z\n                .string()\n                .describe(\"The URL slug/identifier of the problem (e.g., 'two-sum', 'add-two-numbers') as it appears in the LeetCode URL\")\n        }, async ({ titleSlug }) => {\n            const data = await this.leetcodeService.fetchProblemSimplified(titleSlug);\n            return {\n                content: [\n                    {\n                        type: \"text\",\n                        text: JSON.stringify({\n                            titleSlug,\n                            problem: data\n                        })\n                    }\n                ]\n            };\n        });",
+          "new_code": "        this.server.tool(\"get_problem\", \"Retrieves complete details about a specific LeetCode problem, including its full description, examples, constraints, test cases, and all related information. Use this for comprehensive problem analysis. Also supports fetching today's LeetCode Daily Challenge by setting the 'daily' parameter to true (titleSlug is not required in that case)\", {\n            titleSlug: z\n                .string()\n                .optional()\n                .describe(\"The URL slug/identifier of the problem (e.g., 'two-sum', 'add-two-numbers') as it appears in the LeetCode URL. Not required when 'daily' is true\"),\n            daily: z\n                .boolean()\n                .optional()\n                .default(false)\n                .describe(\"When set to true, retrieves today's LeetCode Daily Challenge problem instead of a specific problem by slug\")\n        }, async ({ titleSlug, daily }) => {\n            if (daily) {\n                const data = await this.leetcodeService.fetchDailyChallenge();\n                return {\n                    content: [\n                        {\n                            type: \"text\",\n                            text: JSON.stringify({\n                                date: new Date().toISOString().split(\"T\")[0],\n                                problem: data\n                            })\n                        }\n                    ]\n                };\n            }\n            if (!titleSlug) {\n                return {\n                    content: [\n                        {\n                            type: \"text\",\n                            text: JSON.stringify({ error: \"titleSlug is required when 'daily' is not set to true\" })\n                        }\n                    ]\n                };\n            }\n            const data = await this.leetcodeService.fetchProblemSimplified(titleSlug);\n            return {\n                content: [\n                    {\n                        type: \"text\",\n                        text: JSON.stringify({\n                            titleSlug,\n                            problem: data\n                        })\n                    }\n                ]\n            };\n        });",
+          "file_name": "@jinzcdev/leetcode-mcp-server/build/mcp/tools/problem-tools.js"
+        }
+      ],
+      "official_selected_tasks": [
+        {
+          "task_id": 90,
+          "question": "I’m preparing a small presentation for a friend.  \n    Could you first help me look up the Yu‑Gi‑Oh! card called “青眼白龙”, show me its detailed info, and also fetch its card image?  \n    After that, please also tell me what today’s LeetCode daily challenge problem is.",
+          "servers": {
+            "ygocdb-mcp-server": [
+              "search_cards",
+              "get_card_by_id",
+              "get_card_image"
+            ],
+            "@jinzcdev/leetcode-mcp-server": [
+              "get_daily_challenge"
+            ]
+          },
+          "removed_tool_in_official_task_map": true
+        },
+        {
+          "task_id": 94,
+          "question": "I want to pick a LeetCode problem today that aligns with my personal Bazi elements. I was born on 1998-07-31 at 14:00 in the afternoon (solar time), and I’m male. Can you first check what elements dominate my Bazi, and then help me find several LeetCode problems whose topics fit that elemental tendency?",
+          "servers": {
+            "bazi-mcp": [
+              "getBaziDetail"
+            ],
+            "@jinzcdev/leetcode-mcp-server": [
+              "search_problems"
+            ]
+          },
+          "removed_tool_in_official_task_map": false
+        }
+      ]
+    }
+  ],
+  "candidate_order": [
+    {
+      "task_id": 430,
+      "reason": "Official selected task explicitly uses removed search_symbols; successor browse_module. Only two public read-only services; no external account, deployment or private fixture. First readiness candidate."
+    },
+    {
+      "task_id": 72,
+      "reason": "Same required removal but requires source PDF fixtures and PDF split/merge runtime. Secondary if430 unsuitable."
+    },
+    {
+      "task_id": 90,
+      "reason": "Required daily-challenge removal, but time-varying remote daily data and third-party card service. Less controlled than430; do not test just to seek wins."
+    }
+  ],
+  "not_sufficient": [
+    {
+      "task_id": 9,
+      "reason": "Official task already names read_text_file, not removed read_file."
+    },
+    {
+      "task_id": 24,
+      "reason": "Official task already names read_text_file, not removed read_file."
+    },
+    {
+      "task_id": 94,
+      "reason": "Official task names search_problems, not removed get_daily_challenge."
+    }
+  ],
+  "scope_limit": "Official task maps identify intended capabilities, not proof that an execution must call them. Live catalogs and actual calls still need verification. Mutation descriptions alone do not prove release behavior or success."
+}

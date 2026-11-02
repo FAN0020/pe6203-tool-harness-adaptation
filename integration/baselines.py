@@ -46,16 +46,19 @@ def _request_completion(messages, settings):
     if not settings.get("allow_metadata_api", False):
         raise ValueError("Explicit allow_metadata_api required to send public tool metadata")
     from pe6203.runner import credentials
+    from pe6203.spend_guard import complete_sync
 
     key, url = credentials(settings)
     with OpenAI(api_key=key, base_url=url, timeout=settings["timeout"], max_retries=0) as client:
-        return client.chat.completions.create(
+        return complete_sync(
+            client,
+            settings.get("spend_guard"),
             model=model_id(settings["model"], url),
             messages=messages,
             temperature=settings["temperature"],
             max_tokens=settings["max_tokens"],
             response_format={"type": "json_object"},
-            extra_body=nonthinking_options(url),
+            extra_body={**nonthinking_options(url), **deepcopy(settings.get("extra_body", {}))},
         ).model_dump(mode="json")
 
 

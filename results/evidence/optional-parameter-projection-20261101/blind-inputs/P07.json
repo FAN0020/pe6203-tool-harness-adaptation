@@ -1,0 +1,136 @@
+{
+  "id": "P07",
+  "question": "How can I ensure secure mathematical operations in my Python codebase by validating expressions and getting security recommendations following OWASP guidelines?",
+  "answer": "## Why this matters\n\nAny feature that takes a **user-supplied string and turns it into executable math** is an injection sink. In Python the naive implementation is:\n\n```python\nresult = eval(user_input)          # ← OWASP A03 / CWE-95\n```\n\nThis is remote code execution, not just a bug. Even the \"hardened\" variant is bypassable:\n\n```python\neval(user_input, {\"__builtins__\": None}, {})   # still RCE:\n# ().__class__.__bases__[0].__subclasses__()  → object graph walk → os.system\n```\n\nThe only safe model is: **never execute. Parse, validate against an allowlist, then interpret.** Below is the five-layer design, plus what your validation tooling actually caught when I ran it.\n\n---\n\n## Layer 1 — Strict grammar validation (reject before you parse)\n\nValidate against a formal grammar whose alphabet is digits, `.`, whitespace, `+ - * / % ^ ( ) ,` and an allowlist of function names. Anything else fails at character level.\n\nI ran adversarial inputs through the grammar validator:\n\n| Input | Verdict | Signal |\n|---|---|---|\n| `__import__('os').system('rm -rf /')` | ❌ `Unexpected character '_' at line 1, column 1` | Rejected at char 1 — no identifier ever parsed |\n| `open('/etc/passwd').read()` | ❌ `Expected semicolon or newline after statement` + 2× `Expected expression` | `/` treated as division → structural failure |\n| `(lambda: 1)()` | ❌ `Expected expression` at col 12–13 | Lambda syntax not in grammar |\n| `(a + b) * 2 / max(c, 1)` | ✅ valid | Legitimate form accepted |\n| `sqrt(16) + 2^10 - abs(-5)` | ✅ → `1023` | Evaluated correctly |\n\nNote the containment property: the malicious strings **failed to parse**, so nothing was ever evaluated. A grammar gate is cheaper and stronger than post-hoc AST inspection.\n\n```python\nimport re\n\nALLOWED_FUNCS = {\"sqrt\", \"abs\", \"min\", \"max\", \"round\", \"floor\", \"ceil\", \"log\", \"exp\"}\nMAX_LEN = 512\n\n_TOKEN = re.compile(r\"\\s*(?:(\\d+\\.?\\d*|\\.\\d+)|([a-zA-Z_]\\w*)|([-+*/%^(),]))\")\n\ndef lex(expr: str):\n    if not isinstance(expr, str):\n        raise ValueError(\"expression must be a string\")\n    if len(expr) > MAX_LEN:\n        raise ValueError(\"expression too long\")\n\n    tokens, pos = [], 0\n    while pos < len(expr):\n        m = _TOKEN.match(expr, pos)\n        if not m:\n            raise ValueError(f\"illegal character at position {pos}\")\n        num, name, op = m.groups()\n        pos = m.end()\n        if num is not None:\n            tokens.append((\"NUM\", num))\n        elif name is not None:\n            if name not in ALLOWED_FUNCS and name not in ALLOWED_VARS:\n                raise ValueError(f\"unknown identifier: {name!r}\")\n            tokens.append((\"NAME\", name))\n        else:\n            tokens.append((\"OP\", op))\n    return tokens\n```\n\n**Critical:** the allowlist is *positive* (what may appear), never negative. Blacklisting `eval`, `import`, `__` is trivially bypassed with `getattr`, unicode escapes, or `\\x5f\\x5f`.\n\n---\n\n## Layer 2 — AST allowlist (defense in depth)\n\nIf you use `ast.parse`, you must walk every node and reject anything outside a small set. `ast.parse` alone is *not* validation — it happily parses `eval`-able payloads.\n\n```python\nimport ast\nfrom decimal import Decimal\n\nALLOWED_NODES = (\n    ast.Expression, ast.BinOp, ast.UnaryOp, ast.Constant, ast.Call,\n    ast.Name, ast.Load, ast.Add, ast.Sub, ast.Mult, ast.Div,\n    ast.FloorDiv, ast.Mod, ast.Pow, ast.USub, ast.UAdd,\n)\n\nALLOWED_CALLS = {\"sqrt\", \"abs\", \"min\", \"max\", \"round\"}\n\ndef validate_ast(node):\n    for n in ast.walk(node):\n        if not isinstance(n, ALLOWED_NODES):\n            raise ValueError(f\"disallowed syntax: {type(n).__name__}\")\n        if isinstance(n, ast.Constant) and not isinstance(n.value, (int, float)):\n            raise ValueError(\"only numeric literals permitted\")\n        if isinstance(n, ast.Call):\n            if not isinstance(n.func, ast.Name) or n.func.id not in ALLOWED_CALLS:\n                raise ValueError(f\"disallowed call: {getattr(n.func, 'id', '?')}\")\n            if n.keywords:\n                raise ValueError(\"keyword arguments not permitted\")\n        if isinstance(n, ast.Name) and n.id.startswith(\"_\"):\n            raise ValueError(\"dunder access blocked\")\n```\n\nReject `Attribute`, `Subscript`, `Lambda`, `Comprehension`, `JoinedStr`, `Await`, `Starred`. **`ast.Attribute` is the single most dangerous node** — it is how every `eval` escape begins.\n\n---\n\n## Layer 3 — Interpret, don't execute\n\nMap operators to `operator` functions over `Decimal`/`Fraction`, so you get precision and never touch `eval`:\n\n```python\nimport operator\nfrom decimal import Decimal, DivisionByZero, InvalidOperation\n\n_OPS = {ast.Add: operator.add, ast.Sub: operator.sub,\n        ast.Mult: operator.mul, ast.Div: operator.truediv,\n        ast.Mod: operator.mod, ast.Pow: operator.pow}\n\ndef _eval(node):\n    if isinstance(node, ast.Expression):\n        return _eval(node.body)\n    if isinstance(node, ast.Constant):\n        return Decimal(str(node.value))\n    if isinstance(node, ast.BinOp):\n        return _OPS[type(node.op)](_eval(node.left), _eval(node.right))\n    if isinstance(node, ast.UnaryOp):\n        v = _eval(node.operand)\n        return -v if isinstance(node.op, ast.USub) else +v\n    if isinstance(node, ast.Name):\n        return Decimal(str(SAFE_VARS[node.id]))\n    if isinstance(node, ast.Call):\n        return SAFE_FUNCS[node.func.id](*[_eval(a) for a in node.args])\n    raise ValueError(\"unsupported node\")\n\ndef safe_eval(user_input: str) -> Decimal:\n    tokens = lex(user_input)                      # layer 1\n    tree = ast.parse(user_input, mode=\"eval\")\n    validate_ast(tree)                            # layer 2\n    return _eval(tree)                            # layer 3\n```\n\n> **Decimal, not float.** Look at `2^64` → `18446744073709552000`. The trailing `...52000` is float precision loss on a value that is exactly `18446744073709551616`. For financial or scientific math, float coercion is a correctness *and* integrity defect. Also pin down `^`: in Python it means XOR, in math notation it means power. Ambiguity here silently produces wrong answers — pick one, document it, and test it.\n\nUse a maintained library rather than hand-rolling if you can: **`asteval`** (built for exactly this), **`simpleeval`**, or `sympy.parse_expr` with a restricted global dict. Avoid `sympy.sympify` on raw input (historically exploitable), and treat `numexpr` as a performance tool, not a security boundary.\n\n---\n\n## Layer 4 — Resource limits (DoS / A04 Insecure Design)\n\nUnbounded evaluation is an availability attack. My run of `9^(9^9)` returned `result: null` rather than hanging — that is **fail-closed** behaviour, and it's the property you want. But you must enforce it explicitly:\n\n```python\nMAX_EXPONENT = 1_000\nMAX_RESULT_BITS = 1 << 16\n\nif isinstance(node.op, ast.Pow):\n    base, exp = _eval(node.left), _eval(node.right)\n    if exp > MAX_EXPONENT:\n        raise ValueError(\"exponent limit exceeded\")\n    if abs(base) > 1 and exp * base.adjusted() > MAX_RESULT_BITS:\n        raise ValueError(\"result magnitude limit exceeded\")\n```\n\nAlso enforce, at the boundary:\n- **String length cap** (512–1024 chars) before lexing\n- **Nesting-depth cap** (~32) — prevents parser stack exhaustion on `((((...))))`\n- **Token count cap**\n- **Wall-clock timeout** — run evaluation in a subprocess with `resource.setrlimit(RLIMIT_CPU, ...)` and killed children, or a worker pool with a hard deadline\n- **Memory cap** via `RLIMIT_AS`\n\n---\n\n## Layer 5 — Error handling, logging, and API surface\n\nYour evaluation tooling showed the right instinct: `1/0` returned `result: null` with **no stack trace, no exception text, no internal paths**. Preserve that, but make it structured — an opaque `null` is ambiguous to a client and useless to a defender:\n\n```python\nclass MathError(Exception):\n    code: str          # \"SYNTAX\" | \"DISALLOWED\" | \"DIV_ZERO\" | \"LIMIT\"\n    public: str        # safe message for the caller\n\n@app.post(\"/calculate\")\nasync def calculate(payload: CalcRequest):\n    try:\n        return {\"result\": str(safe_eval(payload.expression))}\n    except ValueError:\n        audit_log.warning(\"math.rejected\", extra={\n            \"user\": current_user.id,\n            \"expr_hash\": sha256(payload.expression),\n            \"expr_truncated\": payload.expression[:64],\n            \"remote_addr\": request.client.host,\n        })\n        raise HTTPException(422, detail={\"code\": \"INVALID_EXPRESSION\"})\n    except DivisionByZero:\n        raise HTTPException(422, detail={\"code\": \"DIVISION_BY_ZERO\"})\n```\n\n- **Log rejections, not just successes** — repeated grammar failures from one principal are your IDS signal (OWASP A09).\n- **Rate limit per user/IP** — expression evaluation is CPU-expensive and a natural DoS amplifier (A04).\n- **Never echo the raw expression into an HTML response unescaped** — XSS (A03).\n- **Validate with Pydantic** at the boundary: `expression: constr(max_length=512)`.\n\n---\n\n## OWASP Top 10 mapping\n\n| Risk | How it manifests here | Control |\n|---|---|---|\n| **A01** Broken Access Control | Calculator reveals variable/tenant values | Scope `SAFE_VARS` per request, never globally |\n| **A03** Injection | `eval`/`exec` → RCE | Grammar + AST allowlist + interpreter (layers 1–3) |\n| **A04** Insecure Design | No timeout/limits → DoS | Length, depth, exponent, CPU, memory caps (layer 4) |\n| **A05** Misconfiguration | `eval` left in a debug path; permissive CORS on `/calculate` | Remove entirely; explicit CORS allowlist |\n| **A06** Vulnerable Components | Old `sympy` / `numexpr` CVE | Pin + scan dependencies (`pip-audit`) |\n| **A08** Integrity Failures | Float/greedy parse yields **wrong math** | `Decimal`, pinned operators, deterministic tests |\n| **A09** Logging Failures | Malicious expressions invisible | Structured audit log on every rejection |\n| **A10** SSRF | Rarely relevant *unless* you allow `import`/`fetch` functions | Keep the function allowlist closed |\n\n---\n\n## Test corpus to run in CI\n\nEvery item below should be a test **asserting rejection** — this is your regression fence:\n\n```python\nMUST_REJECT = [\n    \"__import__('os').system('rm -rf /')\",\n    \"open('/etc/passwd').read()\",\n    \"(lambda: 1)()\",\n    \"().__class__.__bases__[0].__subclasses__()\",\n    \"eval('1+1')\",\n    \"exec('x=1')\",\n    \"[x for x in range(10**9)]\",\n    \"1 if True else 2\",\n    \"9**(9**9)\",                 # resource\n    \"((((((((((1))))))))))\" * 4, # depth\n    \"a\" * 10_000,                # length\n    \"1/0\",\n    \"\\x5f\\x5fimport\\x5f\\x5f('os')\",  # encoded dunder\n]\nMUST_ACCEPT = [\n    (\"(a + b) * 2 / max(c, 1)\", ...),\n    (\"sqrt(16) + 2**10 - abs(-5)\", Decimal(1023)),   # 1023, exact, not float\n    (\"2**64\", Decimal(18446744073709551616)),        # exact, not ...52000\n]\n```\n\nThen add **property-based fuzzing** (`hypothesis`) that generates random strings from a wide alphabet including `_`, `\\`, quotes, and unicode confusables, and asserts the evaluator either returns a `Decimal` or raises `MathError` — never any other exception, never executes I/O.\n\n---\n\n## Adoption checklist\n\n1. **Grep and delete.** `grep -rn \"eval(\\|exec(\\|compile(\" --include=*.py`. Every hit on a request path is a P0.\n2. **Replace with `safe_eval`** (or `asteval`) behind a single internal module — one choke point, easy to audit.\n3. **Ban the pattern** in CI: a `flake8` plugin or `semgrep` rule (`python.lang.security.audit.eval-detected`) that fails the build on `eval`/`exec`.\n4. **Add the rejection corpus** above to the test suite; require 100% pass before merge.\n5. **Wire structured audit logging** and a per-user rate limit on the endpoint.\n6. **Scan dependencies** (`pip-audit`, Dependabot) and pin versions.\n7. **Threat-model the boundary** — write the one-page A04 design note explaining *why* eval is prohibited. Future maintainers need the reasoning, not just the rule.\n\n---\n\n### Note on the generated assessment prompt\n\nI also produced a full **OWASP + NIST-aligned security hardening prompt** via the security-hardening tool, scoped to your exact context (Python 3, `ast`/`decimal`/`operator`, optional `asteval`). It enumerates the A01–A10 checks, Python-specific sink patterns (`eval`, `pickle.loads`, `shell=True`, path traversal), an OWASP risk-rating matrix, and before/after remediation plus test-case requirements. Feed it to your reviewer or a coding agent as the review rubric for this module — it's designed to be pasted in as-is.\n\nThe one-line summary: **treat a math expression as untrusted input of the same severity as a SQL fragment — grammar-gate it, allowlist its AST, interpret it over `Decimal`, cap its resources, and log every refusal.**",
+  "calls": [
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"__import__('os').system('rm -rf /')\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 1: Unexpected character '_' at line 1, column 1"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"open('/etc/passwd').read()\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 20: Expected semicolon or newline after statement\nLine 1, Column 20: Expected expression\nLine 1, Column 20: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"(a + b) * 2 / max(c, 1)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Expression is syntactically valid."
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"sqrt(16) + 2^10 - abs(-5)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"sqrt(16) + 2^10 - abs(-5)\",\n  \"result\": 1023,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "security-hardening-prompt-builder__b65756357998",
+      "arguments": "{\"codeContext\":\"Python service that accepts user-supplied mathematical expressions (from a web form / API field) and evaluates them for a calculator feature. Current naive implementation uses eval(expression) on raw input. Needs a strict-grammar parser/validator, an AST allowlist, resource limits, and safe error handling.\",\"securityFocus\":\"vulnerability-analysis\",\"language\":\"python\",\"framework\":\"Python 3 / standard library (ast, decimal, operator); optional sympy or asteval\",\"complianceStandards\":[\"OWASP-Top-10\",\"NIST-Cybersecurity-Framework\"],\"analysisScope\":[\"input-validation\",\"error-handling\",\"logging-monitoring\",\"configuration-security\",\"dependency-security\",\"api-security\"],\"riskTolerance\":\"low\",\"includeMitigations\":true,\"includeCodeExamples\":true,\"includeTestCases\":true,\"outputFormat\":\"detailed\",\"prioritizeFindings\":true}",
+      "result_outer_isError": false,
+      "result_chars": 17865
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"1/0\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"1/0\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"9^(9^9)\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"9^(9^9)\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "set_variable__b4e6856a10df",
+      "arguments": "{\"name\":\"rate\",\"expression\":\"0.0725\"}",
+      "result_outer_isError": false,
+      "result_chars": 91
+    },
+    {
+      "tool": "validate_syntax__b7e42007400a",
+      "arguments": "{\"expression\":\"(lambda: 1)()\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Syntax errors:\nLine 1, Column 12: Expected semicolon or newline after statement\nLine 1, Column 13: Expected expression\nLine 1, Column 13: Expected expression"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"10000 * rate * 5\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"10000 * rate * 5\",\n  \"result\": 3625,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    },
+    {
+      "tool": "evaluate__7722fb090eee",
+      "arguments": "{\"expression\":\"2^64\"}",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"expression\": \"2^64\",\n  \"result\": 18446744073709552000,\n  \"type\": \"number\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    }
+  ]
+}

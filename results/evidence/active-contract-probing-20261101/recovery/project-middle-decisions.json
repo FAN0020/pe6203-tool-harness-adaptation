@@ -1,0 +1,50 @@
+{
+  "decisions": [
+    {
+      "id": "C001",
+      "action": "retain",
+      "after": "Launch new projects with structured organization, detailed documentation, and optional repository/tag metadata. Establishes a solid foundation for task management with richer setup context for collaboration, categorization, and progress tracking across your development workflow.",
+      "evidence": [],
+      "reason": "No probe contradicts this descriptive text; P1 only adds observed persistence detail on the parameter field."
+    },
+    {
+      "id": "C002",
+      "action": "retain",
+      "after": "The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: \"C:\\Users\\username\\project\" or \"D:\\projects\\my-app\". Unix/Linux/macOS: \"/home/username/project\" or \"/Users/username/project\". Do NOT use: \".\", \"..\", \"~\", \"./folder\", \"../folder\" or any relative paths. Ensure the path exists and is accessible before calling this tool. NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead.",
+      "evidence": [],
+      "reason": "Both probes used a workspace path argument successfully and show no evidence about relative paths or the --claude flag; no justified change."
+    },
+    {
+      "id": "C003",
+      "action": "retain",
+      "after": "The name of the new project",
+      "evidence": [],
+      "reason": "P1 and P2 both created projects whose names were echoed; description remains accurate."
+    },
+    {
+      "id": "C004",
+      "action": "retain",
+      "after": "A detailed description of the project",
+      "evidence": [],
+      "reason": "P1 shows description stored and echoed; no contradiction."
+    },
+    {
+      "id": "C005",
+      "action": "replace",
+      "after": "Optional repository URL associated with the project. In the observed creation, a supplied value was accepted and surfaced in the success message; the stored project record reflected it appended to the description rather than as a separate repoUrl field.",
+      "evidence": [
+        "P1"
+      ],
+      "reason": "P1: create_project with repoUrl succeeded and the response showed a Repository line, but after_state lists the project without a repoUrl field, with the URL appended to description; list_projects probe did not show a repoUrl field. Limited to the tested input."
+    },
+    {
+      "id": "C006",
+      "action": "replace",
+      "after": "Optional tags for categorizing the project. In the observed creation, supplied tags were accepted and listed in the success message; the stored project record reflected them appended to the description rather than as a separate tags array.",
+      "evidence": [
+        "P1"
+      ],
+      "reason": "P1: create_project with tags succeeded and the response listed them, but after_state shows no tags field on the project, with tags text appended to description. Limited to the tested input."
+    }
+  ]
+}

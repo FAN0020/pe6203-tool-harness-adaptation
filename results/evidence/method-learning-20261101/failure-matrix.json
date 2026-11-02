@@ -1,0 +1,45 @@
+{
+  "scope": "Six selected summaries plus targeted native/source/response metadata; not an exhaustive failure census.",
+  "classes": [
+    {
+      "category": "知识适应问题",
+      "proven": "workflow_notes v2 被语义审查发现把另一条已失败路径当替代；更新器输入验证通过不等于行为知识正确。",
+      "observed": "MagicUI 两次失效调用降为零；Context7 候选也避开已知坏接口，但原题验证完成数均11/12、实际质量均0/12。",
+      "hypothesis": "应以可复用动作/产物的正反经验约束知识，而不只记住局部调用错误。",
+      "source": "results/evidence/selective-search-20261031/generation-v2-rejection.json"
+    },
+    {
+      "category": "执行与预算问题",
+      "proven": "MagicUI 两组最后响应均finish_reason=length，4096 completion全部计为reasoning，未产生最终答复或工具提议；这是可直接定位的停止条件。",
+      "observed": "contract_reconcile调用从40降至10、PE从5.9升至9.2，完成和core仍均0/2；项目候选最后一轮同样4096 reasoning截断，SP则轮数耗尽。",
+      "hypothesis": "减少探索没有减少产物构造的推理负担；大返回可能加重负担，但未建立因果。",
+      "source": "results/evidence/extensions/magicui-log-dashboard-v1/mechanism-projection.json"
+    },
+    {
+      "category": "产物生成错误",
+      "proven": "已有验收确认数学代码的运算符/边界处理矛盾、RT-2摘要能力混淆，以及235最终统计解读错误；扩展两组均未写出parser/data/page。",
+      "observed": "weather_provenance曾把变化任务core由0/2提高至1/2，但两组完成本已2/2，保持任务core又未达门槛。",
+      "hypothesis": "有执行证明的程序记忆可能减少从接口知识到正确产物之间的重新推导。",
+      "source": "results/evidence/contract-reconcile-pilot-20261101/final-response-inspection.json"
+    },
+    {
+      "category": "环境/数据问题",
+      "proven": "377原始输入缺失、当前不可评估；171缺所需服务且不属201题，217缺读取工具且不属201题，246输入缺购买频次且无读取工具。12306旧探针在原生初始化停止，未发生agent试验。",
+      "observed": "完整的合成日志已能读写；输入完整没有自动解决产物生成。",
+      "hypothesis": "输入/依赖准入必须先于方法优劣判断。不能将这些排除记为策略失败。",
+      "source": "results/evidence/mechanism-screening-20261101/magicui-task-readiness-screen.json"
+    },
+    {
+      "category": "评测不确定性",
+      "proven": "扩展保持235的两组官方TF/PE都是10，但盲审发现最终事实错误。官方prompt确实接收最终answer，不能归因于没有把答案传给judge。",
+      "observed": "同K0的保持结果会波动；sufficiency_feedback旧确认总体完成14/27对SP17/27，但变化阶段均11/18，差异在Early，不能断言补丁致损。",
+      "hypothesis": "官方高分不足以作为经验入库的正确性标签；需独立产物验证。",
+      "source": "results/evidence/extensions/magicui-log-dashboard-v1/blind-review/cell-003-review.json"
+    }
+  ],
+  "labels": {
+    "proven": "源码、原生返回、停止字段或确定性产物检查直接支持；不等于证明策略因果。",
+    "observed": "有限运行中的共同现象/差异。",
+    "hypothesis": "须新干预检验，不能写成既定原因。"
+  }
+}

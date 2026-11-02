@@ -1,0 +1,1424 @@
+{
+  "schema_version": "1.0",
+  "strategy": "selective_patch",
+  "status": "validated",
+  "formal_llm_rewrite": false,
+  "validation": {
+    "errors": [],
+    "checks": {
+      "records": 43,
+      "unchanged": 38
+    }
+  },
+  "adapt_status": "applied",
+  "target_stage": "middle",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "cache_key": "a592b597ed2d85d8346552778993f1015069fd5823ce1fa5ef200de8463b4371",
+  "input": {
+    "old_knowledge_file_sha256": "bae1080d26a4c1fe8842d564d61f02d355c4b4de0026c632e0ebeaa085160cde",
+    "target_metadata_file_sha256": "33463c6f29216058e3b04ef9ee0f314342556ab019de89a23dabf40a945e9eb2"
+  },
+  "output": {
+    "knowledge_path": "knowledge.json",
+    "knowledge_file_sha256": "335e6feadb144b869a4849da993727ed40a8b6e78d5cd4823310172d8f25c005"
+  },
+  "diff": {
+    "schema_version": "1.0",
+    "old_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+    "new_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+    "old_version": "early",
+    "new_version": "middle",
+    "old_tool_count": 42,
+    "new_tool_count": 43,
+    "removed": [],
+    "added": [
+      {
+        "change_id": "a1",
+        "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+        "new": {
+          "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+          "server_id": "mcp-ai-agent-guidelines",
+          "version": "middle",
+          "name": "constitution-validator",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "artifactContent": {
+                "type": "string",
+                "description": "Content of the artifact to validate (spec.md, ADR, roadmap, plan, etc.)"
+              },
+              "artifactType": {
+                "type": "string",
+                "enum": [
+                  "spec",
+                  "adr",
+                  "roadmap",
+                  "plan",
+                  "tasks",
+                  "progress",
+                  "custom"
+                ],
+                "description": "Type of artifact being validated",
+                "default": "spec"
+              },
+              "constitutionPath": {
+                "type": "string",
+                "description": "Path to CONSTITUTION.md file (optional if constitutionContent provided)"
+              },
+              "constitutionContent": {
+                "type": "string",
+                "description": "CONSTITUTION.md content directly (optional if constitutionPath provided)"
+              },
+              "validationLevel": {
+                "type": "string",
+                "enum": [
+                  "strict",
+                  "standard",
+                  "lenient"
+                ],
+                "description": "Validation strictness level",
+                "default": "standard"
+              },
+              "checkPrinciples": {
+                "type": "boolean",
+                "description": "Validate against constitutional principles",
+                "default": true
+              },
+              "checkConstraints": {
+                "type": "boolean",
+                "description": "Validate against constitutional constraints",
+                "default": true
+              },
+              "checkQualityStandards": {
+                "type": "boolean",
+                "description": "Validate against quality standards",
+                "default": true
+              },
+              "outputFormat": {
+                "type": "string",
+                "enum": [
+                  "json",
+                  "markdown",
+                  "summary"
+                ],
+                "description": "Output format for validation results",
+                "default": "markdown"
+              },
+              "includeRecommendations": {
+                "type": "boolean",
+                "description": "Include remediation recommendations",
+                "default": true
+              },
+              "includeExamples": {
+                "type": "boolean",
+                "description": "Include compliant examples for violations",
+                "default": false
+              }
+            },
+            "required": [
+              "artifactContent"
+            ]
+          },
+          "description": "Validate any project artifact (spec.md, ADR, roadmap, plan, or custom document) against CONSTITUTION.md principles, constraints, and quality standards. Provides standalone constitutional compliance checking independent of generation workflows. BEST FOR: post-generation validation, constitutional compliance audits, artifact quality assurance. OUTPUTS: Detailed validation report with compliance score, principle violations, constraint breaches, and remediation recommendations.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "mcp-ai-agent-guidelines",
+            "tool_name": "constitution-validator"
+          }
+        }
+      }
+    ],
+    "changed": [
+      {
+        "change_id": "c1",
+        "tool_id": "math-mcp::validate_syntax",
+        "changed_fields": [
+          "parameters"
+        ],
+        "old": {
+          "tool_id": "math-mcp::validate_syntax",
+          "server_id": "math-mcp",
+          "version": "early",
+          "name": "validate_syntax",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "expression": {
+                "type": "string",
+                "description": "Mathematical expression to validate"
+              }
+            },
+            "required": [
+              "expression"
+            ]
+          },
+          "description": "Validate mathematical expression syntax against grammar",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "math-mcp",
+            "tool_name": "validate_syntax"
+          }
+        },
+        "new": {
+          "tool_id": "math-mcp::validate_syntax",
+          "server_id": "math-mcp",
+          "version": "middle",
+          "name": "validate_syntax",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "expression": {
+                "type": "string",
+                "description": "Mathematical expression to validate"
+              },
+              "detailed": {
+                "type": "boolean",
+                "description": "If true, return a more detailed validation result when supported",
+                "default": false
+              },
+              "allow_variables": {
+                "type": "boolean",
+                "description": "If true, allow variable references during validation when supported",
+                "default": false
+              }
+            },
+            "required": [
+              "expression"
+            ]
+          },
+          "description": "Validate mathematical expression syntax against grammar",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "math-mcp",
+            "tool_name": "validate_syntax"
+          }
+        }
+      },
+      {
+        "change_id": "c2",
+        "tool_id": "mcp-ai-agent-guidelines::design-assistant",
+        "changed_fields": [
+          "description"
+        ],
+        "old": {
+          "tool_id": "mcp-ai-agent-guidelines::design-assistant",
+          "server_id": "mcp-ai-agent-guidelines",
+          "version": "early",
+          "name": "design-assistant",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "start-session",
+                  "advance-phase",
+                  "validate-phase",
+                  "evaluate-pivot",
+                  "generate-strategic-pivot-prompt",
+                  "generate-artifacts",
+                  "enforce-coverage",
+                  "enforce-consistency",
+                  "get-status",
+                  "load-constraints",
+                  "select-methodology",
+                  "enforce-cross-session-consistency",
+                  "generate-enforcement-prompts",
+                  "generate-constraint-documentation",
+                  "generate-context-aware-guidance"
+                ],
+                "description": "Action to perform",
+                "examples": [
+                  "start-session",
+                  "advance-phase",
+                  "generate-artifacts"
+                ]
+              },
+              "sessionId": {
+                "type": "string",
+                "description": "Unique session identifier",
+                "examples": [
+                  "api-gateway-design-2024",
+                  "payment-service-architecture",
+                  "auth-system-refactor-q1"
+                ]
+              },
+              "config": {
+                "type": "object",
+                "description": "Design session configuration (required for start-session)",
+                "properties": {
+                  "sessionId": {
+                    "type": "string"
+                  },
+                  "context": {
+                    "type": "string"
+                  },
+                  "goal": {
+                    "type": "string"
+                  },
+                  "requirements": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "coverageThreshold": {
+                    "type": "number",
+                    "default": 85
+                  },
+                  "enablePivots": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "templateRefs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "outputFormats": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "content": {
+                "type": "string",
+                "description": "Content to validate or analyze"
+              },
+              "phaseId": {
+                "type": "string",
+                "description": "Target phase ID for advance or validate actions"
+              },
+              "constraintId": {
+                "type": "string",
+                "description": "Specific constraint ID for consistency enforcement"
+              },
+              "constraintConfig": {
+                "type": "object",
+                "description": "Custom constraint configuration in YAML/JSON format"
+              },
+              "artifactTypes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "adr",
+                    "specification",
+                    "roadmap"
+                  ]
+                },
+                "description": "Types of artifacts to generate",
+                "default": [
+                  "adr",
+                  "specification",
+                  "roadmap"
+                ]
+              },
+              "methodologySignals": {
+                "type": "object",
+                "description": "Methodology signals for select-methodology action (e.g., team size, project complexity, domain)"
+              },
+              "includeTemplates": {
+                "type": "boolean",
+                "description": "Include templates in generated prompts (for generate-strategic-pivot-prompt)"
+              },
+              "includeSpace7Instructions": {
+                "type": "boolean",
+                "description": "Include Space7 instructions in prompts (for generate-strategic-pivot-prompt)"
+              },
+              "customInstructions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Custom instructions for prompt generation (for generate-strategic-pivot-prompt)"
+              }
+            },
+            "required": [
+              "action",
+              "sessionId"
+            ]
+          },
+          "description": "Orchestrate multi-phase design workflows with constraint validation, coverage enforcement, and artifact generation. BEST FOR: Coordinating design sessions, enforcing constraints, and producing ADRs and roadmaps. Example: 'Use the design-assistant to start a design session for an API gateway.'",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "mcp-ai-agent-guidelines",
+            "tool_name": "design-assistant"
+          }
+        },
+        "new": {
+          "tool_id": "mcp-ai-agent-guidelines::design-assistant",
+          "server_id": "mcp-ai-agent-guidelines",
+          "version": "middle",
+          "name": "design-assistant",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "start-session",
+                  "advance-phase",
+                  "validate-phase",
+                  "evaluate-pivot",
+                  "generate-strategic-pivot-prompt",
+                  "generate-artifacts",
+                  "enforce-coverage",
+                  "enforce-consistency",
+                  "get-status",
+                  "load-constraints",
+                  "select-methodology",
+                  "enforce-cross-session-consistency",
+                  "generate-enforcement-prompts",
+                  "generate-constraint-documentation",
+                  "generate-context-aware-guidance"
+                ],
+                "description": "Action to perform",
+                "examples": [
+                  "start-session",
+                  "advance-phase",
+                  "generate-artifacts"
+                ]
+              },
+              "sessionId": {
+                "type": "string",
+                "description": "Unique session identifier",
+                "examples": [
+                  "api-gateway-design-2024",
+                  "payment-service-architecture",
+                  "auth-system-refactor-q1"
+                ]
+              },
+              "config": {
+                "type": "object",
+                "description": "Design session configuration (required for start-session)",
+                "properties": {
+                  "sessionId": {
+                    "type": "string"
+                  },
+                  "context": {
+                    "type": "string"
+                  },
+                  "goal": {
+                    "type": "string"
+                  },
+                  "requirements": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "coverageThreshold": {
+                    "type": "number",
+                    "default": 85
+                  },
+                  "enablePivots": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "templateRefs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "outputFormats": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "content": {
+                "type": "string",
+                "description": "Content to validate or analyze"
+              },
+              "phaseId": {
+                "type": "string",
+                "description": "Target phase ID for advance or validate actions"
+              },
+              "constraintId": {
+                "type": "string",
+                "description": "Specific constraint ID for consistency enforcement"
+              },
+              "constraintConfig": {
+                "type": "object",
+                "description": "Custom constraint configuration in YAML/JSON format"
+              },
+              "artifactTypes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "adr",
+                    "specification",
+                    "roadmap"
+                  ]
+                },
+                "description": "Types of artifacts to generate",
+                "default": [
+                  "adr",
+                  "specification",
+                  "roadmap"
+                ]
+              },
+              "methodologySignals": {
+                "type": "object",
+                "description": "Methodology signals for select-methodology action (e.g., team size, project complexity, domain)"
+              },
+              "includeTemplates": {
+                "type": "boolean",
+                "description": "Include templates in generated prompts (for generate-strategic-pivot-prompt)"
+              },
+              "includeSpace7Instructions": {
+                "type": "boolean",
+                "description": "Include Space7 instructions in prompts (for generate-strategic-pivot-prompt)"
+              },
+              "customInstructions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Custom instructions for prompt generation (for generate-strategic-pivot-prompt)"
+              }
+            },
+            "required": [
+              "action",
+              "sessionId"
+            ]
+          },
+          "description": "Orchestrate multi-phase design workflows with built-in constraint validation, coverage enforcement, and artifact generation. Outputs can be further validated using constitution-validator for constitutional compliance verification. BEST FOR: Coordinating design sessions, enforcing constraints, producing ADRs and roadmaps. Example: 'Use the design-assistant to start a design session for an API gateway.'",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "mcp-ai-agent-guidelines",
+            "tool_name": "design-assistant"
+          }
+        }
+      },
+      {
+        "change_id": "c3",
+        "tool_id": "mcp-ai-agent-guidelines::speckit-generator",
+        "changed_fields": [
+          "description"
+        ],
+        "old": {
+          "tool_id": "mcp-ai-agent-guidelines::speckit-generator",
+          "server_id": "mcp-ai-agent-guidelines",
+          "version": "early",
+          "name": "speckit-generator",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Specification title",
+                "examples": [
+                  "User Authentication System",
+                  "Payment Processing Module",
+                  "Real-time Analytics Dashboard"
+                ]
+              },
+              "overview": {
+                "type": "string",
+                "description": "High-level overview of the feature/project",
+                "examples": [
+                  "Implement OAuth2 authentication flow with JWT tokens",
+                  "Build secure payment processing with Stripe integration",
+                  "Create real-time WebSocket-based analytics dashboard"
+                ]
+              },
+              "objectives": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "description": {
+                      "type": "string"
+                    },
+                    "priority": {
+                      "type": "string",
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "description"
+                  ]
+                },
+                "description": "Strategic objectives for the project"
+              },
+              "requirements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "description": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "functional",
+                        "non-functional"
+                      ]
+                    },
+                    "priority": {
+                      "type": "string",
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "description"
+                  ]
+                },
+                "description": "Functional and non-functional requirements"
+              },
+              "acceptanceCriteria": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Acceptance criteria for completion (optional)"
+              },
+              "outOfScope": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Explicitly out-of-scope items (optional)"
+              },
+              "constitutionPath": {
+                "type": "string",
+                "description": "Path to CONSTITUTION.md file (optional)",
+                "examples": [
+                  "./CONSTITUTION.md",
+                  "./docs/CONSTITUTION.md"
+                ]
+              },
+              "validateAgainstConstitution": {
+                "type": "boolean",
+                "description": "Whether to validate against constitution before rendering (optional)"
+              }
+            },
+            "required": [
+              "title",
+              "overview",
+              "objectives",
+              "requirements"
+            ]
+          },
+          "description": "Generate GitHub Spec-Kit artifacts (all documents: README.md, spec.md, plan.md, tasks.md, progress.md, adr.md, roadmap.md) from requirements. Optionally validate against CONSTITUTION.md. BEST FOR: feature specs, project planning.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "mcp-ai-agent-guidelines",
+            "tool_name": "speckit-generator"
+          }
+        },
+        "new": {
+          "tool_id": "mcp-ai-agent-guidelines::speckit-generator",
+          "server_id": "mcp-ai-agent-guidelines",
+          "version": "middle",
+          "name": "speckit-generator",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Specification title",
+                "examples": [
+                  "User Authentication System",
+                  "Payment Processing Module",
+                  "Real-time Analytics Dashboard"
+                ]
+              },
+              "overview": {
+                "type": "string",
+                "description": "High-level overview of the feature/project",
+                "examples": [
+                  "Implement OAuth2 authentication flow with JWT tokens",
+                  "Build secure payment processing with Stripe integration",
+                  "Create real-time WebSocket-based analytics dashboard"
+                ]
+              },
+              "objectives": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "description": {
+                      "type": "string"
+                    },
+                    "priority": {
+                      "type": "string",
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "description"
+                  ]
+                },
+                "description": "Strategic objectives for the project"
+              },
+              "requirements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "description": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "functional",
+                        "non-functional"
+                      ]
+                    },
+                    "priority": {
+                      "type": "string",
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "description"
+                  ]
+                },
+                "description": "Functional and non-functional requirements"
+              },
+              "acceptanceCriteria": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Acceptance criteria for completion (optional)"
+              },
+              "outOfScope": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Explicitly out-of-scope items (optional)"
+              },
+              "constitutionPath": {
+                "type": "string",
+                "description": "Path to CONSTITUTION.md file (optional)",
+                "examples": [
+                  "./CONSTITUTION.md",
+                  "./docs/CONSTITUTION.md"
+                ]
+              },
+              "validateAgainstConstitution": {
+                "type": "boolean",
+                "description": "Whether to validate against constitution before rendering (optional)"
+              }
+            },
+            "required": [
+              "title",
+              "overview",
+              "objectives",
+              "requirements"
+            ]
+          },
+          "description": "Generate GitHub Spec-Kit artifacts (all documents: README.md, spec.md, plan.md, tasks.md, progress.md, adr.md, roadmap.md) from requirements with integrated constitutional validation during generation. Use constitution-validator for standalone validation of existing artifacts. BEST FOR: feature specs, project planning, constitutional compliance.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "mcp-ai-agent-guidelines",
+            "tool_name": "speckit-generator"
+          }
+        }
+      },
+      {
+        "change_id": "c4",
+        "tool_id": "mcp-ai-agent-guidelines::validate-spec",
+        "changed_fields": [
+          "description"
+        ],
+        "old": {
+          "tool_id": "mcp-ai-agent-guidelines::validate-spec",
+          "server_id": "mcp-ai-agent-guidelines",
+          "version": "early",
+          "name": "validate-spec",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "specContent": {
+                "type": "string",
+                "description": "The spec.md content to validate"
+              },
+              "constitutionPath": {
+                "type": "string",
+                "description": "Path to CONSTITUTION.md file (optional)"
+              },
+              "constitutionContent": {
+                "type": "string",
+                "description": "CONSTITUTION.md content directly (optional)"
+              },
+              "outputFormat": {
+                "type": "string",
+                "enum": [
+                  "json",
+                  "markdown",
+                  "summary"
+                ],
+                "description": "Output format for validation results",
+                "default": "markdown"
+              },
+              "includeRecommendations": {
+                "type": "boolean",
+                "description": "Whether to include recommendations in the output",
+                "default": true
+              }
+            },
+            "required": [
+              "specContent"
+            ]
+          },
+          "description": "Validate spec.md content against constitutional constraints without generating artifacts. Useful for iterative spec refinement and quality assurance. BEST FOR: spec validation, quality checks, constitutional compliance. OUTPUTS: Validation report with score, errors, warnings, and recommendations.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "mcp-ai-agent-guidelines",
+            "tool_name": "validate-spec"
+          }
+        },
+        "new": {
+          "tool_id": "mcp-ai-agent-guidelines::validate-spec",
+          "server_id": "mcp-ai-agent-guidelines",
+          "version": "middle",
+          "name": "validate-spec",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "specContent": {
+                "type": "string",
+                "description": "The spec.md content to validate"
+              },
+              "constitutionPath": {
+                "type": "string",
+                "description": "Path to CONSTITUTION.md file (optional)"
+              },
+              "constitutionContent": {
+                "type": "string",
+                "description": "CONSTITUTION.md content directly (optional)"
+              },
+              "outputFormat": {
+                "type": "string",
+                "enum": [
+                  "json",
+                  "markdown",
+                  "summary"
+                ],
+                "description": "Output format for validation results",
+                "default": "markdown"
+              },
+              "includeRecommendations": {
+                "type": "boolean",
+                "description": "Whether to include recommendations in the output",
+                "default": true
+              }
+            },
+            "required": [
+              "specContent"
+            ]
+          },
+          "description": "Validate spec.md structure, completeness, and constitutional constraints without generating artifacts. Focuses on spec.md-specific validation. For broader artifact validation (ADRs, roadmaps, plans), use constitution-validator. BEST FOR: spec.md validation, iterative refinement, quality checks. OUTPUTS: Validation report with score, errors, warnings, and recommendations.",
+          "usage_rules": [],
+          "output_schema": null,
+          "routing": {
+            "server_id": "mcp-ai-agent-guidelines",
+            "tool_name": "validate-spec"
+          }
+        }
+      }
+    ],
+    "unchanged_tool_ids": [
+      "math-mcp::clear_variables",
+      "math-mcp::evaluate",
+      "math-mcp::get_variable",
+      "math-mcp::list_variables",
+      "math-mcp::set_variable",
+      "mcp-ai-agent-guidelines::agent-orchestrator",
+      "mcp-ai-agent-guidelines::architecture-design-prompt-builder",
+      "mcp-ai-agent-guidelines::clean-code-scorer",
+      "mcp-ai-agent-guidelines::code-analysis-prompt-builder",
+      "mcp-ai-agent-guidelines::code-hygiene-analyzer",
+      "mcp-ai-agent-guidelines::coverage-dashboard-design-prompt-builder",
+      "mcp-ai-agent-guidelines::debugging-assistant-prompt-builder",
+      "mcp-ai-agent-guidelines::dependency-auditor",
+      "mcp-ai-agent-guidelines::digital-enterprise-architect-prompt-builder",
+      "mcp-ai-agent-guidelines::documentation-generator-prompt-builder",
+      "mcp-ai-agent-guidelines::domain-neutral-prompt-builder",
+      "mcp-ai-agent-guidelines::gap-frameworks-analyzers",
+      "mcp-ai-agent-guidelines::guidelines-validator",
+      "mcp-ai-agent-guidelines::hierarchical-prompt-builder",
+      "mcp-ai-agent-guidelines::hierarchy-level-selector",
+      "mcp-ai-agent-guidelines::iterative-coverage-enhancer",
+      "mcp-ai-agent-guidelines::l9-distinguished-engineer-prompt-builder",
+      "mcp-ai-agent-guidelines::memory-context-optimizer",
+      "mcp-ai-agent-guidelines::mermaid-diagram-generator",
+      "mcp-ai-agent-guidelines::mode-switcher",
+      "mcp-ai-agent-guidelines::model-compatibility-checker",
+      "mcp-ai-agent-guidelines::project-onboarding",
+      "mcp-ai-agent-guidelines::prompt-chaining-builder",
+      "mcp-ai-agent-guidelines::prompt-flow-builder",
+      "mcp-ai-agent-guidelines::prompt-hierarchy",
+      "mcp-ai-agent-guidelines::prompting-hierarchy-evaluator",
+      "mcp-ai-agent-guidelines::quick-developer-prompts-builder",
+      "mcp-ai-agent-guidelines::security-hardening-prompt-builder",
+      "mcp-ai-agent-guidelines::semantic-code-analyzer",
+      "mcp-ai-agent-guidelines::spark-prompt-builder",
+      "mcp-ai-agent-guidelines::sprint-timeline-calculator",
+      "mcp-ai-agent-guidelines::strategy-frameworks-builder",
+      "mcp-ai-agent-guidelines::update-progress"
+    ],
+    "unchanged_count": 38
+  },
+  "impacted_tool_ids": [
+    "mcp-ai-agent-guidelines::design-assistant",
+    "math-mcp::validate_syntax",
+    "mcp-ai-agent-guidelines::constitution-validator",
+    "mcp-ai-agent-guidelines::validate-spec",
+    "mcp-ai-agent-guidelines::speckit-generator"
+  ],
+  "patch": [
+    {
+      "operation": "replace",
+      "tool_id": "math-mcp::validate_syntax",
+      "fields": [
+        "parameters"
+      ],
+      "new": {
+        "tool_id": "math-mcp::validate_syntax",
+        "server_id": "math-mcp",
+        "version": "middle",
+        "name": "validate_syntax",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "expression": {
+              "type": "string",
+              "description": "Mathematical expression to validate"
+            },
+            "detailed": {
+              "type": "boolean",
+              "description": "If true, return a more detailed validation result when supported",
+              "default": false
+            },
+            "allow_variables": {
+              "type": "boolean",
+              "description": "If true, allow variable references during validation when supported",
+              "default": false
+            }
+          },
+          "required": [
+            "expression"
+          ]
+        },
+        "description": "Validate mathematical expression syntax against grammar",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "math-mcp",
+          "tool_name": "validate_syntax"
+        }
+      },
+      "basis": [
+        "c1"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "replace",
+      "tool_id": "mcp-ai-agent-guidelines::speckit-generator",
+      "fields": [
+        "description"
+      ],
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::speckit-generator",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "middle",
+        "name": "speckit-generator",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Specification title",
+              "examples": [
+                "User Authentication System",
+                "Payment Processing Module",
+                "Real-time Analytics Dashboard"
+              ]
+            },
+            "overview": {
+              "type": "string",
+              "description": "High-level overview of the feature/project",
+              "examples": [
+                "Implement OAuth2 authentication flow with JWT tokens",
+                "Build secure payment processing with Stripe integration",
+                "Create real-time WebSocket-based analytics dashboard"
+              ]
+            },
+            "objectives": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "high",
+                      "medium",
+                      "low"
+                    ]
+                  }
+                },
+                "required": [
+                  "description"
+                ]
+              },
+              "description": "Strategic objectives for the project"
+            },
+            "requirements": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "functional",
+                      "non-functional"
+                    ]
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "high",
+                      "medium",
+                      "low"
+                    ]
+                  }
+                },
+                "required": [
+                  "description"
+                ]
+              },
+              "description": "Functional and non-functional requirements"
+            },
+            "acceptanceCriteria": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Acceptance criteria for completion (optional)"
+            },
+            "outOfScope": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Explicitly out-of-scope items (optional)"
+            },
+            "constitutionPath": {
+              "type": "string",
+              "description": "Path to CONSTITUTION.md file (optional)",
+              "examples": [
+                "./CONSTITUTION.md",
+                "./docs/CONSTITUTION.md"
+              ]
+            },
+            "validateAgainstConstitution": {
+              "type": "boolean",
+              "description": "Whether to validate against constitution before rendering (optional)"
+            }
+          },
+          "required": [
+            "title",
+            "overview",
+            "objectives",
+            "requirements"
+          ]
+        },
+        "description": "Generate GitHub Spec-Kit artifacts (all documents: README.md, spec.md, plan.md, tasks.md, progress.md, adr.md, roadmap.md) from requirements with integrated constitutional validation during generation. Use constitution-validator for standalone validation of existing artifacts. BEST FOR: feature specs, project planning, constitutional compliance.",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "speckit-generator"
+        }
+      },
+      "basis": [
+        "c3"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "replace",
+      "tool_id": "mcp-ai-agent-guidelines::validate-spec",
+      "fields": [
+        "description"
+      ],
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::validate-spec",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "middle",
+        "name": "validate-spec",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "specContent": {
+              "type": "string",
+              "description": "The spec.md content to validate"
+            },
+            "constitutionPath": {
+              "type": "string",
+              "description": "Path to CONSTITUTION.md file (optional)"
+            },
+            "constitutionContent": {
+              "type": "string",
+              "description": "CONSTITUTION.md content directly (optional)"
+            },
+            "outputFormat": {
+              "type": "string",
+              "enum": [
+                "json",
+                "markdown",
+                "summary"
+              ],
+              "description": "Output format for validation results",
+              "default": "markdown"
+            },
+            "includeRecommendations": {
+              "type": "boolean",
+              "description": "Whether to include recommendations in the output",
+              "default": true
+            }
+          },
+          "required": [
+            "specContent"
+          ]
+        },
+        "description": "Validate spec.md structure, completeness, and constitutional constraints without generating artifacts. Focuses on spec.md-specific validation. For broader artifact validation (ADRs, roadmaps, plans), use constitution-validator. BEST FOR: spec.md validation, iterative refinement, quality checks. OUTPUTS: Validation report with score, errors, warnings, and recommendations.",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "validate-spec"
+        }
+      },
+      "basis": [
+        "c4"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "replace",
+      "tool_id": "mcp-ai-agent-guidelines::design-assistant",
+      "fields": [
+        "description"
+      ],
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::design-assistant",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "middle",
+        "name": "design-assistant",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "start-session",
+                "advance-phase",
+                "validate-phase",
+                "evaluate-pivot",
+                "generate-strategic-pivot-prompt",
+                "generate-artifacts",
+                "enforce-coverage",
+                "enforce-consistency",
+                "get-status",
+                "load-constraints",
+                "select-methodology",
+                "enforce-cross-session-consistency",
+                "generate-enforcement-prompts",
+                "generate-constraint-documentation",
+                "generate-context-aware-guidance"
+              ],
+              "description": "Action to perform",
+              "examples": [
+                "start-session",
+                "advance-phase",
+                "generate-artifacts"
+              ]
+            },
+            "sessionId": {
+              "type": "string",
+              "description": "Unique session identifier",
+              "examples": [
+                "api-gateway-design-2024",
+                "payment-service-architecture",
+                "auth-system-refactor-q1"
+              ]
+            },
+            "config": {
+              "type": "object",
+              "description": "Design session configuration (required for start-session)",
+              "properties": {
+                "sessionId": {
+                  "type": "string"
+                },
+                "context": {
+                  "type": "string"
+                },
+                "goal": {
+                  "type": "string"
+                },
+                "requirements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "coverageThreshold": {
+                  "type": "number",
+                  "default": 85
+                },
+                "enablePivots": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "templateRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "outputFormats": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "content": {
+              "type": "string",
+              "description": "Content to validate or analyze"
+            },
+            "phaseId": {
+              "type": "string",
+              "description": "Target phase ID for advance or validate actions"
+            },
+            "constraintId": {
+              "type": "string",
+              "description": "Specific constraint ID for consistency enforcement"
+            },
+            "constraintConfig": {
+              "type": "object",
+              "description": "Custom constraint configuration in YAML/JSON format"
+            },
+            "artifactTypes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "adr",
+                  "specification",
+                  "roadmap"
+                ]
+              },
+              "description": "Types of artifacts to generate",
+              "default": [
+                "adr",
+                "specification",
+                "roadmap"
+              ]
+            },
+            "methodologySignals": {
+              "type": "object",
+              "description": "Methodology signals for select-methodology action (e.g., team size, project complexity, domain)"
+            },
+            "includeTemplates": {
+              "type": "boolean",
+              "description": "Include templates in generated prompts (for generate-strategic-pivot-prompt)"
+            },
+            "includeSpace7Instructions": {
+              "type": "boolean",
+              "description": "Include Space7 instructions in prompts (for generate-strategic-pivot-prompt)"
+            },
+            "customInstructions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Custom instructions for prompt generation (for generate-strategic-pivot-prompt)"
+            }
+          },
+          "required": [
+            "action",
+            "sessionId"
+          ]
+        },
+        "description": "Orchestrate multi-phase design workflows with built-in constraint validation, coverage enforcement, and artifact generation. Outputs can be further validated using constitution-validator for constitutional compliance verification. BEST FOR: Coordinating design sessions, enforcing constraints, producing ADRs and roadmaps. Example: 'Use the design-assistant to start a design session for an API gateway.'",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "design-assistant"
+        }
+      },
+      "basis": [
+        "c2"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "add",
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "middle",
+        "name": "constitution-validator",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "artifactContent": {
+              "type": "string",
+              "description": "Content of the artifact to validate (spec.md, ADR, roadmap, plan, etc.)"
+            },
+            "artifactType": {
+              "type": "string",
+              "enum": [
+                "spec",
+                "adr",
+                "roadmap",
+                "plan",
+                "tasks",
+                "progress",
+                "custom"
+              ],
+              "description": "Type of artifact being validated",
+              "default": "spec"
+            },
+            "constitutionPath": {
+              "type": "string",
+              "description": "Path to CONSTITUTION.md file (optional if constitutionContent provided)"
+            },
+            "constitutionContent": {
+              "type": "string",
+              "description": "CONSTITUTION.md content directly (optional if constitutionPath provided)"
+            },
+            "validationLevel": {
+              "type": "string",
+              "enum": [
+                "strict",
+                "standard",
+                "lenient"
+              ],
+              "description": "Validation strictness level",
+              "default": "standard"
+            },
+            "checkPrinciples": {
+              "type": "boolean",
+              "description": "Validate against constitutional principles",
+              "default": true
+            },
+            "checkConstraints": {
+              "type": "boolean",
+              "description": "Validate against constitutional constraints",
+              "default": true
+            },
+            "checkQualityStandards": {
+              "type": "boolean",
+              "description": "Validate against quality standards",
+              "default": true
+            },
+            "outputFormat": {
+              "type": "string",
+              "enum": [
+                "json",
+                "markdown",
+                "summary"
+              ],
+              "description": "Output format for validation results",
+              "default": "markdown"
+            },
+            "includeRecommendations": {
+              "type": "boolean",
+              "description": "Include remediation recommendations",
+              "default": true
+            },
+            "includeExamples": {
+              "type": "boolean",
+              "description": "Include compliant examples for violations",
+              "default": false
+            }
+          },
+          "required": [
+            "artifactContent"
+          ]
+        },
+        "description": "Validate any project artifact (spec.md, ADR, roadmap, plan, or custom document) against CONSTITUTION.md principles, constraints, and quality standards. Provides standalone constitutional compliance checking independent of generation workflows. BEST FOR: post-generation validation, constitutional compliance audits, artifact quality assurance. OUTPUTS: Detailed validation report with compliance score, principle violations, constraint breaches, and remediation recommendations.",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "constitution-validator"
+        }
+      },
+      "basis": [
+        "a1"
+      ],
+      "reason": "new tool present in target environment"
+    }
+  ],
+  "unresolved_items": [],
+  "cost": {
+    "method": "deterministic_diff_selective_patch",
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "usd": 0.0,
+    "seconds": 0.2392717500042636,
+    "update_operations": 5,
+    "untouched_records": 38,
+    "llm_used": false,
+    "probe_calls": 0,
+    "unresolved_count": 0
+  }
+}

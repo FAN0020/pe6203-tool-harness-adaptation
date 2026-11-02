@@ -1,0 +1,37 @@
+{
+  "decisions": [
+    {
+      "id": "C001",
+      "action": "retain",
+      "after": "Validate mathematical expression syntax against grammar",
+      "evidence": [],
+      "reason": "Probes only exercised expression usage; no observation contradicts the general syntax-validation description."
+    },
+    {
+      "id": "C002",
+      "action": "retain",
+      "after": "Mathematical expression to validate",
+      "evidence": [],
+      "reason": "Input field remains the expression being validated; probe usage is consistent with this and no change is warranted."
+    },
+    {
+      "id": "C003",
+      "action": "replace",
+      "after": "If true, request detailed validation output; observed results may be indistinguishable from the default form and should not be relied upon",
+      "evidence": [
+        "P1"
+      ],
+      "reason": "P1 shows acceptance of detailed=true but returned only the plain valid-syntax message, giving no distinguishable detailed result."
+    },
+    {
+      "id": "C004",
+      "action": "replace",
+      "after": "If true, allow variable references during validation; however, variable references were also accepted with false, so this flag did not gate acceptance in observed probes",
+      "evidence": [
+        "P2",
+        "P3"
+      ],
+      "reason": "P2 accepted x+1 with allow_variables=true while P3 also accepted x+1 with false, so the observed results do not show the flag controlling variable acceptance."
+    }
+  ]
+}

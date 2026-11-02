@@ -38,6 +38,574 @@ def changed():
     return target
 
 
+def artifact_observation(stage="late", name="lookup"):
+    return {
+        "stage": stage,
+        "server": "server",
+        "tool": name,
+        "args": {"synthetic_cases": ["existing_document"]},
+        "result": {
+            "kind": "artifact_effects_v1",
+            "contract": {
+                "reported_output": "Returned six templates.",
+                "persisted_state": "Seven pages persisted; old content survived.",
+                "instruction_effect": "Custom text canary was absent.",
+                "cover_effect": "Default call reset the cover theme.",
+                "verified_alternatives": "Explicit content replacement saved the exact text.",
+            },
+        },
+    }
+
+
+def slidev_catalog(stage="early"):
+    original = catalog(stage)
+    names = ["create_bulk_slides", "set_page", "load_slidev", "apply_theme", "unrelated"]
+    tools = []
+    for name in names:
+        tool = deepcopy(original["tools"][0])
+        tool.update(
+            tool_id=f"slidev-mcp::{name}",
+            server_id="slidev-mcp",
+            name=name,
+            routing={"server_id": "slidev-mcp", "tool_name": name},
+        )
+        tools.append(tool)
+    original["tools"] = tools
+    return original
+
+
+def document_observation(stage="late"):
+    return {
+        "stage": stage,
+        "server": "slidev-mcp",
+        "tool": "create_bulk_slides",
+        "args": {"probe": "fresh_project_write_reload_theme"},
+        "result": {
+            "kind": "document_sequence_v1",
+            "body_example": "# A\n\nVALUE_A=17",
+            "verified_pages": 3,
+            "fresh_project": True,
+            "direct_theme_result": "first_page_only",
+            "reload_theme_result": "three_pages_preserved",
+        },
+    }
+
+
+def test_document_sequence_updates_only_proven_dependencies_of_changed_bulk():
+    old, target = slidev_catalog(), slidev_catalog("late")
+    target["tools"][0]["description"] += " New bulk contract."
+    knowledge, changes, cost = adapt(
+        old, target, "document_sequence", {"feedback": [document_observation()]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    for index, (a, b) in enumerate(zip(base["tools"], knowledge["tools"], strict=True)):
+        assert {k: v for k, v in a.items() if k != "usage_rules"} == {
+            k: v for k, v in b.items() if k != "usage_rules"
+        }
+        assert b["usage_rules"][: len(a["usage_rules"])] == a["usage_rules"]
+        assert len(b["usage_rules"]) - len(a["usage_rules"]) == (1 if index < 4 else 0)
+    writer_rule = knowledge["tools"][1]["usage_rules"][-1]
+    assert "VALUE_A=17" in writer_rule and "fresh" in writer_rule
+    assert "load_slidev" in writer_rule and "apply_theme" in writer_rule
+    notes = [c for c in changes if c["operation"] == "append_document_sequence"]
+    assert len(notes) == 4 and len({tuple(n["basis"]) for n in notes}) == 1
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+
+
+def test_document_sequence_does_not_change_unaffected_catalog_or_wrong_stage():
+    old, target = slidev_catalog(), slidev_catalog("late")
+    target["tools"][-1]["description"] += " Unrelated change."
+    candidate, _, _ = adapt(
+        old, target, "document_sequence", {"feedback": [document_observation()]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    assert candidate == base
+    target["tools"][0]["description"] += " New bulk contract."
+    candidate, _, _ = adapt(
+        old, target, "document_sequence", {"feedback": [document_observation("middle")]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    assert candidate == base
+    candidate, _, _ = adapt(old, old, "document_sequence", {"feedback": [document_observation()]})
+    assert candidate == old
+
+
+def test_document_sequence_rejects_unproven_claims_and_missing_dependency():
+    old, target = slidev_catalog(), slidev_catalog("late")
+    target["tools"][0]["description"] += " New bulk contract."
+    evidence = document_observation()
+    evidence["result"]["fresh_project"] = False
+    with pytest.raises(ValueError, match="document sequence"):
+        adapt(old, target, "document_sequence", {"feedback": [evidence]})
+    target["tools"] = [t for t in target["tools"] if t["name"] != "load_slidev"]
+    with pytest.raises(ValueError, match="document sequence"):
+        adapt(old, target, "document_sequence", {"feedback": [document_observation()]})
+
+
+def project_state_catalog(stage="early"):
+    result = catalog(stage)
+    names = ["list_tasks", "analyze_task_complexity", "unrelated"]
+    if stage == "late":
+        names.append("review_project_status")
+    tools = []
+    for name in names:
+        tool = deepcopy(result["tools"][0])
+        server = "@pimzino/agentic-tools-mcp"
+        tool.update(
+            tool_id=f"{server}::{name}",
+            server_id=server,
+            name=name,
+            routing={"server_id": server, "tool_name": name},
+        )
+        tools.append(tool)
+    result["tools"] = tools
+    return result
+
+
+def project_state_observation(stage="late"):
+    return {
+        "stage": stage,
+        "server": "@pimzino/agentic-tools-mcp",
+        "tool": "review_project_status",
+        "args": {"probe": "synthetic_state_views"},
+        "result": {
+            "kind": "project_state_contract_v1",
+            "status_error": "storage.getTasksByProject is not a function",
+            "persisted_valid_records": 3,
+            "hierarchy_occurrences": 5,
+            "flat_unique_records": 3,
+            "parent_scores": [9, 9],
+            "child_scores": [3, 3],
+            "final_auto_records": 9,
+            "final_auto_empty_ids": 6,
+        },
+    }
+
+
+def test_project_state_contract_keeps_metadata_and_unrelated_rules_unchanged():
+    old, target = project_state_catalog(), project_state_catalog("late")
+    before = deepcopy((old, target))
+    knowledge, changes, cost = adapt(
+        old, target, "project_state_contract", {"feedback": [project_state_observation()]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    for a, b in zip(base["tools"], knowledge["tools"], strict=True):
+        assert {k: v for k, v in a.items() if k != "usage_rules"} == {
+            k: v for k, v in b.items() if k != "usage_rules"
+        }
+        assert b["usage_rules"][: len(a["usage_rules"])] == a["usage_rules"]
+        assert len(b["usage_rules"]) - len(a["usage_rules"]) == (a["name"] != "unrelated")
+    notes = [c for c in changes if c["operation"] == "append_project_state_contract"]
+    assert len(notes) == 3 and len({tuple(n["basis"]) for n in notes}) == 1
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+
+
+def test_project_state_contract_requires_matching_stage_and_actual_changed_basis():
+    old, target = project_state_catalog(), project_state_catalog("late")
+    candidate, _, _ = adapt(
+        old, target, "project_state_contract", {"feedback": [project_state_observation("middle")]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    assert candidate == base
+    candidate, _, _ = adapt(
+        old, old, "project_state_contract", {"feedback": [project_state_observation()]}
+    )
+    assert candidate == old
+    unchanged_status = deepcopy(target)
+    unchanged_status["version"] = "early"
+    for tool in unchanged_status["tools"]:
+        tool["version"] = "early"
+    target["tools"][0]["description"] += " unrelated view metadata change"
+    candidate, _, _ = adapt(
+        unchanged_status,
+        target,
+        "project_state_contract",
+        {"feedback": [project_state_observation()]},
+    )
+    base, _, _ = adapt(unchanged_status, target, "selective_patch")
+    assert candidate == base
+
+
+def test_project_state_contract_rejects_unverified_facts_or_missing_fallback():
+    old, target = project_state_catalog(), project_state_catalog("late")
+    evidence = project_state_observation()
+    evidence["result"]["final_auto_empty_ids"] = 0
+    with pytest.raises(ValueError, match="project state"):
+        adapt(old, target, "project_state_contract", {"feedback": [evidence]})
+    target["tools"] = [t for t in target["tools"] if t["name"] != "list_tasks"]
+    with pytest.raises(ValueError, match="project state"):
+        adapt(old, target, "project_state_contract", {"feedback": [project_state_observation()]})
+
+
+def thinking_catalog(stage="early"):
+    result = catalog(stage)
+    names = ["sequentialthinking", "unrelated"]
+    if stage == "late":
+        names.extend(["parallel-thinking", "convergent-synthesis"])
+    tools = []
+    for name in names:
+        tool = deepcopy(result["tools"][0])
+        server = "@modelcontextprotocol/server-sequential-thinking"
+        tool.update(
+            tool_id=f"{server}::{name}",
+            server_id=server,
+            name=name,
+            routing={"server_id": server, "tool_name": name},
+        )
+        if stage == "late" and name == "sequentialthinking":
+            tool["description"] += " New Late confidence tracking and synthesis workflow"
+        tools.append(tool)
+    result["tools"] = tools
+    return result
+
+
+def thinking_observation(stage="late"):
+    return {
+        "stage": stage,
+        "server": "@modelcontextprotocol/server-sequential-thinking",
+        "tool": "sequentialthinking",
+        "args": {"probe": "synthetic_state_views"},
+        "result": {
+            "kind": "thinking_contract_v1",
+            "sequential_error": "thinkingServer.getThoughtHistory is not a function",
+            "parallel_invalid_fields": ["pathsSummary", "synthesisReady"],
+            "synthesis_invalid_fields": ["synthesisData"],
+            "single_path_terminal_status": "completed",
+            "single_path_terminal_ready": False,
+            "single_path_terminal_active_paths": [],
+            "unverified_source_echoed": True,
+        },
+    }
+
+
+def test_thinking_contract_keeps_metadata_and_unrelated_rules_unchanged():
+    old, target = thinking_catalog(), thinking_catalog("late")
+    before = deepcopy((old, target))
+    knowledge, changes, cost = adapt(
+        old, target, "thinking_contract", {"feedback": [thinking_observation()]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    for a, b in zip(base["tools"], knowledge["tools"], strict=True):
+        assert {k: v for k, v in a.items() if k != "usage_rules"} == {
+            k: v for k, v in b.items() if k != "usage_rules"
+        }
+        assert b["usage_rules"][: len(a["usage_rules"])] == a["usage_rules"]
+        assert len(b["usage_rules"]) - len(a["usage_rules"]) == (a["name"] != "unrelated")
+    notes = [c for c in changes if c["operation"] == "append_thinking_contract"]
+    assert len(notes) == 3 and len({tuple(n["basis"]) for n in notes}) == 1
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+
+
+def test_thinking_contract_requires_matching_stage_and_actual_changed_basis():
+    old, target = thinking_catalog(), thinking_catalog("late")
+    candidate, _, _ = adapt(
+        old, target, "thinking_contract", {"feedback": [thinking_observation("middle")]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    assert candidate == base
+    candidate, _, _ = adapt(
+        old, old, "thinking_contract", {"feedback": [thinking_observation()]}
+    )
+    assert candidate == old
+    unchanged_status = deepcopy(target)
+    unchanged_status["version"] = "early"
+    for tool in unchanged_status["tools"]:
+        tool["version"] = "early"
+    target["tools"][1]["description"] += " unrelated view metadata change"
+    candidate, _, _ = adapt(
+        unchanged_status,
+        target,
+        "thinking_contract",
+        {"feedback": [thinking_observation()]},
+    )
+    base, _, _ = adapt(unchanged_status, target, "selective_patch")
+    assert candidate == base
+
+
+def test_thinking_contract_rejects_unverified_facts_or_missing_fallback():
+    old, target = thinking_catalog(), thinking_catalog("late")
+    evidence = thinking_observation()
+    evidence["result"]["single_path_terminal_ready"] = True
+    with pytest.raises(ValueError, match="thinking contract"):
+        adapt(old, target, "thinking_contract", {"feedback": [evidence]})
+    target["tools"] = [t for t in target["tools"] if t["name"] != "parallel-thinking"]
+    with pytest.raises(ValueError, match="thinking contract"):
+        adapt(old, target, "thinking_contract", {"feedback": [thinking_observation()]})
+
+
+def weather_catalog(stage="early"):
+    result = catalog(stage)
+    names = ["get-forecast", "unrelated"]
+    if stage != "early":
+        names.append("get-weather-advice")
+    tools = []
+    for name in names:
+        tool = deepcopy(result["tools"][0])
+        tool.update(
+            tool_id=f"mcp-weather-demo::{name}", server_id="mcp-weather-demo", name=name,
+            routing={"server_id": "mcp-weather-demo", "tool_name": name},
+        )
+        tools.append(tool)
+    result["tools"] = tools
+    return result
+
+
+def weather_observation(stage="late"):
+    return {
+        "stage": stage, "server": "mcp-weather-demo", "tool": "get-weather-advice",
+        "args": {"probe": "synthetic_latitude_provenance"},
+        "result": {
+            "kind": "weather_provenance_v1", "latitude_only_temperature": True,
+            "formula": "clamp(round(30 - abs(latitude)/3), -10, 35)",
+            "synthetic_latitude": 12, "synthetic_longitudes": [-20, 140],
+            "synthetic_temperature_c": 26, "same_advice_except_coordinates": True,
+            "native_real_forecast_available": True,
+        },
+    }
+
+
+def media_catalog(stage="early"):
+    result = catalog(stage)
+    specs = [
+        ("@hugeicons/mcp-server", "search_icons"),
+        ("@hugeicons/mcp-server", "get_icon_glyph_by_style"),
+        ("plantuml-mcp-server", "generate_plantuml_diagram"),
+        ("other", "unrelated"),
+    ]
+    result["tools"] = [deepcopy(result["tools"][0]) for _ in specs]
+    for tool, (server, name) in zip(result["tools"], specs, strict=True):
+        tool.update(tool_id=f"{server}::{name}", server_id=server, name=name,
+                    routing={"server_id": server, "tool_name": name})
+        if name == "search_icons" and stage != "early":
+            tool["parameters"]["properties"]["style"] = {"type": "string"}
+        if name == "generate_plantuml_diagram" and stage == "late":
+            tool["parameters"]["properties"]["skip_fetch_check"] = {"type": "boolean"}
+    return result
+
+
+def media_observations(stage):
+    from pathlib import Path
+
+    path = Path(__file__).parents[1] / "experiments/native-media-contract-feedback-v1.json"
+    return [x for x in json.loads(path.read_text())["observations"] if x["stage"] == stage]
+
+
+@pytest.mark.parametrize("stage,count", [("middle", 2), ("late", 3)])
+def test_media_contract_changes_only_verified_rules_with_unchanged_contracts(stage, count):
+    from pathlib import Path
+
+    old, target = media_catalog(), media_catalog(stage)
+    before = deepcopy((old, target))
+    base, _, _ = adapt(old, target, "selective_patch")
+    candidate, changes, cost = adapt(
+        old, target, "native_media_contract", {"feedback": media_observations(stage)}
+    )
+    rules = json.loads((Path(__file__).parents[1] / "experiments/native-media-contract-v1.json")
+                      .read_text())["mechanism"]["frozen_rules"]
+    actual = 0
+    for a, b in zip(base["tools"], candidate["tools"], strict=True):
+        assert {k: v for k, v in a.items() if k != "usage_rules"} == {
+            k: v for k, v in b.items() if k != "usage_rules"}
+        suffix = b["usage_rules"][len(a["usage_rules"]):]
+        expected = a["server_id"] == "@hugeicons/mcp-server" or (
+            stage == "late" and a["server_id"] == "plantuml-mcp-server")
+        assert b["usage_rules"][:len(a["usage_rules"])] == a["usage_rules"]
+        assert suffix == ([rules[a["tool_id"]]] if expected else [])
+        actual += bool(suffix)
+    assert actual == count
+    assert len([c for c in changes if c["operation"] == "append_native_media_contract"]) == count
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+
+
+def test_media_contract_no_change_and_wrong_stage_have_no_intervention():
+    old, target = media_catalog(), media_catalog("middle")
+    same, _, _ = adapt(old, old, "native_media_contract", {"feedback": media_observations("late")})
+    assert same == old
+    base, _, _ = adapt(old, target, "selective_patch")
+    wrong, _, _ = adapt(old, target, "native_media_contract",
+                        {"feedback": media_observations("late")})
+    assert wrong == base
+
+
+def test_media_contract_rejects_unverified_evidence_and_missing_native_alternative():
+    old, target = media_catalog(), media_catalog("late")
+    evidence = media_observations("late")
+    evidence[0]["result"]["native_glyph_by_style_success"] = False
+    with pytest.raises(ValueError, match="media contract"):
+        adapt(old, target, "native_media_contract", {"feedback": evidence})
+    target["tools"] = [t for t in target["tools"] if t["name"] != "get_icon_glyph_by_style"]
+    with pytest.raises(ValueError, match="media contract"):
+        adapt(old, target, "native_media_contract", {"feedback": media_observations("late")})
+
+
+def test_media_contract_does_not_use_evidence_without_corresponding_change():
+    target = media_catalog("late")
+    old = deepcopy(target)
+    old["version"] = "early"
+    for tool in old["tools"]:
+        tool["version"] = "early"
+    target["tools"][-1]["description"] += " unrelated change"
+    base, _, _ = adapt(old, target, "selective_patch")
+    candidate, _, _ = adapt(old, target, "native_media_contract",
+                            {"feedback": media_observations("late")})
+    assert candidate == base
+
+
+@pytest.mark.parametrize("stage", ["middle", "late"])
+def test_weather_provenance_changes_only_new_advice_and_verified_forecast_dependency(stage):
+    old, target = weather_catalog(), weather_catalog(stage)
+    before = deepcopy((old, target))
+    knowledge, changes, cost = adapt(
+        old, target, "weather_provenance", {"feedback": [weather_observation(stage)]}
+    )
+    base, _, _ = adapt(old, target, "selective_patch")
+    for a, b in zip(base["tools"], knowledge["tools"], strict=True):
+        assert {k: v for k, v in a.items() if k != "usage_rules"} == {
+            k: v for k, v in b.items() if k != "usage_rules"
+        }
+        assert b["usage_rules"][:len(a["usage_rules"])] == a["usage_rules"]
+        assert len(b["usage_rules"]) - len(a["usage_rules"]) == (a["name"] != "unrelated")
+    notes = [c for c in changes if c["operation"] == "append_weather_provenance"]
+    assert len(notes) == 2 and len({tuple(n["basis"]) for n in notes}) == 1
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+
+
+def test_weather_provenance_requires_matching_stage_and_actual_changed_basis():
+    old, target = weather_catalog(), weather_catalog("late")
+    base, _, _ = adapt(old, target, "selective_patch")
+    candidate, _, _ = adapt(
+        old, target, "weather_provenance", {"feedback": [weather_observation("middle")]}
+    )
+    assert candidate == base
+    candidate, _, _ = adapt(old, old, "weather_provenance", {"feedback": [weather_observation()]})
+    assert candidate == old
+    unchanged_advice = deepcopy(target)
+    unchanged_advice["version"] = "early"
+    for tool in unchanged_advice["tools"]:
+        tool["version"] = "early"
+    target["tools"][1]["description"] += " unrelated change"
+    candidate, _, _ = adapt(
+        unchanged_advice, target, "weather_provenance", {"feedback": [weather_observation()]}
+    )
+    base, _, _ = adapt(unchanged_advice, target, "selective_patch")
+    assert candidate == base
+
+
+def test_weather_provenance_rejects_unverified_facts_and_missing_alternative():
+    old, target = weather_catalog(), weather_catalog("late")
+    evidence = weather_observation()
+    evidence["result"]["native_real_forecast_available"] = False
+    with pytest.raises(ValueError, match="weather provenance"):
+        adapt(old, target, "weather_provenance", {"feedback": [evidence]})
+    target["tools"] = [t for t in target["tools"] if t["name"] != "get-forecast"]
+    with pytest.raises(ValueError, match="weather provenance"):
+        adapt(old, target, "weather_provenance", {"feedback": [weather_observation()]})
+
+
+def test_artifact_contract_distinguishes_persisted_state_without_rewriting_metadata():
+    old, target = catalog(), changed()
+    before = deepcopy((old, target))
+    observation = artifact_observation()
+    knowledge, changes, cost = adapt(old, target, "artifact_contract", {"feedback": [observation]})
+    original, _, _ = adapt(old, target, "selective_patch")
+    rules = knowledge["tools"][0]["usage_rules"]
+    assert rules[:-1] == original["tools"][0]["usage_rules"]
+    for fact in observation["result"]["contract"].values():
+        assert fact in rules[-1]
+    assert "persisted artifact" in rules[-1]
+    for field in original["tools"][0]:
+        if field != "usage_rules":
+            assert knowledge["tools"][0][field] == original["tools"][0][field]
+    assert knowledge["tools"][1] == old["tools"][1]
+    assert (old, target) == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+    assert len([x for x in changes if x["operation"] == "append_artifact_contract"]) == 1
+
+
+def test_artifact_contract_does_not_import_other_stage_or_unchanged_tool_evidence():
+    feedback = [artifact_observation("middle"), artifact_observation(name="unrelated")]
+    knowledge, _, _ = adapt(catalog(), changed(), "artifact_contract", {"feedback": feedback})
+    original, _, _ = adapt(catalog(), changed(), "selective_patch")
+    assert knowledge == original
+    early, _, _ = adapt(catalog(), catalog(), "artifact_contract", {"feedback": feedback})
+    assert early == catalog()
+
+
+@pytest.mark.parametrize("mutation", ["task_answer", "unreviewed", "oversized"])
+def test_artifact_contract_rejects_noncontract_or_unbounded_inputs(mutation):
+    observation = artifact_observation()
+    if mutation == "task_answer":
+        observation["result"]["contract"]["answer"] = "Do not import task material."
+    elif mutation == "unreviewed":
+        observation["result"]["kind"] = "raw_tool_response"
+    else:
+        observation["result"]["contract"]["persisted_state"] = "x" * 601
+    with pytest.raises(ValueError, match="artifact effect"):
+        adapt(catalog(), changed(), "artifact_contract", {"feedback": [observation]})
+
+
+def test_observed_contract_preserves_semantic_error_text_even_without_tool_error():
+    # Losing content here turns a semantic rejection into a false success cue.
+    observations = [
+        {
+            "stage": "late",
+            "server": "server",
+            "tool": "lookup",
+            "args": {"query": "7+", "mode": False},
+            "result": {
+                "isError": False,
+                "content": [{"type": "text", "text": "Syntax errors: Expected expression"}],
+            },
+        },
+        {
+            "stage": "late",
+            "server": "server",
+            "tool": "lookup",
+            "args": {"query": "q+1", "mode": False},
+            "result": {
+                "isError": False,
+                "content": [{"type": "text", "text": "Expression is syntactically valid."}],
+            },
+        },
+    ]
+    knowledge, changes, cost = adapt(
+        catalog(), changed(), "observed_contract", {"feedback": observations}
+    )
+    rules = "\n".join(knowledge["tools"][0]["usage_rules"])
+    assert "Syntax errors: Expected expression" in rules
+    assert "Expression is syntactically valid." in rules
+    assert '"mode": false' in rules and '"query": "q+1"' in rules
+    assert knowledge["tools"][0]["parameters"] == changed()["tools"][0]["parameters"]
+    assert knowledge["tools"][1] == catalog()["tools"][1]
+    assert cost["calls"] == 0
+    assert len([c for c in changes if c["operation"] == "append_observed_contract"]) == 2
+
+
+def test_observed_contract_ignores_other_stages_and_unchanged_tool_feedback():
+    observations = [
+        {
+            "stage": stage,
+            "server": "server",
+            "tool": name,
+            "args": {"query": "sentinel"},
+            "result": {
+                "isError": False,
+                "content": [{"type": "text", "text": "Do not import this observation"}],
+            },
+        }
+        for stage, name in [("middle", "lookup"), ("late", "unrelated")]
+    ]
+    knowledge, _, _ = adapt(catalog(), changed(), "observed_contract", {"feedback": observations})
+    original, _, _ = adapt(catalog(), changed(), "selective_patch")
+    assert knowledge == original
+    early, _, cost = adapt(catalog(), catalog(), "observed_contract", {"feedback": observations})
+    assert early == catalog() and cost["calls"] == 0
+
+
 def test_delta_notes_surface_new_required_contract_and_preserve_unrelated_record():
     old, target = catalog(), changed()
     old_copy, target_copy = deepcopy(old), deepcopy(target)
@@ -424,4 +992,67 @@ def test_budget_feedback_only_extends_parent_rules_on_changed_and_added_tools(mo
     assert sum(entry.get("evidence") == "existing_runtime_budget" for entry in log) == 2
     for unchanged in [deepcopy(old), catalog("late")]:
         same, _, same_cost = adapt(old, unchanged, "budget_feedback", context)
+        assert same == old and same_cost["calls"] == 0
+
+
+def test_budget_contract_replaces_only_the_existing_changed_tool_budget_rule():
+    from pe6203.patch_variants import BUDGET_RULE
+
+    old, target = catalog(), changed()
+    control, _, _ = adapt(old, target, "budget_feedback")
+    candidate, _, cost = adapt(old, target, "budget_contract")
+    before = control["tools"][0]["usage_rules"]
+    after = candidate["tools"][0]["usage_rules"]
+    assert len(before) == len(after)
+    assert before[-1] == BUDGET_RULE and after[-1] != BUDGET_RULE
+    assert "12 model rounds" in after[-1] and "4096" in after[-1]
+    candidate["tools"][0]["usage_rules"][-1] = BUDGET_RULE
+    assert candidate == control
+    assert candidate["tools"][1] == old["tools"][1]
+    assert cost["calls"] == 0
+    unchanged, _, _ = adapt(old, catalog("late"), "budget_contract")
+    assert unchanged["tools"] == old["tools"]
+
+
+def test_evidence_scope_appends_only_one_rule_to_affected_records_without_model_calls(monkeypatch):
+    import integration.baselines as provider
+
+    monkeypatch.setattr(
+        provider, "_request_completion", lambda *_: pytest.fail("deterministic patch called model")
+    )
+    old, target = catalog(), changed()
+    added = deepcopy(target["tools"][0])
+    added.update(
+        tool_id="server::new_lookup",
+        name="new_lookup",
+        routing={"server_id": "server", "tool_name": "new_lookup"},
+    )
+    target["tools"].append(added)
+    originals = deepcopy((old, target))
+    feedback = [
+        {
+            "stage": "late",
+            "server": "server",
+            "tool": "lookup",
+            "args": {"mode": True},
+            "result": {"isError": True, "error": "MISSING_HANDLER"},
+        }
+    ]
+    control, _, _ = adapt(old, target, "budget_feedback", {"feedback": feedback})
+    candidate, log, cost = adapt(old, target, "evidence_scope", {"feedback": feedback})
+    from pe6203.patch_variants import EVIDENCE_RULE
+
+    for actual, before in zip(candidate["tools"], control["tools"], strict=True):
+        if actual["tool_id"] == "server::unrelated":
+            assert actual == before == old["tools"][1]
+        else:
+            assert actual["usage_rules"] == before["usage_rules"] + [EVIDENCE_RULE]
+            restored = deepcopy(actual)
+            restored["usage_rules"].pop()
+            assert restored == before
+    assert cost["calls"] == cost["total_tokens"] == cost["usd"] == 0
+    assert sum(row.get("evidence") == "capability_evidence_boundary" for row in log) == 2
+    assert (old, target) == originals
+    for unchanged in (old, catalog("late")):
+        same, _, same_cost = adapt(old, unchanged, "evidence_scope", {"feedback": feedback})
         assert same == old and same_cost["calls"] == 0
