@@ -201,7 +201,7 @@ def main():
     p.add_argument("--output", type=Path, required=True)
     p.add_argument(
         "--selective-mode",
-        choices=["hybrid_v2", "deterministic_v1", "hybrid_v3", "hybrid_v5"],
+        choices=["deterministic_v1", "hybrid_v2", "hybrid_v3", "hybrid_v5", "hybrid_v6"],
         default="hybrid_v2",
         help="QI-V2 hybrid is the default; V1 is retained for historical comparisons",
     )
@@ -224,6 +224,18 @@ def main():
     p.add_argument("--output", type=Path, required=True)
     p = sub.add_parser(
         "run-v5", help="Explicit V5 knowledge plus optional Python artifact validation"
+    )
+    p.add_argument("--task-id", type=int, required=True)
+    p.add_argument("--version", choices=["early", "middle", "late"], required=True)
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--config", type=Path, required=True)
+    p.add_argument("--adaptation", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    scope = p.add_mutually_exclusive_group(required=True)
+    scope.add_argument("--artifact-protocol", type=Path)
+    scope.add_argument("--non-python-deliverable", action="store_true")
+    p = sub.add_parser(
+        "run-v6", help="Explicit V6 knowledge plus optional Python artifact validation"
     )
     p.add_argument("--task-id", type=int, required=True)
     p.add_argument("--version", choices=["early", "middle", "late"], required=True)
@@ -320,9 +332,9 @@ def main():
             return 0
         elif args.command == "adapt":
             if args.evidence_bundle and (
-                args.strategy != "selective_patch" or args.selective_mode != "hybrid_v5"
+                args.strategy != "selective_patch" or args.selective_mode not in {"hybrid_v5", "hybrid_v6"}
             ):
-                raise ValueError("Evidence bundles are only supported in hybrid_v5")
+                raise ValueError("Evidence bundles are only supported in hybrid_v5/hybrid_v6")
             from .capability import load_evidence
 
             result = write_adaptation(
@@ -359,6 +371,22 @@ def main():
             from .execution_v5 import run_v5
 
             _, result = run_v5(
+                args.root,
+                args.task_id,
+                args.version,
+                args.seed,
+                args.config,
+                args.adaptation,
+                args.output,
+                args.artifact_protocol,
+                args.non_python_deliverable,
+            )
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+            return 0 if result["status"] == "evaluated" else 2
+        elif args.command == "run-v6":
+            from .execution_v6 import run_v6
+
+            _, result = run_v6(
                 args.root,
                 args.task_id,
                 args.version,
