@@ -1,0 +1,78 @@
+{
+  "artifact_validation": {
+    "version": "artifact-v1",
+    "protocol_sha256": "55353bc159287bf898a282cd30418fbcca8a0cc99b9420d1c36d3973188abeb2",
+    "status": "backend_unavailable",
+    "attempts": [
+      {
+        "index": 0,
+        "status": "syntax_failed",
+        "isolated_execution": false,
+        "artifact_path": "attempt-0.py",
+        "sha256": "acc6cea497935ae04d5505e95f1d264c9d12161ca862e79ed0e6e9ac88d5575a",
+        "static_status": "failed",
+        "failure": {
+          "type": "SyntaxError",
+          "message": "invalid syntax (attempt-0.py, line 1)"
+        }
+      },
+      {
+        "index": 1,
+        "status": "backend_unavailable",
+        "isolated_execution": false,
+        "artifact_path": "attempt-1.py",
+        "sha256": "7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912",
+        "static_status": "passed",
+        "tests": []
+      }
+    ],
+    "repairs": [
+      {
+        "index": 0,
+        "status": "returned_requires_revalidation"
+      }
+    ],
+    "latest_artifact": {
+      "path": "attempt-1.py",
+      "sha256": "7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912"
+    },
+    "accepted_artifact": null,
+    "accepted_summary": null,
+    "security_guarantee": false,
+    "official_TF_PE": "separate_not_measured_here"
+  },
+  "generation_status": "completed",
+  "answer": "{\"status\": \"backend_unavailable\", \"artifact_accepted\": false, \"original_answer\": \"{\\\"artifact\\\": {\\\"path\\\": \\\"artifact.py\\\", \\\"language\\\": \\\"python\\\", \\\"source\\\": \\\"def broken(:\\\"}, \\\"summary\\\": \\\"Synthetic normalization function; finite tests only.\\\"}\", \"latest_preserved_artifact\": {\"path\": \"attempt-1.py\", \"sha256\": \"7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912\"}}",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an AI agent connected to MCP tools. Complete the user's task using the supplied tools. Do not ask the user follow-up questions. Use only the tools and schemas supplied to you. Do not invent successful tool results. All workingDirectory arguments must be exactly: /private/tmp/pe6203-review.e7yVmZ/repo/results/qi-v3/local-acceptance-01/workspace\nReturn one JSON object, no markdown, with exactly these keys:\n{\"artifact\":{\"path\":\"artifact.py\",\"language\":\"python\",\"source\":\"complete Python source\"},\n\"summary\":\"brief user-facing explanation\"}. The source is the exact final deliverable.\nTool observations about expressions or prompt templates do not test this artifact.\nIndependent finite artifact tests may follow; passing them is not proof of full security."
+    },
+    {
+      "role": "user",
+      "content": "Write normalize(value): string strip and lower; reject other types."
+    },
+    {
+      "content": "{\"artifact\": {\"path\": \"artifact.py\", \"language\": \"python\", \"source\": \"def broken(:\"}, \"summary\": \"Synthetic normalization function; finite tests only.\"}",
+      "role": "assistant"
+    },
+    {
+      "role": "user",
+      "content": "{\"protocol\": \"artifact-v1\", \"attempt\": {\"index\": 0, \"status\": \"syntax_failed\", \"isolated_execution\": false, \"artifact_path\": \"attempt-0.py\", \"sha256\": \"acc6cea497935ae04d5505e95f1d264c9d12161ca862e79ed0e6e9ac88d5575a\", \"static_status\": \"failed\", \"failure\": {\"type\": \"SyntaxError\", \"message\": \"invalid syntax (attempt-0.py, line 1)\"}}, \"source\": \"def broken(:\", \"independent_tests_sha256\": \"448ec273ab1fa616fac9e20a427a0a81bf49ab1e85fdbd18f402b7b968430243\", \"instruction\": \"Correct the exact artifact using these observed failures. Return one JSON object, no markdown, with exactly these keys:\\n{\\\"artifact\\\":{\\\"path\\\":\\\"artifact.py\\\",\\\"language\\\":\\\"python\\\",\\\"source\\\":\\\"complete Python source\\\"},\\n\\\"summary\\\":\\\"brief user-facing explanation\\\"}. The source is the exact final deliverable.\\nTool observations about expressions or prompt templates do not test this artifact.\\nIndependent finite artifact tests may follow; passing them is not proof of full security.\"}"
+    },
+    {
+      "content": "{\"artifact\": {\"path\": \"artifact.py\", \"language\": \"python\", \"source\": \"def normalize(value):\\n if not isinstance(value, str): raise TypeError('string required')\\n return value.strip().lower()\\n\"}, \"summary\": \"Synthetic normalization function; finite tests only.\"}",
+      "role": "assistant"
+    }
+  ],
+  "status": "artifact_unaccepted",
+  "usage": {
+    "prompt_tokens": 20,
+    "completion_tokens": 10,
+    "total_tokens": 30,
+    "usd": null,
+    "known_usd": null,
+    "usd_source": null
+  },
+  "rounds": 1
+}

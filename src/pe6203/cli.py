@@ -201,10 +201,11 @@ def main():
     p.add_argument("--output", type=Path, required=True)
     p.add_argument(
         "--selective-mode",
-        choices=["hybrid_v2", "deterministic_v1"],
+        choices=["hybrid_v2", "deterministic_v1", "hybrid_v3"],
         default="hybrid_v2",
         help="QI-V2 hybrid is the default; V1 is retained for historical comparisons",
     )
+    p.add_argument("--capability-evidence", type=Path, help="Frozen V3 source evidence manifest")
     p.add_argument("--patch-budget", type=Path, help="Hybrid request/time limits JSON")
     p.add_argument(
         "--validation-cases", type=Path, help="Independent argument regression cases JSON"
@@ -215,6 +216,25 @@ def main():
     p.add_argument(
         "--allow-metadata-api", action="store_true", help="Allow sending tool metadata to updater"
     )
+    p = sub.add_parser("run-artifact-arm", help="Run one verified frozen five-arm experiment entry")
+    p.add_argument("--plan", type=Path, required=True)
+    p.add_argument(
+        "--arm",
+        choices=["no_update", "full_rewrite", "deterministic_v1", "hybrid_v2", "hybrid_v3"],
+        required=True,
+    )
+    p.add_argument("--output", type=Path, required=True)
+    p = sub.add_parser(
+        "freeze-artifact-plan", help="Require and freeze equal execution budgets for five arms"
+    )
+    p.add_argument("--plan", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    p = sub.add_parser(
+        "validate-artifact", help="Check an exact JSON Python deliverable; Docker only"
+    )
+    p.add_argument("--answer", type=Path, required=True)
+    p.add_argument("--protocol", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
     setup = sub.add_parser("bootstrap", help="Verify and install immutable benchmark releases")
     setup.add_argument(
         "--stages",
@@ -281,12 +301,19 @@ def main():
             )
             return 0
         elif args.command == "adapt":
+            from .capability import load_evidence
+
             result = write_adaptation(
                 args.old_knowledge,
                 args.new_metadata,
                 args.strategy,
                 args.output,
                 context={
+                    **(
+                        {"capability_evidence": load_evidence(args.capability_evidence)}
+                        if args.capability_evidence
+                        else {}
+                    ),
                     "selective_mode": args.selective_mode,
                     "patch_budget": read_json(args.patch_budget) if args.patch_budget else {},
                     "validation_cases": read_json(args.validation_cases)
@@ -298,6 +325,24 @@ def main():
                     },
                 },
             )
+        elif args.command == "run-artifact-arm":
+            from .artifact_plan import run_arm
+
+            _, result = run_arm(args.plan, args.arm, args.root, args.output)
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+            return 0 if result["status"] == "evaluated" else 2
+        elif args.command == "freeze-artifact-plan":
+            from .artifact_plan import freeze
+
+            result = freeze(args.plan, args.output)
+        elif args.command == "validate-artifact":
+            from .artifact_validation import validate
+
+            result = asyncio.run(
+                validate(args.answer.read_text(), read_json(args.protocol), args.output)
+            )
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+            return 0 if result["accepted_artifact"] else 2
         elif args.command == "bootstrap":
             result = bootstrap(args.root, args.stages, args.scope)
             result = {

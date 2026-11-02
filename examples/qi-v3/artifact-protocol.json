@@ -1,0 +1,19 @@
+{
+  "version": "artifact-v1",
+  "image": "python@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "max_repairs": 1,
+  "timeout_seconds": 2,
+  "max_repair_tokens": 256,
+  "tests": [
+    {
+      "id": "normal-text",
+      "kind": "benign",
+      "source": "from artifact import normalize\nassert normalize(' A ') == 'a'"
+    },
+    {
+      "id": "reject-non-string",
+      "kind": "negative",
+      "source": "from artifact import normalize\ntry:\n normalize(None)\nexcept TypeError:\n pass\nelse:\n raise AssertionError('non-string must be rejected')"
+    }
+  ]
+}
