@@ -5,11 +5,32 @@ source provenance separately from main's active Selective implementations.
 Packaging or merging an evaluation does not promote a strategy as best, change
 scores, enable code validation for existing baselines, or run paid requests.
 
+## Current reporting scope: 133 / 235 / 283
+
+V3, V5 and the original V6 now share the same reporting task IDs. Start with
+[V3's three-task view](v3/three-task-view/README.md),
+[V5's three-task view](v5/three-task-view/README.md), and
+[the frozen V6 package](v6/README.md). V3/V5 show first attempts and a separately
+labelled once-retry supplement; this offline scope view does not rewrite any
+historical four/five-task study or imply identical providers, repeats or artifact
+protocols. Later V6 development changes are not included in this branch.
+
+The active three-task V3/V5 evaluator is `scripts/eval_v35_three_tasks.py`.
+Preparation and execution require a fresh output directory; paid execution still
+requires explicit `execute` and credentials. The archived four-task evaluators
+below remain byte-identical historical reproduction tools.
+
+Regenerate only the derived summaries, with no API calls:
+
+```sh
+python scripts/build_three_task_views.py
+```
+
 | Label / branch | Directory | Publication scope |
 | --- | --- | --- |
 | evaluation 2 / `evaluation-2` | `v2/` | Original V2 evaluation engine, protocol and recorded partial results |
-| evaluation 3 / `evaluation-3` | `v3/` | Verified optimized V3 evaluator, frozen protocol and completed 108-trajectory / 540-rating knowledge-only study |
-| evaluation 5 / `evaluation-5` | `v5/` | Historical V5 evaluation plus later knowledge-only 72-trajectory study and scope measurements |
+| evaluation 3 / `evaluation-3` | `v3/` | Current three-task reporting view; historical 108-trajectory study retained |
+| evaluation 5 / `evaluation-5` | `v5/` | Current three-task reporting view; historical 72-trajectory study retained |
 | evaluation 6 / `evaluation-6` | `v6/` | Gated V6 evaluation, offline checks, cost analysis and retained diagnostic attempts |
 
 Start with each version's README and manifest. Batches carry exact source Git

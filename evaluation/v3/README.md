@@ -1,4 +1,12 @@
-# evaluation 3 — verified optimized V3, 2026-11-03
+# evaluation 3 — current tasks 133 / 235 / 283
+
+The current reporting entry is the [three-task aligned view](three-task-view/README.md).
+It covers the same task IDs as original V6. First attempts and the post hoc
+once-retry supplement are separate; all valid retry results and their costs are
+included without picking only improvements. No raw scores or historical plans
+are changed. The active three-task evaluator is `scripts/eval_v35_three_tasks.py`.
+
+## Historical four-task publication (retained unchanged)
 
 This package supersedes the former pending staging state after the explicitly
 authorized new evaluation. It publishes the actual evaluator source and frozen
