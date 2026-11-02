@@ -1,0 +1,799 @@
+{
+  "projects": [
+    {
+      "id": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "name": "Customer Analytics Dashboard",
+      "description": "An analytics dashboard that ingests customer CSV files, analyzes application logs, and presents the combined results through visualization components.\n\nScope:\n1. Data processing pipeline for customer CSV files (ingestion, validation, normalization, enrichment).\n2. Log analysis pipeline for application logs (parsing, aggregation, error/anomaly detection).\n3. Visualization layer (charts, tables, filters, dashboard pages).\n4. Integration, testing, deployment and observability.\n\nStructure is organized into milestones, each decomposed into tasks with a complexity ceiling of 5/10 so no single task is too large to execute.\n\nTags: analytics, dashboard, data-processing, log-analysis, visualization",
+      "createdAt": "2026-11-02T01:04:51.142Z",
+      "updatedAt": "2026-11-02T01:04:51.142Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "c76d8c6a-ee20-4184-bc0c-58527db90c33",
+      "name": "Milestone 1 — Discovery, Requirements & Data Contracts",
+      "details": "Establish what we are building and the contracts everything else depends on.\n\nDeliverables:\n- Prioritized analytics use cases and KPI definitions (which customer and log metrics matter).\n- Inventory and profiling of customer CSV sources (file schemas, volumes, freshness, PII).\n- Inventory and profiling of application log sources (formats, retention, severity levels).\n- Signed-off data contracts/schemas for both CSV and log events.\n- Non-functional requirements: freshness SLAs, query latency targets, retention, access control.\n\nExit criteria: Use cases, data contracts and NFRs reviewed and approved; no downstream work blocked on unknowns.\n\nWhy this milestone first: schema and metric ambiguity is the most common cause of rework in analytics projects.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "completed": false,
+      "createdAt": "2026-11-02T01:04:59.426Z",
+      "updatedAt": "2026-11-02T01:04:59.426Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "discovery",
+        "requirements"
+      ],
+      "estimatedHours": 40,
+      "level": 0
+    },
+    {
+      "id": "c337b1f1-08a0-4c82-96a3-1cf485fc5bdd",
+      "name": "Milestone 2 — Customer CSV Data Processing Pipeline",
+      "details": "Build the ingestion-to-curated-warehouse path for customer CSV files.\n\nDeliverables:\n- Ingestion of CSV drops (batch file landing zone or scheduled pull).\n- Parsing, schema validation, type coercion and quarantine of bad rows.\n- Normalization/deduplication keyed on customer identity.\n- PII handling: masking/tokenization policy applied before broad access.\n- Curated customer dimensional/fact tables with documented grain.\n- Data quality checks, error reporting and pipeline observability.\n\nExit criteria: Customer CSV data lands, validates and is queryable in curated tables with measurable data-quality thresholds and a replay path.\n\nDepends on: Milestone 1 data contracts.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "completed": false,
+      "createdAt": "2026-11-02T01:04:59.429Z",
+      "updatedAt": "2026-11-02T01:05:59.941Z",
+      "dependsOn": [
+        "c76d8c6a-ee20-4184-bc0c-58527db90c33"
+      ],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "data-processing",
+        "csv"
+      ],
+      "estimatedHours": 80,
+      "level": 0
+    },
+    {
+      "id": "20a051d0-99b0-4c0a-a4d8-83abedfa3ca0",
+      "name": "Milestone 3 — Application Log Analysis Pipeline",
+      "details": "Turn raw application logs into queryable, dashboard-ready metrics.\n\nDeliverables:\n- Log collection and shipping from application hosts/services.\n- Parsing/normalization into structured events (timestamp, severity, service, request id, message, duration).\n- Aggregations: error rates, request latency percentiles, throughput, top failure reasons per service.\n- Anomaly detection on error rate and latency baselines.\n- Log-derived fact tables and a query layer for the dashboard.\n- Retention policy and cost controls.\n\nExit criteria: Log metrics are queryable with acceptable freshness, and anomaly alerts fire on a seeded test condition.\n\nDepends on: Milestone 1 log data contracts.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "completed": false,
+      "createdAt": "2026-11-02T01:04:59.431Z",
+      "updatedAt": "2026-11-02T01:05:59.945Z",
+      "dependsOn": [
+        "c76d8c6a-ee20-4184-bc0c-58527db90c33"
+      ],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "log-analysis"
+      ],
+      "estimatedHours": 80,
+      "level": 0
+    },
+    {
+      "id": "9c9831de-1fb0-471c-a699-f7b4db979ee9",
+      "name": "Milestone 4 — Visualization Components & Dashboard UI",
+      "details": "Deliver the user-facing dashboard that consumes the curated customer and log data.\n\nDeliverables:\n- Dashboard shell: navigation, layout grid, responsive behavior, theming.\n- Reusable chart component library (time series, bar/stacked, KPI tiles, data table).\n- Global filters (date range, customer segment, service) wired to query parameters.\n- Customer analytics page(s).\n- Log/operations health page(s).\n- Accessibility and performance standards applied to every component.\n\nExit criteria: All KPI/use cases from Milestone 1 are visible and filterable, with Lighthouse/accessibility scores meeting agreed thresholds.\n\nDepends on: Milestones 2 and 3 providing stable query interfaces.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "completed": false,
+      "createdAt": "2026-11-02T01:04:59.433Z",
+      "updatedAt": "2026-11-02T01:05:59.947Z",
+      "dependsOn": [
+        "c337b1f1-08a0-4c82-96a3-1cf485fc5bdd",
+        "20a051d0-99b0-4c0a-a4d8-83abedfa3ca0"
+      ],
+      "priority": 9,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "visualization",
+        "frontend"
+      ],
+      "estimatedHours": 100,
+      "level": 0
+    },
+    {
+      "id": "c43f2fa0-5e9c-4964-935a-dcf39b0cba52",
+      "name": "Milestone 5 — Integration, QA, Deployment & Operations",
+      "details": "Harden and ship the dashboard, then keep it healthy.\n\nDeliverables:\n- End-to-end integration tests across CSV pipeline, log pipeline and UI.\n- Data reconciliation tests (dashboard numbers vs. source-of-truth).\n- Deployment pipeline and environment promotion (staging → production).\n- Monitoring/alerting on pipeline freshness, job failures, query latency and error budget.\n- Runbook, access provisioning and user enablement documentation.\n\nExit criteria: Production release approved, monitoring live, on-call runbook published, first week of operation within SLO.\n\nDepends on: Milestone 4 complete and Milestones 1–3 quality gates green.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "completed": false,
+      "createdAt": "2026-11-02T01:04:59.434Z",
+      "updatedAt": "2026-11-02T01:05:59.949Z",
+      "dependsOn": [
+        "9c9831de-1fb0-471c-a699-f7b4db979ee9"
+      ],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "milestone",
+        "qa",
+        "deployment",
+        "operations"
+      ],
+      "estimatedHours": 60,
+      "level": 0
+    },
+    {
+      "id": "63dbcccf-e26b-46fd-b020-9e3696ed1864",
+      "name": "1.1 Define analytics use cases and KPI catalogue",
+      "details": "Interview 3–5 stakeholders and produce a single KPI catalogue document.\n\nContents:\n- Ranked list of dashboard use cases (e.g. \"revenue by customer segment\", \"error rate by service over time\").\n- For each KPI: definition, formula, grain, source (CSV field or log field), owner, refresh expectation.\n- Explicit out-of-scope list to prevent scope creep.\n\nDone when: catalogue reviewed by stakeholders; every KPI maps to a data source or is flagged as a data gap.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c76d8c6a-ee20-4184-bc0c-58527db90c33",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:14.445Z",
+      "updatedAt": "2026-11-02T01:05:14.445Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "requirements",
+        "kpi"
+      ],
+      "estimatedHours": 6,
+      "level": 1
+    },
+    {
+      "id": "83283836-9169-437f-976a-e8e3a1bf7e82",
+      "name": "1.2 Profile customer CSV sources and document schemas",
+      "details": "Inventory every customer CSV feed and profile a representative sample of each.\n\nCapture per source:\n- Delivery mechanism, file naming, cadence, average/peak volume.\n- Column list, inferred types, nullability, encodings, delimiter/quote quirks.\n- Known quality issues (duplicate customer ids, malformed dates, mixed currencies).\n- PII columns (name, email, address, phone) and sensitivity level.\n\nDone when: profiling report exists for every source and PII columns are listed for the masking task.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c76d8c6a-ee20-4184-bc0c-58527db90c33",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:14.449Z",
+      "updatedAt": "2026-11-02T01:05:59.951Z",
+      "dependsOn": [
+        "63dbcccf-e26b-46fd-b020-9e3696ed1864"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "data-profiling"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "a8ec10d7-83a9-43d1-81aa-736760718652",
+      "name": "1.3 Profile application log sources and formats",
+      "details": "Inventory application logs across services and characterise their structure.\n\nCapture per service:\n- Log format (JSON, plaintext, key-value), current shipping mechanism, retention period.\n- Event volume per day and peak burst behaviour.\n- Available fields: timestamp precision, severity, service/instance, request/correlation id, latency, error class.\n- Gaps that block the log KPIs (e.g. missing correlation id, inconsistent severity names).\n\nDone when: log source inventory and field-availability matrix are complete, with gaps called out.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c76d8c6a-ee20-4184-bc0c-58527db90c33",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:14.451Z",
+      "updatedAt": "2026-11-02T01:05:59.953Z",
+      "dependsOn": [
+        "63dbcccf-e26b-46fd-b020-9e3696ed1864"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "data-profiling"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "def13c0a-ecf9-44a0-82d2-5e2f01b5a232",
+      "name": "1.4 Author and approve data contracts for CSV and log events",
+      "details": "Turn the profiling output into versioned, machine-readable contracts.\n\n- CSV contract: column names, types, required/optional, accepted value domains, row-key definition.\n- Log event contract: canonical field names and types (timestamp, severity, service, correlation_id, latency_ms, error_code, message), enum for severity.\n- Contract versioning rule and process for upstream schema change notification.\n- Validation rule set that the parsers will implement.\n\nDone when: contracts reviewed by data producers and consumers and checked into the repo with a version number.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c76d8c6a-ee20-4184-bc0c-58527db90c33",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:14.453Z",
+      "updatedAt": "2026-11-02T01:05:59.954Z",
+      "dependsOn": [
+        "83283836-9169-437f-976a-e8e3a1bf7e82",
+        "a8ec10d7-83a9-43d1-81aa-736760718652"
+      ],
+      "priority": 10,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "data-contract",
+        "schema"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "4236750f-9c91-4fed-bf7a-095d969cf4a2",
+      "name": "1.5 Define NFRs and record architecture decision",
+      "details": "Agree the non-functional envelope and lock the high-level architecture.\n\n- Freshness SLAs per data source (e.g. CSV hourly, logs near-real-time at 5 min).\n- Dashboard query latency target (e.g. p95 < 2s) and concurrency expectation.\n- Storage/retention, cost ceiling, access control model, audit requirements.\n- Tech selection: warehouse, orchestration, log store, frontend charting library — captured in a one-page ADR with alternatives considered.\n\nDone when: NFR table and ADR approved; choices unblock the build milestones.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c76d8c6a-ee20-4184-bc0c-58527db90c33",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:14.454Z",
+      "updatedAt": "2026-11-02T01:05:59.956Z",
+      "dependsOn": [
+        "def13c0a-ecf9-44a0-82d2-5e2f01b5a232"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "nfr",
+        "architecture"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "d51f5aba-c5a9-493b-a995-c449faad56a1",
+      "name": "2.1 Build CSV landing zone and ingestion scheduler",
+      "details": "Stand up the entry point for customer CSV files.\n\n- Create the raw/landing storage location with a predictable path convention (source/date/file).\n- Implement scheduled ingestion (or event trigger) that registers each incoming file in an ingestion manifest with checksum and arrival time.\n- Idempotency: re-running the same file must not duplicate data.\n- Emit a \"file received\" event/log for downstream orchestration.\n\nDone when: a test CSV dropped in the landing zone is registered, checksummed, and triggers the next stage exactly once.\n\nComplexity note: deliberately excludes parsing logic (task 2.2).",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c337b1f1-08a0-4c82-96a3-1cf485fc5bdd",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:23.079Z",
+      "updatedAt": "2026-11-02T01:05:23.079Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "ingestion"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "e6b43494-043a-4f8e-92b4-a52526914a0a",
+      "name": "2.2 Implement CSV parser, schema validation and bad-row quarantine",
+      "details": "Parse CSVs against the versioned contract from task 1.4.\n\n- Robust reader handling quoted fields, embedded delimiters/newlines, encodings, header drift.\n- Row-level validation: required fields present, types parseable, value domains respected.\n- Route valid rows to staging; write rejected rows plus a machine-readable reason to a quarantine table.\n- Produce per-file run statistics: rows read, accepted, rejected, rejection reasons.\n\nDone when: a fixture suite of good/bad files yields correct accept/reject counts and every rejected row has a reason code.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c337b1f1-08a0-4c82-96a3-1cf485fc5bdd",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:23.083Z",
+      "updatedAt": "2026-11-02T01:06:07.010Z",
+      "dependsOn": [
+        "d51f5aba-c5a9-493b-a995-c449faad56a1"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "validation",
+        "parsing"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "657961d8-5c4f-4039-bd9b-10a894e08195",
+      "name": "2.3 Normalize values and resolve duplicate customer identities",
+      "details": "Standardize accepted rows into canonical form.\n\n- Type coercion: dates → UTC ISO timestamps, currency → minor units + code, locale-specific decimals, trims/case-folding.\n- Map source-specific category values onto canonical enums.\n- Customer identity resolution: deterministic match key (e.g. normalized email + account id), survivorship rules for conflicting attributes, duplicate suppression.\n\nDone when: duplicate rate is measured before/after, and the same customer appearing in two feeds resolves to one golden record.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c337b1f1-08a0-4c82-96a3-1cf485fc5bdd",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:23.087Z",
+      "updatedAt": "2026-11-02T01:06:07.013Z",
+      "dependsOn": [
+        "e6b43494-043a-4f8e-92b4-a52526914a0a"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "normalization",
+        "dedup"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "1283ab19-e4c3-4a5e-8e3c-2ade9642a473",
+      "name": "2.4 Apply PII masking and tokenization",
+      "details": "Protect customer PII before it reaches broadly accessible tables.\n\n- Implement masking rules per column identified in task 1.2 (hash email/phone, truncate address, drop free-text notes).\n- Keep a restricted, access-controlled mapping table for re-identification if legally required.\n- Ensure downstream curated models and dashboard APIs never expose raw PII.\n- Add a test that fails the build if an unmasked PII column appears in a public model.\n\nDone when: PII policy tests pass and a spot check of curated tables shows no raw PII.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c337b1f1-08a0-4c82-96a3-1cf485fc5bdd",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:23.088Z",
+      "updatedAt": "2026-11-02T01:06:07.015Z",
+      "dependsOn": [
+        "657961d8-5c4f-4039-bd9b-10a894e08195"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "security",
+        "pii"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "cd8f2c3e-c55e-4da4-9e29-6ef461954509",
+      "name": "2.5 Build curated customer dimension and fact models",
+      "details": "Model the data the dashboard will actually query.\n\n- dim_customer: one row per resolved customer, with segment, geography, acquisition date, status.\n- fct_customer_activity: grain explicitly documented (e.g. one row per customer per day), with orders/revenue/usage measures.\n- Add surrogate keys, change history (SCD type 2 if required by KPIs), and column-level documentation.\n- Publish models to the semantic/query layer with stable, versioned names.\n\nDone when: every customer KPI in the 1.1 catalogue can be computed from these models, and grain is documented in the model description.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c337b1f1-08a0-4c82-96a3-1cf485fc5bdd",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:23.090Z",
+      "updatedAt": "2026-11-02T01:06:07.017Z",
+      "dependsOn": [
+        "657961d8-5c4f-4039-bd9b-10a894e08195",
+        "1283ab19-e4c3-4a5e-8e3c-2ade9642a473"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "data-modeling"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "bb01217a-101f-4bc8-9344-02fd6fd1e0d7",
+      "name": "2.6 Add data quality tests, pipeline observability and replay",
+      "details": "Make the pipeline trustworthy and recoverable.\n\n- Quality tests: row-count reconciliation, freshness, uniqueness of customer key, non-null on required fields, accepted value domains, volume anomaly vs 7-day baseline.\n- Observability: structured run logs, per-step duration, failure alerts to the team channel.\n- Replay/backfill: parameterized run for a date range or specific file, safe to re-run idempotently.\n\nDone when: intentionally corrupted input triggers the right test failure and alert, and a backfill reproduces identical curated output.\n\nComplexity note: if alert routing and backfill turn out large, split into separate tasks during sprint planning.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c337b1f1-08a0-4c82-96a3-1cf485fc5bdd",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:23.092Z",
+      "updatedAt": "2026-11-02T01:06:07.018Z",
+      "dependsOn": [
+        "cd8f2c3e-c55e-4da4-9e29-6ef461954509"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "csv",
+        "data-quality",
+        "observability"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "6b8b5119-62da-4977-bc5a-d985048c4604",
+      "name": "3.1 Set up log collection and shipping",
+      "details": "Get application logs flowing into the analytics log store.\n\n- Deploy/configure the collector (agent or forwarder) for each service identified in task 1.3.\n- Buffer and retry on store outages; backpressure instead of log loss.\n- Tag events with environment, service, instance and ingestion timestamp.\n- Verify end-to-end with a canary log line: emitted in app → visible in store within the agreed freshness SLA.\n\nDone when: canary event appears in the store with correct metadata across all in-scope services.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "20a051d0-99b0-4c0a-a4d8-83abedfa3ca0",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:32.339Z",
+      "updatedAt": "2026-11-02T01:05:32.339Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "ingestion"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "941eba07-8a20-4e20-80fd-553941281e59",
+      "name": "3.2 Parse raw logs into canonical structured events",
+      "details": "Implement parsers that conform to the log event contract (task 1.4).\n\n- Grok/regex or JSON extractors per log format; extract timestamp, severity, service, correlation_id, latency_ms, error_code, message.\n- Normalize severity synonyms (WARN/warning/W) to a canonical enum.\n- Handle multi-line stack traces as a single event.\n- Dead-letter unparseable lines with the raw payload and a reason, rather than silently dropping them.\n\nDone when: parse success rate on a real day of logs is measured and ≥ the agreed threshold, and dead-lettered lines are inspectable.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "20a051d0-99b0-4c0a-a4d8-83abedfa3ca0",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:32.341Z",
+      "updatedAt": "2026-11-02T01:06:07.020Z",
+      "dependsOn": [
+        "6b8b5119-62da-4977-bc5a-d985048c4604"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "parsing"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "26fc81f9-fe29-47bc-b809-d22d96228ce3",
+      "name": "3.3 Build log aggregation models: error rate, latency percentiles, throughput",
+      "details": "Create the pre-aggregated tables the dashboard reads.\n\n- fct_service_health at 1-minute and 1-hour grains: request_count, error_count, error_rate, throughput.\n- Latency percentiles p50/p95/p99 per service and endpoint.\n- Include environment and service dimensions for filtering.\n- Document grain, watermark/late-arrival handling, and refresh cadence.\n\nDone when: aggregates for a known test window match a hand-computed baseline within tolerance, and refresh cadence meets the NFR.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "20a051d0-99b0-4c0a-a4d8-83abedfa3ca0",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:32.343Z",
+      "updatedAt": "2026-11-02T01:06:07.021Z",
+      "dependsOn": [
+        "941eba07-8a20-4e20-80fd-553941281e59"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "aggregation"
+      ],
+      "estimatedHours": 12,
+      "level": 1
+    },
+    {
+      "id": "01529ea5-c71c-4dc9-80a6-14a878f3dc75",
+      "name": "3.4 Extract top failure reasons and build an error taxonomy",
+      "details": "Make \"what is breaking\" answerable without reading raw logs.\n\n- Derive an error signature by normalizing messages (strip ids, timestamps, variable values) and grouping error_code + signature.\n- Rank top N failure signatures per service per interval.\n- Maintain a curated taxonomy mapping signatures to human-readable causes/owners, with a manual override table.\n- Expose counts and trend for each signature.\n\nDone when: the top 10 signatures for a real incident are correctly grouped (no id-permutation explosion) and mapped to owners.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "20a051d0-99b0-4c0a-a4d8-83abedfa3ca0",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:32.344Z",
+      "updatedAt": "2026-11-02T01:06:07.023Z",
+      "dependsOn": [
+        "26fc81f9-fe29-47bc-b809-d22d96228ce3"
+      ],
+      "priority": 7,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "error-taxonomy"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "dadf8788-d911-4582-8bf6-bf172ef5376d",
+      "name": "3.5 Establish anomaly baselines and alerting on log metrics",
+      "details": "Detect abnormal error rates and latency, not just absolute thresholds.\n\n- Compute seasonal baselines (same hour/day-of-week) for error rate and p95 latency per service.\n- Alert when deviation exceeds N sigma for M consecutive windows (tunable, low false-positive by default).\n- Suppress flapping with de-duplication and cooldown; route to the on-call channel.\n- Provide a \"seeded incident\" test: inject synthetic errors and confirm exactly one alert fires.\n\nDone when: seeded incident alerts within the target detection window and quiet periods produce zero alerts over a 24h soak.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "20a051d0-99b0-4c0a-a4d8-83abedfa3ca0",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:32.345Z",
+      "updatedAt": "2026-11-02T01:06:07.024Z",
+      "dependsOn": [
+        "26fc81f9-fe29-47bc-b809-d22d96228ce3"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "anomaly-detection",
+        "alerting"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "15efd9a3-77e8-4491-873e-6393a56a560b",
+      "name": "3.6 Define retention/cost controls and expose a log metrics query layer",
+      "details": "Control storage cost and give the frontend a stable way to read log metrics.\n\n- Tiering: hot (7–14d full fidelity), warm (90d aggregated), cold archive per compliance needs.\n- Sampling/downsampling rules for high-volume debug logs; document what is dropped.\n- Query API/views for the dashboard: service, environment, time range, granularity params; pre-aggregated only, no raw log scanning from the UI.\n- Cost estimate at current and 3x volume.\n\nDone when: retention jobs run as configured, the API returns p95 < target for a 30-day range query, and cost estimate is reviewed.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "20a051d0-99b0-4c0a-a4d8-83abedfa3ca0",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:32.346Z",
+      "updatedAt": "2026-11-02T01:06:07.025Z",
+      "dependsOn": [
+        "26fc81f9-fe29-47bc-b809-d22d96228ce3"
+      ],
+      "priority": 7,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "log-analysis",
+        "retention",
+        "api"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "49172c8c-1115-4fd4-9482-15743baceda2",
+      "name": "4.1 Build dashboard shell: layout, navigation, routing, theming",
+      "details": "Create the application skeleton every page plugs into.\n\n- Route structure (/customers, /operations, /overview) with lazy-loaded pages.\n- Responsive 12-column layout grid, header/nav, loading and empty states, error boundary.\n- Design tokens: colour palette, typography scale, spacing; light/dark mode if required.\n- Typed API client stub with request/response types matching the query layer.\n\nDone when: skeleton runs locally, renders empty pages on all routes, and passes a smoke test on desktop and mobile widths.\n\nComplexity note: no real charts in this task.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "9c9831de-1fb0-471c-a699-f7b4db979ee9",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:42.199Z",
+      "updatedAt": "2026-11-02T01:05:42.199Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "ui-shell"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "30900fe1-c163-4b37-a7e0-d5ed5bc6b41c",
+      "name": "4.2 Build KPI tile and time-series chart components",
+      "details": "Implement the two most-used primitives, fully tested in isolation.\n\n- KpiTile: label, value, unit, delta vs comparison period, trend direction, loading/error states.\n- TimeSeriesChart: multi-series, tooltip, legend, threshold line support, brush/zoom optional.\n- Consistent prop API, number/date formatting, accessible colour contrast.\n- Storybook (or equivalent) stories with mocked data for each state.\n\nDone when: both components render from mock data with loading, empty, error and populated states and are reviewed by design.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "9c9831de-1fb0-471c-a699-f7b4db979ee9",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:42.203Z",
+      "updatedAt": "2026-11-02T01:06:14.073Z",
+      "dependsOn": [
+        "49172c8c-1115-4fd4-9482-15743baceda2"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "charts"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "8b7b6f1c-a0fa-4ebb-918a-631099c6955a",
+      "name": "4.3 Build bar/stacked chart and data table components",
+      "details": "Second pair of primitives, aimed at comparison and drill-down.\n\n- BarChart: grouped and stacked modes, category axis, optional horizontal orientation.\n- DataTable: sortable columns, pagination, column visibility, numeric alignment, CSV export of the current view.\n- Both handle large result sets without layout thrash (virtualization where needed).\n- Stories covering empty, single-row, 10k-row and error states.\n\nDone when: components pass interaction tests (sort, paginate, export) and handle 10k rows within the render budget.\n\nComplexity note: table virtualization and export can be split out if it overruns.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "9c9831de-1fb0-471c-a699-f7b4db979ee9",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:42.206Z",
+      "updatedAt": "2026-11-02T01:06:14.076Z",
+      "dependsOn": [
+        "49172c8c-1115-4fd4-9482-15743baceda2"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "charts",
+        "table"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "b8ff907f-c0da-43d4-80f9-46ea62ef6111",
+      "name": "4.4 Wire global filters to URL state and query parameters",
+      "details": "One filter bar that drives every widget consistently.\n\n- Filters: date range (with presets + comparison period), customer segment, region, service, environment.\n- Filter state lives in the URL so views are shareable and survive refresh.\n- Debounced requests, cancellation of stale in-flight requests, request caching by filter key.\n- Selected filters propagate to all widgets on the page via a single context/store.\n\nDone when: changing a filter updates every widget, the URL round-trips correctly, and back/forward navigation restores prior state.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "9c9831de-1fb0-471c-a699-f7b4db979ee9",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:42.208Z",
+      "updatedAt": "2026-11-02T01:06:14.079Z",
+      "dependsOn": [
+        "49172c8c-1115-4fd4-9482-15743baceda2"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "filters"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "b218e12d-b9d3-4fa9-ad6f-02508db4b0e9",
+      "name": "4.5 Assemble customer analytics page",
+      "details": "Compose the customer-facing view from the component library.\n\n- KPI row: active customers, revenue, ARPU, churn/retention (as defined in 1.1).\n- Trend charts: revenue and customer count over time, segment breakdown (stacked bar).\n- Customer table with drill-down to a single customer's activity.\n- Empty/partial-data messaging when a data source is stale.\n\nDone when: every customer KPI in the 1.1 catalogue is visible and correct against a verified sample, and page loads within the latency NFR.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "9c9831de-1fb0-471c-a699-f7b4db979ee9",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:42.209Z",
+      "updatedAt": "2026-11-02T01:06:14.080Z",
+      "dependsOn": [
+        "30900fe1-c163-4b37-a7e0-d5ed5bc6b41c",
+        "8b7b6f1c-a0fa-4ebb-918a-631099c6955a",
+        "b8ff907f-c0da-43d4-80f9-46ea62ef6111"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "customer-analytics"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "494df13a-a547-4843-94e4-6dffe1684705",
+      "name": "4.6 Assemble log and operations health page",
+      "details": "Compose the service-health view from log metrics.\n\n- KPI row: overall error rate, p95 latency, request throughput, active anomaly count.\n- Error rate and latency time series per service, stacked error breakdown by signature.\n- Top failure reasons table with count, trend and owner.\n- Anomaly marker overlay on charts so spikes are explainable.\n\nDone when: the seeded incident from task 3.5 is clearly visible on this page, and every log KPI from 1.1 is present.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "9c9831de-1fb0-471c-a699-f7b4db979ee9",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:42.211Z",
+      "updatedAt": "2026-11-02T01:06:14.082Z",
+      "dependsOn": [
+        "30900fe1-c163-4b37-a7e0-d5ed5bc6b41c",
+        "8b7b6f1c-a0fa-4ebb-918a-631099c6955a",
+        "b8ff907f-c0da-43d4-80f9-46ea62ef6111"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "operations"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "759f60f1-a97a-49a4-b839-bed97cfc71c6",
+      "name": "4.7 Run accessibility, responsive and performance QA pass",
+      "details": "Fix quality issues across the whole UI before integration.\n\n- Keyboard navigation, focus order, screen-reader labels for charts (data table fallback), colour contrast ≥ WCAG AA.\n- Responsive checks at 375 / 768 / 1280 / 1920 px; no horizontal scroll or clipped axes.\n- Performance: bundle analysis, route-level code splitting, chart render budget, Lighthouse score target from NFR.\n- Fix list triaged with severity and re-tested.\n\nDone when: automated a11y checks are clean, manual keyboard walkthrough passes, and Lighthouse meets the agreed threshold on the two main pages.\n\nComplexity note: remediation is scoped to issues found; large redesigns become new tasks.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "9c9831de-1fb0-471c-a699-f7b4db979ee9",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:42.213Z",
+      "updatedAt": "2026-11-02T01:06:14.083Z",
+      "dependsOn": [
+        "b218e12d-b9d3-4fa9-ad6f-02508db4b0e9",
+        "494df13a-a547-4843-94e4-6dffe1684705"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "accessibility",
+        "performance"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "ce1897a6-4df9-4a27-b0dd-ca2722025045",
+      "name": "5.1 Build end-to-end integration test suite",
+      "details": "Prove the three pipelines work together.\n\n- Automated test: sample CSV + synthetic logs → pipeline run → curated tables → API → rendered widget values.\n- Cover happy path, late-arriving/skewed data, quarantined rows, and a stale-source scenario.\n- Run in CI against an ephemeral environment seeded with fixtures.\n- Capture and publish a coverage summary of the critical paths.\n\nDone when: the suite runs green in CI on every merge and fails when a break is deliberately injected into any stage.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c43f2fa0-5e9c-4964-935a-dcf39b0cba52",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:50.515Z",
+      "updatedAt": "2026-11-02T01:06:14.085Z",
+      "dependsOn": [
+        "b218e12d-b9d3-4fa9-ad6f-02508db4b0e9",
+        "494df13a-a547-4843-94e4-6dffe1684705"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "qa",
+        "integration-testing"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "4619a079-cdd0-42b7-be23-f31bf7642af7",
+      "name": "5.2 Add data reconciliation tests against source systems",
+      "details": "Guarantee the dashboard agrees with the systems of record.\n\n- For each headline KPI: compare dashboard value to an independent query against the source (CSV totals, log counts).\n- Define an acceptable tolerance and document the known explainable causes of difference (dedup, quarantine, late data).\n- Run daily in production and alert on breach.\n- Publish a reconciliation report the business can read.\n\nDone when: all headline KPIs reconcile within tolerance for 5 consecutive business days.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c43f2fa0-5e9c-4964-935a-dcf39b0cba52",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:50.520Z",
+      "updatedAt": "2026-11-02T01:06:14.086Z",
+      "dependsOn": [
+        "ce1897a6-4df9-4a27-b0dd-ca2722025045"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "qa",
+        "data-quality",
+        "reconciliation"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "ee64345c-dc32-476c-81e3-a533eeca796a",
+      "name": "5.3 Build CI/CD pipeline with staged environments",
+      "details": "Automate build-to-production with guard rails.\n\n- CI: lint, unit, component, integration tests on every PR; required checks before merge.\n- CD: build artifacts/images, deploy to staging automatically, production promotion behind approval.\n- Environment config/secrets management; no credentials in the repo.\n- Rollback procedure tested at least once (redeploy previous version).\n\nDone when: a one-line change ships staging→production through the pipeline, and a deliberate rollback restores the prior version cleanly.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c43f2fa0-5e9c-4964-935a-dcf39b0cba52",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:50.522Z",
+      "updatedAt": "2026-11-02T01:06:14.087Z",
+      "dependsOn": [
+        "ce1897a6-4df9-4a27-b0dd-ca2722025045"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "devops",
+        "ci-cd"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    },
+    {
+      "id": "bc4ac9e6-1cdd-4f8a-a48b-ed67aa5142ce",
+      "name": "5.4 Set up production monitoring, SLOs and alert routing",
+      "details": "Know when the dashboard itself is unhealthy.\n\n- SLOs: pipeline freshness, pipeline success rate, API p95 latency, dashboard availability.\n- Dashboards/metrics for pipeline runs, row volumes, query latency and error rate.\n- Alert routing to on-call with severity levels and runbook links.\n- Synthetic check hitting the main pages and a canary query every few minutes.\n\nDone when: a killed pipeline and a degraded API each raise exactly one correct, actionable alert within the target window.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c43f2fa0-5e9c-4964-935a-dcf39b0cba52",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:50.525Z",
+      "updatedAt": "2026-11-02T01:06:14.088Z",
+      "dependsOn": [
+        "ee64345c-dc32-476c-81e3-a533eeca796a"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "operations",
+        "monitoring",
+        "slo"
+      ],
+      "estimatedHours": 8,
+      "level": 1
+    },
+    {
+      "id": "2158624c-8f53-45fe-a4bb-f0898f385600",
+      "name": "5.5 Write runbook, provision access and enable users",
+      "details": "Make the system operable and usable by people other than the build team.\n\n- Runbook: architecture diagram, common failure modes, replay/backfill procedure, escalation contacts.\n- Access provisioning: role-based groups (viewer, analyst, admin), audit of who has PII access.\n- User guide: what each KPI means, how to use filters, known limitations.\n- 45-minute walkthrough session recorded for new joiners.\n\nDone when: an on-call engineer who did not build the system can execute one replay using only the runbook.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c43f2fa0-5e9c-4964-935a-dcf39b0cba52",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:50.527Z",
+      "updatedAt": "2026-11-02T01:06:14.090Z",
+      "dependsOn": [
+        "ee64345c-dc32-476c-81e3-a533eeca796a"
+      ],
+      "priority": 7,
+      "complexity": 2,
+      "status": "pending",
+      "tags": [
+        "operations",
+        "documentation",
+        "enablement"
+      ],
+      "estimatedHours": 6,
+      "level": 1
+    },
+    {
+      "id": "f2faf703-ac51-42e0-afb0-9e510f22f867",
+      "name": "5.6 Execute staged rollout and hypercare period",
+      "details": "Release gradually and stay close to users while it beds in.\n\n- Rollout: internal pilot team → 10% of users → all users, with a go/no-go check at each gate.\n- Daily review of errors, alerts, feedback and query performance during the first two weeks.\n- Triage channel with a named owner; defects ranked into fix-now vs backlog.\n- Exit criteria: one week with no Sev-1/Sev-2, SLOs met, feedback themes addressed or planned.\n\nDone when: hypercare exit review is signed off and the backlog of follow-ups is filed as new tasks.",
+      "projectId": "3d03825a-fa5f-4227-ac27-15f043025589",
+      "parentId": "c43f2fa0-5e9c-4964-935a-dcf39b0cba52",
+      "completed": false,
+      "createdAt": "2026-11-02T01:05:50.528Z",
+      "updatedAt": "2026-11-02T01:06:14.091Z",
+      "dependsOn": [
+        "bc4ac9e6-1cdd-4f8a-a48b-ed67aa5142ce",
+        "2158624c-8f53-45fe-a4bb-f0898f385600"
+      ],
+      "priority": 8,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "deployment",
+        "rollout",
+        "hypercare"
+      ],
+      "estimatedHours": 10,
+      "level": 1
+    }
+  ],
+  "subtasks": [],
+  "migration": {
+    "version": "1.8.1"
+  }
+}
