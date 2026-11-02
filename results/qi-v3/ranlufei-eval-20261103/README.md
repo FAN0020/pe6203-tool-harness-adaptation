@@ -1,5 +1,9 @@
 # QI-V3 three-strategy evaluation — 2026-11-03
 
+Historical result: these runs predate the 2026-11-03 program-first input
+optimization. They are not scores for the optimized V3 updater. See
+`results/qi-v3/scope-input-20261103/` for the new updater diagnostics.
+
 ## Scope
 
 - Branch/implementation: `QI-V3`, selective strategy mode `hybrid_v3`.

@@ -1,25 +1,64 @@
 # QI-V3: capability evidence and exact-artifact validation
 
 QI-V3 branches from QI-V2 `bdf0ccc5c3466517725c84e7f715234733cde4a8`.
-It adds two separately versioned mechanisms. It does not report a benchmark
-improvement. User approval of the parent chat's flowchart remains pending.
+It adds two separately versioned mechanisms. On 2026-11-03 its updater input
+pipeline was optimized using V5's program-first scope policy. This does not by
+itself establish a benchmark improvement.
 
 ## V2 versus V3
 
 | Responsibility | QI-V2 | QI-V3 |
 |---|---|---|
 | Metadata diff / direct impact / protected catalog fields | Program | Reuses V2 unchanged |
-| Review every surviving record after a metadata change | LLM, bounded | Reuses V2 unchanged |
-| Local usage-rule edits with diff IDs and source quotes | LLM proposes; program checks | Reuses V2 unchanged |
+| Semantic scope after a metadata change | LLM reviews all surviving records | Program completes metadata-only records; LLM screens a lightweight directory and reviews the deduplicated candidate union |
+| Local usage-rule edits with diff IDs and source quotes | Separate review and patch requests | One combined local review/edit; same quote, field and argument gates |
 | Capability evidence / object boundary | No explicit evidence object | Program adds literal evidence, subject fingerprint and limitations |
 | No metadata diff | Skips semantic model stages | Same; independently supplied evidence can still initialize boundaries |
 | Execute exact final Python | None | Optional shared `artifact-v1` protocol |
 | Failed artifact → execution-model repair → repeat checks | None | Bounded; every proposed final repair is checked again |
 
-The public `adapt` default remains `hybrid_v2`. Choose `hybrid_v3` explicitly.
+Select `hybrid_v3` explicitly. The V3 branch retains its historical
+`hybrid_v2` default; main preserves its existing `deterministic_v1` default.
+Merging this V3 optimization does not implicitly switch main's default strategy.
 Historical `deterministic_v1`, V2 APIs and default benchmark configurations remain
 available. V1 course scores, V2 implementation tests, V3 mechanism acceptance,
 and any future artifact-protocol scores are different evidence sets.
+
+## 2026-11-03: reduced updater input
+
+`hybrid_v3` now uses `scoped_selective_v3.py`, with
+`updater_core_version=hybrid_v3_program_first_v1` and
+`scope_policy=program_first_light_screen_local_review_v1`.
+The historical V2 engine remains unchanged.
+
+1. The program synchronizes authoritative metadata. A changed tool without
+   stored rules is program-complete; it is not redundantly reviewed by the LLM.
+2. The program seeds rule-bearing changed records and explicit referring rules.
+   Description changes also trigger reference lookup.
+3. One lightweight directory screen proposes implicit impacts or uncertainty
+   among the remaining records. It receives descriptions/rules and exact changed
+   leaves, not full schemas, a repeated global index, or three record copies.
+4. The deduplicated seed/proposal union is batched for one local review/edit
+   per record. Only relevant changes and compact source views are supplied.
+   Keep/update/unresolved and any usage-rule edit share one model response.
+5. Existing exact-quote, edit scope, schema/routing, and argument regression
+   checks remain. Unresolved reviews fail closed without an accepted snapshot.
+6. The existing literal capability-evidence layer runs separately; the optional
+   shared Python artifact/repair loop is unchanged.
+
+Missing/duplicate coverage, invented IDs/quotes, metadata edits and insufficient
+budgets fail explicitly. Inputs are not silently truncated and no fallback to
+V1 or a repeated scope-expansion loop is added. A negative screen can miss an
+implicit dependency; hashes/quotes do not prove semantic entailment. Input
+characters, UTF-8 bytes and provider-reported tokens are distinct measurements.
+
+The no-change artifact wrapper records the requested target stage even when its
+knowledge bytes reuse Early K0. This fixes Middle/Late execution preflight
+without rewriting metadata, inventing a diff, or calling an updater model.
+
+Evidence and the original diagnostic-checker correction are retained under
+`results/qi-v3/scope-input-20261103/`. Existing 22/27 scored benchmark records
+predate this optimization; new updater diagnostics are not new TF/PE scores.
 
 ## A. What the capability layer actually establishes
 
@@ -52,7 +91,8 @@ Unchanged non-boundary fields remain protected by V2 validation.
 probe execution or semantic entailment. An experiment owner must independently
 review and freeze source/probe provenance before task execution. No source fetch,
 probe execution or automatic capability discovery is claimed. The updater model
-receives only V2's catalog inputs, never artifact tests, answers or judge traces.
+receives only scoped catalog views and exact metadata deltas, never the capability
+evidence bundle, artifact tests, answers or judge traces.
 Unstructured semantic capability inference remains outside this conservative V3.
 Synthetic examples demonstrate the mechanism, not genuine server capabilities.
 
@@ -120,11 +160,11 @@ its test interpreter (e.g. monkey-patch globals). Tests, the driver, local daemo
 image and kernel are trusted. Finite passing tests do not prove full functionality
 or security. Stronger hostile-artifact attestation is future work.
 
-On this acceptance machine Docker/Podman are unavailable. Actual isolated
-execution and functional-failure → repair → isolated-retest acceptance are
-**not verified**. OS sandbox-exec exists but has not been accepted as a sufficiently
-restricted backend. No heavy runtime/VM installation was authorized or attempted.
-The mechanism fails closed with `backend_unavailable`.
+The original V3 acceptance environment had no Docker/Podman, so its historical
+records honestly retained `backend_unavailable`. The 2026-11-03 scope-update
+acceptance uses an already-installed pinned Docker image and separately records
+actual finite-test execution and repair/retest results. See the new acceptance
+evidence; neither the old result nor the current finite checks prove full safety.
 
 ## Honest terminal statuses
 

@@ -1,0 +1,37 @@
+{
+  "protocol": "artifact-v1",
+  "attempt": {
+    "index": 0,
+    "status": "test_failed",
+    "isolated_execution": true,
+    "artifact_path": "attempt-0.py",
+    "sha256": "fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525",
+    "static_status": "passed",
+    "tests": [
+      {
+        "id": "normal-text",
+        "kind": "benign",
+        "status": "test_failed",
+        "returncode": 1,
+        "normal_completion": false,
+        "artifact_sha256_before": "fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525",
+        "artifact_sha256_after": "fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525",
+        "output": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"<frozen runpy>\", line 287, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/work/check.py\", line 3, in <module>\n    assert normalize(' A ') == 'a'\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+      },
+      {
+        "id": "reject-non-string",
+        "kind": "negative",
+        "status": "test_failed",
+        "returncode": 1,
+        "normal_completion": false,
+        "artifact_sha256_before": "fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525",
+        "artifact_sha256_after": "fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525",
+        "output": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"<frozen runpy>\", line 287, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/work/check.py\", line 4, in <module>\n    normalize(None)\n  File \"/work/artifact.py\", line 2, in normalize\n    return value.strip()\n           ^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'strip'\n"
+      }
+    ],
+    "seconds": 1.2495209169574082
+  },
+  "source": "def normalize(value):\n return value.strip()\n",
+  "independent_tests_sha256": "448ec273ab1fa616fac9e20a427a0a81bf49ab1e85fdbd18f402b7b968430243",
+  "instruction": "Correct the exact artifact using these observed failures. Return one JSON object, no markdown, with exactly these keys:\n{\"artifact\":{\"path\":\"artifact.py\",\"language\":\"python\",\"source\":\"complete Python source\"},\n\"summary\":\"brief user-facing explanation\"}. The source is the exact final deliverable.\nTool observations about expressions or prompt templates do not test this artifact.\nIndependent finite artifact tests may follow; passing them is not proof of full security."
+}
