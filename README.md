@@ -2,6 +2,16 @@
 
 **课程主实验与交付已冻结；后续研究另行归档。** 用户现已授权以完成任务为先，不设研究总费用或轨迹额度；仍固定公平比较设置，记录费用和失败，不覆盖旧结果，不自动部署。
 
+**2026-11-02 选题与报告修订：**课程主矩阵是 133 / 283 / 235 × Early / Middle / Late × NU / FR / SP，共 27 条，并未实测早期材料中的论文网页任务 223 或已确认的书籍任务。29 是后来的候选登记快照，不是 29 组同条件 27 条实验。详见[选题与候选审计](reports/course-research/plan-alignment-20261102.md)、[更新的研究报告](reports/course-research/PE6203%20Research%20Report.docx)及[蓝字修订的课程报告](submission/report-final.html)。这次与 `main` 选择性合并了六项离线 CLI 报告测试和已复算的课程结果说明；未引入展示讲稿或把旧暂停要求当作现行授权。
+
+| 课程方法 | TF | PE | ECS（总体 SD） | 正常完成 | 更新 API USD |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| No Update | 9.9556 | 7.8667 | 9.9241 | 7/9 | 0 |
+| Full Rewrite | 9.9778 | 8.3556 | 9.9464 | 7/9 | 0.049176 |
+| Selective Patch | 9.8889 | 9.1111 | 9.7318 | 6/9 | 0 |
+
+这些是原 27 条的描述性结果，不是新候选的同期对照；五次 judge 评分也不是五次独立 agent 执行。[独立复算](submission/evidence/recomputed/metrics.json)。
+
 | 当前选择 | 说明 |
 | --- | --- |
 | 主实验 | MCPEvol-Bench 固定 **133 / 283** 变化任务、**235** 未变化任务；Early / Middle / Late × No Update / Full Rewrite / Selective Patch × **1 次**＝27 条。已完成，无需重跑。 |
