@@ -89,15 +89,17 @@ The LLM in semantic repair made content decisions rather than merely rephrasing 
 
 dependency_cut separated record creation from dependency linking, eliminating the need to know dependency identifiers during initial creation. ready_link then made this conditional: include the complete dependency set when all real identifiers already exist; otherwise defer the link and release it when its own prerequisites are available. It never invents identifiers or submits partial dependency sets. The change is confined to knowledge attached to the changed create_project record; task 133 and retention-task knowledge remain byte-identical to SP. [3, 5]
 
-The borrowed principle is ready-prerequisite release in LLMCompiler, pinned to paper 2312.04511v3 and author commit a00c9d35507507da70e8c637eee64efc8c1857ae, task_fetching_unit.py lines 100–133. The original planner, symbolic argument runtime, parallel executor and replanning are not imported. Here a static tool-knowledge rule must be adopted by the unchanged actor; it does not execute the schedule itself. Native tests therefore establish legality and state equivalence, not agent completion.
+<span style="color:#1250A0">The borrowed principle is ready-prerequisite release in LLMCompiler, pinned to paper 2312.04511v3 and author commit a00c9d35507507da70e8c637eee64efc8c1857ae, task_fetching_unit.py lines 100–133. The original planner, symbolic argument runtime, parallel executor and replanning are not imported. Here a static tool-knowledge rule must be adopted by the unchanged actor; it does not execute the schedule itself. Native tests therefore establish legality and state equivalence, not agent completion. [17]</span>
 
 ### Observation coverage knowledge
 
 observation_coverage records which returned fields can support which claims and conservatively invalidates stale observations after mutation. Its proposed benefit was fewer unnecessary reads and better grounded final claims. All four original project trajectories made zero get_task calls, weakening the specific explanation that removing redundant get_task reads caused the observed Middle success. A later controlled diagnostic also found no reliable read saving and one false claim that a field was unavailable through all read-only tools. [6]
 
+<span style="color:#1250A0">LLM+P informed the use of explicit action preconditions and effects; this candidate instead represents source-certified observation coverage and freshness. It does not translate benchmark questions into PDDL or add a planner to the actor. The reviewed paper and author-source pin are recorded with this candidate. [18]</span>
+
 ### How prior literature was used
 
-ACE contributes local playbook operations and feedback accounting; A-MEM contributes related-memory evolution; Reflexion relies on executable feedback and further attempts. Earlier delta_notes, lexical linked_notes and pre-frozen feedback_notes did not implement those complete systems. Author code and paper versions are pinned in reference 8. Full Reflexion retries would alter the current actor protocol, and answer-bearing benchmark experiences cannot be supplied to the updater. A failed implementation does not establish that an entire method family is ineffective.
+<span style="color:#1250A0">ACE contributes local playbook operations and feedback accounting [19]; A-MEM contributes related-memory evolution [20]; Reflexion relies on executable feedback and further attempts [21]. Earlier delta_notes, lexical linked_notes and pre-frozen feedback_notes did not implement those complete systems. ExpeL was reviewed for experience-based rule induction [22], and Voyager for its executable skill library [23]; no local candidate reproduced either full system. Author-code commits and paper versions are pinned in source audit [8]. Full Reflexion retries or Voyager execution hooks would alter the fixed actor protocol, and answer-bearing benchmark experiences cannot be supplied to the updater. A failed implementation does not establish that an entire method family is ineffective.</span>
 
 ## Original development results and decisions
 
@@ -203,7 +205,7 @@ If a future candidate passes development, the recorded validation design require
 
 No new candidate is admitted by this synthesis. The report closes a delivery gap, not the research gap. A next experiment needs a distinct, lawful knowledge decision and a falsifiable prediction that separates the remaining explanations. A failed version may be closed without declaring the entire mechanism family ineffective; a new version need not already have proved success before a fair test.
 
-## Evidence and references
+## <span style="color:#1250A0">Evidence sources</span>
 
 [1] Course baseline. results/evidence/course-v1.3-20261031. summary.json, interpretation.json, cost-audit.json, metrics-audit.json, plan.json and reproduction.json. Contains the named trajectory IDs and the separate rollback diagnostic.
 
@@ -219,13 +221,11 @@ No new candidate is admitted by this synthesis. The report closes a delivery gap
 
 [7] Dependency factorial. results/evidence/dependency-factorial-20261101. decision.json; synthetic mechanism diagnostic and unresolved-charge accounting.
 
-[8] Mechanism literature. results/evidence/method-learning-20261101/method-review.json. ACE 2510.04618v1, ace-agent/ace SHA 82709de050e1db6e6ef2f07bcb0393560b94992a. A-MEM 2502.12110v1, WujiangXu/AgenticMemory SHA f9a173dec325d84fcc97e7828775c7b241c33466. Reflexion, NeurIPS 2023, noahshinn/reflexion SHA 218cf0ef1df84b05ce379dd4a8e47f17766733a0. Exact functions and implementation limits are recorded in this file.
+<span style="color:#1250A0">[8] Method source audit. results/evidence/method-learning-20261101/method-review.json. Paper versions, author repositories, pinned commits, inspected functions and limits for ACE, A-MEM, Reflexion, ExpeL and Voyager.</span>
 
 [9] Selective updater implementation. src/pe6203/selective.py. Metadata diff, explicit reference index, impact expansion and adaptation validation. Full Rewrite implementation is in src/pe6203/baselines.py; optional updater availability is not evidence it was used.
 
 [10] Course authority. PE6203 Group Project 4 brief. Tool Harness Adaptation under Environment Change. Supplied DOCX SHA256 6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d. User research requirements and later presentation-scope update take precedence for this work.
-
-## <span style="color:#1250A0">Evidence and references continued</span>
 
 <span style="color:#1250A0">[11] Task selection and candidate provenance. reports/course-research/plan-alignment-20261102.md. The bounded audit ties the original paper-webpage plan, frozen course subset and 29-to-43 registry evolution to dated plans and task metadata.</span>
 
@@ -239,4 +239,22 @@ No new candidate is admitted by this synthesis. The report closes a delivery gap
 
 <span style="color:#1250A0">[16] Tool migration. results/evidence/tool-migration-pilot-20261031. trial-verification.json and quality-review.json; twelve separate original-task-430 trajectories.</span>
 
-LLMCompiler: https://arxiv.org/html/2312.04511v3 ; https://github.com/SqueezeAILab/LLMCompiler/tree/a00c9d35507507da70e8c637eee64efc8c1857ae . Borrowed ready-prerequisite logic only; native equivalence and agent outcomes are reported separately.
+## <span style="color:#1250A0">Research literature</span>
+
+<span style="color:#1250A0">The 43 registered names are local strategy versions, not 43 published methods. The works below support mechanism claims made in this report; citing them does not claim that their complete systems or reported results were reproduced.</span>
+
+<span style="color:#1250A0">[17] Kim et al. An LLM Compiler for Parallel Function Calling. arXiv:2312.04511v3, 2024. https://arxiv.org/abs/2312.04511v3</span>
+
+<span style="color:#1250A0">[18] Liu et al. LLM+P: Empowering Large Language Models with Optimal Planning Proficiency. arXiv:2304.11477v1, 2023. https://arxiv.org/abs/2304.11477v1</span>
+
+<span style="color:#1250A0">[19] Zhang et al. Agentic Context Engineering: Evolving Contexts for Self-Improving Language Models. arXiv:2510.04618v1, 2025. https://arxiv.org/abs/2510.04618v1</span>
+
+<span style="color:#1250A0">[20] Xu et al. A-MEM: Agentic Memory for LLM Agents. arXiv:2502.12110v1, 2025. https://arxiv.org/abs/2502.12110v1</span>
+
+<span style="color:#1250A0">[21] Shinn et al. Reflexion: Language Agents with Verbal Reinforcement Learning. NeurIPS, 2023. https://proceedings.neurips.cc/paper_files/paper/2023/file/1b44b878bb782e6954cd888628510e90-Paper-Conference.pdf</span>
+
+<span style="color:#1250A0">[22] Zhao et al. ExpeL: LLM Agents Are Experiential Learners. arXiv:2308.10144v3, 2024. https://arxiv.org/abs/2308.10144v3</span>
+
+<span style="color:#1250A0">[23] Wang et al. Voyager: An Open-Ended Embodied Agent with Large Language Models. arXiv:2305.16291v2, 2023. https://arxiv.org/abs/2305.16291v2</span>
+
+<span style="color:#1250A0">Implementation pins for [17] and [18]: SqueezeAILab/LLMCompiler a00c9d35507507da70e8c637eee64efc8c1857ae; Cranial-XIX/llm-pddl f5f897ccabfb19d5158e5a7ac4cb36517cd4c2e0. The other five pins and implementation limits are in [8].</span>

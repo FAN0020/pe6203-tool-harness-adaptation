@@ -23,14 +23,27 @@ with zipfile.ZipFile(HERE / 'PE6203 Research Report.docx') as z:
     styles = ET.fromstring(z.read('word/styles.xml'))
     assert not styles.findall('.//w:pBdr',ns), 'Unexpected paragraph rule in styles'
     blue_paragraphs = []
+    paragraphs = []
     for p in xml.findall('.//w:p', ns):
         content = ''.join(t.text or '' for t in p.findall('.//w:t', ns))
+        paragraphs.append(content)
         if p.findall('.//w:color[@w:val="1250A0"]', ns):
             blue_paragraphs.append(content)
     for required in ('amended 2 November 2026', 'Separate QI-V2 comparison on the same original task IDs',
                      'The historical “29 candidates”', 'The offline 36-candidate audit'):
         assert any(required in paragraph for paragraph in blue_paragraphs), required
     assert not any('task selection and candidate addendum' in paragraph for paragraph in blue_paragraphs)
+    assert not any('Evidence and references continued' in p for p in paragraphs)
+    for number,title in (
+        (17,'An LLM Compiler for Parallel Function Calling'),
+        (18,'LLM+P: Empowering Large Language Models with Optimal Planning Proficiency'),
+        (19,'Agentic Context Engineering: Evolving Contexts for Self-Improving Language Models'),
+        (20,'A-MEM: Agentic Memory for LLM Agents'),
+        (21,'Reflexion: Language Agents with Verbal Reinforcement Learning'),
+        (22,'ExpeL: LLM Agents Are Experiential Learners'),
+        (23,'Voyager: An Open-Ended Embodied Agent with Large Language Models'),
+    ):
+        assert any(f'[{number}]' in p and title in p for p in paragraphs), (number,title)
 tables = []
 for t in xml.findall('.//w:tbl',ns):
     tables.append([[''.join(x.text or '' for x in c.findall('.//w:t',ns)) for c in row.findall('w:tc',ns)] for row in t.findall('w:tr',ns)])
