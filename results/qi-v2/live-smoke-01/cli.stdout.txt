@@ -1,0 +1,219 @@
+{
+  "schema_version": "1.0",
+  "strategy": "selective_patch",
+  "pipeline_version": "hybrid_v2",
+  "status": "validated",
+  "formal_llm_rewrite": true,
+  "validation": {
+    "errors": [],
+    "checks": {
+      "records": 3,
+      "unchanged": 2
+    },
+    "argument_cases": [
+      {
+        "tool_id": "server::amount",
+        "arguments": {
+          "amount": 100
+        },
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tool_id": "server::amount",
+        "arguments": {
+          "amount": 100,
+          "currency": "USD"
+        },
+        "expected_valid": true,
+        "actual_valid": true,
+        "passed": true
+      },
+      {
+        "tool_id": "server::unchanged",
+        "arguments": {
+          "amount": 100
+        },
+        "expected_valid": true,
+        "actual_valid": true,
+        "passed": true
+      }
+    ],
+    "behavioral_execution": "not_run_by_updater"
+  },
+  "updater_audit_path": "updater-audit.json",
+  "adapt_status": "applied",
+  "benchmark_commit": "synthetic-fixture",
+  "target_stage": "late",
+  "input": {
+    "old_knowledge_file_sha256": "d5b060c33e9e1965d8e5d169aba8be25ac68a167fcc1351017d4acda24308fa4",
+    "target_metadata_file_sha256": "94d0ac7ff38e2637c8dd80fe6153a4e995dad411604aba76c00d14f255f3b5fa"
+  },
+  "output": {
+    "knowledge_path": "knowledge.json",
+    "knowledge_file_sha256": "75f10a09b3ad1bd8813bd8720319124b01e92ba9c9d5a0e5df9b202e9147b32e"
+  },
+  "diff": {
+    "schema_version": "1.0",
+    "old_commit": "synthetic-fixture",
+    "new_commit": "synthetic-fixture",
+    "old_version": "early",
+    "new_version": "late",
+    "old_tool_count": 3,
+    "new_tool_count": 3,
+    "removed": [],
+    "added": [],
+    "changed": [
+      {
+        "change_id": "c1",
+        "tool_id": "server::amount",
+        "changed_fields": [
+          "parameters",
+          "description"
+        ],
+        "old": {
+          "tool_id": "server::amount",
+          "server_id": "server",
+          "name": "amount",
+          "version": "early",
+          "description": "Returns an amount in dollars.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "amount"
+            ],
+            "additionalProperties": false
+          },
+          "output_schema": null,
+          "usage_rules": [],
+          "routing": {
+            "server_id": "server",
+            "tool_name": "amount"
+          }
+        },
+        "new": {
+          "tool_id": "server::amount",
+          "server_id": "server",
+          "name": "amount",
+          "version": "late",
+          "description": "Returns an amount in cents.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "amount",
+              "currency"
+            ],
+            "additionalProperties": false
+          },
+          "output_schema": null,
+          "usage_rules": [],
+          "routing": {
+            "server_id": "server",
+            "tool_name": "amount"
+          }
+        }
+      }
+    ],
+    "unchanged_tool_ids": [
+      "server::display",
+      "server::unchanged"
+    ],
+    "unchanged_count": 2
+  },
+  "stages": [
+    {
+      "stage": "deterministic_diff",
+      "status": "passed"
+    },
+    {
+      "stage": "semantic_review",
+      "status": "passed",
+      "coverage": "all_surviving_records",
+      "records": 3
+    },
+    {
+      "stage": "semantic_patch",
+      "status": "passed",
+      "edited_records": 0
+    },
+    {
+      "stage": "program_validation",
+      "status": "passed"
+    }
+  ],
+  "impacted_tool_ids": [
+    "server::amount",
+    "server::display"
+  ],
+  "patch": [
+    {
+      "operation": "replace",
+      "tool_id": "server::amount",
+      "fields": [
+        "parameters",
+        "description"
+      ],
+      "new": {
+        "tool_id": "server::amount",
+        "server_id": "server",
+        "name": "amount",
+        "version": "late",
+        "description": "Returns an amount in cents.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "number"
+            },
+            "currency": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "additionalProperties": false
+        },
+        "output_schema": null,
+        "usage_rules": [],
+        "routing": {
+          "server_id": "server",
+          "tool_name": "amount"
+        }
+      },
+      "basis": [
+        "c1"
+      ],
+      "reason": "tool metadata changed in target environment"
+    }
+  ],
+  "unresolved_items": [],
+  "semantic_grounding": "quoted_evidence_checked_not_a_behavioral_guarantee",
+  "cost": {
+    "method": "hybrid_selective_patch_v2",
+    "calls": 1,
+    "prompt_tokens": 1783,
+    "completion_tokens": 206,
+    "total_tokens": 1989,
+    "usd": 0.000396165,
+    "known_usd": 0.000396165,
+    "unknown_charge_requests": 0,
+    "seconds": 2.4787457908969373,
+    "update_operations": 1
+  }
+}

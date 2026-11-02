@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "benchmark_commit": "synthetic-fixture",
+  "version": "late",
+  "tools": [
+    {
+      "tool_id": "server::fetch_balance",
+      "server_id": "server",
+      "name": "fetch_balance",
+      "version": "late",
+      "description": "Returns the account balance for the display panel in cents.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": null,
+      "usage_rules": [],
+      "routing": {
+        "server_id": "server",
+        "tool_name": "fetch_balance"
+      }
+    },
+    {
+      "tool_id": "server::display",
+      "server_id": "server",
+      "name": "display",
+      "version": "early",
+      "description": "Displays the account balance supplied by the balance service. The amount input is in dollars.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "amount"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": null,
+      "usage_rules": [
+        "The balance service returns amounts in cents; convert the balance service result from cents to dollars before passing it as amount."
+      ],
+      "routing": {
+        "server_id": "server",
+        "tool_name": "display"
+      }
+    },
+    {
+      "tool_id": "server::unchanged",
+      "server_id": "server",
+      "name": "unchanged",
+      "version": "early",
+      "description": "Stores unrelated numeric measurements.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "amount"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": null,
+      "usage_rules": [
+        "Preserve the original value."
+      ],
+      "routing": {
+        "server_id": "server",
+        "tool_name": "unchanged"
+      }
+    }
+  ]
+}

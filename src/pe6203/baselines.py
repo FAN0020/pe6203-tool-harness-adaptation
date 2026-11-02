@@ -103,7 +103,13 @@ def adapt(old_knowledge, new_metadata, strategy, context=None):
     if strategy in VARIANTS:
         return variant_adapt(old_knowledge, new_metadata, strategy, context)
     if strategy == "selective_patch":
-        from .selective import adapt as selective_adapt
+        mode = (context or {}).get("selective_mode", "hybrid_v2")
+        if mode == "deterministic_v1":
+            from .selective import adapt as selective_adapt
+        elif mode == "hybrid_v2":
+            from .hybrid_selective import adapt as selective_adapt
+        else:
+            raise ValueError(f"Unsupported selective mode: {mode}")
 
         return selective_adapt(old_knowledge, new_metadata, context)
     if strategy not in {"no_update", "full_rewrite"}:
@@ -161,7 +167,13 @@ def write_adaptation(old_path, metadata_path, strategy, output, context=None):
     if strategy in VARIANTS:
         context_settings(context)
     if strategy == "selective_patch":
-        from .selective import write_adaptation as selective_write
+        mode = (context or {}).get("selective_mode", "hybrid_v2")
+        if mode == "deterministic_v1":
+            from .selective import write_adaptation as selective_write
+        elif mode == "hybrid_v2":
+            from .hybrid_selective import write_adaptation as selective_write
+        else:
+            raise ValueError(f"Unsupported selective mode: {mode}")
 
         return selective_write(old_path, metadata_path, output, context)
     old_path, metadata_path, output = Path(old_path), Path(metadata_path), Path(output)

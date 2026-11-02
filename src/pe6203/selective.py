@@ -1,4 +1,7 @@
-"""Diff-guided Selective Patch (owner group C).
+"""Historical deterministic V1 Selective Patch (owner group C).
+
+QI-V2's public selective_patch entry now defaults to hybrid_selective.py.
+This module is retained as the deterministic core and historical V1 API.
 
 Updates only the tool-knowledge records affected by a persistent environment
 change, then hands the resulting full snapshot to the shared ``ChatModel``

@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "benchmark_commit": "synthetic-fixture",
+  "version": "early",
+  "tools": [
+    {
+      "tool_id": "server::fetch_balance",
+      "server_id": "server",
+      "name": "fetch_balance",
+      "version": "early",
+      "description": "Returns the account balance for the display panel in dollars.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "amount"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": null,
+      "usage_rules": [],
+      "routing": {
+        "server_id": "server",
+        "tool_name": "fetch_balance"
+      }
+    },
+    {
+      "tool_id": "server::display",
+      "server_id": "server",
+      "name": "display",
+      "version": "early",
+      "description": "Displays the account balance supplied by the balance service. The amount input is in dollars.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "amount"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": null,
+      "usage_rules": [
+        "Pass the balance service result directly as amount without conversion."
+      ],
+      "routing": {
+        "server_id": "server",
+        "tool_name": "display"
+      }
+    },
+    {
+      "tool_id": "server::unchanged",
+      "server_id": "server",
+      "name": "unchanged",
+      "version": "early",
+      "description": "Stores unrelated numeric measurements.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "amount"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": null,
+      "usage_rules": [
+        "Preserve the original value."
+      ],
+      "routing": {
+        "server_id": "server",
+        "tool_name": "unchanged"
+      }
+    }
+  ]
+}

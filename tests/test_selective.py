@@ -204,7 +204,12 @@ def test_hard_validation_failure_rolls_back_without_group_fallback():
     with pytest.raises(ValueError):
         adapt(old, target, "selective_patch")
     # no silent full rewrite: the deterministic method name is still the strategy's
-    knowledge, changes, cost = adapt(old, changed_target("description"), "selective_patch")
+    knowledge, changes, cost = adapt(
+        old,
+        changed_target("description"),
+        "selective_patch",
+        {"selective_mode": "deterministic_v1"},
+    )
     assert cost["method"] == "deterministic_diff_selective_patch"
 
 
@@ -257,6 +262,8 @@ def test_cli_adapt_writes_consumable_artifact(tmp_path, strategy):
         str(target_path),
         "--output",
         str(output),
+        "--selective-mode",
+        "deterministic_v1",
     ]
     run = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
     assert run.returncode == 0, run.stderr

@@ -1,0 +1,245 @@
+{
+  "schema_version": "1.0",
+  "strategy": "selective_patch",
+  "pipeline_version": "hybrid_v2",
+  "status": "validated",
+  "formal_llm_rewrite": true,
+  "validation": {
+    "errors": [],
+    "checks": {
+      "records": 3,
+      "unchanged": 2
+    },
+    "argument_cases": [
+      {
+        "tool_id": "server::fetch_balance",
+        "arguments": {
+          "amount": 100
+        },
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tool_id": "server::fetch_balance",
+        "arguments": {
+          "amount": 100,
+          "currency": "USD"
+        },
+        "expected_valid": true,
+        "actual_valid": true,
+        "passed": true
+      },
+      {
+        "tool_id": "server::unchanged",
+        "arguments": {
+          "amount": 100
+        },
+        "expected_valid": true,
+        "actual_valid": true,
+        "passed": true
+      }
+    ],
+    "behavioral_execution": "not_run_by_updater"
+  },
+  "updater_audit_path": "updater-audit.json",
+  "adapt_status": "applied",
+  "benchmark_commit": "synthetic-fixture",
+  "target_stage": "late",
+  "input": {
+    "old_knowledge_file_sha256": "c310b0c50f59cb501c207d47d5f29b4e9adae3539648d4d65459de8de170c820",
+    "target_metadata_file_sha256": "08c21a886abe2f2571fdbc63832fc967f0a8dcb6e7e1a8924799e1410b62a580"
+  },
+  "output": {
+    "knowledge_path": "knowledge.json",
+    "knowledge_file_sha256": "f01c678caf98ae10625c50fab35793b24c444ae3963a78cc52b20fbf30933348"
+  },
+  "diff": {
+    "schema_version": "1.0",
+    "old_commit": "synthetic-fixture",
+    "new_commit": "synthetic-fixture",
+    "old_version": "early",
+    "new_version": "late",
+    "old_tool_count": 3,
+    "new_tool_count": 3,
+    "removed": [],
+    "added": [],
+    "changed": [
+      {
+        "change_id": "c1",
+        "tool_id": "server::fetch_balance",
+        "changed_fields": [
+          "parameters",
+          "description"
+        ],
+        "old": {
+          "tool_id": "server::fetch_balance",
+          "server_id": "server",
+          "name": "fetch_balance",
+          "version": "early",
+          "description": "Returns the account balance for the display panel in dollars.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "amount"
+            ],
+            "additionalProperties": false
+          },
+          "output_schema": null,
+          "usage_rules": [],
+          "routing": {
+            "server_id": "server",
+            "tool_name": "fetch_balance"
+          }
+        },
+        "new": {
+          "tool_id": "server::fetch_balance",
+          "server_id": "server",
+          "name": "fetch_balance",
+          "version": "late",
+          "description": "Returns the account balance for the display panel in cents.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "amount",
+              "currency"
+            ],
+            "additionalProperties": false
+          },
+          "output_schema": null,
+          "usage_rules": [],
+          "routing": {
+            "server_id": "server",
+            "tool_name": "fetch_balance"
+          }
+        }
+      }
+    ],
+    "unchanged_tool_ids": [
+      "server::display",
+      "server::unchanged"
+    ],
+    "unchanged_count": 2
+  },
+  "stages": [
+    {
+      "stage": "deterministic_diff",
+      "status": "passed"
+    },
+    {
+      "stage": "semantic_review",
+      "status": "passed",
+      "coverage": "all_surviving_records",
+      "records": 3
+    },
+    {
+      "stage": "semantic_patch",
+      "status": "passed",
+      "edited_records": 1
+    },
+    {
+      "stage": "program_validation",
+      "status": "passed"
+    }
+  ],
+  "impacted_tool_ids": [
+    "server::display",
+    "server::fetch_balance"
+  ],
+  "patch": [
+    {
+      "operation": "replace",
+      "tool_id": "server::fetch_balance",
+      "fields": [
+        "parameters",
+        "description"
+      ],
+      "new": {
+        "tool_id": "server::fetch_balance",
+        "server_id": "server",
+        "name": "fetch_balance",
+        "version": "late",
+        "description": "Returns the account balance for the display panel in cents.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "number"
+            },
+            "currency": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "additionalProperties": false
+        },
+        "output_schema": null,
+        "usage_rules": [],
+        "routing": {
+          "server_id": "server",
+          "tool_name": "fetch_balance"
+        }
+      },
+      "basis": [
+        "c1"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "semantic_rules",
+      "tool_id": "server::display",
+      "usage_rules": [
+        "Convert the supplied amount from cents to dollars by dividing by 100 before display."
+      ],
+      "reason": "Amount source changed units",
+      "basis": [
+        "c1"
+      ],
+      "evidence": [
+        {
+          "tool_id": "server::fetch_balance",
+          "side": "target",
+          "field": "description",
+          "quote": "Returns the account balance for the display panel in cents."
+        },
+        {
+          "tool_id": "server::display",
+          "side": "old",
+          "field": "usage_rules",
+          "quote": "Pass the balance service result directly as amount without conversion."
+        }
+      ],
+      "unresolved": false
+    }
+  ],
+  "unresolved_items": [],
+  "semantic_grounding": "quoted_evidence_checked_not_a_behavioral_guarantee",
+  "cost": {
+    "method": "hybrid_selective_patch_v2",
+    "calls": 2,
+    "prompt_tokens": 20,
+    "completion_tokens": 40,
+    "total_tokens": 60,
+    "usd": null,
+    "known_usd": 0,
+    "unknown_charge_requests": 2,
+    "seconds": 0.22211841598618776,
+    "update_operations": 2
+  }
+}
