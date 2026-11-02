@@ -1,0 +1,157 @@
+{
+  "schema_version": "course-suite-1",
+  "suite_id": "course-qi-v2-eval-20261101",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "dataset_revision": "162e3ffbea1717ac8a20fe9b26465e29117229e4",
+  "config_path": "configs/course-benchmark-v1.3.json",
+  "updater_config_path": "configs/course-updater.json",
+  "tasks": [
+    {
+      "task_id": 133,
+      "family": "mathematical_expression_security",
+      "review_evidence": "experiments/evaluation/benchmark-v1-review.json",
+      "fixture": "empty isolated workspace; no existing source code is requested",
+      "required_tools": [
+        "math-mcp::validate_syntax",
+        "math-mcp::evaluate",
+        "mcp-ai-agent-guidelines::security-hardening-prompt-builder"
+      ],
+      "transitions": {
+        "middle": {
+          "label": "changed",
+          "change_types": [
+            "PARAM"
+          ],
+          "reason": "Required validate_syntax gains optional detailed and allow_variables inputs; existing arithmetic calls remain compatible."
+        },
+        "late": {
+          "label": "changed",
+          "change_types": [
+            "PARAM",
+            "TOOL"
+          ],
+          "reason": "validate_syntax requires explicit allow_variables; batch_evaluate adds a relevant multi-expression evaluation capability. TOOL is an addition, not a required rename/removal."
+        }
+      },
+      "question_sha256": "2696530b363e56858c54c15f1ba48eb2bbf4264a7290629284fbbbc28c41b05b",
+      "servers": {
+        "math-mcp": [
+          "validate_syntax",
+          "evaluate"
+        ],
+        "mcp-ai-agent-guidelines": [
+          "security-hardening-prompt-builder"
+        ]
+      }
+    },
+    {
+      "task_id": 235,
+      "family": "supplied_sales_data_visualization",
+      "review_evidence": "experiments/evaluation/benchmark-v1-review.json",
+      "fixture": "all numeric inputs in original question; empty workspace",
+      "required_tools": [
+        "@umengfe/mcp-server-chart::generate_district_map",
+        "@umengfe/mcp-server-chart::generate_area_chart",
+        "@umengfe/mcp-server-chart::generate_column_chart"
+      ],
+      "transitions": {
+        "middle": {
+          "label": "unaffected",
+          "change_types": [],
+          "reason": "All 28 tool records canonically equal excluding stage tags; identical tool implementations; all three required tools return chart specifications in each stage."
+        },
+        "late": {
+          "label": "unaffected",
+          "change_types": [],
+          "reason": "All 28 tool records canonically equal excluding stage tags; identical tool implementations; all three required tools return chart specifications in each stage."
+        }
+      },
+      "question_sha256": "7c83997ef2d8579fccb662e104afbe045b79743aa9387a452edac87f00628bd5",
+      "servers": {
+        "@umengfe/mcp-server-chart": [
+          "generate_district_map",
+          "generate_area_chart",
+          "generate_column_chart"
+        ]
+      }
+    },
+    {
+      "task_id": 283,
+      "family": "project_planning",
+      "review_evidence": "experiments/evaluation/benchmark-v1-review.json",
+      "fixture": "empty workspace; task requests planning, not reading or analyzing actual CSV/log contents",
+      "required_tools": [
+        "@modelcontextprotocol/server-sequential-thinking::sequentialthinking",
+        "@pimzino/agentic-tools-mcp::create_project",
+        "@pimzino/agentic-tools-mcp::create_task",
+        "@pimzino/agentic-tools-mcp::analyze_task_complexity"
+      ],
+      "transitions": {
+        "middle": {
+          "label": "changed",
+          "change_types": [
+            "TOOL",
+            "PARAM",
+            "DESC"
+          ],
+          "reason": "Required create_project schema/description and sequentialthinking description change. Relevant parallel-thinking adds workstream planning; Late also adds convergent-synthesis and sequentialthinking parameters. Additions are optional paths, not necessary for task solvability."
+        },
+        "late": {
+          "label": "changed",
+          "change_types": [
+            "TOOL",
+            "PARAM",
+            "DESC"
+          ],
+          "reason": "Required create_project schema/description and sequentialthinking description change. Relevant parallel-thinking adds workstream planning; Late also adds convergent-synthesis and sequentialthinking parameters. Additions are optional paths, not necessary for task solvability."
+        }
+      },
+      "question_sha256": "d9f159e572391b35c938d344d5ea3eced987b5985995f2a4f54080d37fc6c80d",
+      "servers": {
+        "@modelcontextprotocol/server-sequential-thinking": [
+          "sequentialthinking"
+        ],
+        "@pimzino/agentic-tools-mcp": [
+          "create_project",
+          "create_task",
+          "analyze_task_complexity"
+        ]
+      }
+    }
+  ],
+  "catalog_sha256": {
+    "catalogs/133/early.json": "bae1080d26a4c1fe8842d564d61f02d355c4b4de0026c632e0ebeaa085160cde",
+    "catalogs/133/late.json": "40b3677539f855eebe873c05743c376038ded1a0771d79b1ebc9d40f68333528",
+    "catalogs/133/middle.json": "33463c6f29216058e3b04ef9ee0f314342556ab019de89a23dabf40a945e9eb2",
+    "catalogs/235/early.json": "a1dd73d217ad9b60f979e6840027b123a26bc66789910ad0e0a421b0c3a12b66",
+    "catalogs/235/late.json": "f89478d72530ca0ce0204a998330e0d282c56ef64b8d33dbfa1dbc6d6ae2c115",
+    "catalogs/235/middle.json": "2033c09808b02b8879164eeee1aca52dd4f78f69fb47855906d8c78fb680f967",
+    "catalogs/283/early.json": "01a0f5df548dd4f903a974c8b775cdfac88e1e92ac5d6b0c7da8bcc6d63d4d1a",
+    "catalogs/283/late.json": "2c4f8071f19d1af5754f08f14d8485791c52d3b414b5a19a995b754b40a8b865",
+    "catalogs/283/middle.json": "0cb2c811253421182980bff6f06affbd6a206d9cb7f3d676d8e257db17657cd2"
+  },
+  "evidence_files": [
+    "experiments/evaluation/benchmark-v1-review.json",
+    "results/evidence/benchmark-v1-contracts/verification.json",
+    "results/evidence/benchmark-v1-contracts/probes.json",
+    "experiments/recovery-v1.3.json",
+    "experiments/v2-eval-protocol.json",
+    "scripts/evaluate_v2.py"
+  ],
+  "limitations": [
+    "Fixed budget subset of 3 official selected tasks, selected for local execution and metadata coverage before model scoring; no claim of reproducing the paper leaderboard.",
+    "No task-score tuning on this suite. Task 283 shares a planning server family with development task 139, so this is not an independent task-family holdout.",
+    "TOOL coverage consists of relevant optional additions; no mandatory renamed/removed tool is tested. PARAM and DESC affect required tools. Coverage does not imply a model used every changed tool.",
+    "Task 133 Middle adds optional inputs; Late requires allow_variables. Changed does not necessarily mean old knowledge always fails.",
+    "Task 235 returns vis-chart specifications under the archived default implementation. This is retention of tool behavior, not verification of a hosted or browser-rendered dashboard.",
+    "Known archived-server defects are retained for every method: parallel-thinking completed-path output schema; Late sequentialthinking missing getThoughtHistory; Late batch_evaluate missing handleBatchEvaluate. Do not attribute these automatically to under/over-update.",
+    "Three repeats preferred; one explicitly supported. Five judge ratings per trajectory do not measure agent-run variability.",
+    "Native stdio harness, fixed namespacing, workspace isolation and current pinned MCP SDK are common to all methods and differ from the paper HTTP harness.",
+    "Under/over-update case studies need actual trajectories plus causal review. A low score or tool error alone does not satisfy this report requirement.",
+    "Judge JSON object response mode added after an unscored v1 measurement trial produced truncated/repetitive rationales. Same rubric/model/temperature; five frozen prompts passed format preflight. Original failures retained; this is measurement-protocol debugging, not held-out judge validation.",
+    "v1.1 experienced a complete provider connection outage. v1.2 adds billed endpoint preflight and stops after two consecutive transport-failed cells; keeps failed records and unstarted cells separately. Preflight usage is separate in preflight/*.json.",
+    "v1.3 keeps the original rubric and all common inference settings; a concise output contract and two-attempt judge slots replace the prior single-attempt measurement protocol. First valid score only; raw attempts/costs retained. Never pool v1.2 and v1.3 results. Historical failure prompts are exposed development regressions, not held-out validation.",
+    "Selective Patch is QI-V2 hybrid_v2. No Update and Full Rewrite retain main baseline behavior. This is a new 27-cell comparison; historical V1 scores are not pooled.",
+    "V2 updater is evaluated with the main course updater budget, not the smaller synthetic smoke template. No score-based retries."
+  ]
+}
