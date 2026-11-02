@@ -10,9 +10,9 @@ import json
 from pathlib import Path
 
 from pe6203.benchmark import digest, read_json, write_json
-from pe6203.payload_v6 import detail_packet, measure, prepare, screening_packet, selections
+from pe6203.payload_v6 import detail_packet, prepare, screening_packet, selections
 from pe6203.selective_v5 import REVIEW_PROMPT, _model_record
-from pe6203.selective_v6 import DEFAULT_LIMITS, PATCH_PROMPT, SCREEN_PROMPT, batches, messages_for
+from pe6203.selective_v6 import DEFAULT_LIMITS, PATCH_PROMPT, SCREEN_PROMPT, batches, request_size
 
 
 def v5_packets(state, old, target):
@@ -91,7 +91,7 @@ def main():
                 assert {t["tool_id"] for t in packet["catalog"]} == set(state["records"])
                 assert all(set(t) == {"tool_id", "purpose", "rules"} for t in packet["catalog"])
                 write_json(args.output / f"task{task}-{stage}-screen.json", packet)
-                screen = measure(messages_for(SCREEN_PROMPT, packet))
+                screen = request_size(SCREEN_PROMPT, packet)
                 # Stress every surviving tool plus every actual change as basis;
                 # required candidates cannot disappear even under worst packing.
                 fake = {
@@ -111,9 +111,7 @@ def main():
                 groups = batches(state, chosen, DEFAULT_LIMITS)
                 assert {r["tool_id"] for g in groups for r in g} == set(state["records"])
                 assert len([r for g in groups for r in g]) == len(state["records"])
-                details = [
-                    measure(messages_for(PATCH_PROMPT, detail_packet(state, g)[0])) for g in groups
-                ]
+                details = [request_size(PATCH_PROMPT, detail_packet(state, g)[0]) for g in groups]
                 assert all(
                     s["request_chars"] <= DEFAULT_LIMITS["max_request_chars"] for s in details
                 )

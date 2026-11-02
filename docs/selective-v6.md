@@ -26,6 +26,9 @@ the additional Python artifact tests/repair inherited from V3/V5.
    changed schema leaves; additional fields use validated JSON pointers. Value
    pools deduplicate identical content inside each packet. No global directory
    is sent with local patches. The complete provenance registry stays local.
+   A selector naming only tool/side/field deterministically means that whole
+   field (root pointer); unknown keys, out-of-scope tools and invalid subpaths
+   are rejected. Requesting an already supplied field is not new evidence.
 6. Model edits only usage rules. Retained indices and typed evidence references
    are validated; unrelated records remain equal. Catalog statements are
    declarations, source excerpts are source observations, probes are finite
@@ -33,6 +36,15 @@ the additional Python artifact tests/repair inherited from V3/V5.
    explicit. Provenance does not establish semantic entailment, and preservation
    of unrelated natural-language rules within selected records still requires
    substantive review, beyond structural validation.
+   Candidate packets include program-computed citation scopes (own tool and
+   relevant changed tools). A rejected patch receives exact missing-citation
+   diagnostics for its one revision; the program never silently adds citations
+   or relaxes the evidence coverage requirement to admit it.
+   V6 alone uses strict JSON Schema response formatting at the model API. The
+   transport envelope has `patches` and `need_evidence` arrays; only one may be
+   nonempty. Extra fields are forbidden. The decoder format is counted in
+   request-size estimates; independent program admission still validates actual
+   IDs, citations and patch contents. Historical API callers are untouched.
 7. One patch plus at most one directed evidence/admission revision per batch.
    No implicit updater transport retry. Invalid/incomplete screen fails rather
    than invoking another full screening. If budget is insufficient, stop with
@@ -91,7 +103,9 @@ the tool-knowledge updater. Post-run diagnosis records findings/hypotheses:
 | Planning/call/generated-code error | Only predeclared execution/code repair allowance |
 | Insufficient evidence/evaluator concern | Preserve uncertainty; investigate separately |
 
-Program checks precede hypotheses. Current diagnosis is conservative, read-only
+Program checks precede hypotheses, including actual call names and arguments
+against the frozen model-facing schemas. Trace events and tool calls are counted
+separately. Current diagnosis is conservative, read-only
 and makes no additional paid LLM requests. It cannot prove semantic knowledge
 correctness or blame the evaluator from TF/PE. The saved runner knowledge is
 checked, but its equality alone is not proof of correct model attention or use.
