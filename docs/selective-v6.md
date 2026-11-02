@@ -40,6 +40,11 @@ the additional Python artifact tests/repair inherited from V3/V5.
    relevant changed tools). A rejected patch receives exact missing-citation
    diagnostics for its one revision; the program never silently adds citations
    or relaxes the evidence coverage requirement to admit it.
+   V6 alone uses strict JSON Schema response formatting at the model API. The
+   transport envelope has `patches` and `need_evidence` arrays; only one may be
+   nonempty. Extra fields are forbidden. The decoder format is counted in
+   request-size estimates; independent program admission still validates actual
+   IDs, citations and patch contents. Historical API callers are untouched.
 7. One patch plus at most one directed evidence/admission revision per batch.
    No implicit updater transport retry. Invalid/incomplete screen fails rather
    than invoking another full screening. If budget is insufficient, stop with

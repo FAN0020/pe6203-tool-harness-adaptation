@@ -80,8 +80,13 @@ def main():
             errors.append("Transport/provider violation")
         if req.get("provider") != plan["provider"] or req.get("reasoning") != {"enabled": False}:
             errors.append("Provider/reasoning policy changed")
-        if measure(req["messages"]) != {
-            k: record["preflight"][k] for k in measure(req["messages"])
+        if measure(
+            {"messages": req["messages"], "response_format": req.get("response_format")}
+        ) != {
+            k: record["preflight"][k]
+            for k in measure(
+                {"messages": req["messages"], "response_format": req.get("response_format")}
+            )
         }:
             errors.append("Preflight does not match actual wire request")
     for name in plan["cells"]:

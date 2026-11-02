@@ -152,7 +152,9 @@ def main():
             body.pop("thinking", None)
             body["reasoning"] = {"enabled": False}
             body["provider"] = plan["provider"]
-            sizing = measure(body["messages"])
+            sizing = measure(
+                {"messages": body["messages"], "response_format": body.get("response_format")}
+            )
             output_tokens = body.get("max_completion_tokens", body.get("max_tokens", 0))
             if type(output_tokens) is not int or output_tokens <= 0:
                 self.send_error(400)

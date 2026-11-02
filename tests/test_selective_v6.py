@@ -8,8 +8,7 @@ from test_hybrid_selective import catalogs as catalogs
 from test_hybrid_selective import response
 from test_selective_v5 import bundle
 
-from integration import baselines as provider
-from pe6203 import execution_v6
+from pe6203 import execution_v6, selective_v6
 from pe6203.baselines import adapt, write_adaptation
 from pe6203.benchmark import digest, read_json, write_json
 from pe6203.payload_v6 import detail_packet, prepare, screening_packet, selections
@@ -64,7 +63,7 @@ def model(monkeypatch, change=lambda p, r: r):
         requests.append(packet)
         return response(change(packet, reply(packet)))
 
-    monkeypatch.setattr(provider, "_request_completion", call)
+    monkeypatch.setattr(selective_v6, "request_completion", call)
     return requests
 
 
@@ -273,6 +272,64 @@ def test_missing_cross_tool_citation_gets_exact_directed_feedback(catalogs, monk
     assert len(result["audit"]["revision_errors"]) == 1
 
 
+def test_structured_transport_schema_rejects_echo_without_relaxing_admission(catalogs):
+    from jsonschema import Draft202012Validator
+
+    from pe6203.output_v6 import schema
+
+    state = prepare(*catalogs)
+    rows = reply(screening_packet(state))["candidates"]
+    packet, _ = detail_packet(state, rows)
+    data = {**reply(packet), "need_evidence": []}
+    validator = Draft202012Validator(schema("local_patch", packet))
+    assert validator.is_valid(data)
+    data["patches"][0]["citation_scope"] = packet["selected"][0]["citation_scope"]
+    assert not validator.is_valid(data)
+
+
+def test_v6_real_sdk_wire_has_strict_json_schema_without_network(catalogs, monkeypatch):
+    import httpx
+    import openai
+
+    from pe6203 import output_v6, runner
+
+    state = prepare(*catalogs)
+    packet = screening_packet(state)
+    schema = output_v6.response_format("global_screen", packet)
+    seen = []
+
+    def handle(request):
+        body = json.loads(request.content)
+        seen.append(body)
+        return httpx.Response(200, json=response(reply(packet)))
+
+    original = openai.OpenAI
+    monkeypatch.setattr(
+        runner, "credentials", lambda _: ("synthetic-key", "https://fixture.invalid/v1")
+    )
+    monkeypatch.setattr(
+        openai,
+        "OpenAI",
+        lambda **kwargs: original(
+            **kwargs, http_client=httpx.Client(transport=httpx.MockTransport(handle))
+        ),
+    )
+    output_v6.request_completion(
+        selective_v6.messages_for(selective_v6.SCREEN_PROMPT, packet),
+        {
+            "model": "fixture",
+            "temperature": 0,
+            "timeout": 2,
+            "max_tokens": 512,
+            "allow_metadata_api": True,
+            "response_format": schema,
+        },
+    )
+    assert seen[0]["response_format"] == schema
+    assert schema["json_schema"]["strict"] is True
+    assert schema["json_schema"]["schema"]["additionalProperties"] is False
+
+
 @pytest.mark.parametrize(
     "budget",
     [{"max_request_chars": 20}, {"max_usd": 0.000001}, {"max_total_estimated_input_tokens": 1}],
@@ -297,7 +354,7 @@ def test_unknown_charge_blocks_next_request(catalogs, monkeypatch):
         result["usage"].pop("cost", None)
         return result
 
-    monkeypatch.setattr(provider, "_request_completion", call)
+    monkeypatch.setattr(selective_v6, "request_completion", call)
     with pytest.raises(HybridPatchError, match="Unknown prior charge") as exc:
         adapt_result(*catalogs, context())
     assert exc.value.audit["cost"]["unknown_charge_requests"] == 1
