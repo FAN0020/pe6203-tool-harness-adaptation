@@ -1,8 +1,10 @@
 # QI-V2 对照评估接手说明
 
-当前状态：评估流程已准备并通过离线测试，真实 V2 benchmark 尚未运行。
-本次环境没有 AGENT_API_KEY/JUDGE_API_KEY，也没有上游 checkout 和三阶段 MCP 安装。
-`results/evaluation/v2-eval/readiness.json` 记录实际检查；模型调用 0 次，无新增费用。
+当前状态：已上传 2026-11-01 的真实 V2 运行结果，计划 27 条，25 条已完成官方评分（125 槽），19 条正常完成。另 2 条在适应阶段失败、actor 未启动；缺失评分和未知费用保留。
+
+结果入口：[V2 结果与完整证据归档](../results/evidence/v2-eval-20261101/README.md)。本次仅上传已有记录，没有重新运行模型。
+
+历史准备状态：初始提交所在环境没有 AGENT_API_KEY/JUDGE_API_KEY、上游 checkout 或三阶段 MCP 安装。`results/evaluation/v2-eval/readiness.json` 保留当时的零调用准备检查，不代表本次结果状态。
 
 ## 比较对象
 
@@ -68,7 +70,7 @@ python scripts/evaluate_v2.py report --output results/raw/v2-eval-20261101
 task 235 的 chart specification 是工具产物，不等于已经上线的网页。
 
 真实运行结束后，将完整运行目录归档放到共享文件夹，并将整理结果与证据索引提交本分支。
-当前提交仅包含准备和离线验收，不能用来填写 V2 的 TF、PE、完成率或声称评估已完成。
+初始准备提交仅包含准备和离线验收。当前已上传的实际结果见顶部入口；仍有 2 条未评分，不能声称 27 条完整评估已完成。
 
 ## 离线检查
 
