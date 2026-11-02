@@ -19,6 +19,20 @@ The latest V3 evaluation is now completed and verified. Its 108-trajectory
 knowledge-only study is separate from the historical partial 22/27 V3 record.
 Evaluation 2/3/5/6 packages are available without promoting a default strategy.
 
+## Five-task supplement (2026-11-03)
+
+The current report treats V6 as the primary method and V1 as a historical
+reference. [The five-task supplement](supplements/five-task-20261103/README.md)
+adds a fresh V3/V5 study on tasks 133/235/283 and fills task 430/90 gaps for
+V1/V2/V6 with contemporaneous, unchanged No Update and Full Rewrite controls.
+All conditions have three planned actor executions in each new batch. Failed
+knowledge updates remain explicit blocked conditions without invented scores.
+The supplement retains the original V6 first-pass results and separately
+preserves its previously selected repeat. Cross-batch coverage is not a
+controlled five-task version leaderboard and does not promote a default method.
+Its raw requests, receipts, source archive and offline verification are separate
+from the version packages managed by `evaluation/manage.py`.
+
 ## Offline commands (no API calls)
 
 ```sh
