@@ -1,0 +1,194 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+____________ test_selects_shortest_exact_row_for_each_truth_vector _____________
+
+    def test_selects_shortest_exact_row_for_each_truth_vector():
+        rows = fixtures()
+>       selected = implementation().select_basis(rows)
+                   ^^^^^^^^^^^^^^^^
+
+tests/test_relation_witness_basis.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def implementation():
+>       assert importlib.util.find_spec('pe6203.relation_witness_basis') is not None, 'Missing evidence selection compiler'
+E       AssertionError: Missing evidence selection compiler
+E       assert None is not None
+E        +  where None = <function find_spec at 0x1052f5da0>('pe6203.relation_witness_basis')
+E        +    where <function find_spec at 0x1052f5da0> = <module 'importlib.util' (frozen)>.find_spec
+E        +      where <module 'importlib.util' (frozen)> = importlib.util
+
+tests/test_relation_witness_basis.py:11: AssertionError
+_______ test_selection_is_order_independent_and_does_not_mutate_evidence _______
+
+    def test_selection_is_order_independent_and_does_not_mutate_evidence():
+        rows = fixtures(); before = deepcopy(rows)
+>       assert implementation().select_basis(rows) == implementation().select_basis(list(reversed(rows)))
+               ^^^^^^^^^^^^^^^^
+
+tests/test_relation_witness_basis.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def implementation():
+>       assert importlib.util.find_spec('pe6203.relation_witness_basis') is not None, 'Missing evidence selection compiler'
+E       AssertionError: Missing evidence selection compiler
+E       assert None is not None
+E        +  where None = <function find_spec at 0x1052f5da0>('pe6203.relation_witness_basis')
+E        +    where <function find_spec at 0x1052f5da0> = <module 'importlib.util' (frozen)>.find_spec
+E        +      where <module 'importlib.util' (frozen)> = importlib.util
+
+tests/test_relation_witness_basis.py:11: AssertionError
+____ test_tie_uses_canonical_content_and_every_observed_vector_is_retained _____
+
+    def test_tie_uses_canonical_content_and_every_observed_vector_is_retained():
+        rows = fixtures()[:1]
+        rows += [dict(rows[0], expression='a'), dict(rows[0], expression='b')]
+>       assert implementation().select_basis(rows) == [min(rows, key=lambda r:(len(canonical(r).encode()), canonical(r)))]
+               ^^^^^^^^^^^^^^^^
+
+tests/test_relation_witness_basis.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def implementation():
+>       assert importlib.util.find_spec('pe6203.relation_witness_basis') is not None, 'Missing evidence selection compiler'
+E       AssertionError: Missing evidence selection compiler
+E       assert None is not None
+E        +  where None = <function find_spec at 0x1052f5da0>('pe6203.relation_witness_basis')
+E        +    where <function find_spec at 0x1052f5da0> = <module 'importlib.util' (frozen)>.find_spec
+E        +      where <module 'importlib.util' (frozen)> = importlib.util
+
+tests/test_relation_witness_basis.py:11: AssertionError
+_____________ test_incomplete_or_duplicate_evidence_rejected[bad0] _____________
+
+bad = []
+
+    @pytest.mark.parametrize('bad', [[], [dict(fixtures()[0], numeric_value='true')], [fixtures()[0],fixtures()[0]]])
+    def test_incomplete_or_duplicate_evidence_rejected(bad):
+        with pytest.raises(ValueError):
+>           implementation().select_basis(bad)
+            ^^^^^^^^^^^^^^^^
+
+tests/test_relation_witness_basis.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def implementation():
+>       assert importlib.util.find_spec('pe6203.relation_witness_basis') is not None, 'Missing evidence selection compiler'
+E       AssertionError: Missing evidence selection compiler
+E       assert None is not None
+E        +  where None = <function find_spec at 0x1052f5da0>('pe6203.relation_witness_basis')
+E        +    where <function find_spec at 0x1052f5da0> = <module 'importlib.util' (frozen)>.find_spec
+E        +      where <module 'importlib.util' (frozen)> = importlib.util
+
+tests/test_relation_witness_basis.py:11: AssertionError
+_____________ test_incomplete_or_duplicate_evidence_rejected[bad1] _____________
+
+bad = [{'evaluated': True, 'expression': '0', 'native': 'observed', 'numeric_value': 'true', ...}]
+
+    @pytest.mark.parametrize('bad', [[], [dict(fixtures()[0], numeric_value='true')], [fixtures()[0],fixtures()[0]]])
+    def test_incomplete_or_duplicate_evidence_rejected(bad):
+        with pytest.raises(ValueError):
+>           implementation().select_basis(bad)
+            ^^^^^^^^^^^^^^^^
+
+tests/test_relation_witness_basis.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def implementation():
+>       assert importlib.util.find_spec('pe6203.relation_witness_basis') is not None, 'Missing evidence selection compiler'
+E       AssertionError: Missing evidence selection compiler
+E       assert None is not None
+E        +  where None = <function find_spec at 0x1052f5da0>('pe6203.relation_witness_basis')
+E        +    where <function find_spec at 0x1052f5da0> = <module 'importlib.util' (frozen)>.find_spec
+E        +      where <module 'importlib.util' (frozen)> = importlib.util
+
+tests/test_relation_witness_basis.py:11: AssertionError
+_____________ test_incomplete_or_duplicate_evidence_rejected[bad2] _____________
+
+bad = [{'evaluated': True, 'expression': '0', 'native': 'observed', 'numeric_value': True, ...}, {'evaluated': True, 'expression': '0', 'native': 'observed', 'numeric_value': True, ...}]
+
+    @pytest.mark.parametrize('bad', [[], [dict(fixtures()[0], numeric_value='true')], [fixtures()[0],fixtures()[0]]])
+    def test_incomplete_or_duplicate_evidence_rejected(bad):
+        with pytest.raises(ValueError):
+>           implementation().select_basis(bad)
+            ^^^^^^^^^^^^^^^^
+
+tests/test_relation_witness_basis.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def implementation():
+>       assert importlib.util.find_spec('pe6203.relation_witness_basis') is not None, 'Missing evidence selection compiler'
+E       AssertionError: Missing evidence selection compiler
+E       assert None is not None
+E        +  where None = <function find_spec at 0x1052f5da0>('pe6203.relation_witness_basis')
+E        +    where <function find_spec at 0x1052f5da0> = <module 'importlib.util' (frozen)>.find_spec
+E        +      where <module 'importlib.util' (frozen)> = importlib.util
+
+tests/test_relation_witness_basis.py:11: AssertionError
+_ test_compiler_protects_untreated_fields_and_retains_full_sequence_provenance[middle] _
+
+stage = 'middle'
+
+    @pytest.mark.parametrize('stage', ['middle','late'])
+    def test_compiler_protects_untreated_fields_and_retains_full_sequence_provenance(stage):
+        import json
+        from pathlib import Path
+        from pe6203.selective import adapt_result
+        root=Path(__file__).resolve().parents[1]
+        folder=root/'results/raw/capability-relation-matrix-pilot-20261102/catalogs/133'
+        old=json.loads((folder/'early.json').read_text()); target=json.loads((folder/f'{stage}.json').read_text())
+        feedback=json.loads((root/'experiments/capability-relation-matrix-feedback-v1.json').read_text())['observations']
+        base=adapt_result(old,target); snapshot=deepcopy((base,target,feedback))
+>       result,edits=implementation().compile_knowledge(base,target,feedback)
+                     ^^^^^^^^^^^^^^^^
+
+tests/test_relation_witness_basis.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def implementation():
+>       assert importlib.util.find_spec('pe6203.relation_witness_basis') is not None, 'Missing evidence selection compiler'
+E       AssertionError: Missing evidence selection compiler
+E       assert None is not None
+E        +  where None = <function find_spec at 0x1052f5da0>('pe6203.relation_witness_basis')
+E        +    where <function find_spec at 0x1052f5da0> = <module 'importlib.util' (frozen)>.find_spec
+E        +      where <module 'importlib.util' (frozen)> = importlib.util
+
+tests/test_relation_witness_basis.py:11: AssertionError
+_ test_compiler_protects_untreated_fields_and_retains_full_sequence_provenance[late] _
+
+stage = 'late'
+
+    @pytest.mark.parametrize('stage', ['middle','late'])
+    def test_compiler_protects_untreated_fields_and_retains_full_sequence_provenance(stage):
+        import json
+        from pathlib import Path
+        from pe6203.selective import adapt_result
+        root=Path(__file__).resolve().parents[1]
+        folder=root/'results/raw/capability-relation-matrix-pilot-20261102/catalogs/133'
+        old=json.loads((folder/'early.json').read_text()); target=json.loads((folder/f'{stage}.json').read_text())
+        feedback=json.loads((root/'experiments/capability-relation-matrix-feedback-v1.json').read_text())['observations']
+        base=adapt_result(old,target); snapshot=deepcopy((base,target,feedback))
+>       result,edits=implementation().compile_knowledge(base,target,feedback)
+                     ^^^^^^^^^^^^^^^^
+
+tests/test_relation_witness_basis.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def implementation():
+>       assert importlib.util.find_spec('pe6203.relation_witness_basis') is not None, 'Missing evidence selection compiler'
+E       AssertionError: Missing evidence selection compiler
+E       assert None is not None
+E        +  where None = <function find_spec at 0x1052f5da0>('pe6203.relation_witness_basis')
+E        +    where <function find_spec at 0x1052f5da0> = <module 'importlib.util' (frozen)>.find_spec
+E        +      where <module 'importlib.util' (frozen)> = importlib.util
+
+tests/test_relation_witness_basis.py:11: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_relation_witness_basis.py::test_selects_shortest_exact_row_for_each_truth_vector
+FAILED tests/test_relation_witness_basis.py::test_selection_is_order_independent_and_does_not_mutate_evidence
+FAILED tests/test_relation_witness_basis.py::test_tie_uses_canonical_content_and_every_observed_vector_is_retained
+FAILED tests/test_relation_witness_basis.py::test_incomplete_or_duplicate_evidence_rejected[bad0]
+FAILED tests/test_relation_witness_basis.py::test_incomplete_or_duplicate_evidence_rejected[bad1]
+FAILED tests/test_relation_witness_basis.py::test_incomplete_or_duplicate_evidence_rejected[bad2]
+FAILED tests/test_relation_witness_basis.py::test_compiler_protects_untreated_fields_and_retains_full_sequence_provenance[middle]
+FAILED tests/test_relation_witness_basis.py::test_compiler_protects_untreated_fields_and_retains_full_sequence_provenance[late]
+8 failed in 0.58s

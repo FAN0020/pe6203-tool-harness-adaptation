@@ -57,6 +57,7 @@ VARIANTS = (
     "relational_probe_memory",
     "pruned_episode_memory",
     "capability_relation_matrix",
+    "relation_witness_basis",
 )
 
 SUFFICIENCY_RULE = (
@@ -821,6 +822,18 @@ def adapt_result(old, target, strategy, context=None):
         return result
     if strategy == "capability_relation_matrix":
         from .capability_relations import compile_knowledge
+
+        result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
+        result["changes"].extend(changes)
+        result["cost"].update(seconds=perf_counter() - started, update_operations=len(result["changes"]))
+        result["validation"] = {"errors": [], "checks": {
+            "certificate": "reviewed task-free cross-operation counterexample relations",
+            "scope": "changed validate_syntax usage_rules only; all native interfaces retained",
+            "edits": len(changes),
+        }}
+        return result
+    if strategy == "relation_witness_basis":
+        from .relation_witness_basis import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
