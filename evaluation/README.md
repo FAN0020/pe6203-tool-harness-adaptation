@@ -42,3 +42,13 @@ requires a fresh output directory, matching archived source/protocol, installed
 MCPEvol services and separately supplied credentials. See version READMEs for
 parameterized current tools and original entry points. Secrets, local env files,
 virtual environments, node_modules and benchmark release caches are excluded.
+
+## Integration verification
+
+See [integration-verification.json](integration-verification.json). Evaluation
+2/5/6 package and recorded-result checks passed. The added 15 tests passed;
+no new repository-test failures were introduced. The pre-existing main baseline
+had 22 failing tests (missing untracked research fixtures plus one artifact
+assertion) and 416 lint issues; the integration reproduced the same failures.
+This is a scoped evaluation-code acceptance, not a claim that the entire
+repository CI is green. Current V3 remains unvalidated and unmerged.
