@@ -3,8 +3,14 @@
 import itertools
 import json
 import math
+import hashlib
+from copy import deepcopy
+
+from .selective import canonical
 
 PREDICATES = ("syntax_envelope", "syntax_valid", "evaluated", "numeric_value")
+APPROVED_OBSERVATIONS_SHA = "3ab9f0792e0786fb6bb2c81024986d3d942a1ed82391d3c690250a150e87bb22"
+HOST = "math-mcp::validate_syntax"
 
 
 def classify(result, mode):
@@ -49,3 +55,42 @@ def infer_relations(rows):
                       "status": "falsified" if counter else "not_falsified_on_these_inputs",
                       "counterexamples": counter})
     return edges
+
+
+def compile_knowledge(base, target, feedback):
+    knowledge = deepcopy(base["knowledge"])
+    changed = {r["tool_id"] for r in base["diff"]["changed"] + base["diff"]["added"]}
+    if HOST not in changed:
+        return knowledge, []
+    if hashlib.sha256(canonical(feedback).encode()).hexdigest() != APPROVED_OBSERVATIONS_SHA:
+        raise ValueError("Unreviewed cross-operation evidence")
+    certs = [r["result"] for r in feedback if r["stage"] == target["version"]]
+    if len(certs) != 1 or certs[0]["semantic_review"] != "accepted":
+        raise ValueError("Missing accepted stage certificate")
+    cert = certs[0]
+    native = {t["tool_id"]: t for t in target["tools"]}
+    for identity, expected in cert["catalog_hashes"].items():
+        if identity not in native or hashlib.sha256(canonical(native[identity]).encode()).hexdigest() != expected:
+            raise ValueError("Native contract drift")
+    if infer_relations(cert["rows"]) != cert["relations"]:
+        raise ValueError("Unsupported implication inference")
+    note = {
+        "kind": "finite_cross_operation_contract_relations",
+        "operations": cert["argument_domain"],
+        "predicates": {
+            "syntax_envelope": "validate_syntax outer isError is false",
+            "syntax_valid": "validate_syntax text explicitly accepts syntax",
+            "evaluated": "normal evaluate returned a result JSON",
+            "numeric_value": "normal evaluate returned a finite JSON number, not boolean/string/array/null",
+        },
+        "paired_observations": cert["rows"],
+        "relations": cert["relations"],
+        "validation_only_mode": "evaluate(validate_only=true) matched validate_syntax on all these inputs; both interfaces remain available.",
+        "sequence_state_receipts": cert["sequence_effects"],
+        "scope": "Finite native-language observations, not a universal grammar or security certificate. A falsified implication has a concrete counterexample; not_falsified_on_these_inputs is not a theorem. No observation verifies another implementation or runtime. Sequence effects cover this complete ordered probe sequence only.",
+    }
+    tool = next(t for t in knowledge["tools"] if t["tool_id"] == HOST)
+    before = deepcopy(tool["usage_rules"])
+    tool["usage_rules"].append("Cross-operation evidence: " + json.dumps(note, ensure_ascii=False, separators=(",", ":")))
+    return knowledge, [{"tool_id": HOST, "field": "usage_rules", "before": before,
+                        "after": deepcopy(tool["usage_rules"]), "reason": "native counterexample-supported finite capability relations"}]

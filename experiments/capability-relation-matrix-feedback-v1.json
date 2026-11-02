@@ -1,0 +1,662 @@
+{
+  "kind": "task_free_cross_operation_relations",
+  "observations": [
+    {
+      "stage": "middle",
+      "server": "math-mcp",
+      "result": {
+        "kind": "capability_relation_matrix_v1",
+        "stage": "middle",
+        "semantic_review": "accepted",
+        "rows": [
+          {
+            "expression": "7+4",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": true,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"7+4\",\n  \"result\": 11,\n  \"type\": \"number\"\n}"
+            }
+          },
+          {
+            "expression": "7+",
+            "syntax_envelope": true,
+            "syntax_valid": false,
+            "evaluated": false,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Syntax errors:\nLine 1, Column 3: Expected expression\nLine 1, Column 3: Expected expression",
+              "validate_only": "Syntax errors:\nLine 1, Column 3: Expected expression\nLine 1, Column 3: Expected expression",
+              "evaluate": "Syntax errors:\nLine 1, Column 3: Expected expression\nLine 1, Column 3: Expected expression"
+            }
+          },
+          {
+            "expression": "unboundvalue+1",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": false,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "Evaluation error: Undefined variable: unboundvalue"
+            }
+          },
+          {
+            "expression": "unlisted(2)",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": false,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "Evaluation error: Function not allowed: unlisted"
+            }
+          },
+          {
+            "expression": "'cobalt'",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"'cobalt'\",\n  \"result\": \"cobalt\",\n  \"type\": \"string\"\n}"
+            }
+          },
+          {
+            "expression": "[2,5]",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"[2,5]\",\n  \"result\": [\n    2,\n    5\n  ],\n  \"type\": \"object\"\n}"
+            }
+          },
+          {
+            "expression": "4/0",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"4/0\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+            }
+          },
+          {
+            "expression": "3>2",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"3>2\",\n  \"result\": true,\n  \"type\": \"boolean\"\n}"
+            }
+          },
+          {
+            "expression": "2^3",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": true,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"2^3\",\n  \"result\": 8,\n  \"type\": \"number\"\n}"
+            }
+          },
+          {
+            "expression": "lumen=5; lumen+1",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": true,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"lumen=5; lumen+1\",\n  \"result\": 6,\n  \"type\": \"number\"\n}"
+            }
+          }
+        ],
+        "relations": [
+          {
+            "if": "syntax_envelope",
+            "then": "syntax_valid",
+            "status": "falsified",
+            "counterexamples": [
+              "7+"
+            ]
+          },
+          {
+            "if": "syntax_envelope",
+            "then": "evaluated",
+            "status": "falsified",
+            "counterexamples": [
+              "7+",
+              "unboundvalue+1",
+              "unlisted(2)"
+            ]
+          },
+          {
+            "if": "syntax_envelope",
+            "then": "numeric_value",
+            "status": "falsified",
+            "counterexamples": [
+              "7+",
+              "unboundvalue+1",
+              "unlisted(2)",
+              "'cobalt'",
+              "[2,5]",
+              "4/0",
+              "3>2"
+            ]
+          },
+          {
+            "if": "syntax_valid",
+            "then": "syntax_envelope",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          },
+          {
+            "if": "syntax_valid",
+            "then": "evaluated",
+            "status": "falsified",
+            "counterexamples": [
+              "unboundvalue+1",
+              "unlisted(2)"
+            ]
+          },
+          {
+            "if": "syntax_valid",
+            "then": "numeric_value",
+            "status": "falsified",
+            "counterexamples": [
+              "unboundvalue+1",
+              "unlisted(2)",
+              "'cobalt'",
+              "[2,5]",
+              "4/0",
+              "3>2"
+            ]
+          },
+          {
+            "if": "evaluated",
+            "then": "syntax_envelope",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          },
+          {
+            "if": "evaluated",
+            "then": "syntax_valid",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          },
+          {
+            "if": "evaluated",
+            "then": "numeric_value",
+            "status": "falsified",
+            "counterexamples": [
+              "'cobalt'",
+              "[2,5]",
+              "4/0",
+              "3>2"
+            ]
+          },
+          {
+            "if": "numeric_value",
+            "then": "syntax_envelope",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          },
+          {
+            "if": "numeric_value",
+            "then": "syntax_valid",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          },
+          {
+            "if": "numeric_value",
+            "then": "evaluated",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          }
+        ],
+        "sequence_effects": {
+          "syntax": {
+            "before": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "No variables defined"
+                }
+              ],
+              "isError": false
+            },
+            "after": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "No variables defined"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "validate_only": {
+            "before": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "No variables defined"
+                }
+              ],
+              "isError": false
+            },
+            "after": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "No variables defined"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "evaluate": {
+            "before": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "No variables defined"
+                }
+              ],
+              "isError": false
+            },
+            "after": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Defined variables:\nlumen = 5"
+                }
+              ],
+              "isError": false
+            }
+          }
+        },
+        "native_sources": {
+          "native-result.json": "6997b1ed4b85d76b85938734541cfdad64e49e12c1e35a4ec39509860e3f4cf5",
+          "repair-result.json": "d048d4eba25aae3fdc300e3eab30d6b41404cb08c09b276402af33f437bc0f12"
+        },
+        "catalog_hashes": {
+          "math-mcp::evaluate": "9ce6408bd361ba7e197e5ca493960d586f24177d33347319c35c09686050be3f",
+          "math-mcp::validate_syntax": "81baa447206b80c7f96bb298609ecee73321ad03afc6da7bf9ebcbce3f51a02b",
+          "math-mcp::set_variable": "a18c1e6e75249a0b0763db40e9c30ed14fbcd748e4c13d2cc1354d43919215a1",
+          "math-mcp::get_variable": "ad53274a6ae4c23f915f87d25bbefae8e130b0f1eaf4a423f9698e2aa148dfa8",
+          "math-mcp::list_variables": "e31908b270e15aeefacf188dcc12f01302040eb636c86865a38594b0f9fc7699",
+          "math-mcp::clear_variables": "d774ba65923d56624096816cce6e8cbc5eb5cca99ece78fe0ff4bf23159b8156"
+        },
+        "source_hashes": {
+          "results/evidence/capability-relation-matrix-20261102/run_native.py": "c2a06ba41d19339f1ec59ee5ee1125cab72002b8a54c5e7918bd6407206b6dcd",
+          "src/pe6203/transport.py": "d7ceb1f783bc55a20809a1ad50f89e6af2c6f1bbccb2d322e75120b63b591dd4",
+          "src/pe6203/runner.py": "e8f910263b68ab46c2073aed8ac852f2c2579895a2b36be13e55a988ad704bcb",
+          ".cache/mcpevol/iter3/node_modules/math-mcp/dist/server.js": "881897c762485ab29df7432ac7ffd60c4564428a2b820c0d96d7f990a0efdb66",
+          ".cache/mcpevol/iter3/node_modules/math-mcp/dist/grammar-parser.js": "28ab575b40cf44147b8fe7ee1ee27fc4b980fd04f4cae58971a31646c0acadd0",
+          ".cache/mcpevol/iter3/node_modules/math-mcp/dist/evaluator.js": "bd9ad8acb83f13bf6ff06cf4efbbdf077718154e89148f6e45fa268b39818370",
+          ".cache/mcpevol/iter3/node_modules/math-mcp/dist/tools/handlers.js": "fe63b22756354f3249c450dbf113ccd8f24579654debf3e4412c3ce971ea2c39",
+          ".cache/mcpevol/iter3/node_modules/math-mcp/dist/tools/definitions.js": "9f92f1dcbfaf8800db60f33e6a9aeea4629ac810bba666d45e79692681a25359",
+          ".cache/mcpevol/iter5/node_modules/math-mcp/dist/server.js": "96a4f655eda70b22aa1d31192a5a72f507d52eeaa4799d3a6bfaff4e9a60c8be",
+          ".cache/mcpevol/iter5/node_modules/math-mcp/dist/grammar-parser.js": "28ab575b40cf44147b8fe7ee1ee27fc4b980fd04f4cae58971a31646c0acadd0",
+          ".cache/mcpevol/iter5/node_modules/math-mcp/dist/evaluator.js": "bd9ad8acb83f13bf6ff06cf4efbbdf077718154e89148f6e45fa268b39818370",
+          ".cache/mcpevol/iter5/node_modules/math-mcp/dist/tools/handlers.js": "fe63b22756354f3249c450dbf113ccd8f24579654debf3e4412c3ce971ea2c39",
+          ".cache/mcpevol/iter5/node_modules/math-mcp/dist/tools/definitions.js": "d89c200d992a2c46fe407c18debea08ef0b5b85e87f8c90d7cd2fb6e2d203cee"
+        },
+        "argument_domain": {
+          "validate_syntax": "expression string; allow_variables omitted, dispatcher default false; other flags absent",
+          "evaluate_validate_only": "same expression, validate_only=true",
+          "evaluate": "same expression, validate_only omitted/false"
+        }
+      }
+    },
+    {
+      "stage": "late",
+      "server": "math-mcp",
+      "result": {
+        "kind": "capability_relation_matrix_v1",
+        "stage": "late",
+        "semantic_review": "accepted",
+        "rows": [
+          {
+            "expression": "7+4",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": true,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"7+4\",\n  \"result\": 11,\n  \"type\": \"number\"\n}"
+            }
+          },
+          {
+            "expression": "7+",
+            "syntax_envelope": true,
+            "syntax_valid": false,
+            "evaluated": false,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Syntax errors:\nLine 1, Column 3: Expected expression\nLine 1, Column 3: Expected expression",
+              "validate_only": "Syntax errors:\nLine 1, Column 3: Expected expression\nLine 1, Column 3: Expected expression",
+              "evaluate": "Syntax errors:\nLine 1, Column 3: Expected expression\nLine 1, Column 3: Expected expression"
+            }
+          },
+          {
+            "expression": "unboundvalue+1",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": false,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "Evaluation error: Undefined variable: unboundvalue"
+            }
+          },
+          {
+            "expression": "unlisted(2)",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": false,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "Evaluation error: Function not allowed: unlisted"
+            }
+          },
+          {
+            "expression": "'cobalt'",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"'cobalt'\",\n  \"result\": \"cobalt\",\n  \"type\": \"string\"\n}"
+            }
+          },
+          {
+            "expression": "[2,5]",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"[2,5]\",\n  \"result\": [\n    2,\n    5\n  ],\n  \"type\": \"object\"\n}"
+            }
+          },
+          {
+            "expression": "4/0",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"4/0\",\n  \"result\": null,\n  \"type\": \"number\"\n}"
+            }
+          },
+          {
+            "expression": "3>2",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": false,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"3>2\",\n  \"result\": true,\n  \"type\": \"boolean\"\n}"
+            }
+          },
+          {
+            "expression": "2^3",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": true,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"2^3\",\n  \"result\": 8,\n  \"type\": \"number\"\n}"
+            }
+          },
+          {
+            "expression": "lumen=5; lumen+1",
+            "syntax_envelope": true,
+            "syntax_valid": true,
+            "evaluated": true,
+            "numeric_value": true,
+            "native_text": {
+              "syntax": "Expression is syntactically valid.",
+              "validate_only": "Expression is syntactically valid.",
+              "evaluate": "{\n  \"expression\": \"lumen=5; lumen+1\",\n  \"result\": 6,\n  \"type\": \"number\"\n}"
+            }
+          }
+        ],
+        "relations": [
+          {
+            "if": "syntax_envelope",
+            "then": "syntax_valid",
+            "status": "falsified",
+            "counterexamples": [
+              "7+"
+            ]
+          },
+          {
+            "if": "syntax_envelope",
+            "then": "evaluated",
+            "status": "falsified",
+            "counterexamples": [
+              "7+",
+              "unboundvalue+1",
+              "unlisted(2)"
+            ]
+          },
+          {
+            "if": "syntax_envelope",
+            "then": "numeric_value",
+            "status": "falsified",
+            "counterexamples": [
+              "7+",
+              "unboundvalue+1",
+              "unlisted(2)",
+              "'cobalt'",
+              "[2,5]",
+              "4/0",
+              "3>2"
+            ]
+          },
+          {
+            "if": "syntax_valid",
+            "then": "syntax_envelope",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          },
+          {
+            "if": "syntax_valid",
+            "then": "evaluated",
+            "status": "falsified",
+            "counterexamples": [
+              "unboundvalue+1",
+              "unlisted(2)"
+            ]
+          },
+          {
+            "if": "syntax_valid",
+            "then": "numeric_value",
+            "status": "falsified",
+            "counterexamples": [
+              "unboundvalue+1",
+              "unlisted(2)",
+              "'cobalt'",
+              "[2,5]",
+              "4/0",
+              "3>2"
+            ]
+          },
+          {
+            "if": "evaluated",
+            "then": "syntax_envelope",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          },
+          {
+            "if": "evaluated",
+            "then": "syntax_valid",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          },
+          {
+            "if": "evaluated",
+            "then": "numeric_value",
+            "status": "falsified",
+            "counterexamples": [
+              "'cobalt'",
+              "[2,5]",
+              "4/0",
+              "3>2"
+            ]
+          },
+          {
+            "if": "numeric_value",
+            "then": "syntax_envelope",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          },
+          {
+            "if": "numeric_value",
+            "then": "syntax_valid",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          },
+          {
+            "if": "numeric_value",
+            "then": "evaluated",
+            "status": "not_falsified_on_these_inputs",
+            "counterexamples": []
+          }
+        ],
+        "sequence_effects": {
+          "syntax": {
+            "before": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "No variables defined"
+                }
+              ],
+              "isError": false
+            },
+            "after": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "No variables defined"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "validate_only": {
+            "before": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "No variables defined"
+                }
+              ],
+              "isError": false
+            },
+            "after": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "No variables defined"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "evaluate": {
+            "before": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "No variables defined"
+                }
+              ],
+              "isError": false
+            },
+            "after": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Defined variables:\nlumen = 5"
+                }
+              ],
+              "isError": false
+            }
+          }
+        },
+        "native_sources": {
+          "native-result.json": "6997b1ed4b85d76b85938734541cfdad64e49e12c1e35a4ec39509860e3f4cf5",
+          "repair-result.json": "d048d4eba25aae3fdc300e3eab30d6b41404cb08c09b276402af33f437bc0f12"
+        },
+        "catalog_hashes": {
+          "math-mcp::evaluate": "7905e939b2c916f33239ac68bca21035c0737fb32fe07002ab1a6eca3a4ec269",
+          "math-mcp::validate_syntax": "811104410fdf275cff624c4e6f35c59ac1e08649986037935bde090d52496a7b",
+          "math-mcp::set_variable": "cdd8eea06989af14cbbbff625a9b1b295370096acc50fe18d11638f73907d21e",
+          "math-mcp::get_variable": "dbf040fd00d8941c7aae9d42299b0d31da5a1ea34c25dab174df92b8e8f40dec",
+          "math-mcp::list_variables": "3c850d9cdcdaeb4f8cedb782e046a130bdc859e8869a2c7b00f49f10671490b9",
+          "math-mcp::clear_variables": "26c6f4aa02b74f96fb99acf5ca7b25546159994717c7367a29bc613f65711cb6",
+          "math-mcp::batch_evaluate": "f9f0b520a5d300d6ec8d62b2db24b90dc0e19efa8b0e8b814c4bcbdbb08415f2"
+        },
+        "source_hashes": {
+          "results/evidence/capability-relation-matrix-20261102/run_native.py": "c2a06ba41d19339f1ec59ee5ee1125cab72002b8a54c5e7918bd6407206b6dcd",
+          "src/pe6203/transport.py": "d7ceb1f783bc55a20809a1ad50f89e6af2c6f1bbccb2d322e75120b63b591dd4",
+          "src/pe6203/runner.py": "e8f910263b68ab46c2073aed8ac852f2c2579895a2b36be13e55a988ad704bcb",
+          ".cache/mcpevol/iter3/node_modules/math-mcp/dist/server.js": "881897c762485ab29df7432ac7ffd60c4564428a2b820c0d96d7f990a0efdb66",
+          ".cache/mcpevol/iter3/node_modules/math-mcp/dist/grammar-parser.js": "28ab575b40cf44147b8fe7ee1ee27fc4b980fd04f4cae58971a31646c0acadd0",
+          ".cache/mcpevol/iter3/node_modules/math-mcp/dist/evaluator.js": "bd9ad8acb83f13bf6ff06cf4efbbdf077718154e89148f6e45fa268b39818370",
+          ".cache/mcpevol/iter3/node_modules/math-mcp/dist/tools/handlers.js": "fe63b22756354f3249c450dbf113ccd8f24579654debf3e4412c3ce971ea2c39",
+          ".cache/mcpevol/iter3/node_modules/math-mcp/dist/tools/definitions.js": "9f92f1dcbfaf8800db60f33e6a9aeea4629ac810bba666d45e79692681a25359",
+          ".cache/mcpevol/iter5/node_modules/math-mcp/dist/server.js": "96a4f655eda70b22aa1d31192a5a72f507d52eeaa4799d3a6bfaff4e9a60c8be",
+          ".cache/mcpevol/iter5/node_modules/math-mcp/dist/grammar-parser.js": "28ab575b40cf44147b8fe7ee1ee27fc4b980fd04f4cae58971a31646c0acadd0",
+          ".cache/mcpevol/iter5/node_modules/math-mcp/dist/evaluator.js": "bd9ad8acb83f13bf6ff06cf4efbbdf077718154e89148f6e45fa268b39818370",
+          ".cache/mcpevol/iter5/node_modules/math-mcp/dist/tools/handlers.js": "fe63b22756354f3249c450dbf113ccd8f24579654debf3e4412c3ce971ea2c39",
+          ".cache/mcpevol/iter5/node_modules/math-mcp/dist/tools/definitions.js": "d89c200d992a2c46fe407c18debea08ef0b5b85e87f8c90d7cd2fb6e2d203cee"
+        },
+        "argument_domain": {
+          "validate_syntax": "expression string; allow_variables=false explicitly; other flags absent",
+          "evaluate_validate_only": "same expression, validate_only=true",
+          "evaluate": "same expression, validate_only omitted/false"
+        }
+      }
+    }
+  ]
+}

@@ -51,3 +51,32 @@ def test_counterexample_refutes_only_observed_implication_not_its_reverse():
     assert relations[("syntax_envelope", "syntax_valid")]["counterexamples"] == ["c"]
     assert relations[("evaluated", "syntax_valid")]["status"] == "not_falsified_on_these_inputs"
     assert len(relations) == 12
+
+
+@pytest.mark.parametrize("stage", ["middle", "late"])
+def test_compiler_preserves_interfaces_and_unrelated_knowledge(stage):
+    import json
+    from copy import deepcopy
+    from pathlib import Path
+    from pe6203.selective import adapt_result
+    module = implementation()
+    assert callable(getattr(module, "compile_knowledge", None)), "Missing protected compiler"
+    root = Path(__file__).resolve().parents[1]
+    folder = root / "results/raw/evidence-contrastive-pilot-ready-20261102/catalogs/133"
+    old = json.loads((folder / "early.json").read_text())
+    target = json.loads((folder / f"{stage}.json").read_text())
+    feedback = json.loads((root / "experiments/capability-relation-matrix-feedback-v1.json").read_text())["observations"]
+    base = adapt_result(old, target)
+    snapshot = deepcopy((base, target, feedback))
+    result, edits = module.compile_knowledge(base, target, feedback)
+    assert len(edits) == 1
+    assert [t["tool_id"] for t in result["tools"]] == [t["tool_id"] for t in base["knowledge"]["tools"]]
+    changed = next(t for t in result["tools"] if t["tool_id"] == "math-mcp::validate_syntax")
+    original = next(t for t in base["knowledge"]["tools"] if t["tool_id"] == "math-mcp::validate_syntax")
+    assert len(changed["usage_rules"]) == len(original["usage_rules"]) + 1
+    changed["usage_rules"] = original["usage_rules"]
+    assert result == base["knowledge"]
+    assert (base, target, feedback) == snapshot
+    feedback[0]["result"]["rows"][0]["evaluated"] = False
+    with pytest.raises(ValueError, match="Unreviewed"):
+        module.compile_knowledge(base, target, feedback)

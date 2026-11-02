@@ -1,0 +1,1025 @@
+{
+  "schema_version": "1.0",
+  "strategy": "capability_relation_matrix",
+  "status": "validated",
+  "formal_llm_rewrite": false,
+  "validation": {
+    "errors": []
+  },
+  "target_stage": "late",
+  "benchmark_commit": "888c779a0fe735f612ca62bdd1fdd7c9e6bf8701",
+  "input": {
+    "old_knowledge_file_sha256": "bae1080d26a4c1fe8842d564d61f02d355c4b4de0026c632e0ebeaa085160cde",
+    "target_metadata_file_sha256": "40b3677539f855eebe873c05743c376038ded1a0771d79b1ebc9d40f68333528"
+  },
+  "output": {
+    "knowledge_path": "knowledge.json",
+    "knowledge_file_sha256": "0783af7b6bb76ed66a79ce065d0e6a7b8c6f0299c47875619f82051a6dd37f14"
+  },
+  "patch": [
+    {
+      "operation": "replace",
+      "tool_id": "math-mcp::validate_syntax",
+      "fields": [
+        "parameters"
+      ],
+      "new": {
+        "tool_id": "math-mcp::validate_syntax",
+        "server_id": "math-mcp",
+        "version": "late",
+        "name": "validate_syntax",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "expression": {
+              "type": "string",
+              "description": "Mathematical expression to validate",
+              "minLength": 1
+            },
+            "detailed": {
+              "type": "boolean",
+              "description": "If true, return a more detailed validation result when supported",
+              "default": false
+            },
+            "allow_variables": {
+              "type": "boolean",
+              "description": "Explicitly specify whether variable references are allowed during validation"
+            },
+            "show_ast": {
+              "type": "boolean",
+              "description": "If true, include the abstract syntax tree (AST) structure in the validation result",
+              "default": false
+            },
+            "check_balanced": {
+              "type": "boolean",
+              "description": "If true, perform additional validation to ensure all brackets and parentheses are properly balanced",
+              "default": true
+            },
+            "max_depth": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Maximum allowed nesting depth for expressions (e.g., nested parentheses or function calls). If specified, validation fails if depth exceeds this limit"
+            }
+          },
+          "required": [
+            "expression",
+            "allow_variables"
+          ]
+        },
+        "description": "Validate mathematical expression syntax against grammar",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "math-mcp",
+          "tool_name": "validate_syntax"
+        }
+      },
+      "basis": [
+        "c1"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "replace",
+      "tool_id": "mcp-ai-agent-guidelines::hierarchical-prompt-builder",
+      "fields": [
+        "description"
+      ],
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::hierarchical-prompt-builder",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "late",
+        "name": "hierarchical-prompt-builder",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "context": {
+              "type": "string",
+              "description": "The broad context or domain",
+              "examples": [
+                "Microservices authentication system",
+                "E-commerce payment processing module",
+                "Real-time analytics dashboard"
+              ]
+            },
+            "goal": {
+              "type": "string",
+              "description": "The specific goal or objective",
+              "examples": [
+                "Implement OAuth2 authorization flow with JWT tokens",
+                "Optimize database query performance for product search",
+                "Add real-time WebSocket updates to user dashboard"
+              ]
+            },
+            "requirements": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Detailed requirements and constraints"
+            },
+            "outputFormat": {
+              "type": "string",
+              "description": "Desired output format"
+            },
+            "audience": {
+              "type": "string",
+              "description": "Target audience or expertise level"
+            },
+            "includeDisclaimer": {
+              "type": "boolean",
+              "description": "Append a third-party disclaimer section"
+            },
+            "includeReferences": {
+              "type": "boolean",
+              "description": "Append a short references list"
+            },
+            "techniques": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "zero-shot",
+                  "few-shot",
+                  "chain-of-thought",
+                  "self-consistency",
+                  "in-context-learning",
+                  "generate-knowledge",
+                  "prompt-chaining",
+                  "tree-of-thoughts",
+                  "meta-prompting",
+                  "rag",
+                  "react",
+                  "art"
+                ]
+              },
+              "description": "Optional list of technique hints to include"
+            },
+            "includeTechniqueHints": {
+              "type": "boolean",
+              "description": "Include a Technique Hints section"
+            },
+            "includePitfalls": {
+              "type": "boolean",
+              "description": "Include a Pitfalls section"
+            },
+            "autoSelectTechniques": {
+              "type": "boolean",
+              "description": "Infer techniques automatically from context/goal/requirements"
+            },
+            "provider": {
+              "type": "string",
+              "enum": [
+                "gpt-4.1",
+                "gpt-5",
+                "gpt-5.1",
+                "gpt-5.2",
+                "gpt-5-codex",
+                "gpt-5.1-codex",
+                "gpt-5.1-codex-mini",
+                "gpt-5-mini",
+                "claude-opus-4.1",
+                "claude-haiku-4.5",
+                "claude-sonnet-4.5",
+                "claude-sonnet-4",
+                "gemini-2.5-pro",
+                "gemini-2.0-flash",
+                "grok-code-fast-1",
+                "qwen2.5",
+                "raptor-mini",
+                "other"
+              ],
+              "description": "Model family for tailored tips"
+            },
+            "style": {
+              "type": "string",
+              "enum": [
+                "markdown",
+                "xml"
+              ],
+              "description": "Preferred prompt formatting style"
+            }
+          },
+          "required": [
+            "context",
+            "goal"
+          ]
+        },
+        "description": "Create AI prompts with context→goal→requirements hierarchy supporting chain-of-thought, few-shot, and zero-shot techniques. BEST FOR: code reviews, feature specifications, technical decisions, complex task breakdown. OUTPUTS: Structured markdown prompts for LLM injection. TIP: Save and version generated prompts using prompt-version-manager for lifecycle tracking and rollback.",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "hierarchical-prompt-builder"
+        }
+      },
+      "basis": [
+        "c3"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "replace",
+      "tool_id": "mcp-ai-agent-guidelines::speckit-generator",
+      "fields": [
+        "description"
+      ],
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::speckit-generator",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "late",
+        "name": "speckit-generator",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Specification title",
+              "examples": [
+                "User Authentication System",
+                "Payment Processing Module",
+                "Real-time Analytics Dashboard"
+              ]
+            },
+            "overview": {
+              "type": "string",
+              "description": "High-level overview of the feature/project",
+              "examples": [
+                "Implement OAuth2 authentication flow with JWT tokens",
+                "Build secure payment processing with Stripe integration",
+                "Create real-time WebSocket-based analytics dashboard"
+              ]
+            },
+            "objectives": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "high",
+                      "medium",
+                      "low"
+                    ]
+                  }
+                },
+                "required": [
+                  "description"
+                ]
+              },
+              "description": "Strategic objectives for the project"
+            },
+            "requirements": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "functional",
+                      "non-functional"
+                    ]
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "high",
+                      "medium",
+                      "low"
+                    ]
+                  }
+                },
+                "required": [
+                  "description"
+                ]
+              },
+              "description": "Functional and non-functional requirements"
+            },
+            "acceptanceCriteria": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Acceptance criteria for completion (optional)"
+            },
+            "outOfScope": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Explicitly out-of-scope items (optional)"
+            },
+            "constitutionPath": {
+              "type": "string",
+              "description": "Path to CONSTITUTION.md file (optional)",
+              "examples": [
+                "./CONSTITUTION.md",
+                "./docs/CONSTITUTION.md"
+              ]
+            },
+            "validateAgainstConstitution": {
+              "type": "boolean",
+              "description": "Whether to validate against constitution before rendering (optional)"
+            }
+          },
+          "required": [
+            "title",
+            "overview",
+            "objectives",
+            "requirements"
+          ]
+        },
+        "description": "Generate GitHub Spec-Kit artifacts (all documents: README.md, spec.md, plan.md, tasks.md, progress.md, adr.md, roadmap.md) from requirements with integrated constitutional validation during generation. Use constitution-validator for standalone validation of existing artifacts. BEST FOR: feature specs, project planning, constitutional compliance. TIP: Version generated spec artifacts using prompt-version-manager to maintain a history of spec iterations.",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "speckit-generator"
+        }
+      },
+      "basis": [
+        "c6"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "replace",
+      "tool_id": "mcp-ai-agent-guidelines::validate-spec",
+      "fields": [
+        "description"
+      ],
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::validate-spec",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "late",
+        "name": "validate-spec",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "specContent": {
+              "type": "string",
+              "description": "The spec.md content to validate"
+            },
+            "constitutionPath": {
+              "type": "string",
+              "description": "Path to CONSTITUTION.md file (optional)"
+            },
+            "constitutionContent": {
+              "type": "string",
+              "description": "CONSTITUTION.md content directly (optional)"
+            },
+            "outputFormat": {
+              "type": "string",
+              "enum": [
+                "json",
+                "markdown",
+                "summary"
+              ],
+              "description": "Output format for validation results",
+              "default": "markdown"
+            },
+            "includeRecommendations": {
+              "type": "boolean",
+              "description": "Whether to include recommendations in the output",
+              "default": true
+            }
+          },
+          "required": [
+            "specContent"
+          ]
+        },
+        "description": "Validate spec.md structure, completeness, and constitutional constraints without generating artifacts. Focuses on spec.md-specific validation. For broader artifact validation (ADRs, roadmaps, plans), use constitution-validator. BEST FOR: spec.md validation, iterative refinement, quality checks. OUTPUTS: Validation report with score, errors, warnings, and recommendations.",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "validate-spec"
+        }
+      },
+      "basis": [
+        "c7"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "replace",
+      "tool_id": "mcp-ai-agent-guidelines::prompting-hierarchy-evaluator",
+      "fields": [
+        "description"
+      ],
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::prompting-hierarchy-evaluator",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "late",
+        "name": "prompting-hierarchy-evaluator",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "promptText": {
+              "type": "string",
+              "description": "The prompt text to evaluate"
+            },
+            "targetLevel": {
+              "type": "string",
+              "enum": [
+                "independent",
+                "indirect",
+                "direct",
+                "modeling",
+                "scaffolding",
+                "full-physical"
+              ],
+              "description": "Expected hierarchy level (if known)"
+            },
+            "context": {
+              "type": "string",
+              "description": "Additional context about the task"
+            },
+            "includeRecommendations": {
+              "type": "boolean",
+              "description": "Include improvement recommendations"
+            },
+            "includeReferences": {
+              "type": "boolean",
+              "description": "Include reference links"
+            }
+          },
+          "required": [
+            "promptText"
+          ]
+        },
+        "description": "Evaluate prompt quality with hierarchical taxonomy and numeric scoring based on clarity, specificity, completeness, and cognitive complexity. BEST FOR: prompt quality assessment, effectiveness measurement, prompt optimization. OUTPUTS: Detailed scores with improvement recommendations. TIP: Store evaluation snapshots as named versions in prompt-version-manager to track quality improvements over time.",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "prompting-hierarchy-evaluator"
+        }
+      },
+      "basis": [
+        "c5"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "replace",
+      "tool_id": "mcp-ai-agent-guidelines::prompt-hierarchy",
+      "fields": [
+        "description"
+      ],
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::prompt-hierarchy",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "late",
+        "name": "prompt-hierarchy",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "build",
+                "select",
+                "evaluate"
+              ],
+              "description": "Operation mode: 'build' creates prompts, 'select' recommends hierarchy level, 'evaluate' scores prompts",
+              "examples": [
+                "build",
+                "evaluate",
+                "select"
+              ]
+            },
+            "context": {
+              "type": "string",
+              "description": "Build mode: Broad context or domain"
+            },
+            "goal": {
+              "type": "string",
+              "description": "Build mode: Specific goal or objective"
+            },
+            "requirements": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Build mode: Detailed requirements and constraints"
+            },
+            "outputFormat": {
+              "type": "string",
+              "description": "Build mode: Desired output format"
+            },
+            "audience": {
+              "type": "string",
+              "description": "Build mode: Target audience or expertise level"
+            },
+            "taskDescription": {
+              "type": "string",
+              "description": "Select mode: Description of the task",
+              "examples": [
+                "Review code for security vulnerabilities",
+                "Design a caching strategy for user sessions"
+              ]
+            },
+            "agentCapability": {
+              "type": "string",
+              "enum": [
+                "novice",
+                "intermediate",
+                "advanced",
+                "expert"
+              ],
+              "description": "Select mode: Agent's capability level"
+            },
+            "taskComplexity": {
+              "type": "string",
+              "enum": [
+                "simple",
+                "moderate",
+                "complex",
+                "very-complex"
+              ],
+              "description": "Select mode: Task complexity level"
+            },
+            "autonomyPreference": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ],
+              "description": "Select mode: Desired autonomy level"
+            },
+            "promptText": {
+              "type": "string",
+              "description": "Evaluate mode: The prompt text to evaluate"
+            },
+            "targetLevel": {
+              "type": "string",
+              "enum": [
+                "independent",
+                "indirect",
+                "direct",
+                "modeling",
+                "scaffolding",
+                "full-physical"
+              ],
+              "description": "Evaluate mode: Expected hierarchy level"
+            },
+            "includeExamples": {
+              "type": "boolean",
+              "description": "Include examples in output"
+            },
+            "includeReferences": {
+              "type": "boolean",
+              "description": "Include reference links"
+            },
+            "includeRecommendations": {
+              "type": "boolean",
+              "description": "Include improvement recommendations"
+            },
+            "includeMetadata": {
+              "type": "boolean",
+              "description": "Include metadata section"
+            },
+            "includeFrontmatter": {
+              "type": "boolean",
+              "description": "Include YAML frontmatter"
+            },
+            "includeDisclaimer": {
+              "type": "boolean",
+              "description": "Include disclaimer section"
+            }
+          },
+          "required": [
+            "mode"
+          ]
+        },
+        "description": "Manage prompting hierarchy operations with modes: 'build' (create prompts), 'select' (recommend level), 'evaluate' (score quality). BEST FOR: all hierarchy operations, prompt creation, level selection, quality assessment. OUTPUTS: Mode-specific structured responses. TIP: Persist built prompts as named versions using prompt-version-manager to enable diffing and rollback across iterations.",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "prompt-hierarchy"
+        }
+      },
+      "basis": [
+        "c4"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "replace",
+      "tool_id": "mcp-ai-agent-guidelines::design-assistant",
+      "fields": [
+        "description"
+      ],
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::design-assistant",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "late",
+        "name": "design-assistant",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "start-session",
+                "advance-phase",
+                "validate-phase",
+                "evaluate-pivot",
+                "generate-strategic-pivot-prompt",
+                "generate-artifacts",
+                "enforce-coverage",
+                "enforce-consistency",
+                "get-status",
+                "load-constraints",
+                "select-methodology",
+                "enforce-cross-session-consistency",
+                "generate-enforcement-prompts",
+                "generate-constraint-documentation",
+                "generate-context-aware-guidance"
+              ],
+              "description": "Action to perform",
+              "examples": [
+                "start-session",
+                "advance-phase",
+                "generate-artifacts"
+              ]
+            },
+            "sessionId": {
+              "type": "string",
+              "description": "Unique session identifier",
+              "examples": [
+                "api-gateway-design-2024",
+                "payment-service-architecture",
+                "auth-system-refactor-q1"
+              ]
+            },
+            "config": {
+              "type": "object",
+              "description": "Design session configuration (required for start-session)",
+              "properties": {
+                "sessionId": {
+                  "type": "string"
+                },
+                "context": {
+                  "type": "string"
+                },
+                "goal": {
+                  "type": "string"
+                },
+                "requirements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "coverageThreshold": {
+                  "type": "number",
+                  "default": 85
+                },
+                "enablePivots": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "templateRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "outputFormats": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "content": {
+              "type": "string",
+              "description": "Content to validate or analyze"
+            },
+            "phaseId": {
+              "type": "string",
+              "description": "Target phase ID for advance or validate actions"
+            },
+            "constraintId": {
+              "type": "string",
+              "description": "Specific constraint ID for consistency enforcement"
+            },
+            "constraintConfig": {
+              "type": "object",
+              "description": "Custom constraint configuration in YAML/JSON format"
+            },
+            "artifactTypes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "adr",
+                  "specification",
+                  "roadmap"
+                ]
+              },
+              "description": "Types of artifacts to generate",
+              "default": [
+                "adr",
+                "specification",
+                "roadmap"
+              ]
+            },
+            "methodologySignals": {
+              "type": "object",
+              "description": "Methodology signals for select-methodology action (e.g., team size, project complexity, domain)"
+            },
+            "includeTemplates": {
+              "type": "boolean",
+              "description": "Include templates in generated prompts (for generate-strategic-pivot-prompt)"
+            },
+            "includeSpace7Instructions": {
+              "type": "boolean",
+              "description": "Include Space7 instructions in prompts (for generate-strategic-pivot-prompt)"
+            },
+            "customInstructions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Custom instructions for prompt generation (for generate-strategic-pivot-prompt)"
+            }
+          },
+          "required": [
+            "action",
+            "sessionId"
+          ]
+        },
+        "description": "Orchestrate multi-phase design workflows with built-in constraint validation, coverage enforcement, and artifact generation. Outputs can be further validated using constitution-validator for constitutional compliance verification. BEST FOR: Coordinating design sessions, enforcing constraints, producing ADRs and roadmaps. Example: 'Use the design-assistant to start a design session for an API gateway.'",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "design-assistant"
+        }
+      },
+      "basis": [
+        "c2"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "add",
+      "tool_id": "math-mcp::batch_evaluate",
+      "new": {
+        "tool_id": "math-mcp::batch_evaluate",
+        "server_id": "math-mcp",
+        "version": "late",
+        "name": "batch_evaluate",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "expressions": {
+              "type": "array",
+              "description": "Array of mathematical expressions to evaluate",
+              "items": {
+                "type": "string"
+              }
+            },
+            "stop_on_error": {
+              "type": "boolean",
+              "description": "If true, stop processing on first error; if false, continue and report all results",
+              "default": false
+            }
+          },
+          "required": [
+            "expressions"
+          ]
+        },
+        "description": "Evaluate multiple mathematical expressions in a single batch operation",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "math-mcp",
+          "tool_name": "batch_evaluate"
+        }
+      },
+      "basis": [
+        "a1"
+      ],
+      "reason": "new tool present in target environment"
+    },
+    {
+      "operation": "add",
+      "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::constitution-validator",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "late",
+        "name": "constitution-validator",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "artifactContent": {
+              "type": "string",
+              "description": "Content of the artifact to validate (spec.md, ADR, roadmap, plan, etc.)"
+            },
+            "artifactType": {
+              "type": "string",
+              "enum": [
+                "spec",
+                "adr",
+                "roadmap",
+                "plan",
+                "tasks",
+                "progress",
+                "custom"
+              ],
+              "description": "Type of artifact being validated",
+              "default": "spec"
+            },
+            "constitutionPath": {
+              "type": "string",
+              "description": "Path to CONSTITUTION.md file (optional if constitutionContent provided)"
+            },
+            "constitutionContent": {
+              "type": "string",
+              "description": "CONSTITUTION.md content directly (optional if constitutionPath provided)"
+            },
+            "validationLevel": {
+              "type": "string",
+              "enum": [
+                "strict",
+                "standard",
+                "lenient"
+              ],
+              "description": "Validation strictness level",
+              "default": "standard"
+            },
+            "checkPrinciples": {
+              "type": "boolean",
+              "description": "Validate against constitutional principles",
+              "default": true
+            },
+            "checkConstraints": {
+              "type": "boolean",
+              "description": "Validate against constitutional constraints",
+              "default": true
+            },
+            "checkQualityStandards": {
+              "type": "boolean",
+              "description": "Validate against quality standards",
+              "default": true
+            },
+            "outputFormat": {
+              "type": "string",
+              "enum": [
+                "json",
+                "markdown",
+                "summary"
+              ],
+              "description": "Output format for validation results",
+              "default": "markdown"
+            },
+            "includeRecommendations": {
+              "type": "boolean",
+              "description": "Include remediation recommendations",
+              "default": true
+            },
+            "includeExamples": {
+              "type": "boolean",
+              "description": "Include compliant examples for violations",
+              "default": false
+            }
+          },
+          "required": [
+            "artifactContent"
+          ]
+        },
+        "description": "Validate any project artifact (spec.md, ADR, roadmap, plan, or custom document) against CONSTITUTION.md principles, constraints, and quality standards. Provides standalone constitutional compliance checking independent of generation workflows. BEST FOR: post-generation validation, constitutional compliance audits, artifact quality assurance. OUTPUTS: Detailed validation report with compliance score, principle violations, constraint breaches, and remediation recommendations.",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "constitution-validator"
+        }
+      },
+      "basis": [
+        "a2"
+      ],
+      "reason": "new tool present in target environment"
+    },
+    {
+      "operation": "add",
+      "tool_id": "mcp-ai-agent-guidelines::prompt-version-manager",
+      "new": {
+        "tool_id": "mcp-ai-agent-guidelines::prompt-version-manager",
+        "server_id": "mcp-ai-agent-guidelines",
+        "version": "late",
+        "name": "prompt-version-manager",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "save",
+                "list",
+                "diff",
+                "restore",
+                "delete"
+              ],
+              "description": "Operation to perform: 'save' stores a prompt version, 'list' shows all versions for a key, 'diff' computes line-level diff between two versions, 'restore' retrieves a specific version's content, 'delete' removes a version."
+            },
+            "key": {
+              "type": "string",
+              "description": "Logical name for the prompt (e.g., 'auth-system-prompt', 'onboarding-spec'). Groups versions under a shared identifier.",
+              "examples": [
+                "auth-system-prompt",
+                "payment-spec",
+                "onboarding-flow"
+              ]
+            },
+            "content": {
+              "type": "string",
+              "description": "Prompt content to save (required for 'save' action)."
+            },
+            "label": {
+              "type": "string",
+              "description": "Optional human-readable label for the version (e.g., 'v1-initial', 'v2-with-cot').",
+              "examples": [
+                "v1-initial",
+                "v2-chain-of-thought",
+                "v3-security-hardened"
+              ]
+            },
+            "versionA": {
+              "type": "string",
+              "description": "Version ID or label for the base side of a diff (required for 'diff' action)."
+            },
+            "versionB": {
+              "type": "string",
+              "description": "Version ID or label for the comparison side of a diff (required for 'diff' action). Omit to diff against the latest saved version."
+            },
+            "versionId": {
+              "type": "string",
+              "description": "Specific version ID to restore or delete (required for 'restore' and 'delete' actions)."
+            },
+            "includeMetadata": {
+              "type": "boolean",
+              "description": "Include version metadata (timestamp, label, character count) in the response.",
+              "default": true
+            }
+          },
+          "required": [
+            "action",
+            "key"
+          ]
+        },
+        "description": "Version and manage prompt artifacts with save, list, diff, restore, and delete operations using an in-memory registry of named prompt versions and optional metadata output. BEST FOR: prompt lifecycle management, iterative prompt refinement, A/B comparison of prompt variants, rollback to previous prompt versions. OUTPUTS: Version metadata, line-level diffs between versions, restored prompt content, or deletion confirmation.",
+        "usage_rules": [],
+        "output_schema": null,
+        "routing": {
+          "server_id": "mcp-ai-agent-guidelines",
+          "tool_name": "prompt-version-manager"
+        }
+      },
+      "basis": [
+        "a3"
+      ],
+      "reason": "new tool present in target environment"
+    },
+    {
+      "tool_id": "math-mcp::validate_syntax",
+      "field": "usage_rules",
+      "before": [],
+      "after": [
+        "Cross-operation evidence: {\"kind\":\"finite_cross_operation_contract_relations\",\"operations\":{\"validate_syntax\":\"expression string; allow_variables=false explicitly; other flags absent\",\"evaluate_validate_only\":\"same expression, validate_only=true\",\"evaluate\":\"same expression, validate_only omitted/false\"},\"predicates\":{\"syntax_envelope\":\"validate_syntax outer isError is false\",\"syntax_valid\":\"validate_syntax text explicitly accepts syntax\",\"evaluated\":\"normal evaluate returned a result JSON\",\"numeric_value\":\"normal evaluate returned a finite JSON number, not boolean/string/array/null\"},\"paired_observations\":[{\"expression\":\"7+4\",\"syntax_envelope\":true,\"syntax_valid\":true,\"evaluated\":true,\"numeric_value\":true,\"native_text\":{\"syntax\":\"Expression is syntactically valid.\",\"validate_only\":\"Expression is syntactically valid.\",\"evaluate\":\"{\\n  \\\"expression\\\": \\\"7+4\\\",\\n  \\\"result\\\": 11,\\n  \\\"type\\\": \\\"number\\\"\\n}\"}},{\"expression\":\"7+\",\"syntax_envelope\":true,\"syntax_valid\":false,\"evaluated\":false,\"numeric_value\":false,\"native_text\":{\"syntax\":\"Syntax errors:\\nLine 1, Column 3: Expected expression\\nLine 1, Column 3: Expected expression\",\"validate_only\":\"Syntax errors:\\nLine 1, Column 3: Expected expression\\nLine 1, Column 3: Expected expression\",\"evaluate\":\"Syntax errors:\\nLine 1, Column 3: Expected expression\\nLine 1, Column 3: Expected expression\"}},{\"expression\":\"unboundvalue+1\",\"syntax_envelope\":true,\"syntax_valid\":true,\"evaluated\":false,\"numeric_value\":false,\"native_text\":{\"syntax\":\"Expression is syntactically valid.\",\"validate_only\":\"Expression is syntactically valid.\",\"evaluate\":\"Evaluation error: Undefined variable: unboundvalue\"}},{\"expression\":\"unlisted(2)\",\"syntax_envelope\":true,\"syntax_valid\":true,\"evaluated\":false,\"numeric_value\":false,\"native_text\":{\"syntax\":\"Expression is syntactically valid.\",\"validate_only\":\"Expression is syntactically valid.\",\"evaluate\":\"Evaluation error: Function not allowed: unlisted\"}},{\"expression\":\"'cobalt'\",\"syntax_envelope\":true,\"syntax_valid\":true,\"evaluated\":true,\"numeric_value\":false,\"native_text\":{\"syntax\":\"Expression is syntactically valid.\",\"validate_only\":\"Expression is syntactically valid.\",\"evaluate\":\"{\\n  \\\"expression\\\": \\\"'cobalt'\\\",\\n  \\\"result\\\": \\\"cobalt\\\",\\n  \\\"type\\\": \\\"string\\\"\\n}\"}},{\"expression\":\"[2,5]\",\"syntax_envelope\":true,\"syntax_valid\":true,\"evaluated\":true,\"numeric_value\":false,\"native_text\":{\"syntax\":\"Expression is syntactically valid.\",\"validate_only\":\"Expression is syntactically valid.\",\"evaluate\":\"{\\n  \\\"expression\\\": \\\"[2,5]\\\",\\n  \\\"result\\\": [\\n    2,\\n    5\\n  ],\\n  \\\"type\\\": \\\"object\\\"\\n}\"}},{\"expression\":\"4/0\",\"syntax_envelope\":true,\"syntax_valid\":true,\"evaluated\":true,\"numeric_value\":false,\"native_text\":{\"syntax\":\"Expression is syntactically valid.\",\"validate_only\":\"Expression is syntactically valid.\",\"evaluate\":\"{\\n  \\\"expression\\\": \\\"4/0\\\",\\n  \\\"result\\\": null,\\n  \\\"type\\\": \\\"number\\\"\\n}\"}},{\"expression\":\"3>2\",\"syntax_envelope\":true,\"syntax_valid\":true,\"evaluated\":true,\"numeric_value\":false,\"native_text\":{\"syntax\":\"Expression is syntactically valid.\",\"validate_only\":\"Expression is syntactically valid.\",\"evaluate\":\"{\\n  \\\"expression\\\": \\\"3>2\\\",\\n  \\\"result\\\": true,\\n  \\\"type\\\": \\\"boolean\\\"\\n}\"}},{\"expression\":\"2^3\",\"syntax_envelope\":true,\"syntax_valid\":true,\"evaluated\":true,\"numeric_value\":true,\"native_text\":{\"syntax\":\"Expression is syntactically valid.\",\"validate_only\":\"Expression is syntactically valid.\",\"evaluate\":\"{\\n  \\\"expression\\\": \\\"2^3\\\",\\n  \\\"result\\\": 8,\\n  \\\"type\\\": \\\"number\\\"\\n}\"}},{\"expression\":\"lumen=5; lumen+1\",\"syntax_envelope\":true,\"syntax_valid\":true,\"evaluated\":true,\"numeric_value\":true,\"native_text\":{\"syntax\":\"Expression is syntactically valid.\",\"validate_only\":\"Expression is syntactically valid.\",\"evaluate\":\"{\\n  \\\"expression\\\": \\\"lumen=5; lumen+1\\\",\\n  \\\"result\\\": 6,\\n  \\\"type\\\": \\\"number\\\"\\n}\"}}],\"relations\":[{\"if\":\"syntax_envelope\",\"then\":\"syntax_valid\",\"status\":\"falsified\",\"counterexamples\":[\"7+\"]},{\"if\":\"syntax_envelope\",\"then\":\"evaluated\",\"status\":\"falsified\",\"counterexamples\":[\"7+\",\"unboundvalue+1\",\"unlisted(2)\"]},{\"if\":\"syntax_envelope\",\"then\":\"numeric_value\",\"status\":\"falsified\",\"counterexamples\":[\"7+\",\"unboundvalue+1\",\"unlisted(2)\",\"'cobalt'\",\"[2,5]\",\"4/0\",\"3>2\"]},{\"if\":\"syntax_valid\",\"then\":\"syntax_envelope\",\"status\":\"not_falsified_on_these_inputs\",\"counterexamples\":[]},{\"if\":\"syntax_valid\",\"then\":\"evaluated\",\"status\":\"falsified\",\"counterexamples\":[\"unboundvalue+1\",\"unlisted(2)\"]},{\"if\":\"syntax_valid\",\"then\":\"numeric_value\",\"status\":\"falsified\",\"counterexamples\":[\"unboundvalue+1\",\"unlisted(2)\",\"'cobalt'\",\"[2,5]\",\"4/0\",\"3>2\"]},{\"if\":\"evaluated\",\"then\":\"syntax_envelope\",\"status\":\"not_falsified_on_these_inputs\",\"counterexamples\":[]},{\"if\":\"evaluated\",\"then\":\"syntax_valid\",\"status\":\"not_falsified_on_these_inputs\",\"counterexamples\":[]},{\"if\":\"evaluated\",\"then\":\"numeric_value\",\"status\":\"falsified\",\"counterexamples\":[\"'cobalt'\",\"[2,5]\",\"4/0\",\"3>2\"]},{\"if\":\"numeric_value\",\"then\":\"syntax_envelope\",\"status\":\"not_falsified_on_these_inputs\",\"counterexamples\":[]},{\"if\":\"numeric_value\",\"then\":\"syntax_valid\",\"status\":\"not_falsified_on_these_inputs\",\"counterexamples\":[]},{\"if\":\"numeric_value\",\"then\":\"evaluated\",\"status\":\"not_falsified_on_these_inputs\",\"counterexamples\":[]}],\"validation_only_mode\":\"evaluate(validate_only=true) matched validate_syntax on all these inputs; both interfaces remain available.\",\"sequence_state_receipts\":{\"syntax\":{\"before\":{\"content\":[{\"type\":\"text\",\"text\":\"No variables defined\"}],\"isError\":false},\"after\":{\"content\":[{\"type\":\"text\",\"text\":\"No variables defined\"}],\"isError\":false}},\"validate_only\":{\"before\":{\"content\":[{\"type\":\"text\",\"text\":\"No variables defined\"}],\"isError\":false},\"after\":{\"content\":[{\"type\":\"text\",\"text\":\"No variables defined\"}],\"isError\":false}},\"evaluate\":{\"before\":{\"content\":[{\"type\":\"text\",\"text\":\"No variables defined\"}],\"isError\":false},\"after\":{\"content\":[{\"type\":\"text\",\"text\":\"Defined variables:\\nlumen = 5\"}],\"isError\":false}}},\"scope\":\"Finite native-language observations, not a universal grammar or security certificate. A falsified implication has a concrete counterexample; not_falsified_on_these_inputs is not a theorem. No observation verifies another implementation or runtime. Sequence effects cover this complete ordered probe sequence only.\"}"
+      ],
+      "reason": "native counterexample-supported finite capability relations"
+    }
+  ],
+  "cost": {
+    "method": "capability_relation_matrix",
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "usd": 0.0,
+    "seconds": 0.24711804199614562,
+    "update_operations": 11,
+    "untouched_records": 35,
+    "llm_used": false,
+    "probe_calls": 0,
+    "unresolved_count": 0
+  }
+}
