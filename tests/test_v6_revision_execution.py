@@ -163,7 +163,7 @@ async def test_artifact_format_applies_to_early_final_answer_and_existing_repair
 def test_schema_keeps_summary_top_level_and_rejects_additional_fields():
     schema = artifact_response_format()["json_schema"]["schema"]
     validator = Draft202012Validator(schema)
-    good = {"artifact": {"path": "artifact.py", "language": "python", "source": "pass"},
+    good = {"artifact": {"path": "artifact.py", "language": "python", "source": "pass\n"},
             "summary": "not executed"}
     assert validator.is_valid(good)
     assert not validator.is_valid({"artifact": {**good["artifact"], "summary": "nested"}})

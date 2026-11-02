@@ -17,7 +17,7 @@ from .selective import validate_adaptation
 from .selective_v5 import HybridPatchError, _account, validate_calls
 
 VERSION = "hybrid_v6"
-IMPLEMENTATION_REVISION = "v6-r1-protocol-and-delivery"
+IMPLEMENTATION_REVISION = "v6-r2-valid-indices-multiline-source"
 DEFAULT_LIMITS = {
     "max_calls": 32,
     "patch_batch_size": 8,

@@ -111,11 +111,36 @@ def schema(phase, payload):
     patch["rules"]["items"]["properties"]["evidence_ids"] = arr(
         {"type": "string", "enum": evidence_ids}
     )
+    # A position belongs to its own record. A global union of rule indices
+    # would incorrectly permit [0] for an empty record when a peer has rules.
+    branches = []
+    for record in payload["selected"]:
+        existing = record["rules"]
+        if not isinstance(existing, list):
+            raise ValueError("Selected existing rules must be a list")
+        branch = deepcopy(result["properties"]["patches"]["items"])
+        properties = branch["properties"]
+        properties["tool_id"] = {"type": "string", "enum": [record["tool_id"]]}
+        retained = {"type": "array", "items": {"type": "integer"},
+                    "maxItems": len(existing)}
+        if existing:
+            retained["items"]["enum"] = list(range(len(existing)))
+        # maxItems:0 forces [], without an invalid empty enum. Uniqueness,
+        # sorting and all semantic admission remain independent program checks.
+        properties["retain_rule_indices"] = retained
+        branches.append(branch)
+    result["properties"]["patches"]["items"] = {"anyOf": branches}
     # These enums prevent invented handles, not wrong semantic inferences or
     # out-of-scope citations. Those still require the unchanged program checks.
     selector_ids = sorted(set(selected_ids) | {c["tool_id"] for c in payload["changes"]})
     result["properties"]["need_evidence"]["items"]["properties"]["tool_id"] = {
         "type": "string", "enum": selector_ids
+    }
+    # The pointer is relative to this one catalog field, not the prompt
+    # envelope. Changed leaves are already supplied by the program. Further
+    # model requests name the field root; this does not upload a global catalog.
+    result["properties"]["need_evidence"]["items"]["properties"]["pointer"] = {
+        "type": "string", "enum": [""]
     }
     return result
 

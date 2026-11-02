@@ -9,7 +9,12 @@ SYSTEM_RULE = (
     "expanding the investigation. Reuse successful observations when the inputs and "
     "environment have not changed; repeat a call only for a specific unresolved need. "
     "The final allowed generation round is reserved for the final deliverable, with "
-    "no further tool actions. Distinguish observed results from untested claims."
+    "no further tool actions. Distinguish observed results from untested claims. "
+    "When an artifact output contract is active, artifact.source must contain the "
+    "actual runnable source module with real line breaks and Python indentation. "
+    "Encode line breaks as JSON newline escapes that decode to real newlines; do "
+    "not flatten the implementation into a single prose or comment line. Put "
+    "explanations and security recommendations in the top-level summary."
 )
 FINAL_REMINDER = (
     "This is the final generation round within the existing budget. No further tool "
@@ -51,7 +56,22 @@ def artifact_response_format():
                         "properties": {
                             "path": {"type": "string", "enum": ["artifact.py"]},
                             "language": {"type": "string", "enum": ["python"]},
-                            "source": {"type": "string", "minLength": 1},
+                            "source": {
+                                "type": "string",
+                                "minLength": 1,
+                                "pattern": r"\n",
+                                "description": (
+                                    "Complete runnable Python source module, preserving "
+                                    "real newline characters and indentation. Include "
+                                    "actual statements and definitions, not a description "
+                                    "or promise of code. Do not flatten code into a single "
+                                    "comment line. JSON newline escapes must decode to "
+                                    "real line breaks in this source string. Put all "
+                                    "explanations and security recommendations in the "
+                                    "top-level summary. Formatting constraints do not "
+                                    "prove program correctness or safety."
+                                ),
+                            },
                         },
                         "required": ["path", "language", "source"],
                         "additionalProperties": False,
