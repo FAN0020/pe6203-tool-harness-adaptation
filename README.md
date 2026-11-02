@@ -1,3 +1,16 @@
+# selective-V3 — current three-task results
+
+133 / 235 / 283 × Early / Middle / Late.
+
+| TF | PE | ECS | Normal final answers |
+| ---: | ---: | ---: | ---: |
+| 9.674 | 8.593 | 9.370 | 22/27 |
+
+Method: includes one retry of failed knowledge updates; all valid resulting scores and all costs are included. Different batches and execution protocols prevent a controlled ranking against historical V6. [Current evidence](https://github.com/FAN0020/pe6203-tool-harness-adaptation/blob/main/evaluation/v3/three-task-view/README.md). Implementation and runtime configuration are unchanged.
+
+<details>
+<summary>Historical branch documentation and publication records</summary>
+
 # PE6203 · 工具变化下的 Harness 适应
 
 **当前 V3 汇报范围：133、235、283（2026-11-03）。** [三任务评测入口](https://github.com/FAN0020/pe6203-tool-harness-adaptation/blob/main/evaluation/v3/three-task-view/README.md)已与原 V6 对齐；首轮与一次重试结果分别保留。下方旧说明和四／五任务实验属于历史材料，没有改写原始分数。本次仅更新评测入口，不修改实现或执行配置。
@@ -78,3 +91,5 @@ python3 submission/handover-20261031/verify.py
 | `docs/`、`contributions/` | 机器说明、来源与成员贡献记录。 |
 | `tools/netlify/` | 可选 Netlify CLI 的版本与依赖锁。 |
 | `.cache/`、`.venv/`、`.netlify/` | 本机依赖、环境、登录关联，不提交。 |
+
+</details>
