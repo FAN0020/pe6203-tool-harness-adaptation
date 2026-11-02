@@ -1,3 +1,16 @@
+# selective-V5 — current three-task results
+
+133 / 235 / 283 × Early / Middle / Late.
+
+| TF | PE | ECS | Normal final answers |
+| ---: | ---: | ---: | ---: |
+| 9.815 | 8.519 | 9.598 | 23/27 |
+
+Method: includes one retry of failed knowledge updates; all valid resulting scores and all costs are included. Different batches and execution protocols prevent a controlled ranking against historical V6. [Current evidence](https://github.com/FAN0020/pe6203-tool-harness-adaptation/blob/main/evaluation/v5/three-task-view/README.md). Implementation and runtime configuration are unchanged.
+
+<details>
+<summary>Historical branch documentation and publication records</summary>
+
 # PE6203 · 工具变化下的 Harness 适应
 
 **当前 V5 汇报范围：133、235、283（2026-11-03）。** [三任务评测入口](https://github.com/FAN0020/pe6203-tool-harness-adaptation/blob/main/evaluation/v5/three-task-view/README.md)已与原 V6 对齐；首轮与一次重试结果分别保留。下方旧说明和四／五任务实验属于历史材料，没有改写原始分数。本次仅更新评测入口，不修改实现或执行配置。
@@ -86,3 +99,5 @@ python3 submission/handover-20261031/verify.py
 ## Selective V5 scope update (3 November 2026)
 
 V5 now uses program-first classification, lightweight implicit-impact screening and one combined local review/edit per selected record. See [design](docs/selective-v5.md) and [recorded token acceptance](results/selective-v5/scope-input-20261103/README.md). This changes V5 only; the default mode remains hybrid_v2. The recorded updater diagnostics do not establish benchmark superiority.
+
+</details>
