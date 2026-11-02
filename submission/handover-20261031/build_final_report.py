@@ -63,10 +63,13 @@ def para(s):
     flow.append(Paragraph(s, S["BodyX"]))
     current.append("<p>" + s + "</p>")
 
+def blue_para(s):
+    para('<font color="#1250A0">' + s + '</font>')
 
-def heading(s):
-    flow.append(Paragraph(s, S["H2X"]))
-    current.append("<h3>" + s + "</h3>")
+
+def heading(s, blue=False):
+    flow.append(Paragraph('<font color="#1250A0">' + s + '</font>' if blue else s, S["H2X"]))
+    current.append('<h3' + (' style="color:#1250A0"' if blue else '') + '>' + s + '</h3>')
 
 
 def code(s):
@@ -106,13 +109,13 @@ def table(headers, rows, widths=None):
     )
 
 
-def page(title):
+def page(title, blue=False):
     global current
     if current:
         sections.append("".join(current))
         flow.append(PageBreak())
-    current = ["<section><h2>" + title + "</h2>"]
-    flow.append(Paragraph(title, S["TitleX"]))
+    current = ['<section><h2' + (' style="color:#1250A0"' if blue else '') + '>' + title + '</h2>']
+    flow.append(Paragraph('<font color="#1250A0">' + title + '</font>' if blue else title, S["TitleX"]))
 
 
 def ev(s):
@@ -712,10 +715,31 @@ para(
     "1. May the explicitly injected missing-knowledge trajectory satisfy under-update analysis despite unchanged TF and no demonstrated original-updater omission? The brief contains no natural-occurrence requirement.\n2. May we present over-update candidates and negative controls as an unresolved finding, or is a stronger unrelated-change failure required?\n3. Does full-catalog rebuilding with all descriptions regenerated and schema/rules/routing copied from authoritative target metadata meet the Full Rewrite definition?\n4. Does the documented optional-addition coverage with actual contact meet the intended Tool-level scope, with deletion/rename untested?"
 )
 para(
-    "Pending TA clarification is a limitation, not an instruction to expand the experiment. No further diagnostics, model calls, scoring or deployment are authorized. HANDOVER.md lists evidence paths, team review and next steps."
+    '<font color="#1250A0">TA clarification remains open. Later user authorization permits bounded local research; frozen scores are unchanged, and external submission or deployment is not authorized.</font>'
 )
 ev(
     "diagnostics-20261031/plan.json, exact-knowledge-diffs.json and audit.json; targeted-diagnostics archive; HANDOVER.md. This clarification supersedes earlier strict-natural wording; diagnostic facts remain unchanged."
+)
+page("2 November 2026. Scope and merge addendum", blue=True)
+heading("Task selection and the 27-run baseline", blue=True)
+blue_para(
+    "The course brief permits a documented fixed subset of the 201 released tasks. Earlier team materials included task 223, retrieval of recent research papers for webpage publication. Before model scoring, the course matrix instead froze task 133 (mathematical-expression guidance), task 283 (project planning), and unchanged task 235 (chart behavior) because the original inputs and archived services were locally executable. Its 27 agent trajectories are three tasks × three stages × three methods × one execution, with five judge ratings per trajectory. They do not test the earlier paper-webpage scenario or a verified book task. The available written record does not show team sign-off for this task switch."
+)
+blue_para(
+    "The task 223 original fetch and publication services were not verified for the frozen matrix. A later Netlify version changes the publication backend and must be identified as a separate environment; its three-stage tool catalogs do not by themselves demonstrate recovery after tool change. The 27-run scores remain valid for the stated 133/283/235 subset and are not relabeled as paper or book results."
+)
+heading("Which research evidence can be carried forward", blue=True)
+blue_para(
+    "A later registry snapshot listed 29 candidate names; 27 had actor evidence, two had generation or admission records only, and none had task 223 actor results. The registry later grew to 36 and then 43 names. These names include different mechanism versions and cohorts with original benchmark questions, fixed-fixture versions of original questions, and controlled synthetic extensions. The course 27 cells already include No Update, Full Rewrite and Selective Patch; they are not 27 candidate-versus-Patch comparisons. Mechanisms may be borrowed, but performance claims require matching task, fixture, tool, model, decoding, budget, product acceptance and a contemporaneous Patch control."
+)
+blue_para(
+    "The offline 36-candidate audit reviewed 45 cohorts, 517 executed cells, 2555 valid judge slots and 445 existing product reviews. Six later rounds completed and one was interrupted; no candidate has met strict gains in normal completion and all required product properties together with TF and retention safeguards. This does not invalidate the course baseline or establish that an entire mechanism family is ineffective. Development and controlled synthetic results remain separate from the two independent validation batches required for the stronger research goal."
+)
+blue_para(
+    "Some mechanisms remain research leads: sufficiency_feedback raised PE but completed 14/27 versus Patch 17/27; budget_feedback had local completion gains yet faulty code or numerical summaries; observed_contract completed 5/12 versus Patch 8/12 across two batches, with complete products at 0/12 in both arms. None is inserted into the frozen original Patch as a validated improvement."
+)
+blue_para(
+    "Merge scope for this revision: the main branch's six offline CLI report tests were integrated; presentation scripts, slide-sync material and the dated speaking review were not imported. The old course scores, diagnostic outcomes and unknown charges remain unchanged. This report addendum and the research synthesis mark new or revised wording in blue. Sources: reports/course-research/plan-alignment-20261102.md; results/evaluation/current-branch-5b772ff-20261102/REPORT.md; main:d32e44b/submission/fanziyu-failure-review-20261031.md. No model calls or new benchmark runs were made for this merge."
 )
 sections.append("".join(current))
 css = "body{font:16px/1.65 system-ui,sans-serif;color:#172333;background:#f4f6fa;margin:0}main{max-width:1060px;margin:auto;padding:35px;background:white}section{margin-bottom:44px}h1,h2{color:#102b46}h2{border-bottom:1px solid #cbd5e1;padding-bottom:12px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:9px;border:1px solid #cbd5e1;text-align:left;vertical-align:top}th{background:#e8eef4}.scroll{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fa;padding:15px}p{overflow-wrap:anywhere}@media print{section{break-before:page}main{padding:0}}"

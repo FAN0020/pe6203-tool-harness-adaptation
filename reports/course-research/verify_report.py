@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 read = lambda p: json.loads(p.read_text())
 manifest = read(HERE / 'source-manifest.json')
+assert manifest['builder_sha256'] == hashlib.sha256((HERE / 'build_report.py').read_bytes()).hexdigest()
 for path, digest in manifest['sources'].items():
     assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == digest, path
 course = read(ROOT / 'results/evidence/course-v1.3-20261031/summary.json')
@@ -21,6 +22,14 @@ with zipfile.ZipFile(HERE / 'PE6203 Research Report.docx') as z:
     xml = ET.fromstring(z.read('word/document.xml'))
     styles = ET.fromstring(z.read('word/styles.xml'))
     assert not styles.findall('.//w:pBdr',ns), 'Unexpected paragraph rule in styles'
+    blue_paragraphs = []
+    for p in xml.findall('.//w:p', ns):
+        content = ''.join(t.text or '' for t in p.findall('.//w:t', ns))
+        if p.findall('.//w:color[@w:val="1250A0"]', ns):
+            blue_paragraphs.append(content)
+    for required in ('amended 2 November 2026', '2 November task selection and candidate addendum',
+                     'The historical “29 candidates”', 'The later 36-candidate audit'):
+        assert any(required in paragraph for paragraph in blue_paragraphs), required
 tables = []
 for t in xml.findall('.//w:tbl',ns):
     tables.append([[''.join(x.text or '' for x in c.findall('.//w:t',ns)) for c in row.findall('w:tc',ns)] for row in t.findall('w:tr',ns)])

@@ -1,8 +1,9 @@
 # PE6203 research report reproduction
 
-This is the integrated local entry point as of 1 November 2026. The report does
+This is the integrated local entry point amended 2 November 2026. The report does
 not certify the research Goal: strict original-benchmark development has not
-passed and the two formal validation batches have not started. Presentation
+passed, and no candidate has passed the required two independent validation
+batches. One older candidate underwent two recorded batches and failed. Presentation
 slides and speaker scripts are outside current scope, following the user's
 update that the presentation has ended.
 
@@ -37,10 +38,11 @@ The builder writes the DOCX, its Markdown text, exact table data and input
 manifest. These are synthesis outputs; it never changes the experiment data.
 Regeneration records current input hashes, so run the verifier **before** a
 rebuild if testing the originally delivered input snapshot. The builder records
-the inspected source commit `d5d8a89`; it does not claim DOCX ZIP-byte identity
-across builds. Render using the documents skill's `render_docx.py` and inspect
-all pages after any layout or content change. The delivered file was rendered
-and reviewed on all nine pages; no slides or speaker scripts were generated.
+its own SHA-256 and the exact synthesis input hashes; it does not claim DOCX
+ZIP-byte identity across builds. Render using the documents skill's
+`render_docx.py` and inspect all pages after any layout or content change. The
+1 November nine-page visual review remains a historical record; the amended
+document has its own dated verification. No slides or speaker scripts were generated.
 
 ## Authoritative experiment packages
 

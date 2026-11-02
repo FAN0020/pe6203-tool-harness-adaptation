@@ -29,6 +29,8 @@ SOURCES = {
     'factorial': 'results/evidence/dependency-factorial-20261101/decision.json',
     'observation_diagnostic': 'results/evidence/observation-selection-20261101/decision.json',
     'literature': 'results/evidence/method-learning-20261101/method-review.json',
+    'selection_audit': 'results/evaluation/plan-alignment-20261102/summary.json',
+    'branch_evaluation': 'results/evaluation/current-branch-5b772ff-20261102/evaluation.json',
 }
 D = {key: json.loads((ROOT / path).read_text()) for key, path in SOURCES.items()}
 assert len(D['course']['rows']) == 27
@@ -60,7 +62,7 @@ doc.styles['Heading 2'].paragraph_format.space_before = Pt(8)
 for element in doc.styles.element.xpath('.//w:pBdr'):
     element.getparent().remove(element)
 doc.core_properties.title = 'Selective Tool Knowledge Adaptation under Environment Change'
-doc.core_properties.subject = 'PE6203 Group Project 4 research evidence as of 1 November 2026'
+doc.core_properties.subject = 'PE6203 Group Project 4 research evidence amended 2 November 2026'
 doc.core_properties.author = ''
 footer = sec.footer.paragraphs[0]
 footer.alignment = 2
@@ -68,15 +70,27 @@ field = OxmlElement('w:fldSimple'); field.set(qn('w:instr'), 'PAGE')
 footer._p.append(field)
 md = []
 
-def para(text, style=None):
-    doc.add_paragraph(text, style)
-    md.extend([text, ''])
+BLUE = RGBColor(18, 80, 160)
+BLUE_HEX = '#1250A0'
 
-def heading(text, level=1, newpage=False):
+def para(text, style=None, blue=False):
+    if blue:
+        p = doc.add_paragraph(style=style)
+        p.add_run(text).font.color.rgb = BLUE
+        md.extend([f'<span style="color:{BLUE_HEX}">{text}</span>', ''])
+    else:
+        doc.add_paragraph(text, style)
+        md.extend([text, ''])
+
+def heading(text, level=1, newpage=False, blue=False):
     if newpage:
         doc.add_page_break()
-    doc.add_heading(text, level)
-    md.extend(['#' * (level + 1) + ' ' + text, ''])
+    p = doc.add_heading(text, level)
+    if blue:
+        for run in p.runs:
+            run.font.color.rgb = BLUE
+    label = f'<span style="color:{BLUE_HEX}">{text}</span>' if blue else text
+    md.extend(['#' * (level + 1) + ' ' + label, ''])
 
 def table(headers, rows, widths):
     t = doc.add_table(rows=1, cols=len(headers))
@@ -107,15 +121,15 @@ def table(headers, rows, widths):
 
 doc.add_paragraph('Selective Tool Knowledge Adaptation under Environment Change', 'Title')
 md.extend(['# Selective Tool Knowledge Adaptation under Environment Change', ''])
-para('PE6203 Group Project 4   |   Research report   |   1 November 2026', 'Subtitle')
+para('PE6203 Group Project 4   |   Research report   |   amended 2 November 2026', 'Subtitle', blue=True)
 heading('Research conclusion')
-para('The implementation can recover specific tool capabilities after an environment change, but no tested candidate has yet demonstrated the required joint improvement over the original Selective Patch on the frozen original benchmark subset. The latest ready_link development study tied normal completion at 1 of 4 changed conditions and reduced mean official task fulfillment from 9.8 to 7.4. Its apparent product-quality gain occurred on task 133, where the two arms used identical knowledge. The candidate was closed without formal validation. [3]')
+para('The implementation can recover specific tool capabilities after an environment change, but no tested candidate has demonstrated the required joint improvement over the original Selective Patch on the frozen original benchmark subset. The ready_link development study tied normal completion at 1 of 4 changed conditions and reduced mean official task fulfillment from 9.8 to 7.4; its apparent product-quality gain occurred where the two arms used identical knowledge. A later offline audit of 36 registered candidates and seven recent rounds found no qualifying successor. These are separate cohorts, not a pooled effect estimate. [3, 12]', blue=True)
 para('This report separates the completed 27-run course comparison, additional exposed development cohorts, and controlled synthetic diagnostics. Their scores are not pooled. No Update and Full Rewrite remain course baselines; new candidate studies use a fresh, contemporaneous original Selective Patch control. Five judge ratings per trajectory are measurement repeats, not five independent agent runs.')
 heading('Method and contribution', 2)
 para('The original Selective Patch is a deterministic metadata and reference-based updater. It compares tool identity, parameters, descriptions, output schemas and routing; expands the affected set through explicit one-hop usage-rule references; copies authoritative changed records; and validates schemas, routing and preservation of unrelated records. Tool renames without stable evidence are treated as removal plus addition. Its reference index is a lexical heuristic, not a learned dependency graph. [1, 9]')
 para('No Update retains Early knowledge. Full Rewrite rebuilds structural fields from target metadata and uses the fixed model to regenerate all target descriptions. The course comparison therefore varies both update scope and generation mechanism; it is not a pure scope ablation. The later work tests source-grounded semantic repair, dependency scheduling and field-level observation knowledge while preserving the shared actor and judge. These are measured mechanism tests with negative as well as positive outcomes, not evidence of a universally superior updater.')
 heading('Delivery status', 2)
-para('The research objective remains unmet. Two independent validation batches have not begun because development gates failed. A causal Selective Patch under-update example and a causal over-update harm example also remain unestablished. The user reports that the presentation has ended and has removed further slide and speaker-script work from scope. No external submission or publication is claimed.')
+para('The research objective remains unmet. The observed_contract version underwent two recorded validation batches and failed the joint completion-and-product gate; ready_link and the later failed development versions did not enter such validation. No candidate has passed the required two-batch criterion. A causal under-update by the original Selective Patch and a natural unrelated-knowledge over-update harm example remain unestablished. Presentation work has ended. No external submission or publication is claimed. [12]', blue=True)
 
 heading('Study design and authority', newpage=True)
 para('The course brief requires fixed model, decoding, tasks and judge across No Update, Full Rewrite and Selective Patch; three environment stages; TOOL, PARAM and DESC coverage; TF, PE and ECS; recovery, retention and update cost; and failure trajectories. A documented fixed subset and one trajectory repeat are allowed, although three repeats are preferred. The user adds a stronger research criterion: strict gains in normal completion and actual product quality in development and separately in each of two fresh validation batches, with no TF or retention decrease. [1, 3, 10]')
@@ -228,16 +242,24 @@ refs=[
  ('8','Mechanism literature','results/evidence/method-learning-20261101/method-review.json','ACE 2510.04618v1, ace-agent/ace SHA 82709de050e1db6e6ef2f07bcb0393560b94992a. A-MEM 2502.12110v1, WujiangXu/AgenticMemory SHA f9a173dec325d84fcc97e7828775c7b241c33466. Reflexion, NeurIPS 2023, noahshinn/reflexion SHA 218cf0ef1df84b05ce379dd4a8e47f17766733a0. Exact functions and implementation limits are recorded in this file.'),
  ('9','Selective updater implementation','src/pe6203/selective.py','Metadata diff, explicit reference index, impact expansion and adaptation validation. Full Rewrite implementation is in src/pe6203/baselines.py; optional updater availability is not evidence it was used.'),
  ('10','Course authority','PE6203 Group Project 4 brief','Tool Harness Adaptation under Environment Change. Supplied DOCX SHA256 6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d. User research requirements and later presentation-scope update take precedence for this work.'),
+ ('11','Task selection and candidate provenance','reports/course-research/plan-alignment-20261102.md','The bounded audit ties the original paper-webpage plan, frozen course subset and 29-to-43 registry evolution to dated plans and task metadata.'),
+ ('12','Current branch evaluation','results/evaluation/current-branch-5b772ff-20261102/REPORT.md','Offline recomputation of 36 registered candidates and later rounds; original scores, missing cells and product reviews remain separate.'),
 ]
 for number,title,path,detail in refs:
-    para(f'[{number}] {title}. {path}. {detail}')
+    para(f'[{number}] {title}. {path}. {detail}', blue=number in ('11','12'))
 para('LLMCompiler: https://arxiv.org/html/2312.04511v3 ; https://github.com/SqueezeAILab/LLMCompiler/tree/a00c9d35507507da70e8c637eee64efc8c1857ae . Borrowed ready-prerequisite logic only; native equivalence and agent outcomes are reported separately.')
+
+heading('2 November task selection and candidate addendum', newpage=True, blue=True)
+para('The course brief permits a fixed, documented subset. Early team materials included task 223, which asks for recent research-paper retrieval and webpage publication. The course matrix later froze tasks 133, 283 and 235 before model scoring because their original inputs and local tool archives were executable without an external login. These 27 trajectories are three tasks × three stages × three methods × one agent run; they do not test the earlier paper-webpage scenario or a verified book task. The original task 223 publication and fetch services were not verified for that matrix, and a later Netlify variant changes the publication backend. No written team sign-off for the task switch was found in the audited record. [11]', blue=True)
+para('The historical “29 candidates” refers to a later registry snapshot, not 29 completed course matrices: 27 names had actor evidence and two had only generation or admission records, with none tested on task 223. The registry later grew to 36 and then 43 names. Candidate cohorts vary by original task, fixed fixture and controlled synthetic extension; name, version and input class must stay distinct. The old 27-run baseline preserves No Update and Full Rewrite, while a new candidate requires a contemporaneous Selective Patch control on the same frozen conditions. The 29 × 27 proposal cannot be treated as a completed or directly comparable screen. [11, 12]', blue=True)
+para('The later 36-candidate audit checked 45 cohorts, 517 executed cells, 2555 valid judge slots and 445 existing product reviews; seven recent rounds contained 69 actor trajectories, with six rounds complete and one interrupted. No version satisfied strict normal-completion and complete-product improvement with the TF and retention safeguards. These exposed development and historical results do not substitute for two fresh validation batches. [12]', blue=True)
+para('Local signals remain research leads rather than adopted replacements: sufficiency_feedback improved PE but completed 14/27 versus Selective Patch 17/27; budget_feedback sometimes finished earlier while code or numerical summaries remained wrong; observed_contract completed 5/12 versus 8/12 for Patch across two batches, with complete product quality at 0/12 in both arms. None is inserted into the frozen original Patch or presented as a validated task-223 method. [11, 12]', blue=True)
 
 OUT.mkdir(exist_ok=True)
 doc.save(OUT / 'PE6203 Research Report.docx')
 (OUT / 'report.md').write_text('\n'.join(md))
 metrics={'course_main':D['course']['main_results'],'course_ecs':D['course']['matched_ecs'],'course_update_cost':D['course']['update_cost_by_strategy'],'daily':D['daily']['summary'],'development':{k:D[k]['metrics'] for k in ('dependency_cut','observation_coverage','ready_link')},'selected_cohort_costs':costs,'goal_achieved':False,'formal_validation_started':False}
 (OUT / 'metrics.json').write_text(json.dumps(metrics,ensure_ascii=False,indent=2)+'\n')
-manifest={'source_commit':'d5d8a89','purpose':'Synthesis inputs only; not a new experiment freeze','sources':{p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in SOURCES.values()},'model_calls':0}
+manifest={'source_commit':None,'builder_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'purpose':'Synthesis inputs only; not a new experiment freeze','sources':{p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in SOURCES.values()},'model_calls':0}
 (OUT / 'source-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 print(json.dumps({'docx':str(OUT/'PE6203 Research Report.docx'),'source_files':len(SOURCES),'tables':len(doc.tables),'model_calls':0}))

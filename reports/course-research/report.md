@@ -1,10 +1,10 @@
 # Selective Tool Knowledge Adaptation under Environment Change
 
-PE6203 Group Project 4   |   Research report   |   1 November 2026
+<span style="color:#1250A0">PE6203 Group Project 4   |   Research report   |   amended 2 November 2026</span>
 
 ## Research conclusion
 
-The implementation can recover specific tool capabilities after an environment change, but no tested candidate has yet demonstrated the required joint improvement over the original Selective Patch on the frozen original benchmark subset. The latest ready_link development study tied normal completion at 1 of 4 changed conditions and reduced mean official task fulfillment from 9.8 to 7.4. Its apparent product-quality gain occurred on task 133, where the two arms used identical knowledge. The candidate was closed without formal validation. [3]
+<span style="color:#1250A0">The implementation can recover specific tool capabilities after an environment change, but no tested candidate has demonstrated the required joint improvement over the original Selective Patch on the frozen original benchmark subset. The ready_link development study tied normal completion at 1 of 4 changed conditions and reduced mean official task fulfillment from 9.8 to 7.4; its apparent product-quality gain occurred where the two arms used identical knowledge. A later offline audit of 36 registered candidates and seven recent rounds found no qualifying successor. These are separate cohorts, not a pooled effect estimate. [3, 12]</span>
 
 This report separates the completed 27-run course comparison, additional exposed development cohorts, and controlled synthetic diagnostics. Their scores are not pooled. No Update and Full Rewrite remain course baselines; new candidate studies use a fresh, contemporaneous original Selective Patch control. Five judge ratings per trajectory are measurement repeats, not five independent agent runs.
 
@@ -16,7 +16,7 @@ No Update retains Early knowledge. Full Rewrite rebuilds structural fields from 
 
 ### Delivery status
 
-The research objective remains unmet. Two independent validation batches have not begun because development gates failed. A causal Selective Patch under-update example and a causal over-update harm example also remain unestablished. The user reports that the presentation has ended and has removed further slide and speaker-script work from scope. No external submission or publication is claimed.
+<span style="color:#1250A0">The research objective remains unmet. The observed_contract version underwent two recorded validation batches and failed the joint completion-and-product gate; ready_link and the later failed development versions did not enter such validation. No candidate has passed the required two-batch criterion. A causal under-update by the original Selective Patch and a natural unrelated-knowledge over-update harm example remain unestablished. Presentation work has ended. No external submission or publication is claimed. [12]</span>
 
 ## Study design and authority
 
@@ -195,4 +195,18 @@ No new candidate is admitted by this synthesis. The report closes a delivery gap
 
 [10] Course authority. PE6203 Group Project 4 brief. Tool Harness Adaptation under Environment Change. Supplied DOCX SHA256 6a74fda17b7a8b9280151e55ec46b46a70d1d717e4be24c5f9c38d134611af0d. User research requirements and later presentation-scope update take precedence for this work.
 
+<span style="color:#1250A0">[11] Task selection and candidate provenance. reports/course-research/plan-alignment-20261102.md. The bounded audit ties the original paper-webpage plan, frozen course subset and 29-to-43 registry evolution to dated plans and task metadata.</span>
+
+<span style="color:#1250A0">[12] Current branch evaluation. results/evaluation/current-branch-5b772ff-20261102/REPORT.md. Offline recomputation of 36 registered candidates and later rounds; original scores, missing cells and product reviews remain separate.</span>
+
 LLMCompiler: https://arxiv.org/html/2312.04511v3 ; https://github.com/SqueezeAILab/LLMCompiler/tree/a00c9d35507507da70e8c637eee64efc8c1857ae . Borrowed ready-prerequisite logic only; native equivalence and agent outcomes are reported separately.
+
+## <span style="color:#1250A0">2 November task selection and candidate addendum</span>
+
+<span style="color:#1250A0">The course brief permits a fixed, documented subset. Early team materials included task 223, which asks for recent research-paper retrieval and webpage publication. The course matrix later froze tasks 133, 283 and 235 before model scoring because their original inputs and local tool archives were executable without an external login. These 27 trajectories are three tasks × three stages × three methods × one agent run; they do not test the earlier paper-webpage scenario or a verified book task. The original task 223 publication and fetch services were not verified for that matrix, and a later Netlify variant changes the publication backend. No written team sign-off for the task switch was found in the audited record. [11]</span>
+
+<span style="color:#1250A0">The historical “29 candidates” refers to a later registry snapshot, not 29 completed course matrices: 27 names had actor evidence and two had only generation or admission records, with none tested on task 223. The registry later grew to 36 and then 43 names. Candidate cohorts vary by original task, fixed fixture and controlled synthetic extension; name, version and input class must stay distinct. The old 27-run baseline preserves No Update and Full Rewrite, while a new candidate requires a contemporaneous Selective Patch control on the same frozen conditions. The 29 × 27 proposal cannot be treated as a completed or directly comparable screen. [11, 12]</span>
+
+<span style="color:#1250A0">The later 36-candidate audit checked 45 cohorts, 517 executed cells, 2555 valid judge slots and 445 existing product reviews; seven recent rounds contained 69 actor trajectories, with six rounds complete and one interrupted. No version satisfied strict normal-completion and complete-product improvement with the TF and retention safeguards. These exposed development and historical results do not substitute for two fresh validation batches. [12]</span>
+
+<span style="color:#1250A0">Local signals remain research leads rather than adopted replacements: sufficiency_feedback improved PE but completed 14/27 versus Selective Patch 17/27; budget_feedback sometimes finished earlier while code or numerical summaries remained wrong; observed_contract completed 5/12 versus 8/12 for Patch across two batches, with complete product quality at 0/12 in both arms. None is inserted into the frozen original Patch or presented as a validated task-223 method. [11, 12]</span>
