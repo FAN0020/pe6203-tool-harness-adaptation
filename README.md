@@ -1,3 +1,16 @@
+# evaluation-5 — current three-task results
+
+133 / 235 / 283 × Early / Middle / Late.
+
+| TF | PE | ECS | Normal final answers |
+| ---: | ---: | ---: | ---: |
+| 9.815 | 8.519 | 9.598 | 23/27 |
+
+Method: includes one retry of failed knowledge updates; all valid resulting scores and all costs are included. Different batches and execution protocols prevent a controlled ranking against historical V6. [Current evidence](https://github.com/FAN0020/pe6203-tool-harness-adaptation/blob/main/evaluation/v5/three-task-view/README.md). Implementation and runtime configuration are unchanged.
+
+<details>
+<summary>Historical branch documentation and publication records</summary>
+
 # PE6203 · 工具变化下的 Harness 适应
 
 **当前 V5 汇报范围：133、235、283（2026-11-03）。** [三任务评测入口](https://github.com/FAN0020/pe6203-tool-harness-adaptation/blob/main/evaluation/v5/three-task-view/README.md)已与原 V6 对齐；首轮与一次重试结果分别保留。下方旧说明和四／五任务实验属于历史材料，没有改写原始分数。本次仅更新评测入口，不修改实现或执行配置。
@@ -92,3 +105,5 @@ Choose `pe6203 adapt --selective-mode deterministic_v1|hybrid_v2|hybrid_v3|hybri
 explicitly when comparing versions. V3 artifact commands, V5 probe/run commands,
 and V6 `run-v6` are retained. Existing No Update, Full Rewrite and research variant
 algorithms are unchanged. See [integration and provenance](docs/selective-version-integration.md).
+
+</details>
