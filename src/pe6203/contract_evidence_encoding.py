@@ -5,6 +5,7 @@ factors same-expression inputs into a baseline and exact argument deltas. Both
 decoders recover every observation in its original order; no selection by task,
 score, final answer, or successful outcome is possible.
 """
+
 import json
 from copy import deepcopy
 
@@ -52,11 +53,20 @@ def encode(values, layout):
         groups = []
         for expression in dict.fromkeys(row["arguments"].get("expression") for row in rows):
             selected = [r for r in rows if r["arguments"].get("expression") == expression]
-            base = min(selected, key=lambda r: (len(canonical(r["arguments"])), r["index"]))["arguments"]
-            changes = [{"index": r["index"], "set": {k: v for k, v in r["arguments"].items()
-                         if k not in base or base[k] != v},
-                        "remove": [k for k in base if k not in r["arguments"]], "result": r["result"]}
-                       for r in selected]
+            base = min(selected, key=lambda r: (len(canonical(r["arguments"])), r["index"]))[
+                "arguments"
+            ]
+            changes = [
+                {
+                    "index": r["index"],
+                    "set": {
+                        k: v for k, v in r["arguments"].items() if k not in base or base[k] != v
+                    },
+                    "remove": [k for k in base if k not in r["arguments"]],
+                    "result": r["result"],
+                }
+                for r in selected
+            ]
             groups.append({"base_arguments": base, "deltas": changes})
         packed = {"layout": layout, "results": outcomes, "groups": groups}
     if decode(packed) != values:
@@ -97,8 +107,11 @@ def compile_knowledge(base, target, feedback, layout):
     for host in knowledge["tools"]:
         if host["tool_id"] not in changed:
             continue
-        observations = [o for o in feedback if o["stage"] == target["version"] and
-                        host["tool_id"] == o["server"] + "::" + o["tool"]]
+        observations = [
+            o
+            for o in feedback
+            if o["stage"] == target["version"] and host["tool_id"] == o["server"] + "::" + o["tool"]
+        ]
         if not observations:
             continue
         values = [normalize(o) for o in observations]
@@ -110,9 +123,20 @@ def compile_knowledge(base, target, feedback, layout):
                 "to obtain a row's exact arguments. Indices preserve original observation order; "
                 "equal result references mean equal recorded output, not equivalence for untested inputs."
             )
-        host["usage_rules"].append(BOUNDARY + explanation + "\n" +
-                                    json.dumps(packed, ensure_ascii=False, separators=(",", ":")))
-        log.append({"operation": "encode_empirical_evidence", "tool_id": host["tool_id"],
-                    "layout": layout, "records": len(values), "results": len(packed["results"]),
-                    "roundtrip_exact": True})
+        host["usage_rules"].append(
+            BOUNDARY
+            + explanation
+            + "\n"
+            + json.dumps(packed, ensure_ascii=False, separators=(",", ":"))
+        )
+        log.append(
+            {
+                "operation": "encode_empirical_evidence",
+                "tool_id": host["tool_id"],
+                "layout": layout,
+                "records": len(values),
+                "results": len(packed["results"]),
+                "roundtrip_exact": True,
+            }
+        )
     return knowledge, log

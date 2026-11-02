@@ -8,7 +8,9 @@ from pe6203.contract_evidence_encoding import compile_knowledge, decode, encode,
 from pe6203.selective import adapt_result
 
 ROOT = Path(__file__).resolve().parents[1]
-OBS = json.loads((ROOT / "experiments/observed-contract-probes-v1.json").read_text())["observations"]
+OBS = json.loads((ROOT / "experiments/observed-contract-probes-v1.json").read_text())[
+    "observations"
+]
 
 
 @pytest.mark.parametrize("stage", ["middle", "late"])
@@ -47,5 +49,7 @@ def test_only_changed_observed_host_can_receive_encoded_evidence(layout):
     assert [k for k in before if before[k] != after[k]] == ["math-mcp::validate_syntax"]
     assert len(changes) == 1
     restored = copy.deepcopy(knowledge)
-    next(t for t in restored["tools"] if t["tool_id"] == "math-mcp::validate_syntax")["usage_rules"] = []
+    next(t for t in restored["tools"] if t["tool_id"] == "math-mcp::validate_syntax")[
+        "usage_rules"
+    ] = []
     assert restored == base["knowledge"]

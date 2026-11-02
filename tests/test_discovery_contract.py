@@ -84,4 +84,6 @@ def test_discovery_preserves_k0_and_unrelated_changes():
         tool["version"] = "late"
         if tool["name"] == "query-docs":
             tool["description"] += " Updated docs contract."
-    assert adapt(old, target, "discovery_contract", context)[0] == base_patch(old, target)["knowledge"]
+    assert (
+        adapt(old, target, "discovery_contract", context)[0] == base_patch(old, target)["knowledge"]
+    )
