@@ -1,10 +1,9 @@
 # evaluation 3 — current tasks 133 / 235 / 283
 
-The current reporting entry is the [three-task aligned view](three-task-view/README.md).
-It covers the same task IDs as original V6. First attempts and the post hoc
-once-retry supplement are separate; all valid retry results and their costs are
-included without picking only improvements. No raw scores or historical plans
-are changed. The active three-task evaluator is `scripts/eval_v35_three_tasks.py`.
+The current displayed results are in the [three-task summary](three-task-view/README.md), including one retry of failed knowledge updates. All valid resulting scores and every incurred update/actor cost are retained. First-attempt evidence remains linked for audit. The active three-task evaluator is `scripts/eval_v35_three_tasks.py`.
+
+<details>
+<summary>Historical studies, source packages and reproduction</summary>
 
 ## Historical four-task publication (retained unchanged)
 
@@ -50,3 +49,5 @@ Offline commands (no model requests):
 Paid reproduction must use a fresh output directory and the archived protocol,
 matching installed MCPEvol services and separately supplied credentials.
 The code copies do not silently rewrite historical local paths or install tools.
+
+</details>

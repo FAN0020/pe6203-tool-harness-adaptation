@@ -1,11 +1,9 @@
 # evaluation 5 — current tasks 133 / 235 / 283
 
-Start with the [three-task aligned view](three-task-view/README.md), covering
-the same task IDs as original V6. First attempts and the post hoc once-retry
-supplement are separate. All valid retry scores and all incurred costs remain
-included, even when the mean decreases. The active three-task evaluator is
-`scripts/eval_v35_three_tasks.py`; the four-task scripts below are frozen
-historical reproduction tools, not the current reporting scope.
+The current displayed results are in the [three-task summary](three-task-view/README.md), including one retry of failed knowledge updates. All valid resulting scores and every incurred update/actor cost are retained. First-attempt evidence remains linked for audit. The active three-task evaluator is `scripts/eval_v35_three_tasks.py`.
+
+<details>
+<summary>Historical studies, source packages and reproduction</summary>
 
 ## Historical studies (retained unchanged)
 
@@ -39,3 +37,5 @@ python evaluation/v5/code/scripts/verify_v5_formal.py --root outputs/evaluation5
 Online execution requires MCPEvol services, the frozen runtime and private
 OPENROUTER_API_KEY configuration. Do not run the evaluator against main's newer
 source while claiming to reproduce a historical pinned implementation.
+
+</details>

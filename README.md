@@ -1,8 +1,21 @@
 # PE6203 · 工具变化下的 Harness 适应
 
-**当前汇报任务范围（2026-11-03）：133、235、283。** V3、V5 的当前评测入口已对齐这三个任务，见 [V3 三任务视图](evaluation/v3/three-task-view/README.md)和 [V5 三任务视图](evaluation/v5/three-task-view/README.md)。首轮与一次失败重试后的结果分开列出；原始四／五任务实验仍是历史材料，没有改写其计划或原分。
+**当前正式汇报范围：133、235、283 × Early / Middle / Late。** 主展示统一采用补充运行后的当前汇总；V6 使用冻结实现 `8401df2`，后续 V6-r1/r2 开发修订未合入 main。
 
-V6 继续使用 [原冻结三任务评测](evaluation/v6/README.md)，实现来源为 `8401df2`；后续 V6 开发修订没有合入本分支。以下课程发布表保留其历史版本含义，不应与 V3/V5/V6 的不同批次分数混作同期比较。
+| Version | TF /10 | PE /10 | ECS | Scored / planned | Normal final answers |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| V1 | 9.889 | 9.111 | 9.732 | 9/9 | 6/9 |
+| V2 | 9.750 | 7.175 | incomplete | 8/9 | 6/9 |
+| V3 | 9.674 | 8.593 | 9.370 | 27/27 | 22/27 |
+| V5 | 9.815 | 8.519 | 9.598 | 27/27 | 23/27 |
+| V6 | 9.889 | 9.267 | 9.776 | 9/9 | 8/9 |
+
+评测说明：V3／V5 包含失败知识更新的一次重试；V6 数学 Middle 使用观察后选定的独立重跑结果，基线未获得同样的额外重试。V1 保留已有结果，V2 项目 Late 重试后仍缺失。各批次、重复数和执行协议不同，本表为描述性汇总；“正常结束”不等于代码正确。
+
+[评测入口与数据来源](evaluation/README.md) · [V3 当前结果](evaluation/v3/three-task-view/README.md) · [V5 当前结果](evaluation/v5/three-task-view/README.md) · [V6 与两组对照](evaluation/v6/recorded-results/REPORT.md)。原始记录和全部失败／重试费用仍保留归档，不在首页并列首轮结果表。
+
+<details>
+<summary>历史课程发布、实验记录及运行说明</summary>
 
 **课程主实验与交付已冻结；后续研究另行归档。** 用户现已授权以完成任务为先，不设研究总费用或轨迹额度；仍固定公平比较设置，记录费用和失败，不覆盖旧结果，不自动部署。
 
@@ -94,3 +107,5 @@ Choose `pe6203 adapt --selective-mode deterministic_v1|hybrid_v2|hybrid_v3|hybri
 explicitly when comparing versions. V3 artifact commands, V5 probe/run commands,
 and V6 `run-v6` are retained. Existing No Update, Full Rewrite and research variant
 algorithms are unchanged. See [integration and provenance](docs/selective-version-integration.md).
+
+</details>

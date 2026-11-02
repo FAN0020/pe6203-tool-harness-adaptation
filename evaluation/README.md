@@ -5,15 +5,19 @@ source provenance separately from main's active Selective implementations.
 Packaging or merging an evaluation does not promote a strategy as best, change
 scores, enable code validation for existing baselines, or run paid requests.
 
-## Current reporting scope: 133 / 235 / 283
+## Current results: 133 / 235 / 283
 
-V3, V5 and the original V6 now share the same reporting task IDs. Start with
-[V3's three-task view](v3/three-task-view/README.md),
-[V5's three-task view](v5/three-task-view/README.md), and
-[the frozen V6 package](v6/README.md). V3/V5 show first attempts and a separately
-labelled once-retry supplement; this offline scope view does not rewrite any
-historical four/five-task study or imply identical providers, repeats or artifact
-protocols. Later V6 development changes are not included in this branch.
+| Version | TF /10 | PE /10 | ECS | Scored / planned | Normal final answers |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| V1 | 9.889 | 9.111 | 9.732 | 9/9 | 6/9 |
+| V2 | 9.750 | 7.175 | incomplete | 8/9 | 6/9 |
+| V3 | 9.674 | 8.593 | 9.370 | 27/27 | 22/27 |
+| V5 | 9.815 | 8.519 | 9.598 | 27/27 | 23/27 |
+| V6 | 9.889 | 9.267 | 9.776 | 9/9 | 8/9 |
+
+Method: V3/V5 include one retry of failed knowledge updates; V6 uses the independent Math Middle repeat selected after it was observed. Baselines did not receive the same extra retry. V1 remains its recorded run; V2 still lacks Project Late after retry. Providers, execution protocols and repeat counts differ, so these are descriptive results rather than a controlled version ranking. Normal final answers do not establish code correctness. First attempts and all incurred costs remain in the linked audit records.
+
+Sources: [V1](../results/evidence/course-v1.3-20261031/summary.json), [V2](v2/recorded-results/summary.json), [V3](v3/three-task-view/one-retry.json), [V5](v5/three-task-view/one-retry.json), [V6](v6/recorded-results/summary.json).
 
 The active three-task V3/V5 evaluator is `scripts/eval_v35_three_tasks.py`.
 Preparation and execution require a fresh output directory; paid execution still

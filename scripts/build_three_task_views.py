@@ -91,21 +91,22 @@ def build(root):
         }
         for name, data in views.items():
             (out / name).write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
-        a, b = views["first-attempt.json"]["metrics"], views["one-retry.json"]["metrics"]
+        b = views["one-retry.json"]["metrics"]
         (out / "README.md").write_text(
             f"# {version.upper()} — 133 / 235 / 283\n\n"
             "This is the current three-task reporting view, aligned to original V6 task IDs. "
             "It is derived offline from recorded evaluations; no task has been rerun or relabelled by this view. "
             "Original four/five-task studies and negative results remain historical evidence.\n\n"
-            "| View | Scored / planned | Normal final answers | TF | PE | ECS population |\n"
-            "| --- | --- | --- | ---: | ---: | ---: |\n"
-            f"| First attempt | {a['scored_actor_executions']}/27 | {a['normal_final_answers']}/27 | {a['TF_on_scored']:.3f} | {a['PE_on_scored']:.3f} | unavailable |\n"
-            f"| Once-retry supplement | {b['scored_actor_executions']}/27 | {b['normal_final_answers']}/27 | {b['TF_on_scored']:.3f} | {b['PE_on_scored']:.3f} | {b['ECS_population']:.3f} |\n\n"
-            "First-attempt averages exclude unscored conditions and must be read with the denominator. "
-            "The retry view includes every valid first-retry score on a previously missing condition, even if its inclusion lowers the mean. "
-            "It does not conceal or replace the first-attempt failures. Five judge ratings are not five actor executions.\n\n"
-            f"First-attempt update+actor USD {first_cost['deployment_usd']}; extra retry update+actor USD {retry_cost['deployment_usd']}; "
-            f"combined deployment USD {costs['retry_aware_deployment_usd']}. Judge and local CPU costs are separate.\n\n"
+            "| Scored / planned | Normal final answers | TF | PE | ECS population |\n"
+            "| --- | --- | ---: | ---: | ---: |\n"
+            f"| {b['scored_actor_executions']}/27 | {b['normal_final_answers']}/27 | {b['TF_on_scored']:.3f} | {b['PE_on_scored']:.3f} | {b['ECS_population']:.3f} |\n\n"
+            "Method: this summary includes one retry of failed knowledge updates and every valid resulting actor score. "
+            "It is a post hoc supplement, with three actor repeats per task/stage; five judge ratings are not five actor executions. "
+            "Providers, repeat counts and artifact protocols differ from historical V6, so this is a descriptive comparison.\n\n"
+            f"Actual update+actor cost, including failed attempts and retries: USD {costs['retry_aware_deployment_usd']}. "
+            "Judge and local CPU costs are separate.\n\n"
+            "The displayed metrics come from [one-retry.json](one-retry.json). "
+            "The [first-attempt record](first-attempt.json) is retained for audit, without a second headline table.\n\n"
             f"Sources are pinned to commit `{SOURCE_REF}` on the historical evaluation branch: "
             f"[first cohort](https://github.com/FAN0020/pe6203-tool-harness-adaptation/blob/{SOURCE_REF}/{FIRST_PATH}), "
             f"[once-retry cohort](https://github.com/FAN0020/pe6203-tool-harness-adaptation/blob/{SOURCE_REF}/{RETRY_PATH}). "
@@ -113,7 +114,7 @@ def build(root):
             "Offline regeneration: `python scripts/build_three_task_views.py`. "
             "The pinned source commit must be available locally (fetch the historical evaluation branch if necessary).\n"
         )
-        result[version] = {"first": a, "one_retry": b}
+        result[version] = {"first": views["first-attempt.json"]["metrics"], "one_retry": b}
     return result
 
 
