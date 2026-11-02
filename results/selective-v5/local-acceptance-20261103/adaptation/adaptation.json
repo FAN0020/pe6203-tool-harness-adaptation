@@ -1,0 +1,227 @@
+{
+  "schema_version": "1.0",
+  "strategy": "selective_patch",
+  "pipeline_version": "hybrid_v5",
+  "status": "validated",
+  "formal_llm_rewrite": true,
+  "validation": {
+    "errors": [],
+    "checks": {
+      "records": 3,
+      "unchanged": 2
+    },
+    "argument_cases": [],
+    "behavioral_execution": "only_independently_collected_probe_records_if_supplied",
+    "independent_probe_records": 0,
+    "behavioral_guarantees_admitted": false,
+    "semantic_entailment_proven": false
+  },
+  "updater_audit_path": "updater-audit.json",
+  "adapt_status": "applied",
+  "benchmark_commit": "synthetic-fixture",
+  "target_stage": "late",
+  "input": {
+    "old_knowledge_file_sha256": "c310b0c50f59cb501c207d47d5f29b4e9adae3539648d4d65459de8de170c820",
+    "target_metadata_file_sha256": "08c21a886abe2f2571fdbc63832fc967f0a8dcb6e7e1a8924799e1410b62a580"
+  },
+  "output": {
+    "knowledge_path": "knowledge.json",
+    "knowledge_file_sha256": "3afc69e68dd7d228fd352e2572fd3f804fa23c75886e05c2e92836ec0390a10c"
+  },
+  "diff": {
+    "schema_version": "1.0",
+    "old_commit": "synthetic-fixture",
+    "new_commit": "synthetic-fixture",
+    "old_version": "early",
+    "new_version": "late",
+    "old_tool_count": 3,
+    "new_tool_count": 3,
+    "removed": [],
+    "added": [],
+    "changed": [
+      {
+        "change_id": "c1",
+        "tool_id": "server::fetch_balance",
+        "changed_fields": [
+          "parameters",
+          "description"
+        ],
+        "old": {
+          "tool_id": "server::fetch_balance",
+          "server_id": "server",
+          "name": "fetch_balance",
+          "version": "early",
+          "description": "Returns the account balance for the display panel in dollars.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "amount"
+            ],
+            "additionalProperties": false
+          },
+          "output_schema": null,
+          "usage_rules": [],
+          "routing": {
+            "server_id": "server",
+            "tool_name": "fetch_balance"
+          }
+        },
+        "new": {
+          "tool_id": "server::fetch_balance",
+          "server_id": "server",
+          "name": "fetch_balance",
+          "version": "late",
+          "description": "Returns the account balance for the display panel in cents.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "amount",
+              "currency"
+            ],
+            "additionalProperties": false
+          },
+          "output_schema": null,
+          "usage_rules": [],
+          "routing": {
+            "server_id": "server",
+            "tool_name": "fetch_balance"
+          }
+        }
+      }
+    ],
+    "unchanged_tool_ids": [
+      "server::display",
+      "server::unchanged"
+    ],
+    "unchanged_count": 2
+  },
+  "stages": [
+    {
+      "stage": "deterministic_diff",
+      "status": "passed"
+    },
+    {
+      "stage": "semantic_review",
+      "status": "passed",
+      "coverage": "all_surviving_records",
+      "records": 3
+    },
+    {
+      "stage": "semantic_patch",
+      "status": "passed",
+      "edited_records": 1
+    },
+    {
+      "stage": "program_validation",
+      "status": "passed"
+    }
+  ],
+  "impacted_tool_ids": [
+    "server::display",
+    "server::fetch_balance"
+  ],
+  "patch": [
+    {
+      "operation": "replace",
+      "tool_id": "server::fetch_balance",
+      "fields": [
+        "parameters",
+        "description"
+      ],
+      "new": {
+        "tool_id": "server::fetch_balance",
+        "server_id": "server",
+        "name": "fetch_balance",
+        "version": "late",
+        "description": "Returns the account balance for the display panel in cents.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "number"
+            },
+            "currency": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "additionalProperties": false
+        },
+        "output_schema": null,
+        "usage_rules": [],
+        "routing": {
+          "server_id": "server",
+          "tool_name": "fetch_balance"
+        }
+      },
+      "basis": [
+        "c1"
+      ],
+      "reason": "tool metadata changed in target environment"
+    },
+    {
+      "operation": "semantic_rules",
+      "tool_id": "server::display",
+      "retain_rule_indices": [],
+      "rules": [
+        {
+          "kind": "guidance",
+          "text": "Convert cents to dollars before display.",
+          "evidence_ids": [
+            "e-8af54bf08cf4c9ce56ebc652",
+            "e-1f11547182eff32003584544"
+          ]
+        }
+      ],
+      "basis": [
+        "c1"
+      ],
+      "evidence_ids": [
+        "e-8af54bf08cf4c9ce56ebc652",
+        "e-1f11547182eff32003584544"
+      ],
+      "reason": "Withdraw obsolete direct conversion rule",
+      "usage_rules": [
+        "Unverified LLM guidance from declared evidence; not an established behavior: \"Convert cents to dollars before display.\" [evidence: e-8af54bf08cf4c9ce56ebc652, e-1f11547182eff32003584544]"
+      ],
+      "withdrawn_rules": [
+        {
+          "index": 0,
+          "text": "Pass the balance service result directly as amount without conversion.",
+          "reason": "Withdraw obsolete direct conversion rule"
+        }
+      ]
+    }
+  ],
+  "unresolved_items": [],
+  "evidence_registry_sha256": "8b89e57005bf8a28849fa23b85093a5fc8c68c8930c41c868601c017f10c60bc",
+  "semantic_grounding": "typed_literal_evidence_and_unverified_guidance_not_entailment",
+  "cost": {
+    "method": "hybrid_selective_patch_v5",
+    "calls": 2,
+    "prompt_tokens": 20,
+    "completion_tokens": 10,
+    "total_tokens": 30,
+    "usd": 0.0,
+    "known_usd": 0.0,
+    "unknown_charge_requests": 0,
+    "seconds": 0.24743074993602931,
+    "update_operations": 2
+  }
+}

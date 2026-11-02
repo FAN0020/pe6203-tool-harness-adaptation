@@ -106,6 +106,8 @@ def adapt(old_knowledge, new_metadata, strategy, context=None):
             from .selective import adapt as selective_adapt
         elif mode == "hybrid_v2":
             from .hybrid_selective import adapt as selective_adapt
+        elif mode == "hybrid_v5":
+            from .selective_v5 import adapt as selective_adapt
         else:
             raise ValueError(f"Unsupported selective mode: {mode}")
 
@@ -170,6 +172,8 @@ def write_adaptation(old_path, metadata_path, strategy, output, context=None):
             from .selective import write_adaptation as selective_write
         elif mode == "hybrid_v2":
             from .hybrid_selective import write_adaptation as selective_write
+        elif mode == "hybrid_v5":
+            from .selective_v5 import write_adaptation as selective_write
         else:
             raise ValueError(f"Unsupported selective mode: {mode}")
 

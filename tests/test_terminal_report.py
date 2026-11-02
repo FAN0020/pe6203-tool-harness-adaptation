@@ -85,3 +85,35 @@ def test_json_mode_and_saved_text_keep_unknown_zero_and_refuse_overwrite(tmp_pat
     assert "\x1b" not in text and "\x07" not in text
     assert cli("report", source, "--output", output).returncode == 2
     assert cli("report", source, "--output", source).returncode == 2
+
+
+def test_artifact_protocol_report_separates_generation_completion_and_acceptance(tmp_path):
+    source = tmp_path / "result.json"
+    source.write_text(
+        json.dumps(
+            {
+                "task_id": 999,
+                "status": "evaluated",
+                "execution_status": "completed",
+                "generation_status": "output_truncated",
+                "completion_origin": "artifact_repair",
+                "artifact_validation": {
+                    "status": "passed_finite_tests",
+                    "accepted_artifact": {"path": "attempt-1.py"},
+                    "repairs": [{}],
+                },
+                "config": {},
+            }
+        )
+    )
+    result = cli("report", source)
+    assert result.returncode == 0
+    for text in [
+        "passed_finite_tests",
+        "initial=output_truncated",
+        "final=completed",
+        "origin=artifact_repair",
+        "accepted=True",
+        "security_guarantee=False",
+    ]:
+        assert text in result.stdout
