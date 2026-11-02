@@ -8,21 +8,23 @@ scores, enable code validation for existing baselines, or run paid requests.
 | Label / branch | Directory | Publication scope |
 | --- | --- | --- |
 | evaluation 2 / `evaluation-2` | `v2/` | Original V2 evaluation engine, protocol and recorded partial results |
-| evaluation 3 / `evaluation-3` | Not merged | Pending and unavailable by owner instruction; no valid current V3 eval claim |
+| evaluation 3 / `evaluation-3` | `v3/` | Verified optimized V3 evaluator, frozen protocol and completed 108-trajectory / 540-rating knowledge-only study |
 | evaluation 5 / `evaluation-5` | `v5/` | Historical V5 evaluation plus later knowledge-only 72-trajectory study and scope measurements |
 | evaluation 6 / `evaluation-6` | `v6/` | Gated V6 evaluation, offline checks, cost analysis and retained diagnostic attempts |
 
 Start with each version's README and manifest. Batches carry exact source Git
 revisions, task sets, provider/protocol differences and readiness. Do not pool
 historical artifact-enabled evaluations with later knowledge-only experiments.
-The latest/current V3 evaluation is explicitly pending; old V3 records cannot
-stand in for it. Only evaluation-2, evaluation-5 and evaluation-6 are merge targets.
+The latest V3 evaluation is now completed and verified. Its 108-trajectory
+knowledge-only study is separate from the historical partial 22/27 V3 record.
+Evaluation 2/3/5/6 packages are available without promoting a default strategy.
 
 ## Offline commands (no API calls)
 
 ```sh
 python evaluation/manage.py list
 python evaluation/manage.py verify --version 2
+python evaluation/manage.py verify --version 3
 python evaluation/manage.py verify --version 5
 python evaluation/manage.py verify --version 6
 python evaluation/manage.py verify --all
@@ -50,5 +52,8 @@ See [integration-verification.json](integration-verification.json). Evaluation
 no new repository-test failures were introduced. The pre-existing main baseline
 had 22 failing tests (missing untracked research fixtures plus one artifact
 assertion) and 416 lint issues; the integration reproduced the same failures.
-This is a scoped evaluation-code acceptance, not a claim that the entire
-repository CI is green. Current V3 remains unvalidated and unmerged.
+That earlier check is retained as historical context. The current optimized-V3
+integration restored the ignored historical fixtures and the installed Node
+path, then passed 945 repository tests with no failures or skips (15 native
+integration tests deselected). See v3/integration-verification.json. Current V3
+now has a completed controlled evaluation and verified merge candidate.
