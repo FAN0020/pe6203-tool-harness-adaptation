@@ -1,0 +1,20 @@
+{
+  "review_id": "R09",
+  "input_sha256": "5dbb406f140ae8f3c8aa422dd27bca1ce2d1a2bf23b2213d1cd7cb01240f0020",
+  "properties": {
+    "validation": "pass",
+    "guidance": "pass",
+    "implementation_consistency": "fail"
+  },
+  "core_pass": false,
+  "evidence": {
+    "validation": "Reports actual syntax and evaluation observations for specific expressions correctly; distinguishes native rejection from Python eval execution. Closing analogy that validator proved the pattern is not treated as evidence Python code ran; none is reported.",
+    "guidance": "Python AST allowlist, avoid eval, resource controls, numeric bounds and OWASP references are actionable.",
+    "implementation_consistency": "AST inspection: exponent operation is unguarded despite own test expecting rejection of 2**100000000; bool accepted despite explicit rejection comment. Recommendations to add guards do not make the delivered test pass."
+  },
+  "review_phase": "before_arm_mapping_and_scores",
+  "limitations": [
+    "Same coordinator; no arm or score summary inspected.",
+    "Static AST inspection only; no generated-code execution."
+  ]
+}
