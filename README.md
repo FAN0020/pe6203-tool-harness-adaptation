@@ -80,3 +80,13 @@ python3 submission/handover-20261031/verify.py
 | `docs/`、`contributions/` | 机器说明、来源与成员贡献记录。 |
 | `tools/netlify/` | 可选 Netlify CLI 的版本与依赖锁。 |
 | `.cache/`、`.venv/`、`.netlify/` | 本机依赖、环境、登录关联，不提交。 |
+
+
+## Hao Qi Selective Patch versions
+
+V1, V2, V3, V5 and V6 coexist in main. The shared deterministic V1 core remains
+the default so existing commands do not acquire an implicit model dependency.
+Choose `pe6203 adapt --selective-mode deterministic_v1|hybrid_v2|hybrid_v3|hybrid_v5|hybrid_v6`
+explicitly when comparing versions. V3 artifact commands, V5 probe/run commands,
+and V6 `run-v6` are retained. Existing No Update, Full Rewrite and research variant
+algorithms are unchanged. See [integration and provenance](docs/selective-version-integration.md).

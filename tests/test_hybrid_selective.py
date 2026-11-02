@@ -140,7 +140,7 @@ def llm(monkeypatch):
 
 
 def context(**kwargs):
-    return {"updater": {"allow_metadata_api": True}, **kwargs}
+    return {"selective_mode": "hybrid_v2", "updater": {"allow_metadata_api": True}, **kwargs}
 
 
 def test_public_strategy_uses_all_four_stages_and_finds_implicit_link(catalogs, llm):

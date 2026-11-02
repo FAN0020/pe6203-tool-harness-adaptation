@@ -103,7 +103,7 @@ def adapt(old_knowledge, new_metadata, strategy, context=None):
     if strategy in VARIANTS:
         return variant_adapt(old_knowledge, new_metadata, strategy, context)
     if strategy == "selective_patch":
-        mode = (context or {}).get("selective_mode", "hybrid_v2")
+        mode = (context or {}).get("selective_mode", "deterministic_v1")
         if mode == "deterministic_v1":
             from .selective import adapt as selective_adapt
         elif mode == "hybrid_v2":
@@ -173,7 +173,7 @@ def write_adaptation(old_path, metadata_path, strategy, output, context=None):
     if strategy in VARIANTS:
         context_settings(context)
     if strategy == "selective_patch":
-        mode = (context or {}).get("selective_mode", "hybrid_v2")
+        mode = (context or {}).get("selective_mode", "deterministic_v1")
         if mode == "deterministic_v1":
             from .selective import write_adaptation as selective_write
         elif mode == "hybrid_v2":

@@ -424,8 +424,11 @@ async def run_async(task_id, version, strategy, seed, config):
             raise ValueError("Round and judge-run counts must be integers")
         lock, upstream = source(root)
         extension = config.get("extension_tasks", {}).get(str(task_id))
-        task = (load_task(upstream, task_id, root / extension)
-                if extension else load_task(upstream, task_id))
+        task = (
+            load_task(upstream, task_id, root / extension)
+            if extension
+            else load_task(upstream, task_id)
+        )
         if "dataset_kind" in task:
             result.update(dataset_kind=task["dataset_kind"], extension_id=task["extension_id"])
         if version not in lock["stages"]:

@@ -2,7 +2,8 @@
 
 This branch upgrades the updater, not the execution agent. The public
 `pe6203 adapt --strategy selective_patch` and `pe6203.baselines.adapt` entries
-now default to **hybrid_v2**. The 27-run course results remain evidence for
+default to **hybrid_v2** on the original V2 branch. Combined main retains the
+deterministic default; select `--selective-mode hybrid_v2` explicitly there. The 27-run course results remain evidence for
 **deterministic_v1 only**. V2 has implementation acceptance and a synthetic
 real-LLM smoke, not a new benchmark result or a demonstrated performance gain.
 
@@ -31,7 +32,7 @@ run benchmark tasks, a judge or real MCP tools:
 ```bash
 export OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 # OPENROUTER_API_KEY must already exist in the environment. Do not put it in JSON.
-uv run pe6203 adapt --strategy selective_patch \
+uv run pe6203 adapt --strategy selective_patch --selective-mode hybrid_v2 \
   --old-knowledge examples/qi-v2/early.json \
   --new-metadata examples/qi-v2/late.json \
   --updater-config configs/qi-v2-updater.template.json \
@@ -41,8 +42,8 @@ uv run pe6203 adapt --strategy selective_patch \
 
 The explicit historical mode is `--selective-mode deterministic_v1`, or context
 `{"selective_mode": "deterministic_v1"}` for the shared Python entry. Direct
-imports from `pe6203.selective` are the retained V1/core API, not the new public
-default. Frozen source archives are unchanged. Never resume an old frozen
+imports from `pe6203.selective` are the retained V1/core API, not the explicit V2
+implementation. Frozen source archives are unchanged. Never resume an old frozen
 experiment using modified V2 source, or relabel old V1 scores/costs as V2.
 
 ## Acceptance and evidence

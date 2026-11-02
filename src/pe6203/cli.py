@@ -202,8 +202,8 @@ def main():
     p.add_argument(
         "--selective-mode",
         choices=["deterministic_v1", "hybrid_v2", "hybrid_v3", "hybrid_v5", "hybrid_v6"],
-        default="hybrid_v2",
-        help="QI-V2 hybrid is the default; V1 is retained for historical comparisons",
+        default="deterministic_v1",
+        help="Preserve main deterministic default; choose V2/V3/V5/V6 explicitly",
     )
     p.add_argument("--capability-evidence", type=Path, help="Frozen V3 source evidence manifest")
     p.add_argument("--patch-budget", type=Path, help="Hybrid request/time limits JSON")
@@ -332,7 +332,8 @@ def main():
             return 0
         elif args.command == "adapt":
             if args.evidence_bundle and (
-                args.strategy != "selective_patch" or args.selective_mode not in {"hybrid_v5", "hybrid_v6"}
+                args.strategy != "selective_patch"
+                or args.selective_mode not in {"hybrid_v5", "hybrid_v6"}
             ):
                 raise ValueError("Evidence bundles are only supported in hybrid_v5/hybrid_v6")
             from .capability import load_evidence
@@ -350,7 +351,8 @@ def main():
                     ),
                     **(
                         {"evidence_bundle": str(args.evidence_bundle)}
-                        if args.evidence_bundle else {}
+                        if args.evidence_bundle
+                        else {}
                     ),
                     "selective_mode": args.selective_mode,
                     "patch_budget": read_json(args.patch_budget) if args.patch_budget else {},

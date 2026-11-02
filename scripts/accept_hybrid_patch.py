@@ -143,6 +143,8 @@ def main():
         "adapt",
         "--strategy",
         "selective_patch",
+        "--selective-mode",
+        "hybrid_v2",
         "--old-knowledge",
         str(root / "examples/qi-v2/early.json"),
         "--new-metadata",
