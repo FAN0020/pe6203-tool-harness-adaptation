@@ -1,9 +1,18 @@
-# evaluation 5
+# evaluation 5 — current tasks 133 / 235 / 283
+
+Start with the [three-task aligned view](three-task-view/README.md), covering
+the same task IDs as original V6. First attempts and the post hoc once-retry
+supplement are separate. All valid retry scores and all incurred costs remain
+included, even when the mean decreases. The active three-task evaluator is
+`scripts/eval_v35_three_tasks.py`; the four-task scripts below are frozen
+historical reproduction tools, not the current reporting scope.
+
+## Historical studies (retained unchanged)
 
 This package separates the original a97a599 V5 experiment from the later scoped
 V5 knowledge-only experiment. It does not replace either result with the other.
-The current V3 evaluation is pending and must not be inferred from the original
-paired-driver source stored here for provenance.
+The original paired-driver source remains provenance; current V3 and V5 results
+are published separately and must not be inferred from that older driver alone.
 
 - `code/scripts/eval_v5_formal.py`: later four-task × three-stage × two-arm ×
   three-repeat study (72 trajectories). Explicit --execute required for paid runs.
