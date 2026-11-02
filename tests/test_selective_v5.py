@@ -34,42 +34,45 @@ def refs(payload, identity="server::display"):
 
 
 def reply(payload, *, action="update", kind="guidance"):
-    if "candidates" in payload:
+    if payload.get("phase") == "scope_screen":
+        eligible = [row["tool_id"] for row in payload["directory"]]
         return {
-            "decisions": [
+            "screened_tool_ids": eligible,
+            "candidates": [
                 {
-                    "tool_id": row["tool_id"],
-                    "action": action if row["tool_id"] == "server::display" else "keep",
-                    "reason": "Units may affect display"
-                    if row["tool_id"] == "server::display"
-                    else "Unrelated",
-                    "basis": [payload["changes"][0]["change_id"]]
-                    if row["tool_id"] == "server::display"
-                    else [],
-                    "evidence_ids": refs(payload) if row["tool_id"] == "server::display" else [],
+                    "tool_id": "server::display",
+                    "classification": "potential_impact",
+                    "basis": [payload["changes"][0]["change_id"]],
+                    "reason": "The balance units affect an implicit consumer.",
                 }
-                for row in payload["candidates"]
             ]
+            if "server::display" in eligible
+            else [],
         }
-    return {
-        "patches": [
-            {
-                "tool_id": row["patched_record"]["tool_id"],
-                "retain_rule_indices": [],
-                "rules": [
+    decisions = []
+    for row in payload["records"]:
+        identity = row["tool_id"]
+        affected = identity == "server::display"
+        decision = {
+            "tool_id": identity,
+            "action": action if affected else "keep",
+            "reason": "Units may affect display" if affected else "Unrelated",
+            "basis": row["basis"] if affected else [],
+            "evidence_ids": refs(payload) if affected else [],
+        }
+        if affected and action == "update":
+            decision.update(
+                retain_rule_indices=[],
+                rules=[
                     {
                         "kind": kind,
                         "text": "Convert cents to dollars before display.",
                         "evidence_ids": refs(payload),
                     }
                 ],
-                "reason": "Source changed units",
-                "basis": [payload["changes"][0]["change_id"]],
-                "evidence_ids": refs(payload),
-            }
-            for row in payload["selected"]
-        ]
-    }
+            )
+        decisions.append(decision)
+    return {"decisions": decisions}
 
 
 def install_llm(monkeypatch, factory=reply):
@@ -124,13 +127,15 @@ def bundle(tmp_path, target, *, kind="probe", stage=None, result=None):
     return manifest
 
 
-def test_full_catalog_review_local_edit_and_no_metadata_change(catalogs, monkeypatch):
+def test_light_screen_local_edit_and_no_metadata_change(catalogs, monkeypatch):
     old, target = catalogs
     before = copy.deepcopy(catalogs)
     install_llm(monkeypatch)
     result = adapt_result(old, target, ctx())
     assert result["audit"]["pipeline_version"] == "hybrid_v5"
-    assert set(result["audit"]["reviewed_tool_ids"]) == {t["tool_id"] for t in target["tools"]}
+    assert result["audit"]["reviewed_tool_ids"] == ["server::display"]
+    assert result["audit"]["screened_tool_ids"] == ["server::display", "server::unchanged"]
+    assert result["audit"]["scope_plan"]["program_completed_tool_ids"] == ["server::fetch_balance"]
     assert result["knowledge"]["tools"][0]["description"] == target["tools"][0]["description"]
     assert result["knowledge"]["tools"][2] == old["tools"][2]
     assert result["knowledge"]["tools"][1]["usage_rules"][0].startswith("Unverified LLM guidance")
@@ -153,7 +158,7 @@ def test_unknown_withdraws_stale_rules_but_keeps_schema_update(catalogs, monkeyp
     assert updated["parameters"] == target["tools"][1]["parameters"]
     assert old["tools"][1]["usage_rules"][0] not in updated["usage_rules"]
     assert updated["usage_rules"][0].startswith("Unknown semantic impact")
-    assert result["audit"]["unresolved_items"] and result["cost"]["calls"] == 1
+    assert result["audit"]["unresolved_items"] and result["cost"]["calls"] == 2
 
 
 @pytest.mark.parametrize(
@@ -163,8 +168,8 @@ def test_unknown_withdraws_stale_rules_but_keeps_schema_update(catalogs, monkeyp
 def test_invalid_model_output_never_publishes(catalogs, monkeypatch, tmp_path, corruption):
     def corrupt(payload):
         data = reply(payload)
-        if "patches" in data:
-            row = data["patches"][0]
+        if payload.get("phase") == "local_semantic_review":
+            row = next(r for r in data["decisions"] if r["action"] == "update")
             if corruption == "invent_id":
                 row["evidence_ids"] = ["invented"]
             elif corruption == "free_guarantee":
@@ -174,7 +179,7 @@ def test_invalid_model_output_never_publishes(catalogs, monkeypatch, tmp_path, c
             elif corruption == "retain_invalid":
                 row["retain_rule_indices"] = [99]
         elif corruption == "missing_record":
-            data["decisions"].pop()
+            data["screened_tool_ids"].pop()
         return data
 
     install_llm(monkeypatch, corrupt)
@@ -258,14 +263,15 @@ def test_insufficient_budget_never_silently_skips_review(catalogs, monkeypatch, 
     requests = install_llm(monkeypatch)
     with pytest.raises(HybridPatchError):
         adapt_result(*catalogs, ctx(patch_budget=budget))
-    assert requests == []
+    assert len(requests) == (1 if "max_calls" in budget else 0)
 
 
 def test_multibatch_review_preserves_full_coverage(catalogs, monkeypatch):
     requests = install_llm(monkeypatch)
     result = adapt_result(*catalogs, ctx(patch_budget={"review_batch_size": 1}))
-    assert len(result["audit"]["reviewed_tool_ids"]) == 3
-    assert result["cost"]["calls"] == len(requests) == 4
+    assert result["audit"]["reviewed_tool_ids"] == ["server::display"]
+    assert len(result["audit"]["screened_tool_ids"]) == 2
+    assert result["cost"]["calls"] == len(requests) == 2
 
 
 def test_evidence_only_event_triggers_review_without_fake_catalog_diff(

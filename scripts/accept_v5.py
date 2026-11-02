@@ -27,6 +27,21 @@ BAD = "def normalize(value):\n return value.strip()\n"
 
 
 def updater_reply(payload):
+    if payload.get("phase") == "scope_screen":
+        ids = [r["tool_id"] for r in payload["directory"]]
+        return {
+            "screened_tool_ids": ids,
+            "candidates": [
+                {
+                    "tool_id": "server::display",
+                    "classification": "potential_impact",
+                    "basis": ["c1"],
+                    "reason": "Synthetic units affect an implicit consumer.",
+                }
+            ]
+            if "server::display" in ids
+            else [],
+        }
     ids = [
         key
         for key, value in payload["evidence_registry"].items()
@@ -35,25 +50,11 @@ def updater_reply(payload):
         and value["field"] == "description"
         and value["tool_id"] in {"server::display", "server::fetch_balance"}
     ]
-    if "candidates" in payload:
-        return {
-            "decisions": [
-                {
-                    "tool_id": row["tool_id"],
-                    "action": "update" if row["tool_id"] == "server::display" else "keep",
-                    "reason": "Synthetic units change"
-                    if row["tool_id"] == "server::display"
-                    else "Unrelated rule",
-                    "basis": ["c1"] if row["tool_id"] == "server::display" else [],
-                    "evidence_ids": ids if row["tool_id"] == "server::display" else [],
-                }
-                for row in payload["candidates"]
-            ]
-        }
     return {
-        "patches": [
+        "decisions": [
             {
-                "tool_id": "server::display",
+                "tool_id": row["tool_id"],
+                "action": "update",
                 "retain_rule_indices": [],
                 "rules": [
                     {
@@ -62,10 +63,11 @@ def updater_reply(payload):
                         "evidence_ids": ids,
                     }
                 ],
-                "basis": ["c1"],
+                "basis": row["basis"],
                 "evidence_ids": ids,
                 "reason": "Withdraw obsolete direct conversion rule",
             }
+            for row in payload["records"]
         ]
     }
 
@@ -99,7 +101,7 @@ def main():
                 payload = json.loads(body["messages"][-1]["content"])
             except ValueError:
                 payload = {}
-            if "evidence_registry" in payload:
+            if payload.get("phase") in {"scope_screen", "local_semantic_review"}:
                 content = json.dumps(updater_reply(payload))
             else:
                 source = GOOD if "attempt" in payload else BAD if actual_backend else "def broken(:"

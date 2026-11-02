@@ -6,6 +6,39 @@ validation/repair implementation. It does not merge main or V4, change the
 No Update / Full Rewrite updater, modify historical scores, or report an Evol win.
 The historical `adapt` default stays `hybrid_v2`; V5 is an explicit mode.
 
+## 3 November update: program-first scope and lower input volume
+
+The public mode remains `hybrid_v5`. The new audit records
+`scope_policy=program_first_light_screen_local_review_v1`; the old V5 checkpoint
+is `a97a599790f076b6a48c2e023a7d538e196322f3`. Old acceptance and benchmark
+archives are not overwritten.
+
+- The program synchronizes exact metadata first. A directly changed record with
+  no stored rules or independent evidence needs no LLM to repeat that operation.
+  This certifies metadata synchronization, not behavioral truth.
+- The program selects existing rules on changed records and explicit referring
+  records for semantic review. Description-only changes also trigger reference
+  lookup. Independent evidence events can seed review without a metadata diff.
+- A lightweight directory pass sees exact descriptions/rules, compact changed
+  fields and any independent evidence. It proposes only additional potentially
+  affected or uncertain records. Program-classified items are context, not another
+  classification job. No full catalog schema/index is repeatedly sent.
+- Candidate IDs are unioned and deduplicated. Each candidate receives one local
+  detailed review, with edits returned in that same response. Relevant evidence
+  is sent once per local batch; only changed schema leaves are shown. The program
+  validates exact coverage, rule indices, evidence and immutable metadata.
+- Missing scope receipts, invented IDs, excessive requests or oversized input
+  fail explicitly. Nothing is silently truncated or skipped to manufacture savings.
+  A negative lightweight screen is not proof of no semantic impact: model recall
+  remains an empirical limitation. New independent evidence can start a later
+  update event; this update does not repeatedly expand its own scope.
+
+Input characters/UTF-8 bytes are recorded separately from provider token usage.
+`measure_v5_scope.py` compares frozen task-free catalogs with original V5. Its
+scripted measurements use an explicitly labelled tokenizer proxy; only `--live`
+measurements claim actual model input tokens. These are updater diagnostics,
+not benchmark completion/quality or universal dependency-recall results.
+
 ## Responsibilities and acceptance thresholds
 
 1. **Program:** synchronize authoritative additions/removals/schema/description/
@@ -14,11 +47,12 @@ The historical `adapt` default stays `hybrid_v2`; V5 is an explicit mode.
    independently frozen source excerpts or probe exchanges. Bind external
    evidence to the benchmark commit, stage and contract fingerprint; verify
    content hashes before any model request. No model copies source quotations.
-3. **LLM:** review every surviving record after a metadata change or an explicitly
-   supplied independent-evidence event, including implicit cross-tool effects.
-   Propose only local usage-rule edits, diff/evidence-event IDs, cited evidence
-   IDs and the indices of unrelated rules to retain. No task question, answer,
-   judge trace or task-specific acceptance result is available to the updater.
+3. **Program + LLM:** the program resolves metadata operations and explicit
+   semantic candidates first. The LLM screens the remaining lightweight directory
+   for implicit impact/uncertainty, then reviews the deduplicated candidate union
+   once. A local response combines the keep/update/unresolved decision with any
+   usage-rule edit, evidence IDs and retained rule indices. No task question,
+   answer, judge trace or task-specific acceptance result enters the updater.
 4. **Program:** enforce coverage, IDs, field protection, edit scope and argument
    schema examples. Render rule types itself:
 

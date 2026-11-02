@@ -2,10 +2,12 @@ flowchart TD
     A[Early K0 and target catalog] --> B[Program: metadata diff and authoritative synchronization]
     P[Optional predeclared independent MCP probes or source excerpts] --> E[Program: evidence IDs, hashes, subjects and scope]
     B --> E
-    E --> C[LLM: review every surviving record and semantic dependencies]
-    C --> D[LLM: local rules, retained indices and evidence IDs]
+    E --> SCOPE[Program: metadata-complete items and explicit semantic candidates]
+    SCOPE --> LIGHT[LLM: lightweight directory screening for implicit impact or uncertainty]
+    LIGHT --> UNION[Program: union candidates by tool ID, deduplicate]
+    UNION --> C[LLM: one local review with rule edits in the same response]
     C --> U[Unresolved: withdraw suspect rules and mark unknown]
-    D --> G[Program: scope and provenance gate; declarations and finite observations are distinct]
+    C --> G[Program: scope and provenance gate; immutable metadata and typed evidence]
     U --> G
     G --> F[Frozen knowledge]
     F --> H[Same execution agent chooses tools and arguments]

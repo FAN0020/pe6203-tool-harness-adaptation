@@ -80,3 +80,7 @@ python3 submission/handover-20261031/verify.py
 | `docs/`、`contributions/` | 机器说明、来源与成员贡献记录。 |
 | `tools/netlify/` | 可选 Netlify CLI 的版本与依赖锁。 |
 | `.cache/`、`.venv/`、`.netlify/` | 本机依赖、环境、登录关联，不提交。 |
+
+## Selective V5 scope update (3 November 2026)
+
+V5 now uses program-first classification, lightweight implicit-impact screening and one combined local review/edit per selected record. See [design](docs/selective-v5.md) and [recorded token acceptance](results/selective-v5/scope-input-20261103/README.md). This changes V5 only; the default mode remains hybrid_v2. The recorded updater diagnostics do not establish benchmark superiority.
