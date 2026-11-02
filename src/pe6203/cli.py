@@ -201,12 +201,13 @@ def main():
     p.add_argument("--output", type=Path, required=True)
     p.add_argument(
         "--selective-mode",
-        choices=["hybrid_v2", "deterministic_v1", "hybrid_v3"],
+        choices=["hybrid_v2", "deterministic_v1", "hybrid_v3", "hybrid_v5"],
         default="hybrid_v2",
         help="QI-V2 hybrid is the default; V1 is retained for historical comparisons",
     )
     p.add_argument("--capability-evidence", type=Path, help="Frozen V3 source evidence manifest")
     p.add_argument("--patch-budget", type=Path, help="Hybrid request/time limits JSON")
+    p.add_argument("--evidence-bundle", type=Path, help="Independent V5 source/probe manifest")
     p.add_argument(
         "--validation-cases", type=Path, help="Independent argument regression cases JSON"
     )
@@ -216,6 +217,23 @@ def main():
     p.add_argument(
         "--allow-metadata-api", action="store_true", help="Allow sending tool metadata to updater"
     )
+    p = sub.add_parser(
+        "collect-v5-probes", help="Run a reviewed, task-independent fixed MCP probe plan"
+    )
+    p.add_argument("--plan", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    p = sub.add_parser(
+        "run-v5", help="Explicit V5 knowledge plus optional Python artifact validation"
+    )
+    p.add_argument("--task-id", type=int, required=True)
+    p.add_argument("--version", choices=["early", "middle", "late"], required=True)
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--config", type=Path, required=True)
+    p.add_argument("--adaptation", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    scope = p.add_mutually_exclusive_group(required=True)
+    scope.add_argument("--artifact-protocol", type=Path)
+    scope.add_argument("--non-python-deliverable", action="store_true")
     p = sub.add_parser("run-artifact-arm", help="Run one verified frozen five-arm experiment entry")
     p.add_argument("--plan", type=Path, required=True)
     p.add_argument(
@@ -301,6 +319,10 @@ def main():
             )
             return 0
         elif args.command == "adapt":
+            if args.evidence_bundle and (
+                args.strategy != "selective_patch" or args.selective_mode != "hybrid_v5"
+            ):
+                raise ValueError("Evidence bundles are only supported in hybrid_v5")
             from .capability import load_evidence
 
             result = write_adaptation(
@@ -314,6 +336,10 @@ def main():
                         if args.capability_evidence
                         else {}
                     ),
+                    **(
+                        {"evidence_bundle": str(args.evidence_bundle)}
+                        if args.evidence_bundle else {}
+                    ),
                     "selective_mode": args.selective_mode,
                     "patch_budget": read_json(args.patch_budget) if args.patch_budget else {},
                     "validation_cases": read_json(args.validation_cases)
@@ -325,6 +351,26 @@ def main():
                     },
                 },
             )
+        elif args.command == "collect-v5-probes":
+            from .evidence_v5 import collect_probes
+
+            result = asyncio.run(collect_probes(args.root, args.plan, args.output))
+        elif args.command == "run-v5":
+            from .execution_v5 import run_v5
+
+            _, result = run_v5(
+                args.root,
+                args.task_id,
+                args.version,
+                args.seed,
+                args.config,
+                args.adaptation,
+                args.output,
+                args.artifact_protocol,
+                args.non_python_deliverable,
+            )
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+            return 0 if result["status"] == "evaluated" else 2
         elif args.command == "run-artifact-arm":
             from .artifact_plan import run_arm
 
