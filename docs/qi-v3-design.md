@@ -17,7 +17,9 @@ itself establish a benchmark improvement.
 | Execute exact final Python | None | Optional shared `artifact-v1` protocol |
 | Failed artifact → execution-model repair → repeat checks | None | Bounded; every proposed final repair is checked again |
 
-The public `adapt` default remains `hybrid_v2`. Choose `hybrid_v3` explicitly.
+Select `hybrid_v3` explicitly. The V3 branch retains its historical
+`hybrid_v2` default; main preserves its existing `deterministic_v1` default.
+Merging this V3 optimization does not implicitly switch main's default strategy.
 Historical `deterministic_v1`, V2 APIs and default benchmark configurations remain
 available. V1 course scores, V2 implementation tests, V3 mechanism acceptance,
 and any future artifact-protocol scores are different evidence sets.
