@@ -130,6 +130,46 @@ def screening_packet(state):
     }
 
 
+def _candidate_fields(fields, state):
+    """Validate every requested field before candidate deduplication.
+
+    This reads local evidence only. Candidate/basis scope remains independently
+    enforced by detail_packet, including for merged candidates.
+    """
+    if not isinstance(fields, list):
+        raise ValueError("Requested evidence fields must be a list")
+    validated = {}
+    for raw in fields:
+        if isinstance(raw, dict) and set(raw) == {"tool_id", "side", "field"}:
+            raw = {**raw, "pointer": ""}
+        if not isinstance(raw, dict) or set(raw) != {"tool_id", "side", "field", "pointer"}:
+            raise ValueError("Only tool/side/field/pointer evidence reads are allowed")
+        if (
+            type(raw["tool_id"]) is not str
+            or type(raw["side"]) is not str
+            or type(raw["field"]) is not str
+            or raw["side"] not in {"old", "target"}
+            or raw["field"] not in {
+                "description", "parameters", "output_schema", "routing", "name", "usage_rules"
+            }
+        ):
+            raise ValueError("Invalid candidate evidence selector")
+        source = next(
+            (s for s in state["sources"].values()
+             if s["kind"] == "catalog"
+             and all(s[k] == raw[k] for k in ("tool_id", "side", "field"))),
+            None,
+        )
+        if source is None:
+            raise ValueError("Requested evidence not available in that catalog side")
+        try:
+            _pointer(source["value"], raw["pointer"])
+        except (KeyError, IndexError, TypeError):
+            raise ValueError("Requested evidence pointer not found") from None
+        validated[compact(raw)] = deepcopy(raw)
+    return [validated[k] for k in sorted(validated)]
+
+
 def selections(response, state):
     if not isinstance(response, dict) or set(response) != {"covered_tool_ids", "candidates"}:
         raise ValueError("Screen must return coverage and candidates")
@@ -143,7 +183,7 @@ def selections(response, state):
         raise ValueError("Incomplete or duplicate full-catalog screening coverage")
     if not isinstance(response["candidates"], list):
         raise ValueError("Candidates must be a list")
-    chosen = {}
+    chosen, reason_parts = {}, {}
     for row in response["candidates"]:
         if not isinstance(row, dict) or set(row) != {
             "tool_id",
@@ -154,9 +194,9 @@ def selections(response, state):
         }:
             raise ValueError("Invalid semantic candidate fields")
         identity = row["tool_id"]
-        if type(identity) is not str or identity not in state["records"] or identity in chosen:
-            raise ValueError("Unknown or duplicate candidate")
-        if row["category"] not in {"potential", "uncertain", "program_review"}:
+        if type(identity) is not str or identity not in state["records"]:
+            raise ValueError("Unknown candidate")
+        if type(row["category"]) is not str or row["category"] not in {"potential", "uncertain", "program_review"}:
             raise ValueError("Invalid candidate category")
         if not isinstance(row["reason"], str) or not 0 < len(row["reason"]) <= 1200:
             raise ValueError("Candidate needs a bounded reason")
@@ -167,7 +207,30 @@ def selections(response, state):
             or any(type(b) is not str or b not in state["changes"] for b in basis)
         ):
             raise ValueError("Candidate requires actual change/event IDs")
-        chosen[identity] = deepcopy(row)
+        current = {**deepcopy(row), "basis": sorted(set(basis)),
+                   "fields": _candidate_fields(row["fields"], state)}
+        if identity not in chosen:
+            chosen[identity] = current
+            reason_parts[identity] = [current["reason"]]
+            continue
+        # Repeated identities can express distinct legitimate dependencies.
+        # Preserve their complete evidence requests/basis instead of discarding
+        # a candidate or rejecting the entire update on identity repetition.
+        previous = chosen[identity]
+        reasons = list(dict.fromkeys([*reason_parts[identity], current["reason"]]))
+        reason = "\n".join(reasons)
+        if len(reason) > 1200:
+            raise ValueError("Merged candidate reasons exceed 1200 characters; no truncation")
+        categories = {previous["category"], current["category"]}
+        category = ("uncertain" if "uncertain" in categories else
+                    "program_review" if "program_review" in categories else "potential")
+        fields = {compact(f): deepcopy(f) for f in previous["fields"] + current["fields"]}
+        reason_parts[identity] = reasons
+        chosen[identity] = {
+            "tool_id": identity, "category": category, "reason": reason,
+            "basis": sorted(set(previous["basis"]) | set(current["basis"])),
+            "fields": [fields[k] for k in sorted(fields)],
+        }
     # Model cannot dismiss a program-required record or its basis.
     for identity, basis in state["mandatory"].items():
         if identity not in chosen:

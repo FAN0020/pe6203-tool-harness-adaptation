@@ -93,9 +93,31 @@ PATCH = obj(
 
 
 def schema(phase, payload):
-    # ID membership/exact coverage is checked by the independent program. Do
-    # not repeat the global directory in decoder-schema enums.
-    return deepcopy(SCREEN if phase == "global_screen" else PATCH)
+    # Avoid repeating the entire directory in the global decoder schema.
+    # Local packets already contain a bounded registry: literal membership is
+    # decoder-constrained as well as independently checked by program admission.
+    if phase == "global_screen":
+        return deepcopy(SCREEN)
+    result = deepcopy(PATCH)
+    evidence_ids = sorted(payload["evidence_registry"])
+    basis_ids = sorted({c["change_id"] for c in payload["changes"]})
+    selected_ids = sorted({r["tool_id"] for r in payload["selected"]})
+    if not evidence_ids or not basis_ids or not selected_ids:
+        raise ValueError("Local decoder schema requires evidence, changes and selected records")
+    patch = result["properties"]["patches"]["items"]["properties"]
+    patch["tool_id"] = {"type": "string", "enum": selected_ids}
+    patch["basis"] = arr({"type": "string", "enum": basis_ids})
+    patch["evidence_ids"] = arr({"type": "string", "enum": evidence_ids})
+    patch["rules"]["items"]["properties"]["evidence_ids"] = arr(
+        {"type": "string", "enum": evidence_ids}
+    )
+    # These enums prevent invented handles, not wrong semantic inferences or
+    # out-of-scope citations. Those still require the unchanged program checks.
+    selector_ids = sorted(set(selected_ids) | {c["tool_id"] for c in payload["changes"]})
+    result["properties"]["need_evidence"]["items"]["properties"]["tool_id"] = {
+        "type": "string", "enum": selector_ids
+    }
+    return result
 
 
 def response_format(phase, payload):

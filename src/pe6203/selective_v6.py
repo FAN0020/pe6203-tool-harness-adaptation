@@ -17,6 +17,7 @@ from .selective import validate_adaptation
 from .selective_v5 import HybridPatchError, _account, validate_calls
 
 VERSION = "hybrid_v6"
+IMPLEMENTATION_REVISION = "v6-r1-protocol-and-delivery"
 DEFAULT_LIMITS = {
     "max_calls": 32,
     "patch_batch_size": 8,
@@ -61,6 +62,9 @@ Do not select everything just because it exists; do not miss indirect effects.
 No task, answer, judge or evaluation feedback is available.
 """
 PATCH_PROMPT = """Review ONLY the selected local rules using supplied evidence.
+Published rules must not name retired callables, even as migration history.
+Describe current routing only. Any proposed rule that still names retired
+callables will be withheld and explicitly marked unknown in the publication audit.
 Transport envelope: always return BOTH keys patches and need_evidence. For a
 patch response use need_evidence: []; for an evidence request use patches: [].
 Never return input-only citation_scope, category, review or any other extra key.
@@ -307,6 +311,7 @@ def adapt_result(old_knowledge, new_metadata, context=None):
     started = perf_counter()
     audit = {
         "pipeline_version": VERSION,
+        "implementation_revision": IMPLEMENTATION_REVISION,
         "status": "started",
         "attempts": [],
         "preflights": [],
@@ -403,6 +408,12 @@ def adapt_result(old_knowledge, new_metadata, context=None):
                                 raise ValueError("Evidence revision allowance exhausted")
                             continue
                         admitted = admit_patches(answer, ids, changes, sources, state["records"])
+                        from .publication_v6 import withdraw_retired_proposals
+
+                        admitted, withdrawals = withdraw_retired_proposals(
+                            admitted, base["diff"]["removed"], sources
+                        )
+                        audit.setdefault("withdrawn_proposed_rules", []).extend(withdrawals)
                         patches.extend(admitted)
                         break
                     except (ValueError, KeyError, TypeError, IndexError) as exc:
@@ -502,6 +513,7 @@ def write_adaptation(old_path, metadata_path, output, context=None):
         "schema_version": "1.0",
         "strategy": "selective_patch",
         "pipeline_version": VERSION,
+        "implementation_revision": IMPLEMENTATION_REVISION,
         "status": "failed",
         "formal_llm_rewrite": False,
         "validation": {"errors": []},

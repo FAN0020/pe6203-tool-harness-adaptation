@@ -164,8 +164,13 @@ def usage_total(usages):
 
 
 async def agent_loop(client, clients, tools, routes, question, workspace, config, seed, emit):
+    from .execution_control_v6 import FINAL_REMINDER, SYSTEM_RULE, generation_options
+    from .execution_control_v6 import settings as execution_control_settings
     from .request_retry import request_async
 
+    delivery_control = execution_control_settings(
+        config.get("v6_execution_control"), config["max_rounds"]
+    )
     system = (
         "You are an AI agent connected to MCP tools. Complete the user's task using "
         "the supplied tools. Do not ask the user follow-up questions. Use only the tools "
@@ -174,6 +179,13 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
     )
     if config.get("task_context"):
         system += "\n" + config["task_context"]
+    if delivery_control is not None:
+        system += "\n" + SYSTEM_RULE
+        write_json(
+            Path(workspace).parent / "v6-execution-control-frozen.json", delivery_control
+        )
+        emit({"type": "v6_execution_control_frozen", "protocol": delivery_control,
+              "sha256": digest(delivery_control)})
     artifact_config = None
     if config.get("artifact_validation") is not None:
         from .artifact_validation import CONTRACT
@@ -193,9 +205,17 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
     settings = {k: config["agent"][k] for k in ("model", "temperature", "max_completion_tokens")}
     if "extra_body" in config["agent"]:
         settings["extra_body"] = copy.deepcopy(config["agent"]["extra_body"])
+    if delivery_control is not None and artifact_config is not None:
+        if "response_format" in settings.get("extra_body", {}):
+            raise ValueError("V6 artifact format cannot conflict with extra_body response_format")
     if config.get("send_model_seed", False):
         settings["seed"] = seed
     for turn in range(config["max_rounds"]):
+        round_options = generation_options(delivery_control, turn + 1, artifact_config is not None)
+        if round_options.get("tool_choice") == "none":
+            messages.append({"role": "user", "content": FINAL_REMINDER})
+            emit({"type": "v6_final_generation_round", "round": turn + 1,
+                  "max_rounds": config["max_rounds"], "tool_actions_permitted": False})
 
         def on_retry(event):
             usages.append({})  # Failed HTTP request may have incurred unreported usage.
@@ -204,7 +224,8 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
         try:
             response = await request_async(
                 lambda: complete_async(
-                    client, config.get("spend_guard"), messages=messages, tools=tools, **settings
+                    client, config.get("spend_guard"), messages=messages, tools=tools,
+                    **settings, **round_options
                 ),
                 config.get("request_retry"),
                 on_retry,
@@ -228,6 +249,10 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
             status = "output_truncated" if finish == "length" else "content_filtered"
             break
         calls = message.get("tool_calls", [])
+        if calls and round_options.get("tool_choice") == "none":
+            emit({"type": "v6_final_generation_protocol_violation", "round": turn + 1,
+                  "proposed_tool_calls": len(calls), "executed_tool_calls": 0})
+            raise ValueError("Model proposed tool calls during the reserved final generation round")
         if not calls:
             answer = message.get("content") or ""
             status = "completed" if answer else "empty_answer"
@@ -282,6 +307,10 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
                 **settings,
                 "max_completion_tokens": artifact_config["max_repair_tokens"],
             }
+            if delivery_control is not None:
+                from .execution_control_v6 import artifact_response_format
+
+                repair_settings["response_format"] = artifact_response_format()
             try:
                 response = await client.chat.completions.create(
                     messages=messages, **repair_settings
@@ -339,6 +368,7 @@ async def agent_loop(client, clients, tools, routes, question, workspace, config
             status = "artifact_unaccepted"
         emit({"type": "artifact_validation", "audit": artifact_audit})
     return {
+        **({"v6_execution_control": delivery_control} if delivery_control is not None else {}),
         "artifact_validation": artifact_audit,
         "generation_status": generation_status,
         "completion_origin": "artifact_repair"
@@ -445,6 +475,10 @@ async def run_async(task_id, version, strategy, seed, config):
         if config.get("adaptation_path"):
             artifact_path = root / config["adaptation_path"]
             artifact = read_json(artifact_path)
+            if config.get("v6_execution_control") is not None and (
+                strategy != "selective_patch" or artifact.get("pipeline_version") != "hybrid_v6"
+            ):
+                raise ValueError("V6 execution control requires a validated hybrid_v6 adaptation")
             if (
                 artifact.get("status") != "validated"
                 or artifact.get("strategy") != strategy
@@ -466,6 +500,8 @@ async def run_async(task_id, version, strategy, seed, config):
             ).hexdigest()
             result["adaptation_method"] = artifact["cost"]["method"]
             write_json(output / "adaptation.json", artifact)
+        elif config.get("v6_execution_control") is not None:
+            raise ValueError("V6 execution control requires a validated hybrid_v6 adaptation")
         result["config_sha256"] = digest(config)
         knowledge_path = Path(config["knowledge_path"])
         knowledge = read_json(
