@@ -1,0 +1,91 @@
+diff --git a/src/pe6203/selective.py b/src/pe6203/selective.py
+index 92a6a8e8..389f8218 100644
+--- a/src/pe6203/selective.py
++++ b/src/pe6203/selective.py
+@@ -486,16 +486,13 @@ def validate_adaptation(knowledge, old_knowledge, target, diff, rule_modified_id
+         errors.append("Envelope version mismatch in candidate snapshot")
+     if {t["server_id"] for t in knowledge["tools"]} != {t["server_id"] for t in target["tools"]}:
+         errors.append("Candidate snapshot server set differs from target environment")
+-    seen_ids, seen_names = set(), set()
++    seen_ids = set()
+     for tool in knowledge["tools"]:
+         tool_id = tool.get("tool_id")
+         if not isinstance(tool_id, str) or tool_id in seen_ids:
+             errors.append(f"Invalid or duplicate tool_id: {tool_id}")
+             continue
+         seen_ids.add(tool_id)
+-        if tool.get("name") in seen_names:
+-            errors.append(f"Duplicate model-facing name across records: {tool.get('name')}")
+-        seen_names.add(tool.get("name"))
+         if tool.get("routing") != {"server_id": tool["server_id"], "tool_name": tool["name"]}:
+             errors.append(f"Routing does not match tool identity: {tool_id}")
+         if tool.get("tool_id") != tool["server_id"] + "::" + tool["name"]:
+@@ -520,6 +517,8 @@ def validate_adaptation(knowledge, old_knowledge, target, diff, rule_modified_id
+                     errors.append(f"Untouched metadata field changed: {tool_id}.{field}")
+             if tool_id not in rule_modified_ids and not canonical_equal(tool, old_tools[tool_id]):
+                 errors.append(f"Unchanged record was modified: {tool_id}")
++    if seen_ids != set(new_tools):
++        errors.append("Candidate tool IDs must exactly cover the target catalog")
+     if _dangling_references(knowledge, diff["removed"]):
+         errors.append("Candidate snapshot contains dangling references to removed tools")
+     checks = {"records": len(knowledge["tools"]), "unchanged": len(diff["unchanged_tool_ids"])}
+@@ -533,6 +532,10 @@ def adapt_result(old_knowledge, new_metadata, context=None):
+     unresolved items and validation alongside the tuple returned by
+     :func:`adapt`.
+     """
++    if (context or {}).get("allow_llm_update"):
++        raise ValueError(
++            "Only deterministic Selective Patch is validated; optional LLM rule rewriting is not enabled"
++        )
+     started = perf_counter()
+     old = build_knowledge(old_knowledge)
+     target = build_knowledge(new_metadata)
+diff --git a/tests/test_selective.py b/tests/test_selective.py
+index e68df076..601e36c6 100644
+--- a/tests/test_selective.py
++++ b/tests/test_selective.py
+@@ -238,7 +238,7 @@ def test_reference_index_and_impact_are_one_hop():
+     assert edges == {"server::publisher": ["server::old_tool"]}
+ 
+ 
+-@pytest.mark.parametrize("strategy", ["no_update", "full_rewrite", "selective_patch"])
++@pytest.mark.parametrize("strategy", ["no_update", "selective_patch"])
+ def test_cli_adapt_writes_consumable_artifact(tmp_path, strategy):
+     old_path, target_path = tmp_path / "early.json", tmp_path / "late.json"
+     old_path.write_text(json.dumps(snapshot()))
+@@ -299,3 +299,35 @@ def test_selective_knowledge_never_leaks_target_into_untouched_records():
+     keeper = next(t for t in tools if t["function"]["name"] == "keeper")
+     assert "Kept description" in keeper["function"]["description"]
+     assert "Changed" not in keeper["function"]["description"]
++
++
++def test_cross_server_same_names_remain_distinct_after_patch():
++    old = snapshot()
++    second = copy.deepcopy(old["tools"][0])
++    second.update(server_id="other", tool_id="other::old_tool")
++    second["routing"]["server_id"] = "other"
++    old["tools"].append(second)
++    target = bump_to_late(copy.deepcopy(old))
++    target["tools"][0]["description"] = "Updated"
++    result = adapt_result(old, target)
++    assert result["knowledge"] is not None, result["validation"]
++    tools, routes = prepare_tools(result["knowledge"]["tools"], "selective_patch", "namespaced")
++    assert len(tools) == len(routes) == 2
++    assert result["knowledge"]["tools"][1] == second
++
++
++def test_validation_rejects_missing_target_record():
++    from pe6203.selective import validate_adaptation
++
++    old = snapshot()
++    target = changed_target("add")
++    diff = diff_catalogs(old, target)
++    candidate = adapt_result(old, target)["knowledge"]
++    assert not validate_adaptation(candidate, old, target, diff)["errors"]
++    candidate["tools"].pop()
++    assert validate_adaptation(candidate, old, target, diff)["errors"]
++
++
++def test_unverified_optional_llm_path_cannot_report_zero_billed_cost():
++    with pytest.raises(ValueError, match="deterministic"):
++        adapt_result(snapshot(), changed_target("description"), {"allow_llm_update": True})
