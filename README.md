@@ -1,5 +1,7 @@
 # PE6203 · 工具变化下的 Harness 适应
 
+**当前 V5 汇报范围：133、235、283（2026-11-03）。** [三任务评测入口](https://github.com/FAN0020/pe6203-tool-harness-adaptation/blob/main/evaluation/v5/three-task-view/README.md)已与原 V6 对齐；首轮与一次重试结果分别保留。下方旧说明和四／五任务实验属于历史材料，没有改写原始分数。本次仅更新评测入口，不修改实现或执行配置。
+
 **课程主实验与交付已冻结；后续研究另行归档。** 用户现已授权以完成任务为先，不设研究总费用或轨迹额度；仍固定公平比较设置，记录费用和失败，不覆盖旧结果，不自动部署。
 
 **2026-11-02 选题与报告修订：**课程主矩阵是 133 / 283 / 235 × Early / Middle / Late × NU / FR / SP，共 27 条，并未实测早期材料中的论文网页任务 223 或已确认的书籍任务。29 是后来的候选登记快照，不是 29 组同条件 27 条实验。详见[选题与候选审计](reports/course-research/plan-alignment-20261102.md)、[更新的研究报告](reports/course-research/PE6203%20Research%20Report.docx)及[蓝字修订的课程报告](submission/report-final.html)。这次与 `main` 选择性合并了六项离线 CLI 报告测试和已复算的课程结果说明；未引入展示讲稿或把旧暂停要求当作现行授权。
