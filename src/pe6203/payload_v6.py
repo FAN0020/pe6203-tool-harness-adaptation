@@ -244,6 +244,11 @@ def detail_packet(state, rows, extra_fields=()):
         requests.extend(row["fields"])
     requests.extend(extra_fields)
     for req in requests:
+        # A selector with tool/side/field unambiguously names the whole field.
+        # Normalizing its missing root pointer is deterministic, not another
+        # semantic LLM decision. Never ignore unknown selector keys.
+        if isinstance(req, dict) and set(req) == {"tool_id", "side", "field"}:
+            req = {**req, "pointer": ""}
         if not isinstance(req, dict) or set(req) != {"tool_id", "side", "field", "pointer"}:
             raise ValueError("Only tool/side/field/pointer evidence reads are allowed")
         if req["tool_id"] not in scope or req["side"] not in {"old", "target"}:
@@ -272,7 +277,10 @@ def detail_packet(state, rows, extra_fields=()):
             value = _pointer(source["value"], req["pointer"])
         except (KeyError, IndexError, TypeError):
             raise ValueError("Requested evidence pointer not found") from None
-        add({**source, "pointer": req["pointer"], "value": deepcopy(value)})
+        if req["pointer"]:
+            add({**source, "pointer": req["pointer"], "value": deepcopy(value)})
+        else:
+            add(source)
     # The model sees deduplicated values and short evidence handles. The full
     # provenance stays in this local registry and is restored by the program.
     pool, refs = {}, {}

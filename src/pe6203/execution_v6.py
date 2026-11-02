@@ -5,16 +5,21 @@ tests, judge rubrics or start unregistered retries in the current Evol run.
 """
 
 import hashlib
+import json
 from copy import deepcopy
 from pathlib import Path
 
+from jsonschema import Draft202012Validator
+
 from .artifact_validation import settings
 from .benchmark import digest, read_json, write_json
-from .runner import run
+from .runner import prepare_tools, run
 from .selective_v6 import ACCEPTANCE
 
 
-def diagnose(freeze, knowledge, injected_tools, calls, result, artifact_audit=None):
+def diagnose(
+    freeze, knowledge, injected_tools, calls, result, artifact_audit=None, name_policy="namespaced"
+):
     """Only mechanically checkable observations become findings, not LLM causes.
 
     Correctness of natural language knowledge or an evaluator is not inferred
@@ -50,20 +55,56 @@ def diagnose(freeze, knowledge, injected_tools, calls, result, artifact_audit=No
                     "action": "Inspect injection mapping; preserve knowledge content",
                 }
             )
-    if artifact_audit and artifact_audit.get("status") in {
+    events = [e for e in calls if isinstance(e, dict) and e.get("type") == "tool_result"]
+    specifications, _ = prepare_tools(knowledge["tools"], "selective_patch", name_policy)
+    schemas = {s["function"]["name"]: s["function"]["parameters"] for s in specifications}
+    invalid_calls, runtime_errors = [], []
+    for event in events:
+        call = event.get("call", {}).get("function", {})
+        name = call.get("name")
+        reason = None
+        if name not in schemas:
+            reason = "Call names a tool outside the frozen model-facing catalog"
+        else:
+            try:
+                arguments = json.loads(call.get("arguments", ""))
+                if not isinstance(arguments, dict) or not Draft202012Validator(
+                    schemas[name]
+                ).is_valid(arguments):
+                    reason = "Call arguments do not match the frozen tool schema"
+            except (ValueError, TypeError):
+                reason = "Call arguments are not a JSON object"
+        if reason:
+            invalid_calls.append({"name": name, "reason": reason})
+        if event.get("result", {}).get("isError") is True:
+            runtime_errors.append(name)
+    if invalid_calls:
+        findings.append(
+            {
+                "route": "action_or_artifact",
+                "observation": "Calls violate the frozen catalog",
+                "calls": invalid_calls,
+                "action": "Inspect call formation and actual injection; no knowledge rewrite inferred",
+            }
+        )
+    artifact_failed = artifact_audit and artifact_audit.get("status") in {
         "repair_exhausted",
         "no_artifact",
         "test_failed",
         "static_failed",
-    }:
+    }
+    if artifact_failed:
         findings.append(
             {
                 "route": "action_or_artifact",
-                "observation": "Generated artifact failed frozen checks",
+                "observation": "No parseable artifact was delivered"
+                if artifact_audit.get("status") == "no_artifact"
+                else "Generated artifact failed frozen checks",
                 "action": "Only predeclared code repair allowance; do not rewrite knowledge",
             }
         )
-    if not findings:
+    failure_observed = result.get("execution_status") not in {None, "completed"} or artifact_failed
+    if not findings and (failure_observed or runtime_errors):
         findings.append(
             {
                 "route": "evidence_or_evaluator_uncertain",
@@ -73,11 +114,14 @@ def diagnose(freeze, knowledge, injected_tools, calls, result, artifact_audit=No
         )
     return {
         "version": "v6-post-run-diagnosis-1",
+        "status": "findings_or_unresolved" if findings else "no_failure_detected",
         "findings": findings,
         "knowledge_modified": False,
         "acceptance_modified": False,
         "automatic_retry": False,
-        "actual_calls_observed": len(calls),
+        "actual_tool_calls_observed": len(events),
+        "trace_events_observed": len(calls),
+        "runtime_error_tool_names": runtime_errors,
         "outcome_observed": deepcopy(result),
         "causality_proven": False,
         "scope": "post_run_only_future_versions",
@@ -170,6 +214,7 @@ def run_v6(
             trace if isinstance(trace, list) else trace.get("events", []),
             {k: result.get(k) for k in ("execution_status", "TF", "PE")},
             result.get("artifact_validation"),
+            config.get("tool_name_policy", "native_unique"),
         )
         diagnosis["injection_observation_scope"] = (
             "saved_runner_knowledge_not_full_wire_semantic_delivery_proof"

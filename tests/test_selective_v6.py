@@ -159,6 +159,48 @@ def test_precise_field_reads_and_scope_rejection(catalogs):
         detail_packet(state, [row])
 
 
+def test_whole_field_selector_root_normalization_is_lossless(catalogs):
+    state = prepare(*catalogs)
+    row = reply(screening_packet(state))["candidates"][0]
+    before, sources = detail_packet(state, [row])
+    row["fields"] = [{"tool_id": "server::fetch_balance", "side": "target", "field": "description"}]
+    after, extra = detail_packet(state, [row])
+    assert after == before and extra == sources  # Already supplied; not new evidence.
+    row["fields"][0]["field"] = "parameters"
+    whole, _ = detail_packet(state, [row])
+    assert catalogs[1]["tools"][0]["parameters"] in whole["content_pool"].values()
+    row["fields"][0]["unknown_key"] = "do not silently discard"
+    with pytest.raises(ValueError, match="Only tool"):
+        detail_packet(state, [row])
+
+
+def test_diagnosis_uses_actual_call_events_and_preserves_uncertainty(catalogs):
+    from pe6203.runner import prepare_tools
+
+    old, _ = catalogs
+    tools, _ = prepare_tools(old["tools"], "selective_patch", "namespaced")
+    events = [
+        {"type": "agent_response"},
+        {
+            "type": "tool_result",
+            "call": {"function": {"name": tools[0]["function"]["name"], "arguments": "{}"}},
+            "result": {"isError": True},
+        },
+    ]
+    freeze = {"knowledge_sha256": digest(old)}
+    diagnosis = execution_v6.diagnose(
+        freeze, old, old["tools"], events, {"execution_status": "failed"}
+    )
+    assert diagnosis["actual_tool_calls_observed"] == 1
+    assert diagnosis["trace_events_observed"] == 2
+    assert diagnosis["findings"][0]["route"] == "action_or_artifact"
+    assert not diagnosis["knowledge_modified"]
+    success = execution_v6.diagnose(
+        freeze, old, old["tools"], [], {"execution_status": "completed"}
+    )
+    assert success["findings"] == [] and success["status"] == "no_failure_detected"
+
+
 @pytest.mark.parametrize("corrupt", ["invent_id", "metadata", "omit", "guarantee"])
 def test_invalid_patches_bounded_one_revision_keep_costs(catalogs, monkeypatch, corrupt):
     def alter(packet, result):
