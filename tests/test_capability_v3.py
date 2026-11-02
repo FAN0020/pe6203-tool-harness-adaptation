@@ -180,7 +180,7 @@ def test_missing_evidence_fails_without_publishing_knowledge(tmp_path):
     assert json.loads((tmp_path / "out/adaptation.json").read_text())["status"] == "failed"
 
 
-def test_v3_metadata_change_still_runs_v2_full_review_and_preserves_rules(monkeypatch):
+def test_v3_metadata_change_uses_light_screen_and_preserves_rules(monkeypatch):
     from integration import baselines as provider
 
     old, target = catalogs()
@@ -201,16 +201,8 @@ def test_v3_metadata_change_still_runs_v2_full_review_and_preserves_rules(monkey
                     "message": {
                         "content": json.dumps(
                             {
-                                "decisions": [
-                                    {
-                                        "tool_id": c["tool_id"],
-                                        "action": "keep",
-                                        "reason": "No rule edit warranted.",
-                                        "basis": [],
-                                        "evidence": [],
-                                    }
-                                    for c in payload["candidates"]
-                                ]
+                                "screened_tool_ids": [c["tool_id"] for c in payload["directory"]],
+                                "candidates": [],
                             }
                         )
                     },
@@ -230,8 +222,35 @@ def test_v3_metadata_change_still_runs_v2_full_review_and_preserves_rules(monkey
             "updater": {"allow_metadata_api": True},
         },
     )
-    assert cost["calls"] == 1 and len(calls[0]["candidates"]) == 2
+    assert cost["calls"] == 1
+    assert [c["tool_id"] for c in calls[0]["directory"]] == ["server::unrelated"]
+    assert calls[0]["program_completed_tool_ids"] == ["server::helper"]
     assert "capability_evidence" not in json.dumps(calls[0])
     assert knowledge["tools"][0]["description"] == target["tools"][0]["description"]
     assert knowledge["tools"][1]["usage_rules"] == old["tools"][1]["usage_rules"]
     assert any(c["operation"] == "capability_change_propagation" for c in changes)
+
+
+@pytest.mark.parametrize("stage", ["early", "middle", "late"])
+def test_no_change_artifact_targets_requested_environment_without_rewriting_k0(tmp_path, stage):
+    old, target = catalogs()
+    target["version"] = stage
+    for t in target["tools"]:
+        t["version"] = stage
+        if stage != "early":
+            t["usage_rules"] = []
+    for name, data in [("old", old), ("target", target)]:
+        (tmp_path / f"{name}.json").write_text(json.dumps(data))
+    result = write_adaptation(
+        tmp_path / "old.json",
+        tmp_path / "target.json",
+        "selective_patch",
+        tmp_path / "out",
+        {"selective_mode": "hybrid_v3", "capability_evidence": bundle(target["tools"][0])},
+    )
+    knowledge = json.loads((tmp_path / "out/knowledge.json").read_text())
+    assert result["target_stage"] == stage
+    assert result["cost"]["calls"] == 0
+    assert knowledge["version"] == "early"
+    assert all(t["version"] == "early" for t in knowledge["tools"])
+    assert knowledge["tools"][1]["usage_rules"] == old["tools"][1]["usage_rules"]

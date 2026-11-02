@@ -6,7 +6,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from .benchmark import digest, read_json, write_json
-from .hybrid_selective import adapt_result as v2_result
+from .scoped_selective_v3 import adapt_result as scoped_result
 
 VERSION = "hybrid_v3"
 LIMIT = (
@@ -153,20 +153,21 @@ def adapt_result(old, target, context=None):
     bundle = context.pop("capability_evidence", None)
     if bundle is None:
         raise ValueError("hybrid_v3 requires independently frozen capability_evidence")
-    # Strip untrusted extra boundary fields before V2's protected-field checks/model requests.
+    # Strip untrusted boundary fields before the scoped core's checks/model requests.
     clean_old, clean_target = deepcopy(old), deepcopy(target)
     for data in (clean_old, clean_target):
         for tool in data["tools"]:
             tool.pop("capability_boundary", None)
-    # Reject stale/invented boundary inputs before spending V2 model budget.
+    # Reject stale/invented boundary inputs before spending any model budget.
     enrich(deepcopy(clean_target), clean_old, bundle)
-    context["selective_mode"] = "hybrid_v2"
-    result = v2_result(clean_old, clean_target, context)
+    context["selective_mode"] = "hybrid_v3"
+    result = scoped_result(clean_old, clean_target, context)
     edits = enrich(result["knowledge"], old, bundle)
     result["changes"] += edits
     result["cost"]["method"] = "hybrid_selective_patch_v3"
     result["cost"]["update_operations"] += len(edits)
     result["audit"].update(
+        updater_core_version=result["audit"]["pipeline_version"],
         pipeline_version=VERSION,
         capability_changes=edits,
         capability_evidence_sha256=digest(bundle),
@@ -191,9 +192,10 @@ def write_adaptation(old_path, metadata_path, output, context=None):
     }
     result = None
     try:
+        old, target = read_json(old_path), read_json(metadata_path)
         result = adapt_result(
-            read_json(old_path),
-            read_json(metadata_path),
+            old,
+            target,
             {**(context or {}), "audit_path": str(output / "v2-audit.json")},
         )
         write_json(output / "knowledge.json", result["knowledge"])
@@ -201,7 +203,9 @@ def write_adaptation(old_path, metadata_path, output, context=None):
         artifact.update(
             status="validated",
             benchmark_commit=result["knowledge"]["benchmark_commit"],
-            target_stage=result["knowledge"]["version"],
+            # A no-change update may reuse the exact Early K0 bytes. Its
+            # execution environment is still the requested Middle/Late stage.
+            target_stage=target["version"],
             input={
                 "old_file_sha256": hashlib.sha256(Path(old_path).read_bytes()).hexdigest(),
                 "target_file_sha256": hashlib.sha256(Path(metadata_path).read_bytes()).hexdigest(),
@@ -215,6 +219,8 @@ def write_adaptation(old_path, metadata_path, output, context=None):
             patch=result["changes"],
             cost=result["cost"],
             capability_evidence_sha256=result["audit"]["capability_evidence_sha256"],
+            scope_policy=result["audit"]["scope_policy"],
+            updater_core_version=result["audit"]["updater_core_version"],
         )
     except Exception as exc:
         audit = getattr(exc, "audit", None)

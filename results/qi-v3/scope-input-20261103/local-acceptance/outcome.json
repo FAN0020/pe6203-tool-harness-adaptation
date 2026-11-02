@@ -1,0 +1,125 @@
+{
+  "artifact_validation": {
+    "version": "artifact-v1",
+    "protocol_sha256": "b6f6f976350905a322fa450bafc1a9ee6159a6c9c4e50576f8d8cf60e07884b6",
+    "status": "passed_finite_tests",
+    "attempts": [
+      {
+        "index": 0,
+        "status": "test_failed",
+        "isolated_execution": true,
+        "artifact_path": "attempt-0.py",
+        "sha256": "fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525",
+        "static_status": "passed",
+        "tests": [
+          {
+            "id": "normal-text",
+            "kind": "benign",
+            "status": "test_failed",
+            "returncode": 1,
+            "normal_completion": false,
+            "artifact_sha256_before": "fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525",
+            "artifact_sha256_after": "fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525",
+            "output": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"<frozen runpy>\", line 287, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/work/check.py\", line 3, in <module>\n    assert normalize(' A ') == 'a'\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+          },
+          {
+            "id": "reject-non-string",
+            "kind": "negative",
+            "status": "test_failed",
+            "returncode": 1,
+            "normal_completion": false,
+            "artifact_sha256_before": "fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525",
+            "artifact_sha256_after": "fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525",
+            "output": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"<frozen runpy>\", line 287, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/work/check.py\", line 4, in <module>\n    normalize(None)\n  File \"/work/artifact.py\", line 2, in normalize\n    return value.strip()\n           ^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'strip'\n"
+          }
+        ],
+        "seconds": 1.2495209169574082
+      },
+      {
+        "index": 1,
+        "status": "passed_finite_tests",
+        "isolated_execution": true,
+        "artifact_path": "attempt-1.py",
+        "sha256": "7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912",
+        "static_status": "passed",
+        "tests": [
+          {
+            "id": "normal-text",
+            "kind": "benign",
+            "status": "passed",
+            "returncode": 0,
+            "normal_completion": true,
+            "artifact_sha256_before": "7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912",
+            "artifact_sha256_after": "7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912",
+            "output": "[completion-marker]\n"
+          },
+          {
+            "id": "reject-non-string",
+            "kind": "negative",
+            "status": "passed",
+            "returncode": 0,
+            "normal_completion": true,
+            "artifact_sha256_before": "7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912",
+            "artifact_sha256_after": "7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912",
+            "output": "[completion-marker]\n"
+          }
+        ],
+        "seconds": 1.0744313329923898
+      }
+    ],
+    "repairs": [
+      {
+        "index": 0,
+        "status": "returned_requires_revalidation",
+        "seconds": 0.004515249980613589
+      }
+    ],
+    "latest_artifact": {
+      "path": "attempt-1.py",
+      "sha256": "7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912"
+    },
+    "accepted_artifact": {
+      "path": "attempt-1.py",
+      "sha256": "7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912"
+    },
+    "accepted_summary": "Synthetic normalization function; finite tests only.",
+    "security_guarantee": false,
+    "official_TF_PE": "separate_not_measured_here",
+    "seconds": 2.329661542084068
+  },
+  "generation_status": "completed",
+  "completion_origin": "artifact_repair",
+  "answer": "{\"artifact\": {\"path\": \"artifact.py\", \"language\": \"python\", \"source\": \"def normalize(value):\\n if not isinstance(value, str): raise TypeError('string required')\\n return value.strip().lower()\\n\"}, \"summary\": \"Synthetic normalization function; finite tests only.\", \"validation\": {\"status\": \"passed_finite_tests\", \"sha256\": \"7d23f702327fe76d8f590c2401cf3e7d06fbbe4c25ae5a8e8394e93c98b23912\", \"security_guarantee\": false}}",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an AI agent connected to MCP tools. Complete the user's task using the supplied tools. Do not ask the user follow-up questions. Use only the tools and schemas supplied to you. Do not invent successful tool results. All workingDirectory arguments must be exactly: /private/tmp/pe6203-v3-token-scope-20261103/results/raw/v3-scope-20261103/local-acceptance/workspace\nReturn one JSON object, no markdown, with exactly these keys:\n{\"artifact\":{\"path\":\"artifact.py\",\"language\":\"python\",\"source\":\"complete Python source\"},\n\"summary\":\"brief user-facing explanation\"}. The source is the exact final deliverable.\nTool observations about expressions or prompt templates do not test this artifact.\nIndependent finite artifact tests may follow; passing them is not proof of full security."
+    },
+    {
+      "role": "user",
+      "content": "Write normalize(value): string strip and lower; reject other types."
+    },
+    {
+      "content": "{\"artifact\": {\"path\": \"artifact.py\", \"language\": \"python\", \"source\": \"def normalize(value):\\n return value.strip()\\n\"}, \"summary\": \"Synthetic normalization function; finite tests only.\"}",
+      "role": "assistant"
+    },
+    {
+      "role": "user",
+      "content": "{\"protocol\": \"artifact-v1\", \"attempt\": {\"index\": 0, \"status\": \"test_failed\", \"isolated_execution\": true, \"artifact_path\": \"attempt-0.py\", \"sha256\": \"fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525\", \"static_status\": \"passed\", \"tests\": [{\"id\": \"normal-text\", \"kind\": \"benign\", \"status\": \"test_failed\", \"returncode\": 1, \"normal_completion\": false, \"artifact_sha256_before\": \"fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525\", \"artifact_sha256_after\": \"fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525\", \"output\": \"Traceback (most recent call last):\\n  File \\\"<string>\\\", line 1, in <module>\\n  File \\\"<frozen runpy>\\\", line 287, in run_path\\n  File \\\"<frozen runpy>\\\", line 98, in _run_module_code\\n  File \\\"<frozen runpy>\\\", line 88, in _run_code\\n  File \\\"/work/check.py\\\", line 3, in <module>\\n    assert normalize(' A ') == 'a'\\n           ^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError\\n\"}, {\"id\": \"reject-non-string\", \"kind\": \"negative\", \"status\": \"test_failed\", \"returncode\": 1, \"normal_completion\": false, \"artifact_sha256_before\": \"fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525\", \"artifact_sha256_after\": \"fc93096018d2b9f750a9a4a2193b785fc88a51524556f9e0f11c6bfb0eca3525\", \"output\": \"Traceback (most recent call last):\\n  File \\\"<string>\\\", line 1, in <module>\\n  File \\\"<frozen runpy>\\\", line 287, in run_path\\n  File \\\"<frozen runpy>\\\", line 98, in _run_module_code\\n  File \\\"<frozen runpy>\\\", line 88, in _run_code\\n  File \\\"/work/check.py\\\", line 4, in <module>\\n    normalize(None)\\n  File \\\"/work/artifact.py\\\", line 2, in normalize\\n    return value.strip()\\n           ^^^^^^^^^^^\\nAttributeError: 'NoneType' object has no attribute 'strip'\\n\"}], \"seconds\": 1.2495209169574082}, \"source\": \"def normalize(value):\\n return value.strip()\\n\", \"independent_tests_sha256\": \"448ec273ab1fa616fac9e20a427a0a81bf49ab1e85fdbd18f402b7b968430243\", \"instruction\": \"Correct the exact artifact using these observed failures. Return one JSON object, no markdown, with exactly these keys:\\n{\\\"artifact\\\":{\\\"path\\\":\\\"artifact.py\\\",\\\"language\\\":\\\"python\\\",\\\"source\\\":\\\"complete Python source\\\"},\\n\\\"summary\\\":\\\"brief user-facing explanation\\\"}. The source is the exact final deliverable.\\nTool observations about expressions or prompt templates do not test this artifact.\\nIndependent finite artifact tests may follow; passing them is not proof of full security.\"}"
+    },
+    {
+      "content": "{\"artifact\": {\"path\": \"artifact.py\", \"language\": \"python\", \"source\": \"def normalize(value):\\n if not isinstance(value, str): raise TypeError('string required')\\n return value.strip().lower()\\n\"}, \"summary\": \"Synthetic normalization function; finite tests only.\"}",
+      "role": "assistant"
+    }
+  ],
+  "status": "completed",
+  "usage": {
+    "prompt_tokens": 20,
+    "completion_tokens": 10,
+    "total_tokens": 30,
+    "usd": null,
+    "known_usd": null,
+    "usd_source": null
+  },
+  "rounds": 1
+}

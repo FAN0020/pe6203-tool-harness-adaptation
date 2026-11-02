@@ -17,7 +17,8 @@ uv run pe6203 adapt --strategy selective_patch --selective-mode hybrid_v3 \
 
 No catalog change means no updater model call, while evidence enrichment still
 runs. For a genuine catalog change, supply the V2 updater options and explicit
-`--allow-metadata-api`; V2's full semantic review and quoted local-rule checks
+`--allow-metadata-api`; the V3 program-first scope, combined local review/edit,
+and the preserved quoted local-rule checks
 remain required. No task-specific answer repair was added.
 
 An evidence manifest has version `capability-evidence-v1` and entries containing
