@@ -1,5 +1,7 @@
 # PE6203 · 工具变化下的 Harness 适应
 
+**当前 V5 汇报范围：133、235、283（2026-11-03）。** [三任务评测入口](https://github.com/FAN0020/pe6203-tool-harness-adaptation/blob/main/evaluation/v5/three-task-view/README.md)已与原 V6 对齐；首轮与一次重试结果分别保留。下方旧说明和四／五任务实验属于历史材料，没有改写原始分数。本次仅更新评测入口，不修改实现或执行配置。
+
 > **selective-V5（2026-11-03）**：在 V2 上增加证据编号、分类型规则验收、未知／冲突记录与旧规则撤回，并复用 V3 的 Python 最终代码隔离测试及有限修复。使用显式 `--selective-mode hybrid_v5` 和 `run-v5`，历史默认入口不变。**No Update、Full Rewrite 的配置与历史成绩保持原样；V5 单独增加代码验证时，成绩属于完整系统比较。尚未运行真实 V5 Evol。** [设计与运行说明](docs/selective-v5.md) · [流程图](docs/selective-v5-flow.mmd) · [实现验收](results/selective-v5/acceptance-summary.json)。
 
 下方保留从 V2 基线继承的历史说明和课程结果，不表示 V5 的实验成绩；后续 V2 评测另存于 `V2-eval` 分支。
