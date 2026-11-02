@@ -302,6 +302,26 @@ def detail_packet(state, rows, extra_fields=()):
                 "review": r["reason"],
                 "category": r["category"],
                 "basis": r["basis"],
+                "citation_scope": {
+                    "own_description_ids": [
+                        key
+                        for key, s in sources.items()
+                        if s["tool_id"] == r["tool_id"]
+                        and s["kind"] == "catalog"
+                        and s["side"] == "target"
+                        and s["field"] == "description"
+                    ],
+                    "basis_tool_description_ids": {
+                        identity: [
+                            key
+                            for key, s in sources.items()
+                            if s["tool_id"] == identity
+                            and s["kind"] == "catalog"
+                            and s["field"] == "description"
+                        ]
+                        for identity in sorted({state["changes"][b]["tool_id"] for b in r["basis"]})
+                    },
+                },
             }
             for r in rows
         ],

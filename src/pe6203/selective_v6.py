@@ -77,6 +77,10 @@ behavior guarantees: declarations/source excerpts are not runtime proofs and
 finite probes establish only measured conditions. Evidence provenance is not
 semantic entailment. Every row must cite evidence for its own tool AND a cited
 basis change tool; rule citations must be included in the row's evidence_ids.
+Each selected row includes citation_scope with the exact own_description_ids
+and basis_tool_description_ids. Cite the relevant IDs from BOTH sides in the
+patch's evidence_ids, including when keeping rules or noting uncertainty about
+a cross-tool relation. The program does NOT insert missing model citations.
 Use content_pool to restore evidence_registry handles. Never invent IDs.
 If essential evidence is missing instead return exactly {"need_evidence":[
 {"tool_id":"ID","side":"old|target","field":"parameters|output_schema|description|routing|name|usage_rules",
@@ -223,6 +227,42 @@ def batches(state, rows, limits):
     return result
 
 
+def admission_diagnostics(answer, sources, changes):
+    """Locate scope failures for the one directed revision; no relaxed checks."""
+    notes = []
+    if not isinstance(answer, dict) or not isinstance(answer.get("patches"), list):
+        return notes
+    for row in answer["patches"]:
+        if not isinstance(row, dict):
+            continue
+        identity, evidence, basis = row.get("tool_id"), row.get("evidence_ids"), row.get("basis")
+        if type(identity) is not str:
+            continue
+        if not isinstance(evidence, list) or not isinstance(basis, list):
+            continue
+        if any(type(i) is not str for i in evidence + basis):
+            continue
+        cited = {sources[i]["tool_id"] for i in evidence if i in sources}
+        basis_tools = {changes[b]["tool_id"] for b in basis if b in changes}
+        if identity not in cited or not cited.intersection(basis_tools):
+            notes.append(
+                {
+                    "tool_id": identity,
+                    "own_tool_cited": identity in cited,
+                    "basis_tool_cited": bool(cited.intersection(basis_tools)),
+                    "required_basis_tool_choices": sorted(basis_tools),
+                    "available_description_ids": {
+                        k: s["tool_id"]
+                        for k, s in sources.items()
+                        if s["tool_id"] in ({identity} | basis_tools)
+                        and s["kind"] == "catalog"
+                        and s["field"] == "description"
+                    },
+                }
+            )
+    return notes
+
+
 def adapt_result(old_knowledge, new_metadata, context=None):
     context = deepcopy(context or {})
     settings, limits, pricing = _context(context)
@@ -336,7 +376,14 @@ def adapt_result(old_knowledge, new_metadata, context=None):
                                 "Candidate admission failed within frozen revision budget: "
                                 + str(exc)
                             ) from None
-                        packet = {**packet, "admission_error": str(exc), "prior_proposal": answer}
+                        packet = {
+                            **packet,
+                            "admission_error": str(exc),
+                            "admission_diagnostics": admission_diagnostics(
+                                answer, sources, changes
+                            ),
+                            "prior_proposal": answer,
+                        }
                 audit.setdefault("candidate_evidence", []).append(sources)
             modified = {p["tool_id"]: p for p in patches}
             for tool in candidate["tools"]:

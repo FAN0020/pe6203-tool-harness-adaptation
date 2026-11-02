@@ -247,6 +247,32 @@ def test_requested_evidence_has_one_bounded_followup(catalogs, monkeypatch):
     assert requests[-1]["content_pool"]
 
 
+def test_missing_cross_tool_citation_gets_exact_directed_feedback(catalogs, monkeypatch):
+    def alter(packet, result):
+        if "patches" not in result:
+            return result
+        if "admission_error" not in packet:
+            row = result["patches"][0]
+            own = [
+                key
+                for key, ref in packet["evidence_registry"].items()
+                if ref["tool_id"] == row["tool_id"]
+            ]
+            row["evidence_ids"] = own
+            row["rules"][0]["evidence_ids"] = own
+        else:
+            note = packet["admission_diagnostics"][0]
+            assert note["tool_id"] == "server::display"
+            assert note["own_tool_cited"] and not note["basis_tool_cited"]
+            assert note["required_basis_tool_choices"] == ["server::fetch_balance"]
+        return result
+
+    requests = model(monkeypatch, alter)
+    result = adapt_result(*catalogs, context())
+    assert result["cost"]["calls"] == len(requests) == 3
+    assert len(result["audit"]["revision_errors"]) == 1
+
+
 @pytest.mark.parametrize(
     "budget",
     [{"max_request_chars": 20}, {"max_usd": 0.000001}, {"max_total_estimated_input_tokens": 1}],

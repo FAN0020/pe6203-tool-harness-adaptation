@@ -36,6 +36,10 @@ the additional Python artifact tests/repair inherited from V3/V5.
    explicit. Provenance does not establish semantic entailment, and preservation
    of unrelated natural-language rules within selected records still requires
    substantive review, beyond structural validation.
+   Candidate packets include program-computed citation scopes (own tool and
+   relevant changed tools). A rejected patch receives exact missing-citation
+   diagnostics for its one revision; the program never silently adds citations
+   or relaxes the evidence coverage requirement to admit it.
 7. One patch plus at most one directed evidence/admission revision per batch.
    No implicit updater transport retry. Invalid/incomplete screen fails rather
    than invoking another full screening. If budget is insufficient, stop with
