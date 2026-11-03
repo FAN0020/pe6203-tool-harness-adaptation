@@ -274,14 +274,16 @@ def document_sequence_notes(observation):
 
 def thinking_contract_notes(observation):
     """Use only frozen native notebook failures and a verified terminal path."""
-    expected = {'kind': 'thinking_contract_v1',
-     'sequential_error': 'thinkingServer.getThoughtHistory is not a function',
-     'parallel_invalid_fields': ['pathsSummary', 'synthesisReady'],
-     'synthesis_invalid_fields': ['synthesisData'],
-     'single_path_terminal_status': 'completed',
-     'single_path_terminal_ready': False,
-     'single_path_terminal_active_paths': [],
-     'unverified_source_echoed': True}
+    expected = {
+        "kind": "thinking_contract_v1",
+        "sequential_error": "thinkingServer.getThoughtHistory is not a function",
+        "parallel_invalid_fields": ["pathsSummary", "synthesisReady"],
+        "synthesis_invalid_fields": ["synthesisData"],
+        "single_path_terminal_status": "completed",
+        "single_path_terminal_ready": False,
+        "single_path_terminal_active_paths": [],
+        "unverified_source_echoed": True,
+    }
     if (
         observation["stage"] != "late"
         or observation["server"] != "@modelcontextprotocol/server-sequential-thinking"
@@ -290,33 +292,33 @@ def thinking_contract_notes(observation):
     ):
         raise ValueError("Invalid verified thinking contract evidence")
     return {
-        '@modelcontextprotocol/server-sequential-thinking::sequentialthinking': (
+        "@modelcontextprotocol/server-sequential-thinking::sequentialthinking": (
             'Verified Late regression: valid calls return "thinkingServer.getThoughtHistory is not '
             'a function" with or without confidenceScore/thoughtPriority. Optional argument '
-            'changes do not repair this missing-method failure. If a tool-backed thought record is '
-            'needed, parallel-thinking was verified to support a single path (totalPaths=1) with '
-            'valid receipts; use its documented active/completed path status and the verified '
+            "changes do not repair this missing-method failure. If a tool-backed thought record is "
+            "needed, parallel-thinking was verified to support a single path (totalPaths=1) with "
+            "valid receipts; use its documented active/completed path status and the verified "
             "terminal contract. These are notebook records, not execution of the user's requested "
-            'work. Obtain external facts and artifacts through the relevant actual task tools.'
+            "work. Obtain external facts and artifacts through the relevant actual task tools."
         ),
-        '@modelcontextprotocol/server-sequential-thinking::parallel-thinking': (
-            'Verified native output contract: a single path with totalPaths=1 can be recorded as '
-            'active and later completed under the same pathId, incrementing thoughtInPath. Set '
+        "@modelcontextprotocol/server-sequential-thinking::parallel-thinking": (
+            "Verified native output contract: a single path with totalPaths=1 can be recorded as "
+            "active and later completed under the same pathId, incrementing thoughtInPath. Set "
             'pathStatus="completed" and readyForSynthesis=false to close the path without '
-            'scheduling the unsupported synthesis response; the valid receipt removes that path '
-            'from activePaths. With readyForSynthesis=true the handler emits undeclared '
-            'pathsSummary/synthesisReady fields and the native MCP client rejects the response, '
-            'even though the internal path was updated. This completion flag concerns only the '
-            'notebook path, not completion or validation of external work.'
+            "scheduling the unsupported synthesis response; the valid receipt removes that path "
+            "from activePaths. With readyForSynthesis=true the handler emits undeclared "
+            "pathsSummary/synthesisReady fields and the native MCP client rejects the response, "
+            "even though the internal path was updated. This completion flag concerns only the "
+            "notebook path, not completion or validation of external work."
         ),
-        '@modelcontextprotocol/server-sequential-thinking::convergent-synthesis': (
-            'Verified Late failure: this handler emits an undeclared synthesisData field and the '
-            'native MCP client rejects its structured response. The raw response also echoes a '
-            'supplied conclusion for a nonexistent source path, so it does not verify source '
-            'evidence or correctness. Do not rely on this receipt as a successful synthesis or '
-            'task result. Consolidate the available actual observations and disclose unresolved '
-            'facts in the user-facing response; obtaining this broken wrapper receipt is not a '
-            'prerequisite for that consolidation.'
+        "@modelcontextprotocol/server-sequential-thinking::convergent-synthesis": (
+            "Verified Late failure: this handler emits an undeclared synthesisData field and the "
+            "native MCP client rejects its structured response. The raw response also echoes a "
+            "supplied conclusion for a nonexistent source path, so it does not verify source "
+            "evidence or correctness. Do not rely on this receipt as a successful synthesis or "
+            "task result. Consolidate the available actual observations and disclose unresolved "
+            "facts in the user-facing response; obtaining this broken wrapper receipt is not a "
+            "prerequisite for that consolidation."
         ),
     }
 
@@ -324,10 +326,13 @@ def thinking_contract_notes(observation):
 def weather_provenance_notes(observation):
     """Limit weather claims to independently verified native data provenance."""
     expected = {
-        "kind": "weather_provenance_v1", "latitude_only_temperature": True,
+        "kind": "weather_provenance_v1",
+        "latitude_only_temperature": True,
         "formula": "clamp(round(30 - abs(latitude)/3), -10, 35)",
-        "synthetic_latitude": 12, "synthetic_longitudes": [-20, 140],
-        "synthetic_temperature_c": 26, "same_advice_except_coordinates": True,
+        "synthetic_latitude": 12,
+        "synthetic_longitudes": [-20, 140],
+        "synthetic_temperature_c": 26,
+        "same_advice_except_coordinates": True,
         "native_real_forecast_available": True,
     }
     if (
@@ -689,7 +694,9 @@ def adapt_result(old, target, strategy, context=None):
         from .contract_evidence_encoding import compile_knowledge
 
         result["knowledge"], edits = compile_knowledge(
-            base, target, context.get("feedback", []),
+            base,
+            target,
+            context.get("feedback", []),
             "dictionary" if strategy == "observed_dictionary" else "contrastive",
         )
         result["changes"].extend(edits)
@@ -698,34 +705,43 @@ def adapt_result(old, target, strategy, context=None):
         )
         if result["validation"]["errors"]:
             raise ValueError("Encoded evidence changed a protected contract")
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
         return result
     if strategy == "shared_contract_refs":
         from .shared_contract_refs import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(old, target)
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "source": "exact same-host property/presence equivalence and protected declaration anchors",
-            "scope": "changed descriptive fields only; expansion recovers exact SP; native schemas/routes/order unchanged",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "source": "exact same-host property/presence equivalence and protected declaration anchors",
+                "scope": "changed descriptive fields only; expansion recovers exact SP; native schemas/routes/order unchanged",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "active_contract_probing":
         from .active_contract_probing import frozen_knowledge
 
         result["knowledge"], changes = frozen_knowledge(old, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "source": "reviewed model-designed native probes and exact claim inventory",
-            "scope": "direct changed/added descriptive fields only; schemas/routes/order protected",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "source": "reviewed model-designed native probes and exact claim inventory",
+                "scope": "direct changed/added descriptive fields only; schemas/routes/order protected",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy in ("instruction_scope", "instruction_scope_quote"):
         from .instruction_scope import compile_knowledge
@@ -734,172 +750,232 @@ def adapt_result(old, target, strategy, context=None):
             base, target, context.get("feedback", []), strategy == "instruction_scope_quote"
         )
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "exact source-reviewed contract and section decomposition",
-            "runtime": "unchanged; descriptions only; all tool/schema/routing fields retained",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "exact source-reviewed contract and section decomposition",
+                "runtime": "unchanged; descriptions only; all tool/schema/routing fields retained",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "evidence_dispatch":
         from .evidence_dispatch import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(old, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "selection": "changed-root evidence selects exact reviewed claim repair or coverage deletion",
-            "composition": "disjoint changed tool records; no task-conditioned routing",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "selection": "changed-root evidence selects exact reviewed claim repair or coverage deletion",
+                "composition": "disjoint changed tool records; no task-conditioned routing",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "reviewed_coverage":
         from .reviewed_coverage import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "exact source-reviewed redundant-line policy and full contract hashes",
-            "runtime": "unchanged; descriptions only, every witness and other field retained",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "exact source-reviewed redundant-line policy and full contract hashes",
+                "runtime": "unchanged; descriptions only, every witness and other field retained",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "ready_link":
         from .ready_link import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "source/native conditional inline and ready-link equivalence; changed producer only",
-            "runtime": "unchanged; static knowledge, no executor or scheduler",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "source/native conditional inline and ready-link equivalence; changed producer only",
+                "runtime": "unchanged; static knowledge, no executor or scheduler",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "observation_coverage":
         from .observation_coverage import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "source/native observation discrimination; changed producer description only",
-            "runtime": "unchanged; observation matrix is static knowledge, no state manager",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "source/native observation discrimination; changed producer description only",
+                "runtime": "unchanged; observation matrix is static knowledge, no state manager",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "dependency_cut":
         from .dependency_cut import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "fixed source/native record-link equivalence; changed producer description only",
-            "runtime": "unchanged; graph is static knowledge, not an executor",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "fixed source/native record-link equivalence; changed producer description only",
+                "runtime": "unchanged; graph is static knowledge, not an executor",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "native_record_batch":
         from .native_record_batch import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "exact source/native certificate; changed producer usage_rules only",
-            "native_runtime": "unchanged; no new macro executor or automatic tool calls",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "exact source/native certificate; changed producer usage_rules only",
+                "native_runtime": "unchanged; no new macro executor or automatic tool calls",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "capability_relation_matrix":
         from .capability_relations import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started, update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "reviewed task-free cross-operation counterexample relations",
-            "scope": "changed validate_syntax usage_rules only; all native interfaces retained",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "reviewed task-free cross-operation counterexample relations",
+                "scope": "changed validate_syntax usage_rules only; all native interfaces retained",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "relation_witness_basis":
         from .relation_witness_basis import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started, update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "reviewed task-free cross-operation counterexample relations",
-            "scope": "changed validate_syntax usage_rules only; all native interfaces retained",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "reviewed task-free cross-operation counterexample relations",
+                "scope": "changed validate_syntax usage_rules only; all native interfaces retained",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "pruned_episode_memory":
         from .pruned_episode_memory import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "reviewed finite replay-equivalent pruned program and record witness",
-            "scope": "direct changed create_project usage_rules only; other knowledge protected",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "reviewed finite replay-equivalent pruned program and record witness",
+                "scope": "direct changed create_project usage_rules only; other knowledge protected",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "relational_probe_memory":
         from .relational_probe_memory import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "reviewed receipt-linked sequence with persistent state continuity",
-            "scope": "direct changed create_project usage_rules only; other knowledge protected",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "reviewed receipt-linked sequence with persistent state continuity",
+                "scope": "direct changed create_project usage_rules only; other knowledge protected",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy == "capability_consolidation":
         from .capability_consolidation import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(base, target, context.get("feedback", []))
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "valid-domain source/native equivalence; changed capability and retained representative",
-            "native_runtime": "unchanged; static model knowledge only",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "valid-domain source/native equivalence; changed capability and retained representative",
+                "native_runtime": "unchanged; static model knowledge only",
+                "edits": len(changes),
+            },
+        }
         return result
     if strategy in ("capability_warning", "capability_withdrawal"):
         from .capability_withdrawal import compile_knowledge
 
         result["knowledge"], changes = compile_knowledge(
-            base, target, context.get("feedback", []),
+            base,
+            target,
+            context.get("feedback", []),
             withdraw=strategy == "capability_withdrawal",
         )
         result["changes"].extend(changes)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "certificate": "fixed source/native certificate and exact field allowlist",
-            "native_runtime": "unchanged; static model-facing knowledge only",
-            "edits": len(changes),
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "certificate": "fixed source/native certificate and exact field allowlist",
+                "native_runtime": "unchanged; static model-facing knowledge only",
+                "edits": len(changes),
+            },
+        }
         return result
-    if strategy in ("semantic_contract_direct", "semantic_contract_closure", "optional_parameter_projection"):
+    if strategy in (
+        "semantic_contract_direct",
+        "semantic_contract_closure",
+        "optional_parameter_projection",
+    ):
         from .semantic_contract_maintenance import frozen_patch
 
         result["knowledge"], annotations = frozen_patch(
@@ -909,17 +985,24 @@ def adapt_result(old, target, strategy, context=None):
         if strategy == "optional_parameter_projection":
             from .optional_parameter_projection import project_optional
 
-            result["knowledge"], erasures = project_optional(old, target, context.get("feedback", []))
+            result["knowledge"], erasures = project_optional(
+                old, target, context.get("feedback", [])
+            )
             result["changes"].extend(erasures)
-        result["cost"].update(seconds=perf_counter() - started,
-                              update_operations=len(result["changes"]))
-        result["validation"] = {"errors": [], "checks": {
-            "compiled_annotation_edits": len(annotations),
-            "semantic_review": "external_frozen_knowledge_review_required",
-            "generation_cost": "separate_unique_updater_audits_not_double_counted_on_reuse",
-            "projection": "only source-certified optional properties; native schema unchanged"
-            if strategy == "optional_parameter_projection" else "none",
-        }}
+        result["cost"].update(
+            seconds=perf_counter() - started, update_operations=len(result["changes"])
+        )
+        result["validation"] = {
+            "errors": [],
+            "checks": {
+                "compiled_annotation_edits": len(annotations),
+                "semantic_review": "external_frozen_knowledge_review_required",
+                "generation_cost": "separate_unique_updater_audits_not_double_counted_on_reuse",
+                "projection": "only source-certified optional properties; native schema unchanged"
+                if strategy == "optional_parameter_projection"
+                else "none",
+            },
+        }
         return result
     if strategy == "prefix_workflow_memory":
         from .prefix_workflow_memory import expected_workflow, validate_workflow
@@ -953,9 +1036,7 @@ def adapt_result(old, target, strategy, context=None):
         feedback = context.get("feedback", [])
         result["knowledge"], annotations = expected_routing(base, target, feedback)
         result["changes"].extend(annotations)
-        result["validation"] = validate_routing(
-            result["knowledge"], old, target, base, feedback
-        )
+        result["validation"] = validate_routing(result["knowledge"], old, target, base, feedback)
         if result["validation"]["errors"]:
             raise ValueError("Native argument routing changed a protected contract")
         result["cost"].update(
@@ -968,9 +1049,7 @@ def adapt_result(old, target, strategy, context=None):
         feedback = context.get("feedback", [])
         result["knowledge"], annotations = expected_discovery(base, target, feedback)
         result["changes"].extend(annotations)
-        result["validation"] = validate_discovery(
-            result["knowledge"], old, target, base, feedback
-        )
+        result["validation"] = validate_discovery(result["knowledge"], old, target, base, feedback)
         if result["validation"]["errors"]:
             raise ValueError("Discovery reconciliation changed a protected contract")
         result["cost"].update(
@@ -1039,7 +1118,10 @@ def adapt_result(old, target, strategy, context=None):
         feedback_ids = {t["tool_id"] for t in selected}
     feedback = relevant_feedback(context.get("feedback", []), target["version"], feedback_ids)
     if strategy in (
-        "document_sequence", "project_state_contract", "thinking_contract", "weather_provenance",
+        "document_sequence",
+        "project_state_contract",
+        "thinking_contract",
+        "weather_provenance",
         "native_media_contract",
     ):
         by_id = {t["tool_id"]: t for t in result["knowledge"]["tools"]}

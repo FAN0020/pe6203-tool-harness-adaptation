@@ -12,6 +12,7 @@ E = ROOT / "results/evidence/unified-reaudit-20261102"
 def main():
     def read(n):
         return json.loads((E / n).read_text())
+
     inventory, rows, cohorts = (
         read("candidate-inventory.json"),
         read("cells.json"),
@@ -32,9 +33,13 @@ def main():
             layer = "generation/admission only; no actor result"
         elif observed["independent_validation"]:
             layer = "independent execution blocks run; joint gates failed"
-        elif not changed_original and item["condition_classes"].get("original_with_fixed_fixture", 0):
+        elif not changed_original and item["condition_classes"].get(
+            "original_with_fixed_fixture", 0
+        ):
             layer = "original with fixed fixture development/products; retention separate"
-        elif not changed_original and item["condition_classes"].get("controlled_synthetic_extension", 0):
+        elif not changed_original and item["condition_classes"].get(
+            "controlled_synthetic_extension", 0
+        ):
             layer = "synthetic execution/products plus original retention only"
         elif not changed_original:
             layer = "original retention-only execution; no changed-task evidence"

@@ -1,9 +1,9 @@
 """Finite cross-operation evidence; no benchmark inputs or runtime changes."""
 
+import hashlib
 import itertools
 import json
 import math
-import hashlib
 from copy import deepcopy
 
 from .selective import canonical
@@ -20,13 +20,24 @@ def classify(result, mode):
     if len(content) != 1 or content[0].get("type") != "text" or "diagnostic_exception" in result:
         raise ValueError("Unrecognized native envelope")
     text = content[0]["text"]
-    out = dict(envelope_success=not result.get("isError", False), syntax_valid=False,
-               evaluated=False, numeric_value=False, text=text)
-    if text == "Expression is syntactically valid." and mode != "evaluate" and out["envelope_success"]:
+    out = dict(
+        envelope_success=not result.get("isError", False),
+        syntax_valid=False,
+        evaluated=False,
+        numeric_value=False,
+        text=text,
+    )
+    if (
+        text == "Expression is syntactically valid."
+        and mode != "evaluate"
+        and out["envelope_success"]
+    ):
         out["syntax_valid"] = True
     elif text.startswith("Syntax errors:"):
         pass
-    elif mode == "evaluate" and text.startswith("Evaluation error:") and not out["envelope_success"]:
+    elif (
+        mode == "evaluate" and text.startswith("Evaluation error:") and not out["envelope_success"]
+    ):
         out["syntax_valid"] = True
     elif mode == "evaluate" and out["envelope_success"]:
         try:
@@ -37,7 +48,9 @@ def classify(result, mode):
             raise ValueError("Unrecognized evaluation response") from None
         out.update(syntax_valid=True, evaluated=True)
         number = value["result"]
-        out["numeric_value"] = value["type"] == "number" and type(number) in (int, float) and math.isfinite(number)
+        out["numeric_value"] = (
+            value["type"] == "number" and type(number) in (int, float) and math.isfinite(number)
+        )
     else:
         raise ValueError("Unrecognized native response")
     return out
@@ -51,9 +64,14 @@ def infer_relations(rows):
     edges = []
     for left, right in itertools.permutations(PREDICATES, 2):
         counter = [r["expression"] for r in rows if r[left] and not r[right]]
-        edges.append({"if": left, "then": right,
-                      "status": "falsified" if counter else "not_falsified_on_these_inputs",
-                      "counterexamples": counter})
+        edges.append(
+            {
+                "if": left,
+                "then": right,
+                "status": "falsified" if counter else "not_falsified_on_these_inputs",
+                "counterexamples": counter,
+            }
+        )
     return edges
 
 
@@ -70,7 +88,10 @@ def compile_knowledge(base, target, feedback):
     cert = certs[0]
     native = {t["tool_id"]: t for t in target["tools"]}
     for identity, expected in cert["catalog_hashes"].items():
-        if identity not in native or hashlib.sha256(canonical(native[identity]).encode()).hexdigest() != expected:
+        if (
+            identity not in native
+            or hashlib.sha256(canonical(native[identity]).encode()).hexdigest() != expected
+        ):
             raise ValueError("Native contract drift")
     if infer_relations(cert["rows"]) != cert["relations"]:
         raise ValueError("Unsupported implication inference")
@@ -91,6 +112,15 @@ def compile_knowledge(base, target, feedback):
     }
     tool = next(t for t in knowledge["tools"] if t["tool_id"] == HOST)
     before = deepcopy(tool["usage_rules"])
-    tool["usage_rules"].append("Cross-operation evidence: " + json.dumps(note, ensure_ascii=False, separators=(",", ":")))
-    return knowledge, [{"tool_id": HOST, "field": "usage_rules", "before": before,
-                        "after": deepcopy(tool["usage_rules"]), "reason": "native counterexample-supported finite capability relations"}]
+    tool["usage_rules"].append(
+        "Cross-operation evidence: " + json.dumps(note, ensure_ascii=False, separators=(",", ":"))
+    )
+    return knowledge, [
+        {
+            "tool_id": HOST,
+            "field": "usage_rules",
+            "before": before,
+            "after": deepcopy(tool["usage_rules"]),
+            "reason": "native counterexample-supported finite capability relations",
+        }
+    ]

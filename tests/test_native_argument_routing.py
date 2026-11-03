@@ -24,9 +24,9 @@ def inputs(stage="late"):
     )["observations"]
     old, target = catalogs["early"], catalogs[stage]
     # A real unrelated catalog record catches accidental changes outside MagicUI.
-    unrelated = json.loads(
-        (ROOT / "tests/fixtures/discovery-contract-catalogs.json").read_text()
-    )["early"]["tools"][0]
+    unrelated = json.loads((ROOT / "tests/fixtures/discovery-contract-catalogs.json").read_text())[
+        "early"
+    ]["tools"][0]
     old["tools"].append(deepcopy(unrelated))
     unrelated["version"] = stage
     target["tools"].append(unrelated)

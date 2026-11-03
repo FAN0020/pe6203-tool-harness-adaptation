@@ -25,31 +25,43 @@ def read(path):
 def main():
     checks = []
     for name in TRIALS:
-        script = "verify_trial_with_deviation.py" if name.startswith("relational-") else "verify_trial.py"
+        script = (
+            "verify_trial_with_deviation.py"
+            if name.startswith("relational-")
+            else "verify_trial.py"
+        )
         run = subprocess.run(
             [sys.executable, str(E / name / script)],
-            cwd=ROOT, capture_output=True, text=True, check=True,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
         )
         computed = json.loads(run.stdout)
         assert computed == read(E / name / "trial-verification.json"), name
         assert not computed["development_pass"] and not computed["validation_started"]
-        checks.append({
-            "evidence": name,
-            "saved_verifier_output_reproduced": True,
-            "development_pass": False,
-            "judge_slots": computed["judge_slots"],
-            "rows": len(computed["rows"]),
-            "settled_requests": computed["settled_requests"],
-            "known_usd": computed["known_usd"],
-            "unknown_requests": computed["unknown_requests"],
-        })
+        checks.append(
+            {
+                "evidence": name,
+                "saved_verifier_output_reproduced": True,
+                "development_pass": False,
+                "judge_slots": computed["judge_slots"],
+                "rows": len(computed["rows"]),
+                "settled_requests": computed["settled_requests"],
+                "known_usd": computed["known_usd"],
+                "unknown_requests": computed["unknown_requests"],
+            }
+        )
     inventory = read(OUT / "candidate-inventory.json")
     assert len(inventory) == 36
     assert sum(x["executed_cells"] > 0 for x in inventory) == 33
     assert all(x["executed_cells"] == x["products_reviewed"] for x in inventory)
     maturity = {r["candidate"]: r for r in read(OUT / "candidate-maturity.json")}
     for name in ["artifact_contract", "document_sequence", "prefix_workflow_memory"]:
-        assert maturity[name]["layer"] == "original with fixed fixture development/products; retention separate"
+        assert (
+            maturity[name]["layer"]
+            == "original with fixed fixture development/products; retention separate"
+        )
     assert not any(r["goal_validated"] for r in maturity.values())
     costs = read(OUT / "total-cost-audit.json")
     receipts = read(OUT / "new-cost-receipts.json")

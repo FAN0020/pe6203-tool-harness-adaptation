@@ -15,7 +15,9 @@ SERVER = "slidev-mcp::create_bulk_slides"
 
 
 def inputs(stage="late", task=457):
-    catalogs = json.loads((ROOT / "tests/fixtures/prefix-workflow-catalogs.json").read_text())[str(task)]
+    catalogs = json.loads((ROOT / "tests/fixtures/prefix-workflow-catalogs.json").read_text())[
+        str(task)
+    ]
     old, new = [deepcopy(catalogs[v]) for v in ("early", stage)]
     context = {
         "feedback": json.loads((ROOT / "experiments/prefix-workflow-feedback-v1.json").read_text())[

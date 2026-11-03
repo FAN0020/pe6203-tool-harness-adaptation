@@ -305,9 +305,7 @@ def test_thinking_contract_requires_matching_stage_and_actual_changed_basis():
     )
     base, _, _ = adapt(old, target, "selective_patch")
     assert candidate == base
-    candidate, _, _ = adapt(
-        old, old, "thinking_contract", {"feedback": [thinking_observation()]}
-    )
+    candidate, _, _ = adapt(old, old, "thinking_contract", {"feedback": [thinking_observation()]})
     assert candidate == old
     unchanged_status = deepcopy(target)
     unchanged_status["version"] = "early"
@@ -344,7 +342,9 @@ def weather_catalog(stage="early"):
     for name in names:
         tool = deepcopy(result["tools"][0])
         tool.update(
-            tool_id=f"mcp-weather-demo::{name}", server_id="mcp-weather-demo", name=name,
+            tool_id=f"mcp-weather-demo::{name}",
+            server_id="mcp-weather-demo",
+            name=name,
             routing={"server_id": "mcp-weather-demo", "tool_name": name},
         )
         tools.append(tool)
@@ -354,13 +354,18 @@ def weather_catalog(stage="early"):
 
 def weather_observation(stage="late"):
     return {
-        "stage": stage, "server": "mcp-weather-demo", "tool": "get-weather-advice",
+        "stage": stage,
+        "server": "mcp-weather-demo",
+        "tool": "get-weather-advice",
         "args": {"probe": "synthetic_latitude_provenance"},
         "result": {
-            "kind": "weather_provenance_v1", "latitude_only_temperature": True,
+            "kind": "weather_provenance_v1",
+            "latitude_only_temperature": True,
             "formula": "clamp(round(30 - abs(latitude)/3), -10, 35)",
-            "synthetic_latitude": 12, "synthetic_longitudes": [-20, 140],
-            "synthetic_temperature_c": 26, "same_advice_except_coordinates": True,
+            "synthetic_latitude": 12,
+            "synthetic_longitudes": [-20, 140],
+            "synthetic_temperature_c": 26,
+            "same_advice_except_coordinates": True,
             "native_real_forecast_available": True,
         },
     }
@@ -376,8 +381,12 @@ def media_catalog(stage="early"):
     ]
     result["tools"] = [deepcopy(result["tools"][0]) for _ in specs]
     for tool, (server, name) in zip(result["tools"], specs, strict=True):
-        tool.update(tool_id=f"{server}::{name}", server_id=server, name=name,
-                    routing={"server_id": server, "tool_name": name})
+        tool.update(
+            tool_id=f"{server}::{name}",
+            server_id=server,
+            name=name,
+            routing={"server_id": server, "tool_name": name},
+        )
         if name == "search_icons" and stage != "early":
             tool["parameters"]["properties"]["style"] = {"type": "string"}
         if name == "generate_plantuml_diagram" and stage == "late":
@@ -402,16 +411,19 @@ def test_media_contract_changes_only_verified_rules_with_unchanged_contracts(sta
     candidate, changes, cost = adapt(
         old, target, "native_media_contract", {"feedback": media_observations(stage)}
     )
-    rules = json.loads((Path(__file__).parents[1] / "experiments/native-media-contract-v1.json")
-                      .read_text())["mechanism"]["frozen_rules"]
+    rules = json.loads(
+        (Path(__file__).parents[1] / "experiments/native-media-contract-v1.json").read_text()
+    )["mechanism"]["frozen_rules"]
     actual = 0
     for a, b in zip(base["tools"], candidate["tools"], strict=True):
         assert {k: v for k, v in a.items() if k != "usage_rules"} == {
-            k: v for k, v in b.items() if k != "usage_rules"}
-        suffix = b["usage_rules"][len(a["usage_rules"]):]
+            k: v for k, v in b.items() if k != "usage_rules"
+        }
+        suffix = b["usage_rules"][len(a["usage_rules"]) :]
         expected = a["server_id"] == "@hugeicons/mcp-server" or (
-            stage == "late" and a["server_id"] == "plantuml-mcp-server")
-        assert b["usage_rules"][:len(a["usage_rules"])] == a["usage_rules"]
+            stage == "late" and a["server_id"] == "plantuml-mcp-server"
+        )
+        assert b["usage_rules"][: len(a["usage_rules"])] == a["usage_rules"]
         assert suffix == ([rules[a["tool_id"]]] if expected else [])
         actual += bool(suffix)
     assert actual == count
@@ -425,8 +437,9 @@ def test_media_contract_no_change_and_wrong_stage_have_no_intervention():
     same, _, _ = adapt(old, old, "native_media_contract", {"feedback": media_observations("late")})
     assert same == old
     base, _, _ = adapt(old, target, "selective_patch")
-    wrong, _, _ = adapt(old, target, "native_media_contract",
-                        {"feedback": media_observations("late")})
+    wrong, _, _ = adapt(
+        old, target, "native_media_contract", {"feedback": media_observations("late")}
+    )
     assert wrong == base
 
 
@@ -449,8 +462,9 @@ def test_media_contract_does_not_use_evidence_without_corresponding_change():
         tool["version"] = "early"
     target["tools"][-1]["description"] += " unrelated change"
     base, _, _ = adapt(old, target, "selective_patch")
-    candidate, _, _ = adapt(old, target, "native_media_contract",
-                            {"feedback": media_observations("late")})
+    candidate, _, _ = adapt(
+        old, target, "native_media_contract", {"feedback": media_observations("late")}
+    )
     assert candidate == base
 
 
@@ -466,7 +480,7 @@ def test_weather_provenance_changes_only_new_advice_and_verified_forecast_depend
         assert {k: v for k, v in a.items() if k != "usage_rules"} == {
             k: v for k, v in b.items() if k != "usage_rules"
         }
-        assert b["usage_rules"][:len(a["usage_rules"])] == a["usage_rules"]
+        assert b["usage_rules"][: len(a["usage_rules"])] == a["usage_rules"]
         assert len(b["usage_rules"]) - len(a["usage_rules"]) == (a["name"] != "unrelated")
     notes = [c for c in changes if c["operation"] == "append_weather_provenance"]
     assert len(notes) == 2 and len({tuple(n["basis"]) for n in notes}) == 1

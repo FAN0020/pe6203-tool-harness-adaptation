@@ -4,586 +4,603 @@ from copy import deepcopy
 
 from .selective import validate_adaptation
 
-ANNOTATIONS = {'middle': {'@upstash/context7-mcp::resolve-library-id': {'before': 'Resolves a package/product '
-                                                                    'name to a Context7-compatible '
-                                                                    'library ID and returns '
-                                                                    'matching libraries.\n'
-                                                                    '\n'
-                                                                    'You MUST call this function '
-                                                                    "before 'Query Documentation' "
-                                                                    'tool to obtain a valid '
-                                                                    'Context7-compatible library '
-                                                                    'ID UNLESS the user explicitly '
-                                                                    'provides a library ID in the '
-                                                                    "format '/org/project' or "
-                                                                    "'/org/project/version' in "
-                                                                    'their query.\n'
-                                                                    '\n'
-                                                                    "If the user doesn't know "
-                                                                    'which library to use or wants '
-                                                                    'to explore options, consider '
-                                                                    'using '
-                                                                    "'list-popular-libraries' "
-                                                                    'first to discover available '
-                                                                    'libraries by category.\n'
-                                                                    '\n'
-                                                                    'Each result includes:\n'
-                                                                    '- Library ID: '
-                                                                    'Context7-compatible '
-                                                                    'identifier (format: '
-                                                                    '/org/project)\n'
-                                                                    '- Name: Library or package '
-                                                                    'name\n'
-                                                                    '- Description: Short summary\n'
-                                                                    '- Code Snippets: Number of '
-                                                                    'available code examples\n'
-                                                                    '- Source Reputation: '
-                                                                    'Authority indicator (High, '
-                                                                    'Medium, Low, or Unknown)\n'
-                                                                    '- Benchmark Score: Quality '
-                                                                    'indicator (100 is the highest '
-                                                                    'score)\n'
-                                                                    '- Versions: List of versions '
-                                                                    'if available. Use one of '
-                                                                    'those versions if the user '
-                                                                    'provides a version in their '
-                                                                    'query. The format of the '
-                                                                    'version is '
-                                                                    '/org/project/version.\n'
-                                                                    '\n'
-                                                                    'For best results, select '
-                                                                    'libraries based on name '
-                                                                    'match, source reputation, '
-                                                                    'snippet coverage, benchmark '
-                                                                    'score, and relevance to your '
-                                                                    'use case.\n'
-                                                                    '\n'
-                                                                    'Selection Process:\n'
-                                                                    '1. Analyze the query to '
-                                                                    'understand what '
-                                                                    'library/package the user is '
-                                                                    'looking for\n'
-                                                                    '2. Return the most relevant '
-                                                                    'match based on:\n'
-                                                                    '- Name similarity to the '
-                                                                    'query (exact matches '
-                                                                    'prioritized)\n'
-                                                                    '- Description relevance to '
-                                                                    "the query's intent\n"
-                                                                    '- Documentation coverage '
-                                                                    '(prioritize libraries with '
-                                                                    'higher Code Snippet counts)\n'
-                                                                    '- Source reputation (consider '
-                                                                    'libraries with High or Medium '
-                                                                    'reputation more '
-                                                                    'authoritative)\n'
-                                                                    '- Benchmark Score: Quality '
-                                                                    'indicator (100 is the highest '
-                                                                    'score)\n'
-                                                                    '\n'
-                                                                    'Response Format:\n'
-                                                                    '- Return the selected library '
-                                                                    'ID in a clearly marked '
-                                                                    'section\n'
-                                                                    '- Provide a brief explanation '
-                                                                    'for why this library was '
-                                                                    'chosen\n'
-                                                                    '- If multiple good matches '
-                                                                    'exist, acknowledge this but '
-                                                                    'proceed with the most '
-                                                                    'relevant one\n'
-                                                                    '- If no good matches exist, '
-                                                                    'clearly state this and '
-                                                                    'suggest query refinements\n'
-                                                                    '\n'
-                                                                    'For ambiguous queries, '
-                                                                    'request clarification before '
-                                                                    'proceeding with a best-guess '
-                                                                    'match.\n'
-                                                                    '\n'
-                                                                    'IMPORTANT: Do not call this '
-                                                                    'tool more than 3 times per '
-                                                                    'question. If you cannot find '
-                                                                    'what you need after 3 calls, '
-                                                                    'use the best result you have.',
-                                                          'after': 'Resolves a package/product '
-                                                                   'name to a Context7-compatible '
-                                                                   'library ID and returns '
-                                                                   'matching libraries.\n'
-                                                                   '\n'
-                                                                   'You MUST call this function '
-                                                                   "before 'Query Documentation' "
-                                                                   'tool to obtain a valid '
-                                                                   'Context7-compatible library ID '
-                                                                   'UNLESS the user explicitly '
-                                                                   'provides a library ID in the '
-                                                                   "format '/org/project' or "
-                                                                   "'/org/project/version' in "
-                                                                   'their query.\n'
-                                                                   '\n'
-                                                                   'In this version, '
-                                                                   'list-popular-libraries fails '
-                                                                   'before its network request '
-                                                                   'because CONTEXT7_API_BASE_URL '
-                                                                   'is undefined. For library '
-                                                                   'discovery, use this resolver '
-                                                                   'with a candidate libraryName '
-                                                                   'and a specific domain query, '
-                                                                   'then query-docs with a '
-                                                                   'returned library ID. Resolver '
-                                                                   'matches are not popularity '
-                                                                   'rankings.\n'
-                                                                   '\n'
-                                                                   'Each result includes:\n'
-                                                                   '- Library ID: '
-                                                                   'Context7-compatible identifier '
-                                                                   '(format: /org/project)\n'
-                                                                   '- Name: Library or package '
-                                                                   'name\n'
-                                                                   '- Description: Short summary\n'
-                                                                   '- Code Snippets: Number of '
-                                                                   'available code examples\n'
-                                                                   '- Source Reputation: Authority '
-                                                                   'indicator (High, Medium, Low, '
-                                                                   'or Unknown)\n'
-                                                                   '- Benchmark Score: Quality '
-                                                                   'indicator (100 is the highest '
-                                                                   'score)\n'
-                                                                   '- Versions: List of versions '
-                                                                   'if available. Use one of those '
-                                                                   'versions if the user provides '
-                                                                   'a version in their query. The '
-                                                                   'format of the version is '
-                                                                   '/org/project/version.\n'
-                                                                   '\n'
-                                                                   'For best results, select '
-                                                                   'libraries based on name match, '
-                                                                   'source reputation, snippet '
-                                                                   'coverage, benchmark score, and '
-                                                                   'relevance to your use case.\n'
-                                                                   '\n'
-                                                                   'Selection Process:\n'
-                                                                   '1. Analyze the query to '
-                                                                   'understand what '
-                                                                   'library/package the user is '
-                                                                   'looking for\n'
-                                                                   '2. Return the most relevant '
-                                                                   'match based on:\n'
-                                                                   '- Name similarity to the query '
-                                                                   '(exact matches prioritized)\n'
-                                                                   '- Description relevance to the '
-                                                                   "query's intent\n"
-                                                                   '- Documentation coverage '
-                                                                   '(prioritize libraries with '
-                                                                   'higher Code Snippet counts)\n'
-                                                                   '- Source reputation (consider '
-                                                                   'libraries with High or Medium '
-                                                                   'reputation more '
-                                                                   'authoritative)\n'
-                                                                   '- Benchmark Score: Quality '
-                                                                   'indicator (100 is the highest '
-                                                                   'score)\n'
-                                                                   '\n'
-                                                                   'Response Format:\n'
-                                                                   '- Return the selected library '
-                                                                   'ID in a clearly marked '
-                                                                   'section\n'
-                                                                   '- Provide a brief explanation '
-                                                                   'for why this library was '
-                                                                   'chosen\n'
-                                                                   '- If multiple good matches '
-                                                                   'exist, acknowledge this but '
-                                                                   'proceed with the most relevant '
-                                                                   'one\n'
-                                                                   '- If no good matches exist, '
-                                                                   'clearly state this and suggest '
-                                                                   'query refinements\n'
-                                                                   '\n'
-                                                                   'For ambiguous queries, request '
-                                                                   'clarification before '
-                                                                   'proceeding with a best-guess '
-                                                                   'match.\n'
-                                                                   '\n'
-                                                                   'IMPORTANT: Do not call this '
-                                                                   'tool more than 3 times per '
-                                                                   'question. If you cannot find '
-                                                                   'what you need after 3 calls, '
-                                                                   'use the best result you have.'},
-            '@upstash/context7-mcp::list-popular-libraries': {'before': 'Retrieves a curated list '
-                                                                        'of popular and trending '
-                                                                        'libraries across '
-                                                                        'different categories to '
-                                                                        'help users discover '
-                                                                        'commonly used packages.\n'
-                                                                        '\n'
-                                                                        'Use this tool when:\n'
-                                                                        '- The user asks for '
-                                                                        'recommendations (e.g., '
-                                                                        '"What\'s a good database '
-                                                                        'library?")\n'
-                                                                        '- The user wants to '
-                                                                        'explore options in a '
-                                                                        'specific domain (e.g., '
-                                                                        '"Show me web '
-                                                                        'frameworks")\n'
-                                                                        '- The user is unsure '
-                                                                        'which library to use for '
-                                                                        'their task\n'
-                                                                        '\n'
-                                                                        'Categories include:\n'
-                                                                        '- web-frameworks: '
-                                                                        'Express, Next.js, '
-                                                                        'Fastify, etc.\n'
-                                                                        '- databases: MongoDB, '
-                                                                        'PostgreSQL, Redis, '
-                                                                        'Supabase, etc.\n'
-                                                                        '- ai-ml: TensorFlow, '
-                                                                        'PyTorch, LangChain, etc.\n'
-                                                                        '- testing: Jest, Vitest, '
-                                                                        'Playwright, etc.\n'
-                                                                        '- ui-components: React, '
-                                                                        'Vue, Tailwind CSS, etc.\n'
-                                                                        '- cloud-services: AWS '
-                                                                        'SDK, Vercel, Cloudflare, '
-                                                                        'etc.\n'
-                                                                        '- all: Returns popular '
-                                                                        'libraries across all '
-                                                                        'categories\n'
-                                                                        '\n'
-                                                                        'Each result includes:\n'
-                                                                        '- Library ID: '
-                                                                        'Context7-compatible '
-                                                                        'identifier for use with '
-                                                                        "'query-docs'\n"
-                                                                        '- Name: Library or '
-                                                                        'package name\n'
-                                                                        '- Description: Brief '
-                                                                        "overview of the library's "
-                                                                        'purpose\n'
-                                                                        '- Category: Primary '
-                                                                        'category classification\n'
-                                                                        '- Popularity Score: '
-                                                                        'Relative popularity '
-                                                                        'indicator\n'
-                                                                        '\n'
-                                                                        'After selecting a library '
-                                                                        'from the results, use '
-                                                                        "'resolve-library-id' or "
-                                                                        'directly use the returned '
-                                                                        'Library ID with '
-                                                                        "'query-docs' to retrieve "
-                                                                        'documentation.',
-                                                              'after': "This version's native "
-                                                                       'discovery handler fails '
-                                                                       'before its network request '
-                                                                       'with ReferenceError: '
-                                                                       'CONTEXT7_API_BASE_URL is '
-                                                                       'not defined. The error is '
-                                                                       'returned as text with '
-                                                                       'isError=false; that '
-                                                                       'envelope does not '
-                                                                       'establish successful '
-                                                                       'discovery. Category or '
-                                                                       'limit changes cannot '
-                                                                       'define the missing '
-                                                                       'constant. For '
-                                                                       'documentation discovery, '
-                                                                       'use resolve-library-id '
-                                                                       'with a candidate '
-                                                                       'libraryName and a specific '
-                                                                       'query, then query-docs '
-                                                                       'with an ID actually '
-                                                                       'returned by the resolver. '
-                                                                       'This alternative returns '
-                                                                       'matching libraries and '
-                                                                       'their documentation, not a '
-                                                                       'popularity ranking. If '
-                                                                       'those calls do not return '
-                                                                       'relevant evidence, the '
-                                                                       'missing information '
-                                                                       'remains unresolved.'}},
- 'late': {'@upstash/context7-mcp::resolve-library-id': {'before': 'Resolves a package/product name '
-                                                                  'to a Context7-compatible '
-                                                                  'library ID and returns matching '
-                                                                  'libraries.\n'
-                                                                  '\n'
-                                                                  'You MUST call this function '
-                                                                  "before 'Query Documentation' "
-                                                                  'tool to obtain a valid '
-                                                                  'Context7-compatible library ID '
-                                                                  'UNLESS the user explicitly '
-                                                                  'provides a library ID in the '
-                                                                  "format '/org/project' or "
-                                                                  "'/org/project/version' in their "
-                                                                  'query.\n'
-                                                                  '\n'
-                                                                  "If the user doesn't know which "
-                                                                  'library to use or wants to '
-                                                                  'explore options, consider using '
-                                                                  "'list-popular-libraries' first "
-                                                                  'to discover available libraries '
-                                                                  'by category.\n'
-                                                                  '\n'
-                                                                  'Each result includes:\n'
-                                                                  '- Library ID: '
-                                                                  'Context7-compatible identifier '
-                                                                  '(format: /org/project)\n'
-                                                                  '- Name: Library or package '
-                                                                  'name\n'
-                                                                  '- Description: Short summary\n'
-                                                                  '- Code Snippets: Number of '
-                                                                  'available code examples\n'
-                                                                  '- Source Reputation: Authority '
-                                                                  'indicator (High, Medium, Low, '
-                                                                  'or Unknown)\n'
-                                                                  '- Benchmark Score: Quality '
-                                                                  'indicator (100 is the highest '
-                                                                  'score)\n'
-                                                                  '- Versions: List of versions if '
-                                                                  'available. Use one of those '
-                                                                  'versions if the user provides a '
-                                                                  'version in their query. The '
-                                                                  'format of the version is '
-                                                                  '/org/project/version.\n'
-                                                                  '\n'
-                                                                  'For best results, select '
-                                                                  'libraries based on name match, '
-                                                                  'source reputation, snippet '
-                                                                  'coverage, benchmark score, and '
-                                                                  'relevance to your use case.\n'
-                                                                  '\n'
-                                                                  'Selection Process:\n'
-                                                                  '1. Analyze the query to '
-                                                                  'understand what library/package '
-                                                                  'the user is looking for\n'
-                                                                  '2. Return the most relevant '
-                                                                  'match based on:\n'
-                                                                  '- Name similarity to the query '
-                                                                  '(exact matches prioritized)\n'
-                                                                  '- Description relevance to the '
-                                                                  "query's intent\n"
-                                                                  '- Documentation coverage '
-                                                                  '(prioritize libraries with '
-                                                                  'higher Code Snippet counts)\n'
-                                                                  '- Source reputation (consider '
-                                                                  'libraries with High or Medium '
-                                                                  'reputation more authoritative)\n'
-                                                                  '- Benchmark Score: Quality '
-                                                                  'indicator (100 is the highest '
-                                                                  'score)\n'
-                                                                  '\n'
-                                                                  'Response Format:\n'
-                                                                  '- Return the selected library '
-                                                                  'ID in a clearly marked section\n'
-                                                                  '- Provide a brief explanation '
-                                                                  'for why this library was '
-                                                                  'chosen\n'
-                                                                  '- If multiple good matches '
-                                                                  'exist, acknowledge this but '
-                                                                  'proceed with the most relevant '
-                                                                  'one\n'
-                                                                  '- If no good matches exist, '
-                                                                  'clearly state this and suggest '
-                                                                  'query refinements\n'
-                                                                  '\n'
-                                                                  'For ambiguous queries, request '
-                                                                  'clarification before proceeding '
-                                                                  'with a best-guess match.\n'
-                                                                  '\n'
-                                                                  'IMPORTANT: Do not call this '
-                                                                  'tool more than 3 times per '
-                                                                  'question. If you cannot find '
-                                                                  'what you need after 3 calls, '
-                                                                  'use the best result you have.',
-                                                        'after': 'Resolves a package/product name '
-                                                                 'to a Context7-compatible library '
-                                                                 'ID and returns matching '
-                                                                 'libraries.\n'
-                                                                 '\n'
-                                                                 'You MUST call this function '
-                                                                 "before 'Query Documentation' "
-                                                                 'tool to obtain a valid '
-                                                                 'Context7-compatible library ID '
-                                                                 'UNLESS the user explicitly '
-                                                                 'provides a library ID in the '
-                                                                 "format '/org/project' or "
-                                                                 "'/org/project/version' in their "
-                                                                 'query.\n'
-                                                                 '\n'
-                                                                 'In this version, '
-                                                                 'list-popular-libraries fails '
-                                                                 'before its network request '
-                                                                 'because CONTEXT7_API_BASE_URL is '
-                                                                 'undefined. For library '
-                                                                 'discovery, use this resolver '
-                                                                 'with a candidate libraryName and '
-                                                                 'a specific domain query, then '
-                                                                 'query-docs with a returned '
-                                                                 'library ID. Resolver matches are '
-                                                                 'not popularity rankings.\n'
-                                                                 '\n'
-                                                                 'Each result includes:\n'
-                                                                 '- Library ID: '
-                                                                 'Context7-compatible identifier '
-                                                                 '(format: /org/project)\n'
-                                                                 '- Name: Library or package name\n'
-                                                                 '- Description: Short summary\n'
-                                                                 '- Code Snippets: Number of '
-                                                                 'available code examples\n'
-                                                                 '- Source Reputation: Authority '
-                                                                 'indicator (High, Medium, Low, or '
-                                                                 'Unknown)\n'
-                                                                 '- Benchmark Score: Quality '
-                                                                 'indicator (100 is the highest '
-                                                                 'score)\n'
-                                                                 '- Versions: List of versions if '
-                                                                 'available. Use one of those '
-                                                                 'versions if the user provides a '
-                                                                 'version in their query. The '
-                                                                 'format of the version is '
-                                                                 '/org/project/version.\n'
-                                                                 '\n'
-                                                                 'For best results, select '
-                                                                 'libraries based on name match, '
-                                                                 'source reputation, snippet '
-                                                                 'coverage, benchmark score, and '
-                                                                 'relevance to your use case.\n'
-                                                                 '\n'
-                                                                 'Selection Process:\n'
-                                                                 '1. Analyze the query to '
-                                                                 'understand what library/package '
-                                                                 'the user is looking for\n'
-                                                                 '2. Return the most relevant '
-                                                                 'match based on:\n'
-                                                                 '- Name similarity to the query '
-                                                                 '(exact matches prioritized)\n'
-                                                                 '- Description relevance to the '
-                                                                 "query's intent\n"
-                                                                 '- Documentation coverage '
-                                                                 '(prioritize libraries with '
-                                                                 'higher Code Snippet counts)\n'
-                                                                 '- Source reputation (consider '
-                                                                 'libraries with High or Medium '
-                                                                 'reputation more authoritative)\n'
-                                                                 '- Benchmark Score: Quality '
-                                                                 'indicator (100 is the highest '
-                                                                 'score)\n'
-                                                                 '\n'
-                                                                 'Response Format:\n'
-                                                                 '- Return the selected library ID '
-                                                                 'in a clearly marked section\n'
-                                                                 '- Provide a brief explanation '
-                                                                 'for why this library was chosen\n'
-                                                                 '- If multiple good matches '
-                                                                 'exist, acknowledge this but '
-                                                                 'proceed with the most relevant '
-                                                                 'one\n'
-                                                                 '- If no good matches exist, '
-                                                                 'clearly state this and suggest '
-                                                                 'query refinements\n'
-                                                                 '\n'
-                                                                 'For ambiguous queries, request '
-                                                                 'clarification before proceeding '
-                                                                 'with a best-guess match.\n'
-                                                                 '\n'
-                                                                 'IMPORTANT: Do not call this tool '
-                                                                 'more than 3 times per question. '
-                                                                 'If you cannot find what you need '
-                                                                 'after 3 calls, use the best '
-                                                                 'result you have.'},
-          '@upstash/context7-mcp::list-popular-libraries': {'before': 'Retrieves a curated list of '
-                                                                      'popular and trending '
-                                                                      'libraries across different '
-                                                                      'categories to help users '
-                                                                      'discover commonly used '
-                                                                      'packages.\n'
-                                                                      '\n'
-                                                                      'Use this tool when:\n'
-                                                                      '- The user asks for '
-                                                                      'recommendations (e.g., '
-                                                                      '"What\'s a good database '
-                                                                      'library?")\n'
-                                                                      '- The user wants to explore '
-                                                                      'options in a specific '
-                                                                      'domain (e.g., "Show me web '
-                                                                      'frameworks")\n'
-                                                                      '- The user is unsure which '
-                                                                      'library to use for their '
-                                                                      'task\n'
-                                                                      '\n'
-                                                                      'Categories include:\n'
-                                                                      '- web-frameworks: Express, '
-                                                                      'Next.js, Fastify, etc.\n'
-                                                                      '- databases: MongoDB, '
-                                                                      'PostgreSQL, Redis, '
-                                                                      'Supabase, etc.\n'
-                                                                      '- ai-ml: TensorFlow, '
-                                                                      'PyTorch, LangChain, etc.\n'
-                                                                      '- testing: Jest, Vitest, '
-                                                                      'Playwright, etc.\n'
-                                                                      '- ui-components: React, '
-                                                                      'Vue, Tailwind CSS, etc.\n'
-                                                                      '- cloud-services: AWS SDK, '
-                                                                      'Vercel, Cloudflare, etc.\n'
-                                                                      '- all: Returns popular '
-                                                                      'libraries across all '
-                                                                      'categories\n'
-                                                                      '\n'
-                                                                      'Each result includes:\n'
-                                                                      '- Library ID: '
-                                                                      'Context7-compatible '
-                                                                      'identifier for use with '
-                                                                      "'query-docs'\n"
-                                                                      '- Name: Library or package '
-                                                                      'name\n'
-                                                                      '- Description: Brief '
-                                                                      "overview of the library's "
-                                                                      'purpose\n'
-                                                                      '- Category: Primary '
-                                                                      'category classification\n'
-                                                                      '- Popularity Score: '
-                                                                      'Relative popularity '
-                                                                      'indicator\n'
-                                                                      '\n'
-                                                                      'After selecting a library '
-                                                                      'from the results, use '
-                                                                      "'resolve-library-id' or "
-                                                                      'directly use the returned '
-                                                                      'Library ID with '
-                                                                      "'query-docs' to retrieve "
-                                                                      'documentation.',
-                                                            'after': "This version's native "
-                                                                     'discovery handler fails '
-                                                                     'before its network request '
-                                                                     'with ReferenceError: '
-                                                                     'CONTEXT7_API_BASE_URL is not '
-                                                                     'defined. The error is '
-                                                                     'returned as text with '
-                                                                     'isError=false; that envelope '
-                                                                     'does not establish '
-                                                                     'successful discovery. '
-                                                                     'Category or limit changes '
-                                                                     'cannot define the missing '
-                                                                     'constant. For documentation '
-                                                                     'discovery, use '
-                                                                     'resolve-library-id with a '
-                                                                     'candidate libraryName and a '
-                                                                     'specific query, then '
-                                                                     'query-docs with an ID '
-                                                                     'actually returned by the '
-                                                                     'resolver. This alternative '
-                                                                     'returns matching libraries '
-                                                                     'and their documentation, not '
-                                                                     'a popularity ranking. If '
-                                                                     'those calls do not return '
-                                                                     'relevant evidence, the '
-                                                                     'missing information remains '
-                                                                     'unresolved.'}}}
+ANNOTATIONS = {
+    "middle": {
+        "@upstash/context7-mcp::resolve-library-id": {
+            "before": "Resolves a package/product "
+            "name to a Context7-compatible "
+            "library ID and returns "
+            "matching libraries.\n"
+            "\n"
+            "You MUST call this function "
+            "before 'Query Documentation' "
+            "tool to obtain a valid "
+            "Context7-compatible library "
+            "ID UNLESS the user explicitly "
+            "provides a library ID in the "
+            "format '/org/project' or "
+            "'/org/project/version' in "
+            "their query.\n"
+            "\n"
+            "If the user doesn't know "
+            "which library to use or wants "
+            "to explore options, consider "
+            "using "
+            "'list-popular-libraries' "
+            "first to discover available "
+            "libraries by category.\n"
+            "\n"
+            "Each result includes:\n"
+            "- Library ID: "
+            "Context7-compatible "
+            "identifier (format: "
+            "/org/project)\n"
+            "- Name: Library or package "
+            "name\n"
+            "- Description: Short summary\n"
+            "- Code Snippets: Number of "
+            "available code examples\n"
+            "- Source Reputation: "
+            "Authority indicator (High, "
+            "Medium, Low, or Unknown)\n"
+            "- Benchmark Score: Quality "
+            "indicator (100 is the highest "
+            "score)\n"
+            "- Versions: List of versions "
+            "if available. Use one of "
+            "those versions if the user "
+            "provides a version in their "
+            "query. The format of the "
+            "version is "
+            "/org/project/version.\n"
+            "\n"
+            "For best results, select "
+            "libraries based on name "
+            "match, source reputation, "
+            "snippet coverage, benchmark "
+            "score, and relevance to your "
+            "use case.\n"
+            "\n"
+            "Selection Process:\n"
+            "1. Analyze the query to "
+            "understand what "
+            "library/package the user is "
+            "looking for\n"
+            "2. Return the most relevant "
+            "match based on:\n"
+            "- Name similarity to the "
+            "query (exact matches "
+            "prioritized)\n"
+            "- Description relevance to "
+            "the query's intent\n"
+            "- Documentation coverage "
+            "(prioritize libraries with "
+            "higher Code Snippet counts)\n"
+            "- Source reputation (consider "
+            "libraries with High or Medium "
+            "reputation more "
+            "authoritative)\n"
+            "- Benchmark Score: Quality "
+            "indicator (100 is the highest "
+            "score)\n"
+            "\n"
+            "Response Format:\n"
+            "- Return the selected library "
+            "ID in a clearly marked "
+            "section\n"
+            "- Provide a brief explanation "
+            "for why this library was "
+            "chosen\n"
+            "- If multiple good matches "
+            "exist, acknowledge this but "
+            "proceed with the most "
+            "relevant one\n"
+            "- If no good matches exist, "
+            "clearly state this and "
+            "suggest query refinements\n"
+            "\n"
+            "For ambiguous queries, "
+            "request clarification before "
+            "proceeding with a best-guess "
+            "match.\n"
+            "\n"
+            "IMPORTANT: Do not call this "
+            "tool more than 3 times per "
+            "question. If you cannot find "
+            "what you need after 3 calls, "
+            "use the best result you have.",
+            "after": "Resolves a package/product "
+            "name to a Context7-compatible "
+            "library ID and returns "
+            "matching libraries.\n"
+            "\n"
+            "You MUST call this function "
+            "before 'Query Documentation' "
+            "tool to obtain a valid "
+            "Context7-compatible library ID "
+            "UNLESS the user explicitly "
+            "provides a library ID in the "
+            "format '/org/project' or "
+            "'/org/project/version' in "
+            "their query.\n"
+            "\n"
+            "In this version, "
+            "list-popular-libraries fails "
+            "before its network request "
+            "because CONTEXT7_API_BASE_URL "
+            "is undefined. For library "
+            "discovery, use this resolver "
+            "with a candidate libraryName "
+            "and a specific domain query, "
+            "then query-docs with a "
+            "returned library ID. Resolver "
+            "matches are not popularity "
+            "rankings.\n"
+            "\n"
+            "Each result includes:\n"
+            "- Library ID: "
+            "Context7-compatible identifier "
+            "(format: /org/project)\n"
+            "- Name: Library or package "
+            "name\n"
+            "- Description: Short summary\n"
+            "- Code Snippets: Number of "
+            "available code examples\n"
+            "- Source Reputation: Authority "
+            "indicator (High, Medium, Low, "
+            "or Unknown)\n"
+            "- Benchmark Score: Quality "
+            "indicator (100 is the highest "
+            "score)\n"
+            "- Versions: List of versions "
+            "if available. Use one of those "
+            "versions if the user provides "
+            "a version in their query. The "
+            "format of the version is "
+            "/org/project/version.\n"
+            "\n"
+            "For best results, select "
+            "libraries based on name match, "
+            "source reputation, snippet "
+            "coverage, benchmark score, and "
+            "relevance to your use case.\n"
+            "\n"
+            "Selection Process:\n"
+            "1. Analyze the query to "
+            "understand what "
+            "library/package the user is "
+            "looking for\n"
+            "2. Return the most relevant "
+            "match based on:\n"
+            "- Name similarity to the query "
+            "(exact matches prioritized)\n"
+            "- Description relevance to the "
+            "query's intent\n"
+            "- Documentation coverage "
+            "(prioritize libraries with "
+            "higher Code Snippet counts)\n"
+            "- Source reputation (consider "
+            "libraries with High or Medium "
+            "reputation more "
+            "authoritative)\n"
+            "- Benchmark Score: Quality "
+            "indicator (100 is the highest "
+            "score)\n"
+            "\n"
+            "Response Format:\n"
+            "- Return the selected library "
+            "ID in a clearly marked "
+            "section\n"
+            "- Provide a brief explanation "
+            "for why this library was "
+            "chosen\n"
+            "- If multiple good matches "
+            "exist, acknowledge this but "
+            "proceed with the most relevant "
+            "one\n"
+            "- If no good matches exist, "
+            "clearly state this and suggest "
+            "query refinements\n"
+            "\n"
+            "For ambiguous queries, request "
+            "clarification before "
+            "proceeding with a best-guess "
+            "match.\n"
+            "\n"
+            "IMPORTANT: Do not call this "
+            "tool more than 3 times per "
+            "question. If you cannot find "
+            "what you need after 3 calls, "
+            "use the best result you have.",
+        },
+        "@upstash/context7-mcp::list-popular-libraries": {
+            "before": "Retrieves a curated list "
+            "of popular and trending "
+            "libraries across "
+            "different categories to "
+            "help users discover "
+            "commonly used packages.\n"
+            "\n"
+            "Use this tool when:\n"
+            "- The user asks for "
+            "recommendations (e.g., "
+            "\"What's a good database "
+            'library?")\n'
+            "- The user wants to "
+            "explore options in a "
+            "specific domain (e.g., "
+            '"Show me web '
+            'frameworks")\n'
+            "- The user is unsure "
+            "which library to use for "
+            "their task\n"
+            "\n"
+            "Categories include:\n"
+            "- web-frameworks: "
+            "Express, Next.js, "
+            "Fastify, etc.\n"
+            "- databases: MongoDB, "
+            "PostgreSQL, Redis, "
+            "Supabase, etc.\n"
+            "- ai-ml: TensorFlow, "
+            "PyTorch, LangChain, etc.\n"
+            "- testing: Jest, Vitest, "
+            "Playwright, etc.\n"
+            "- ui-components: React, "
+            "Vue, Tailwind CSS, etc.\n"
+            "- cloud-services: AWS "
+            "SDK, Vercel, Cloudflare, "
+            "etc.\n"
+            "- all: Returns popular "
+            "libraries across all "
+            "categories\n"
+            "\n"
+            "Each result includes:\n"
+            "- Library ID: "
+            "Context7-compatible "
+            "identifier for use with "
+            "'query-docs'\n"
+            "- Name: Library or "
+            "package name\n"
+            "- Description: Brief "
+            "overview of the library's "
+            "purpose\n"
+            "- Category: Primary "
+            "category classification\n"
+            "- Popularity Score: "
+            "Relative popularity "
+            "indicator\n"
+            "\n"
+            "After selecting a library "
+            "from the results, use "
+            "'resolve-library-id' or "
+            "directly use the returned "
+            "Library ID with "
+            "'query-docs' to retrieve "
+            "documentation.",
+            "after": "This version's native "
+            "discovery handler fails "
+            "before its network request "
+            "with ReferenceError: "
+            "CONTEXT7_API_BASE_URL is "
+            "not defined. The error is "
+            "returned as text with "
+            "isError=false; that "
+            "envelope does not "
+            "establish successful "
+            "discovery. Category or "
+            "limit changes cannot "
+            "define the missing "
+            "constant. For "
+            "documentation discovery, "
+            "use resolve-library-id "
+            "with a candidate "
+            "libraryName and a specific "
+            "query, then query-docs "
+            "with an ID actually "
+            "returned by the resolver. "
+            "This alternative returns "
+            "matching libraries and "
+            "their documentation, not a "
+            "popularity ranking. If "
+            "those calls do not return "
+            "relevant evidence, the "
+            "missing information "
+            "remains unresolved.",
+        },
+    },
+    "late": {
+        "@upstash/context7-mcp::resolve-library-id": {
+            "before": "Resolves a package/product name "
+            "to a Context7-compatible "
+            "library ID and returns matching "
+            "libraries.\n"
+            "\n"
+            "You MUST call this function "
+            "before 'Query Documentation' "
+            "tool to obtain a valid "
+            "Context7-compatible library ID "
+            "UNLESS the user explicitly "
+            "provides a library ID in the "
+            "format '/org/project' or "
+            "'/org/project/version' in their "
+            "query.\n"
+            "\n"
+            "If the user doesn't know which "
+            "library to use or wants to "
+            "explore options, consider using "
+            "'list-popular-libraries' first "
+            "to discover available libraries "
+            "by category.\n"
+            "\n"
+            "Each result includes:\n"
+            "- Library ID: "
+            "Context7-compatible identifier "
+            "(format: /org/project)\n"
+            "- Name: Library or package "
+            "name\n"
+            "- Description: Short summary\n"
+            "- Code Snippets: Number of "
+            "available code examples\n"
+            "- Source Reputation: Authority "
+            "indicator (High, Medium, Low, "
+            "or Unknown)\n"
+            "- Benchmark Score: Quality "
+            "indicator (100 is the highest "
+            "score)\n"
+            "- Versions: List of versions if "
+            "available. Use one of those "
+            "versions if the user provides a "
+            "version in their query. The "
+            "format of the version is "
+            "/org/project/version.\n"
+            "\n"
+            "For best results, select "
+            "libraries based on name match, "
+            "source reputation, snippet "
+            "coverage, benchmark score, and "
+            "relevance to your use case.\n"
+            "\n"
+            "Selection Process:\n"
+            "1. Analyze the query to "
+            "understand what library/package "
+            "the user is looking for\n"
+            "2. Return the most relevant "
+            "match based on:\n"
+            "- Name similarity to the query "
+            "(exact matches prioritized)\n"
+            "- Description relevance to the "
+            "query's intent\n"
+            "- Documentation coverage "
+            "(prioritize libraries with "
+            "higher Code Snippet counts)\n"
+            "- Source reputation (consider "
+            "libraries with High or Medium "
+            "reputation more authoritative)\n"
+            "- Benchmark Score: Quality "
+            "indicator (100 is the highest "
+            "score)\n"
+            "\n"
+            "Response Format:\n"
+            "- Return the selected library "
+            "ID in a clearly marked section\n"
+            "- Provide a brief explanation "
+            "for why this library was "
+            "chosen\n"
+            "- If multiple good matches "
+            "exist, acknowledge this but "
+            "proceed with the most relevant "
+            "one\n"
+            "- If no good matches exist, "
+            "clearly state this and suggest "
+            "query refinements\n"
+            "\n"
+            "For ambiguous queries, request "
+            "clarification before proceeding "
+            "with a best-guess match.\n"
+            "\n"
+            "IMPORTANT: Do not call this "
+            "tool more than 3 times per "
+            "question. If you cannot find "
+            "what you need after 3 calls, "
+            "use the best result you have.",
+            "after": "Resolves a package/product name "
+            "to a Context7-compatible library "
+            "ID and returns matching "
+            "libraries.\n"
+            "\n"
+            "You MUST call this function "
+            "before 'Query Documentation' "
+            "tool to obtain a valid "
+            "Context7-compatible library ID "
+            "UNLESS the user explicitly "
+            "provides a library ID in the "
+            "format '/org/project' or "
+            "'/org/project/version' in their "
+            "query.\n"
+            "\n"
+            "In this version, "
+            "list-popular-libraries fails "
+            "before its network request "
+            "because CONTEXT7_API_BASE_URL is "
+            "undefined. For library "
+            "discovery, use this resolver "
+            "with a candidate libraryName and "
+            "a specific domain query, then "
+            "query-docs with a returned "
+            "library ID. Resolver matches are "
+            "not popularity rankings.\n"
+            "\n"
+            "Each result includes:\n"
+            "- Library ID: "
+            "Context7-compatible identifier "
+            "(format: /org/project)\n"
+            "- Name: Library or package name\n"
+            "- Description: Short summary\n"
+            "- Code Snippets: Number of "
+            "available code examples\n"
+            "- Source Reputation: Authority "
+            "indicator (High, Medium, Low, or "
+            "Unknown)\n"
+            "- Benchmark Score: Quality "
+            "indicator (100 is the highest "
+            "score)\n"
+            "- Versions: List of versions if "
+            "available. Use one of those "
+            "versions if the user provides a "
+            "version in their query. The "
+            "format of the version is "
+            "/org/project/version.\n"
+            "\n"
+            "For best results, select "
+            "libraries based on name match, "
+            "source reputation, snippet "
+            "coverage, benchmark score, and "
+            "relevance to your use case.\n"
+            "\n"
+            "Selection Process:\n"
+            "1. Analyze the query to "
+            "understand what library/package "
+            "the user is looking for\n"
+            "2. Return the most relevant "
+            "match based on:\n"
+            "- Name similarity to the query "
+            "(exact matches prioritized)\n"
+            "- Description relevance to the "
+            "query's intent\n"
+            "- Documentation coverage "
+            "(prioritize libraries with "
+            "higher Code Snippet counts)\n"
+            "- Source reputation (consider "
+            "libraries with High or Medium "
+            "reputation more authoritative)\n"
+            "- Benchmark Score: Quality "
+            "indicator (100 is the highest "
+            "score)\n"
+            "\n"
+            "Response Format:\n"
+            "- Return the selected library ID "
+            "in a clearly marked section\n"
+            "- Provide a brief explanation "
+            "for why this library was chosen\n"
+            "- If multiple good matches "
+            "exist, acknowledge this but "
+            "proceed with the most relevant "
+            "one\n"
+            "- If no good matches exist, "
+            "clearly state this and suggest "
+            "query refinements\n"
+            "\n"
+            "For ambiguous queries, request "
+            "clarification before proceeding "
+            "with a best-guess match.\n"
+            "\n"
+            "IMPORTANT: Do not call this tool "
+            "more than 3 times per question. "
+            "If you cannot find what you need "
+            "after 3 calls, use the best "
+            "result you have.",
+        },
+        "@upstash/context7-mcp::list-popular-libraries": {
+            "before": "Retrieves a curated list of "
+            "popular and trending "
+            "libraries across different "
+            "categories to help users "
+            "discover commonly used "
+            "packages.\n"
+            "\n"
+            "Use this tool when:\n"
+            "- The user asks for "
+            "recommendations (e.g., "
+            "\"What's a good database "
+            'library?")\n'
+            "- The user wants to explore "
+            "options in a specific "
+            'domain (e.g., "Show me web '
+            'frameworks")\n'
+            "- The user is unsure which "
+            "library to use for their "
+            "task\n"
+            "\n"
+            "Categories include:\n"
+            "- web-frameworks: Express, "
+            "Next.js, Fastify, etc.\n"
+            "- databases: MongoDB, "
+            "PostgreSQL, Redis, "
+            "Supabase, etc.\n"
+            "- ai-ml: TensorFlow, "
+            "PyTorch, LangChain, etc.\n"
+            "- testing: Jest, Vitest, "
+            "Playwright, etc.\n"
+            "- ui-components: React, "
+            "Vue, Tailwind CSS, etc.\n"
+            "- cloud-services: AWS SDK, "
+            "Vercel, Cloudflare, etc.\n"
+            "- all: Returns popular "
+            "libraries across all "
+            "categories\n"
+            "\n"
+            "Each result includes:\n"
+            "- Library ID: "
+            "Context7-compatible "
+            "identifier for use with "
+            "'query-docs'\n"
+            "- Name: Library or package "
+            "name\n"
+            "- Description: Brief "
+            "overview of the library's "
+            "purpose\n"
+            "- Category: Primary "
+            "category classification\n"
+            "- Popularity Score: "
+            "Relative popularity "
+            "indicator\n"
+            "\n"
+            "After selecting a library "
+            "from the results, use "
+            "'resolve-library-id' or "
+            "directly use the returned "
+            "Library ID with "
+            "'query-docs' to retrieve "
+            "documentation.",
+            "after": "This version's native "
+            "discovery handler fails "
+            "before its network request "
+            "with ReferenceError: "
+            "CONTEXT7_API_BASE_URL is not "
+            "defined. The error is "
+            "returned as text with "
+            "isError=false; that envelope "
+            "does not establish "
+            "successful discovery. "
+            "Category or limit changes "
+            "cannot define the missing "
+            "constant. For documentation "
+            "discovery, use "
+            "resolve-library-id with a "
+            "candidate libraryName and a "
+            "specific query, then "
+            "query-docs with an ID "
+            "actually returned by the "
+            "resolver. This alternative "
+            "returns matching libraries "
+            "and their documentation, not "
+            "a popularity ranking. If "
+            "those calls do not return "
+            "relevant evidence, the "
+            "missing information remains "
+            "unresolved.",
+        },
+    },
+}
 
-FACTS = {'kind': 'discovery_contract_v1',
- 'error': 'CONTEXT7_API_BASE_URL is not defined',
- 'error_envelope_is_error': False,
- 'resolver_and_docs_available': True}
+FACTS = {
+    "kind": "discovery_contract_v1",
+    "error": "CONTEXT7_API_BASE_URL is not defined",
+    "error_envelope_is_error": False,
+    "resolver_and_docs_available": True,
+}
+
 
 def expected_discovery(base, target, feedback):
     """Fail closed unless both changed tools and their observations match the freeze."""
@@ -593,11 +610,19 @@ def expected_discovery(base, target, feedback):
     if not pair.intersection(changes):
         return knowledge, []
     stage = target["version"]
-    verified = [o for o in feedback if o.get("stage") == stage
-                and o.get("server") == "@upstash/context7-mcp"
-                and o.get("tool") == "list-popular-libraries"]
-    if (stage not in ANNOTATIONS or not pair <= changes.keys()
-            or len(verified) != 1 or verified[0].get("result") != FACTS):
+    verified = [
+        o
+        for o in feedback
+        if o.get("stage") == stage
+        and o.get("server") == "@upstash/context7-mcp"
+        and o.get("tool") == "list-popular-libraries"
+    ]
+    if (
+        stage not in ANNOTATIONS
+        or not pair <= changes.keys()
+        or len(verified) != 1
+        or verified[0].get("result") != FACTS
+    ):
         raise ValueError("Missing verified discovery contract evidence or changed pair")
     tools = {t["tool_id"]: t for t in knowledge["tools"]}
     log = []
@@ -606,9 +631,16 @@ def expected_discovery(base, target, feedback):
         if tool["description"] != annotation["before"]:
             raise ValueError("Unverified native discovery description: " + tool_id)
         tool["description"] = annotation["after"]
-        log.append({"operation": "reconcile_discovery_description", "tool_id": tool_id,
-                    "basis": [changes[tool_id]["change_id"]], "path": "description",
-                    **annotation, "evidence": "frozen_native_discovery_and_alternative_probes"})
+        log.append(
+            {
+                "operation": "reconcile_discovery_description",
+                "tool_id": tool_id,
+                "basis": [changes[tool_id]["change_id"]],
+                "path": "description",
+                **annotation,
+                "evidence": "frozen_native_discovery_and_alternative_probes",
+            }
+        )
     return knowledge, log
 
 
@@ -616,8 +648,10 @@ def validate_discovery(candidate, old, target, base, feedback):
     """Only the frozen two descriptions may differ from original SP."""
     expected, log = expected_discovery(base, target, feedback)
     if candidate != expected:
-        return {"errors": ["Candidate differs from exact discovery description allowlist"],
-                "checks": {"annotation_count": len(log)}}
+        return {
+            "errors": ["Candidate differs from exact discovery description allowlist"],
+            "checks": {"annotation_count": len(log)},
+        }
     projection = deepcopy(candidate)
     tools = {t["tool_id"]: t for t in projection["tools"]}
     for entry in log:
